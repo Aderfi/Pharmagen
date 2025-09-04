@@ -14,10 +14,4 @@ from Bio import SeqIO
 def procesar_genomas(input_genoma):
 
     viral_fasta_seq = input_genoma
-    
-    SeqIO.
-    
-    
-    
-    
     return
