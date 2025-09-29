@@ -10,6 +10,12 @@ import pandas as pd
 from Bio import SeqIO  # Importa el directorio principal
 import Pharmagen
 
+##################################################################
+from src.logger_config import unit_logging
+unit_logging()
+##################################################################
+
+
 # Ruta al archivo CSV donde se almacenarán las mutaciones
 output_path = os.path.join(os.path.dirname(__file__), 'viral_mutations.csv')
 

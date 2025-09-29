@@ -1,5 +1,9 @@
 import json
+import sys
+import os
+import subprocess
 from Pharmagen.config import *
+import shutil
 
 def mensaje_introduccion(self=None):
     introduccion = f""""
@@ -45,11 +49,37 @@ def load_config():
             "que el software ya ha utilizado. Por ejemplo, los que configuran", 
             "la estructura de directorios, o los que crean los entornos virtuales."
             ],
-            "environment_created": 0,
-            "dirs_created": 0,
-            "libs_installed": 0,
+            "environment_created": bool(0),
+            "dirs_created": bool(0),
+            "libs_installed": bool(0),
             "date_database": "",
-            "version": "0.1"
+            "version": VERSION,
+            "os": f"{os.name}"  # "NT (Windows)" o "Posix (Linux)"
         }
 
-     
+    return config_df
+
+def check_config(config_df):
+    if config_df["environment_created"] is False:
+        print(f"\n⚠️  El entorno virtual no ha sido creado. Se va a ejecutar el script \
+            para crearlo. \
+            \n Por favor, escribe 1 para hacerlo a través de Conda o 2 para hacerlo con venv.")
+        choice = input("Introduce 1 o 2: ")
+        
+        try:
+            if [choice == '1'] and (sys.platform == 'win32'):
+                print("\nEjecutando Create_CONDA_ENV.py...")
+                os.system(f'python "{ENV_SCRIPTS_DIR}/Create_CONDA_ENV.py"')
+
+            elif [choice == '1'] and (sys.platform != 'linux'): # Ejecutar Create_CONDA_ENV.py en Linux/Mac
+                print("\nEjecutando Create_CONDA_ENV.py...")
+                (f'python "{ENV_SCRIPTS_DIR}/Create_CONDA_ENV.py"')
+            
+            elif [choice == '2']:
+                print("\nEjecutando CREATE_VENV.py...")
+                os.system(f'python "{ENV_SCRIPTS_DIR}/CREATE_VENV.py"')
+        
+        except Exception as e:
+            print(f"Error al intentar crear el entorno virtual: {e}")
+            return
+    return
