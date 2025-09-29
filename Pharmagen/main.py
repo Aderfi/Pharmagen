@@ -11,7 +11,11 @@
 import json, os, sys, src  # Asegura que el directorio src es tratado como un paquete
 from pathlib import Path
 from src.logger_config import unit_logging
-from Pharmagen.config import *
+from src.utils import (
+    mensaje_introduccion, # Observa el uso de paréntesis para agrupar
+    load_config,
+    check_config
+)       
 
 unit_logging()
 
@@ -23,6 +27,10 @@ unit_logging()
 print(src.utils.mensaje_introduccion())   
 
 # --- 3. Carga de historial/cache de variables globales ---
+
+config_df = load_config()
+
+check_config(config_df)
 
 
 """
