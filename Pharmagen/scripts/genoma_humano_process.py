@@ -8,7 +8,10 @@
 import os
 import pandas as pd
 from Bio import SeqIO
-from Anacronico.scripts.viral_mutations_script import mutations_df  # Importa el diccionario de mutaciones
+import json
+import Pharmagen
+
+# Importa el diccionario de mutaciones
 
 # Datos que generar. Seleccion de genomas y mutaciones
 
