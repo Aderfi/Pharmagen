@@ -1,0 +1,9 @@
+# Dispositivos en los que tengo implementado el git para llevar un track
+
+Nombre del remoto: pharmagen
+Nombre de la referencia: main
+
+Dispositivos 
+
+AstorDNA Windows 11 - Torre
+Laptop - Ubuntu
