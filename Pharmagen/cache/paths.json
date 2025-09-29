@@ -1,0 +1,25 @@
+{
+    "_comentario": "Rutas y configuraciones globales para el proyecto Anacronico.",
+    
+    "MAIN_DIRs":{
+        "ANACRONICO_DIR": "Anacronico",
+        "SRC_DIR": "src",
+        "CACHE_DIR": "cache",
+        "CONFIG_DIR": "config",
+        "LOGS_DIR": "logs",
+        "TESTS_DIR": "tests"
+    },
+
+    "CACHE_FILES": {
+        "PATHS": "paths.json",
+        "CONFIG": "config.json"
+    },
+
+    "PATH_FILE": "paths.json",
+
+    "PATH_FILES_DIRS": {
+        "PROJECT_ROOT": "",
+        "ANACRONICO_DIR": ""
+    }
+    
+}

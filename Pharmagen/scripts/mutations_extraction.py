@@ -8,7 +8,7 @@
 import os
 import pandas as pd
 from Bio import SeqIO  # Importa el directorio principal
-import Anacronico 
+import Pharmagen
 
 # Ruta al archivo CSV donde se almacenarán las mutaciones
 output_path = os.path.join(os.path.dirname(__file__), 'viral_mutations.csv')
