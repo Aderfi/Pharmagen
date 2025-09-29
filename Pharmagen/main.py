@@ -8,49 +8,22 @@
 #              El modelo predictivo está basado en un conjunto de modelos de machine learning entrenados
 #              con datos genómicos y clínicos de pacientes reales.
 
-import sys
+import json, os, sys, src  # Asegura que el directorio src es tratado como un paquete
 from pathlib import Path
-import json
-import Pharmagen
+from src.logger_config import unit_logging
+from Pharmagen.config import *
+
+unit_logging()
 
 # --- 1. Configuración de Rutas e Importación y About---
-
-# El directorio 'Master' es la raíz desde donde se ejecuta el script.
-# Python lo añade automáticamente al path, por lo que no es necesario sys.path.append.
-PROJECT_ROOT = Path(__file__).resolve().parent
-ANACRONICO_DIR = PROJECT_ROOT / "Anacronico"
-AUTOR = "Astordna/Aderfi/Adrim Hamed Outmani"
-VERSION = "0.1"
-FECHA_CREACION = "2024-06-15"
-
-with open(ANACRONICO_DIR / "cache" / "paths.json", 'r') as f:
-    paths_df = json.load(f)
     
-
 
 # --- 2. Introducción del software en CLI y advertencias correspondientes ---
-def mostrar_introduccion():
-    introduccion = f""""
-    ============================================
-            pharmagen_pmodel {VERSION}
-    ============================================
-    Autor: Astordna / Aderfi / Adrim Hamed Outmani
-    Fecha: 2024-06-15
-    
-    \t\t\t**ADVERTENCIA IMPORTANTE**
-    
-    Para asegurar el correcto funcionamiento del software y evitar errores,
-    es preciso ejecutar primero el archivo "Create_CONDA_ENV.py" o 
-    "CREATE_VENV.py" ubicado en la carpeta Environment_Scripts.
-    
-    Esto creará el entorno virtual de trabajo con las herramientas y librerías necesarias.
-    ============================================
-    """
-    return introduccion
+
+print(src.utils.mensaje_introduccion())   
 
 # --- 3. Carga de historial/cache de variables globales ---
 
-print(mostrar_introduccion())
 
 """
 json_file = ANACRONICO_DIR / "cache" / "history.json"

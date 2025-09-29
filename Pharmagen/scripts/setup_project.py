@@ -1,12 +1,14 @@
 import sys
 from pathlib import Path
-
-# Añadimos la ruta raíz del proyecto (un nivel arriba de 'scripts') para poder importar desde 'src'
-# Esto hace que el script funcione sin importar desde dónde lo llames
-project_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(project_root))
-
 from src.project_config import ConfiguradorEntorno
+
+##################################################################
+from src.logger_config import unit_logging
+unit_logging()
+##################################################################
+
+project_root = Path(__file__).resolve().parent.parent       # Añadimos la ruta raíz del proyecto (un nivel arriba de 'scripts') para poder importar desde 'src'
+sys.path.append(str(project_root))                          # Esto hace que el script funcione sin importar desde dónde lo llames
 
 def main():
     print("--- CONFIGURACIÓN DEL PROYECTO Pharmagen ---")
