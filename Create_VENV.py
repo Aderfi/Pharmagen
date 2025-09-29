@@ -4,8 +4,8 @@ import venv
 import shutil
 
 # Definir la versión de Python y el nombre del entorno
-PYTHON_VERSION = "3.11.9"
-ENV_NAME = "DeepEnvMaster"
+PYTHON_VERSION = "3.13.7"
+ENV_NAME = "EnvMaster"
 REQUIREMENTS_FILE = "requirements.txt"
 
 def check_python_version(version):
@@ -31,10 +31,17 @@ def create_virtual_environment(env_name, python_version):
     
     print(f"🔧 Creando el entorno virtual '{env_name}' con Python {python_version}...")
     try:
-        venv.create(env_name, with_pip=True, clear=True, symlinks=True,
-                    # Especifica la ruta al ejecutable de Python
-                    # Usa 'py' en Windows y 'python'/'pythonX.Y' en otros sistemas
-                    executable=f'python{python_version}' if sys.platform != "win32" else f'py-{python_version}')
+        # Determina el ejecutable de Python adecuado
+        if sys.platform == "win32":
+            python_executable = shutil.which(f"py -{python_version}") or shutil.which(f"python{python_version}")
+        else:
+            python_executable = shutil.which(f"python{python_version}")
+        
+        if not python_executable:
+            raise FileNotFoundError(f"No se encontró el ejecutable de Python {python_version}.")
+        
+        # Crea el entorno virtual usando el ejecutable encontrado
+        subprocess.run([python_executable, "-m", "venv", env_name, "--clear", "--upgrade-deps"], check=True)
         print(f"✅ Entorno virtual '{env_name}' creado exitosamente.")
         return True
     except Exception as e:

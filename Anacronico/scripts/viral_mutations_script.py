@@ -10,7 +10,8 @@ import pandas as pd
 from Bio import SeqIO  # Importa el directorio principal
 import Anacronico 
 
-output_path = os.path.join(MAIN_DIR, 'data','mutaciones_VIH.csv')
+# Ruta al archivo CSV donde se almacenarán las mutaciones
+output_path = os.path.join(os.path.dirname(__file__), 'viral_mutations.csv')
 
 # Cada mutación será un diccionario con claves: 'Gen', 'Cadena de nucleótidos', 'Implicacion Farmacologica'
 datos_mutaciones = [12*[None] for _ in range(0)]  # Lista para almacenar los datos de las mutaciones
