@@ -6,4 +6,4 @@ Nombre de la referencia: main
 Dispositivos 
 
 AstorDNA Windows 11 - Torre
-Laptop - Ubuntu
+Laptop - Ubuntu __> Ahora es ubuntu
