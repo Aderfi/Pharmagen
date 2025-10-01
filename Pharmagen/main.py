@@ -1,4 +1,5 @@
-# Software: pharmagen_pmodel
+"""
+#  Software: pharmagen_pmodel
 # Versión: 0.1
 # Autor: Astordna / Aderfi / Adrim Hamed Outmani
 # Fecha: 2024-06-15
@@ -7,6 +8,7 @@
 #              del paciente, la eficacia terapéutica y el posible riesgo incrementado de ciertas toxicidades.
 #              El modelo predictivo está basado en un conjunto de modelos de machine learning entrenados
 #              con datos genómicos y clínicos de pacientes reales.
+"""
 
 import json, os, sys, src  # Asegura que el directorio src es tratado como un paquete
 from pathlib import Path
@@ -30,7 +32,17 @@ print(src.utils.mensaje_introduccion())
 
 config_df = load_config()
 
-check_config(config_df)
+choice =  input(str("Introduce 1 o 2: "))
+i = 0
+
+while choice not in ['1', '2']:
+    choice = input(str("Por favor, introduce 1 o 2: "))
+    i+=1
+    if i == 5:
+        print("Demasiados intentos fallidos. Saliendo del programa.")
+        sys.exit(1)
+
+check_config(config_df, choice)
 
 
 """

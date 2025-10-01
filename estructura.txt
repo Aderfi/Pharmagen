@@ -1,0 +1,42 @@
+.
+(0tqq (BEnvironment_Scripts
+(0x   tqq (BCreate_CONDA_ENV.py
+(0x   mqq (BCreate_VENV.py
+(0tqq (Bestructura.txt
+(0tqq (BPharmagen
+(0x   tqq (Bcache
+(0x   x   mqq (Bpaths.json
+(0x   tqq (Bconfig.json
+(0x   tqq (Bconfig.py
+(0x   tqq (Bdata
+(0x   x   tqq (Bpharmacological_groups.csv
+(0x   x   tqq (Bprocessed
+(0x   x   x   mqq (Bgene.fasta
+(0x   x   tqq (Braw
+(0x   x   x   mqq (Bgene.fasta
+(0x   x   mqq (BVIH_Genes_Dataframe.csv
+(0x   tqq (Bmain.py
+(0x   tqq (Bscripts
+(0x   x   tqq (Bgenoma_humano_process.py
+(0x   x   tqq (B__init__.py
+(0x   x   tqq (Bmutations_extraction.py
+(0x   x   mqq (Bsetup_project.py
+(0x   mqq (Bsrc
+(0x       tqq (Banalysis
+(0x       x   tqq (B__init__.py
+(0x       x   mqq (Bmutations.py
+(0x       tqq (Bdata_handle
+(0x       x   tqq (B__init__.py
+(0x       x   tqq (Bio.py
+(0x       x   tqq (Bmodel_tokenizer.py
+(0x       x   tqq (Bpreprocess_model.py
+(0x       x   mqq (Bprocess_raw_data.py
+(0x       tqq (Bfunciones.py
+(0x       tqq (B__init__.py
+(0x       tqq (Blogger_config.py
+(0x       tqq (Bproject_config.py
+(0x       mqq (Butils.py
+(0tqq (BREADME.md
+(0mqq (Brequirements.txt
+
+11 directories, 29 files
