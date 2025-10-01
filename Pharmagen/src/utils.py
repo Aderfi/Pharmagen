@@ -5,7 +5,7 @@ import subprocess
 from Pharmagen.config import *
 import shutil
 
-def mensaje_introduccion(self=None):
+def mensaje_introduccion():
     introduccion = f""""
     ============================================
             pharmagen_pmodel {VERSION}
@@ -59,12 +59,11 @@ def load_config():
 
     return config_df
 
-def check_config(config_df):
+def check_config(config_df, choice):
     if config_df["environment_created"] is False:
         print(f"\n⚠️  El entorno virtual no ha sido creado. Se va a ejecutar el script \
             para crearlo. \
             \n Por favor, escribe 1 para hacerlo a través de Conda o 2 para hacerlo con venv.")
-        choice = input("Introduce 1 o 2: ")
         
         try:
             if [choice == '1'] and (sys.platform == 'win32'):
