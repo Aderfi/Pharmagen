@@ -17,11 +17,13 @@ SCRIPTS_DIR = PHARMAGEN_DIR / "scripts"
 ENV_SCRIPTS_DIR = PHARMAGEN_DIR / "Environment_Scripts"
 
 # --- Rutas de Archivos Específicos ---
+
 CONFIG_FILE = PHARMAGEN_DIR / "config.json"
 LOG_FILE = LOGS_DIR / f"pharmagen_{date}.log"
 
 
 # --- Metadatos del Software ---
+
 AUTOR = "Astordna/Aderfi/Adrim Hamed Outmani"
 VERSION = "0.1"
 FECHA_CREACION = "2024-06-15"
