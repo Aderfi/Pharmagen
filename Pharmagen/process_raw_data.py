@@ -1,14 +1,8 @@
+from pathlib import Path
 import pandas as pd
 import csv
-import os
-
 import sys
-from pathlib import Path
-
-# Add the project root (the directory containing Pharmagen) to sys.path
-project_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+import os
 
 from Pharmagen.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
 
@@ -26,9 +20,11 @@ def increase_csv_field_limit():
 
 def convert_tsv_to_csv(raw_dir, processed_csv_dir, cache_dir):
     """Convierte todos los archivos .tsv en raw_dir a .csv en processed_csv_dir."""
-    raw_dir = Path(RAW_DATA_DIR)
-    processed_csv_dir = Path(PROCESSED_DATA_DIR) / "csv"
-    cache_dir = Path(CACHE_DIR)
+    raw_dir = RAW_DATA_DIR
+    processed_csv_dir = PROCESSED_DATA_DIR / "csv"
+    cache_dir = CACHE_DIR
+    
+    
 
     # Encuentra todos los archivos .tsv en RAW_DATA_DIR
     tsv_files = list(raw_dir.glob("*.tsv"))

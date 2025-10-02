@@ -1,14 +1,14 @@
 import sys
 import pandas as pd
-from Pharmagen.config import MODELS_DIR, VOCABS_DIR, PROCESSED_DATA_DIR
+from Pharmagen.config import MODELS_DIR, MODEL_VOCABS_DIR, PROCESSED_DATA_DIR
 from Pharmagen.src.data_handle.preprocess_model import PharmagenPreprocessor
 from Pharmagen.deepL_model.scripts.model_utils import load_pharmagen_model
 import os
 
 # 1. Configuración de rutas (centralizadas en config.py)
 MODEL_PATH = MODELS_DIR / "modelo_pharmagen_final.h5"
-MUT_VOCAB_PATH = VOCABS_DIR / "mut_vocab.json"
-DRUG_VOCAB_PATH = VOCABS_DIR / "drug_vocab.json"
+MUT_VOCAB_PATH = MODEL_VOCABS_DIR / "mut_vocab.json"
+DRUG_VOCAB_PATH = MODEL_VOCABS_DIR / "drug_vocab.json"
 
 def predict_single_input(mutaciones: str, medicamentos: str) -> dict:
     """Predice para una entrada manual."""
