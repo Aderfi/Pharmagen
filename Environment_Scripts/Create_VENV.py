@@ -1,7 +1,7 @@
 import subprocess
 import sys
-import venv
 import shutil
+from pathlib import Path
 
 # Definir la versión de Python y el nombre del entorno
 PYTHON_VERSION = "3.13.7"
