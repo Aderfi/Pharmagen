@@ -61,9 +61,8 @@ def load_config():
 
 def check_config(config_df, choice):
     if config_df["environment_created"] is False:
-        print(f"\n⚠️  El entorno virtual no ha sido creado. Se va a ejecutar el script \
-            para crearlo. \
-            \n Por favor, escribe 1 para hacerlo a través de Conda o 2 para hacerlo con venv.")
+        print(f"\n⚠️  El entorno virtual no ha sido creado. \n Se va a ejecutar el script \
+            para crearlo.")
         
         try:
             if [choice == '1'] and (sys.platform == 'win32'):
@@ -81,4 +80,4 @@ def check_config(config_df, choice):
         except Exception as e:
             print(f"Error al intentar crear el entorno virtual: {e}")
             return
-    return
+    return 
