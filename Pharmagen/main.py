@@ -10,54 +10,71 @@
 #              con datos genómicos y clínicos de pacientes reales.
 """
 
-import json, os, sys, src  # Asegura que el directorio src es tratado como un paquete
+import sys
 from pathlib import Path
+
+# --- Importación de paths y metadatos desde config.py ---
+from Pharmagen.config import (
+    PHARMAGEN_DIR,
+    SRC_DIR,
+    SCRIPTS_DIR,
+    LOGS_DIR,
+    CACHE_DIR,
+    # Si tienes rutas a deepL_model/scripts, añádelas aquí
+)
+# Si necesitas rutas específicas a scripts de deepL_model:
+from Pharmagen.config import PHARMAGEN_DIR
+DEEPL_MODEL_SCRIPTS_DIR = PHARMAGEN_DIR / "deepL_model" / "scripts"
+
+# --- Añadir rutas a sys.path para importación de módulos internos ---
+sys.path.append(str(SRC_DIR.resolve()))
+sys.path.append(str(DEEPL_MODEL_SCRIPTS_DIR.resolve()))
+
 from src.logger_config import unit_logging
-from src.utils import (
-    mensaje_introduccion, # Observa el uso de paréntesis para agrupar
-    load_config,
-    check_config
-)       
+from src.utils import mensaje_introduccion, load_config, check_config
+from deepL_model.scripts.train_model import main as train_main
+from deepL_model.scripts.predict_model import predict_single_input, predict_from_file
 
-unit_logging()
+def main():
+    # 1. Inicializa logging y muestra introducción
+    unit_logging()
+    print(mensaje_introduccion())
+    config_df = load_config()
 
-# --- 1. Configuración de Rutas e Importación y About---
-    
+    while True:
+        print("\n¿Qué deseas hacer?")
+        print("1. Entrenar modelo")
+        print("2. Realizar predicción (introducir datos manualmente)")
+        print("3. Realizar predicción (desde archivo)")
+        print("4. Salir")
 
-# --- 2. Introducción del software en CLI y advertencias correspondientes ---
+        choice = input("Introduce 1, 2, 3 o 4: ").strip()
+        if choice not in {'1', '2', '3', '4'}:
+            print("Opción no válida. Inténtalo de nuevo.")
+            continue
 
-print(src.utils.mensaje_introduccion())   
+        if choice == "1":
+            print("\nIniciando flujo de entrenamiento...")
+            train_main()
+        elif choice == "2":
+            print("\nIntroduce los datos del paciente para predicción:")
+            mutaciones = input("Mutaciones (separadas por coma): ")
+            medicamentos = input("Medicamentos (separados por coma): ")
+            resultado = predict_single_input(mutaciones, medicamentos)
+            print("\nResultado de la predicción:")
+            for k, v in resultado.items():
+                print(f"{k}: {v}")
+        elif choice == "3":
+            file_path = input("\nIntroduce la ruta del archivo CSV: ")
+            try:
+                results = predict_from_file(file_path)
+                print("\nResultados de la predicción para cada paciente:")
+                print(results)
+            except Exception as e:
+                print(f"Error al procesar el archivo: {e}")
+        elif choice == "4":
+            print("\n¡Gracias por usar Pharmagen!")
+            sys.exit(0)
 
-# --- 3. Carga de historial/cache de variables globales ---
-
-config_df = load_config()
-
-choice =  input(str("Introduce 1 o 2: "))
-i = 0
-
-while choice not in ['1', '2']:
-    choice = input(str("Por favor, introduce 1 o 2: "))
-    i+=1
-    if i == 5:
-        print("Demasiados intentos fallidos. Saliendo del programa.")
-        sys.exit(1)
-
-check_config(config_df, choice)
-
-
-"""
-json_file = ANACRONICO_DIR / "cache" / "history.json"
-
-if json_file.exists():
-    print(f"\n🔄 Cargando historial desde {json_file}...")
-    history_cache_df = json.load(open(json_file, 'r'))
-else: 
-    print(f"❌ No se encontró el archivo de historial en {json_file}. Se crearán valores por defecto.")
-    history = {
-        "_comentario": ("Almacenamiento de variables globales, funciones y scripts "
-                        "que el software ya ha utilizado. Por ejemplo, los que "
-                        "configuran la estructura de directios, o los que crean "
-                        "los entornos virtuales."),
-        "version": "0.1"
-    }
-    """
+if __name__ == "__main__":
+    main()

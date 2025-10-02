@@ -15,6 +15,10 @@ RESULTS_DIR = PHARMAGEN_DIR / "results"
 DOCS_DIR = PHARMAGEN_DIR / "docs"
 SCRIPTS_DIR = PHARMAGEN_DIR / "scripts"
 ENV_SCRIPTS_DIR = PHARMAGEN_DIR / "Environment_Scripts"
+DEEPL_MODEL_DIR = PHARMAGEN_DIR / "deepL_model"
+MODELS_DIR = DEEPL_MODEL_DIR / "models"
+VOCABS_DIR = DEEPL_MODEL_DIR / "vocabs"
+SCRIPTS_DIR = DEEPL_MODEL_DIR / "scripts"
 
 # --- Rutas de Archivos Específicos ---
 
