@@ -1,27 +1,28 @@
 from pathlib import Path
 from datetime import datetime
 
-date = datetime.now().strftime("%Y%m%d")
+# === RUTAS BASE ===
+PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
+PHARMAGEN_DIR = PROJECT_ROOT / "Pharmagen"
 
+# === FECHA PARA LOGS Y OTROS ===
+DATE_STAMP = datetime.now().strftime("%Y%m%d")
 
-### !!!!!!! IMPORTANTE !!!!!!! ###
-##    CAMBIAR SOLO ESTA RUTA    ##
-PHARMAGEN_DIR = Path(__file__).resolve().parent
-##################################
-
-# --- Rutas del Proyecto ---
+# === RUTAS DE CARPETAS PRINCIPALES ===
+DATA_DIR = PHARMAGEN_DIR / "data"
 LOGS_DIR = PHARMAGEN_DIR / "logs"
-CACHE_DIR = PHARMAGEN_DIR / "cache" 
+CACHE_DIR = PHARMAGEN_DIR / "cache"
 SRC_DIR = PHARMAGEN_DIR / "src"
-RAW_DATA_DIR = PHARMAGEN_DIR / "data" / "raw"
-PROCESSED_DATA_DIR = PHARMAGEN_DIR / "data" / "processed"
+RAW_DATA_DIR = DATA_DIR / "raw"
+PROCESSED_DATA_DIR = DATA_DIR / "processed"
 RESULTS_DIR = PHARMAGEN_DIR / "results"
 DOCS_DIR = PHARMAGEN_DIR / "docs"
 SCRIPTS_DIR = PHARMAGEN_DIR / "scripts"
-ENV_SCRIPTS_DIR = PHARMAGEN_DIR.parent / "Environment_Scripts"
+ANALYSIS_DIR = PHARMAGEN_DIR / "analysis"
+DATA_HANDLER_DIR = SRC_DIR / "data_handle"
+ENV_SCRIPTS_DIR = PROJECT_ROOT / "Environment_Scripts"
 
-# --- Rutas del Modelo --- DEEPL_MODEL_DIR
-
+# === RUTAS DE MODELOS DEEP LEARNING ===
 DL_MODEL_DIR = PHARMAGEN_DIR / "deepL_model"
 MODEL_SCRIPTS_DIR = DL_MODEL_DIR / "scripts"
 MODELS_DIR = DL_MODEL_DIR / "models"
@@ -30,17 +31,11 @@ MODEL_DATA_DIR = DL_MODEL_DIR / "data"
 MODEL_CSV_DIR = MODEL_DATA_DIR / "csv"
 MODEL_JSON_DIR = MODEL_DATA_DIR / "json"
 
-
-# --- Rutas de Archivos Específicos ---
-
+# === RUTAS DE ARCHIVOS ESPECÍFICOS ===
 CONFIG_FILE = PHARMAGEN_DIR / "config.json"
-LOG_FILE = LOGS_DIR / f"pharmagen_{date}.log"
+LOG_FILE = LOGS_DIR / f"pharmagen_{DATE_STAMP}.log"
 
-
-# --- Metadatos del Software ---
-
+# === METADATOS DEL SOFTWARE ===
 AUTOR = "Astordna/Aderfi/Adrim Hamed Outmani"
 VERSION = "0.1"
 FECHA_CREACION = "2024-06-15"
-
-

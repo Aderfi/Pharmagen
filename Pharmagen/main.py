@@ -11,22 +11,20 @@
 """
 
 import sys
+import Pharmagen.src as src
+import os
 from pathlib import Path
 
 # --- Importación de paths y metadatos desde config.py ---
-from src.config import PHARMAGEN_DIR, LOGS_DIR, CACHE_DIR, SRC_DIR, \
-        RAW_DATA_DIR, PROCESSED_DATA_DIR, RESULTS_DIR, DOCS_DIR, SCRIPTS_DIR, ENV_SCRIPTS_DIR, \
-        DL_MODEL_DIR, MODEL_SCRIPTS_DIR, MODELS_DIR, MODEL_VOCABS_DIR, MODEL_DATA_DIR, MODEL_CSV_DIR, MODEL_JSON_DIR, \
-        CONFIG_FILE, LOG_FILE, AUTOR, VERSION, FECHA_CREACION
+from .config import PHARMAGEN_DIR, LOGS_DIR, CACHE_DIR, SRC_DIR, RAW_DATA_DIR, PROCESSED_DATA_DIR, RESULTS_DIR, DOCS_DIR
    
 # Si tienes rutas a deepL_model/scripts, añádelas aquí
 
 # Si necesitas rutas específicas a scripts de deepL_model:
-MODEL_SCRIPTS_DIR = PHARMAGEN_DIR / "deepL_model" / "scripts"
+MODEL_SCRIPTS_DIR = Path("deepL_model") / "scripts"
 
 # --- Añadir rutas a sys.path para importación de módulos internos ---
-sys.path.append(str(PHARMAGEN_DIR.resolve()))
-
+sys.path.append(str(PHARMAGEN_DIR))
 from src.logger_config import unit_logging
 from src.utils import mensaje_introduccion, load_config, check_config
 from deepL_model.scripts.train_model import main as train_main

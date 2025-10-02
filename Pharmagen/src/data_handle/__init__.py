@@ -1,3 +1,1 @@
-from . import preprocess_model, process_raw_data, model_tokenizer, io
-import Pharmagen
-from Pharmagen import config
+from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
