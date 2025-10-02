@@ -3,7 +3,8 @@ import pandas as pd
 import csv
 import sys
 import os
-from config import RAW_DATA_DIR, CACHE_DIR, PROCESSED_DATA_DIR
+from Pharmagen.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
+
 
 def increase_csv_field_limit():
     """Aumenta el límite de tamaño de campo para el lector CSV de Python."""
@@ -19,11 +20,11 @@ def increase_csv_field_limit():
 
 def convert_tsv_to_csv(raw_dir, processed_csv_dir, cache_dir):
     """Convierte todos los archivos .tsv en raw_dir a .csv en processed_csv_dir."""
-    raw_dir = Path(raw_dir)
-    processed_csv_dir = Path(processed_csv_dir)
-    cache_dir = Path(cache_dir)
-    processed_csv_dir.mkdir(parents=True, exist_ok=True)
-    cache_dir.mkdir(parents=True, exist_ok=True)
+    raw_dir = RAW_DATA_DIR
+    processed_csv_dir = PROCESSED_DATA_DIR / "csv"
+    cache_dir = CACHE_DIR
+    
+    
 
     # Encuentra todos los archivos .tsv en RAW_DATA_DIR
     tsv_files = list(raw_dir.glob("*.tsv"))

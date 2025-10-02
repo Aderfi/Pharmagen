@@ -14,21 +14,18 @@ import sys
 from pathlib import Path
 
 # --- Importación de paths y metadatos desde config.py ---
-from Pharmagen.config import (
-    PHARMAGEN_DIR,
-    SRC_DIR,
-    SCRIPTS_DIR,
-    LOGS_DIR,
-    CACHE_DIR,
-    # Si tienes rutas a deepL_model/scripts, añádelas aquí
-)
+from src.config import PHARMAGEN_DIR, LOGS_DIR, CACHE_DIR, SRC_DIR, \
+        RAW_DATA_DIR, PROCESSED_DATA_DIR, RESULTS_DIR, DOCS_DIR, SCRIPTS_DIR, ENV_SCRIPTS_DIR, \
+        DL_MODEL_DIR, MODEL_SCRIPTS_DIR, MODELS_DIR, MODEL_VOCABS_DIR, MODEL_DATA_DIR, MODEL_CSV_DIR, MODEL_JSON_DIR, \
+        CONFIG_FILE, LOG_FILE, AUTOR, VERSION, FECHA_CREACION
+   
+# Si tienes rutas a deepL_model/scripts, añádelas aquí
+
 # Si necesitas rutas específicas a scripts de deepL_model:
-from Pharmagen.config import PHARMAGEN_DIR
-DEEPL_MODEL_SCRIPTS_DIR = PHARMAGEN_DIR / "deepL_model" / "scripts"
+MODEL_SCRIPTS_DIR = PHARMAGEN_DIR / "deepL_model" / "scripts"
 
 # --- Añadir rutas a sys.path para importación de módulos internos ---
-sys.path.append(str(SRC_DIR.resolve()))
-sys.path.append(str(DEEPL_MODEL_SCRIPTS_DIR.resolve()))
+sys.path.append(str(PHARMAGEN_DIR.resolve()))
 
 from src.logger_config import unit_logging
 from src.utils import mensaje_introduccion, load_config, check_config
