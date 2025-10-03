@@ -1,1 +1,1 @@
-from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
+from config import *

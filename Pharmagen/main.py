@@ -11,7 +11,7 @@
 """
 
 import sys
-import Pharmagen.src as src
+import src as src
 import os
 from pathlib import Path
 
