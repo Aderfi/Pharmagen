@@ -1,0 +1,11381 @@
+[
+  {
+    "A01AA01": "SODIUM FLUORIDE"
+  },
+  {
+    "A01AA02": "SODIUM MONOFLUOROPHOSPHATE"
+  },
+  {
+    "A01AA03": "OLAFLUR"
+  },
+  {
+    "A01AA30": "CARIES PROPHYLACTIC AGENTS, COMBINATIONS"
+  },
+  {
+    "A01AB02": "HYDROGEN PEROXIDE"
+  },
+  {
+    "A01AB03": "CHLORHEXIDINE"
+  },
+  {
+    "A01AB04": "AMPHOTERICIN"
+  },
+  {
+    "A01AB05": "POLYNOXYLIN"
+  },
+  {
+    "A01AB06": "DOMIPHEN"
+  },
+  {
+    "A01AB07": "OXYQUINOLINE"
+  },
+  {
+    "A01AB08": "NEOMYCIN"
+  },
+  {
+    "A01AB09": "MICONAZOLE"
+  },
+  {
+    "A01AB10": "NATAMYCIN"
+  },
+  {
+    "A01AB11": "VARIOUS"
+  },
+  {
+    "A01AB12": "HEXETIDINE"
+  },
+  {
+    "A01AB13": "TETRACYCLINE"
+  },
+  {
+    "A01AB14": "BENZOXONIUM CHLORIDE"
+  },
+  {
+    "A01AB15": "TIBEZONIUM IODIDE"
+  },
+  {
+    "A01AB16": "MEPARTRICIN"
+  },
+  {
+    "A01AB17": "METRONIDAZOLE"
+  },
+  {
+    "A01AB18": "CLOTRIMAZOLE"
+  },
+  {
+    "A01AB19": "SODIUM PERBORATE"
+  },
+  {
+    "A01AB21": "CHLORTETRACYCLINE"
+  },
+  {
+    "A01AC01": "TRIAMCINOLONE"
+  },
+  {
+    "A01AC02": "DEXAMETHASONE"
+  },
+  {
+    "A01AC03": "HYDROCORTISONE"
+  },
+  {
+    "A01AC54": "PREDNISOLONE, COMBINATIONS"
+  },
+  {
+    "A01AD01": "EPINEPHRINE"
+  },
+  {
+    "A01AD02": "BENZYDAMINE"
+  },
+  {
+    "A01AD05": "ACETYLSALICYLIC ACID"
+  },
+  {
+    "A01AD06": "ADRENALONE"
+  },
+  {
+    "A01AD11": "VARIOUS"
+  },
+  {
+    "A02AA01": "MAGNESIUM CARBONATE"
+  },
+  {
+    "A02AA02": "MAGNESIUM OXIDE"
+  },
+  {
+    "A02AA03": "MAGNESIUM PEROXIDE"
+  },
+  {
+    "A02AA04": "MAGNESIUM HYDROXIDE"
+  },
+  {
+    "A02AA05": "MAGNESIUM SILICATE"
+  },
+  {
+    "A02AA10": "MAGNESIUM COMPOUNDS, COMBINATIONS"
+  },
+  {
+    "A02AB01": "ALUMINIUM HYDROXIDE"
+  },
+  {
+    "A02AB02": "ALGELDRATE"
+  },
+  {
+    "A02AB03": "ALUMINIUM PHOSPHATE"
+  },
+  {
+    "A02AB04": "DIHYDROXIALUMINI SODIUM CARBONATE"
+  },
+  {
+    "A02AB05": "ALUMINIUM ACETOACETATE"
+  },
+  {
+    "A02AB06": "ALOGLUTAMOL"
+  },
+  {
+    "A02AB07": "ALUMINIUM GLYCINATE"
+  },
+  {
+    "A02AB10": "ALUMINIUM COMPOUNDS, COMBINATIONS"
+  },
+  {
+    "A02AC01": "CALCIUM CARBONATE"
+  },
+  {
+    "A02AC02": "CALCIUM SILICATE"
+  },
+  {
+    "A02AC10": "CALCIUM COMPOUNDS, COMBINATIONS"
+  },
+  {
+    "A02AD01": "ORDINARY SALT COMBINATIONS"
+  },
+  {
+    "A02AD02": "MAGALDRATE"
+  },
+  {
+    "A02AD03": "ALMAGATE"
+  },
+  {
+    "A02AD04": "HYDROTALCITE"
+  },
+  {
+    "A02AD05": "ALMASILATE"
+  },
+  {
+    "A02AF01": "MAGALDRATE AND ANTIFLATULENTS"
+  },
+  {
+    "A02AF02": "ORDINARY SALT COMBINATIONS AND ANTIFLATULENTS"
+  },
+  {
+    "A02BA01": "CIMETIDINE"
+  },
+  {
+    "A02BA02": "RANITIDINE"
+  },
+  {
+    "A02BA03": "FAMOTIDINE"
+  },
+  {
+    "A02BA04": "NIZATIDINE"
+  },
+  {
+    "A02BA05": "NIPEROTIDINE"
+  },
+  {
+    "A02BA06": "ROXATIDINE"
+  },
+  {
+    "A02BA07": "RANITIDINE BISMUTH CITRATE"
+  },
+  {
+    "A02BA51": "CIMETIDINE, COMBINATIONS"
+  },
+  {
+    "A02BB01": "MISOPROSTOL"
+  },
+  {
+    "A02BB02": "ENPROSTIL"
+  },
+  {
+    "A02BC01": "OMEPRAZOLE"
+  },
+  {
+    "A02BC02": "PANTOPRAZOLE"
+  },
+  {
+    "A02BC03": "LANSOPRAZOLE"
+  },
+  {
+    "A02BD01": "OMEPRAZOLE, AMOXICILLIN AND METRONIDAZOLE"
+  },
+  {
+    "A02BX01": "CARBENOXOLONE"
+  },
+  {
+    "A02BX02": "SUCRALFATE"
+  },
+  {
+    "A02BX03": "PIRENZEPINE"
+  },
+  {
+    "A02BX03": "PIRENZEPINE"
+  },
+  {
+    "A02BX04": "METHIOSULFONIUM CHLORIDE"
+  },
+  {
+    "A02BX05": "BISMUTH SUBCITRATE"
+  },
+  {
+    "A02BX06": "PROGLUMIDE"
+  },
+  {
+    "A02BX07": "GEFARNATE"
+  },
+  {
+    "A02BX08": "SULGLICOTIDE"
+  },
+  {
+    "A02BX09": "ACETOXOLONE"
+  },
+  {
+    "A02BX10": "ZOLIMIDINE"
+  },
+  {
+    "A02BX11": "TROXIPIDE"
+  },
+  {
+    "A02BX12": "BISMUTH SUBNITRATE"
+  },
+  {
+    "A02BX51": "CARBENOXOLONE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "A02BX71": "CARBENOXOLONE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "A02BX77": "GEFARNATE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "A02DA01": "SILICONES"
+  },
+  {
+    "A02EA01": "ALGINIC ACID"
+  },
+  {
+    "A03AA01": "OXYPHENCYCLIMINE"
+  },
+  {
+    "A03AA03": "CAMYLOFIN"
+  },
+  {
+    "A03AA04": "MEBEVERINE"
+  },
+  {
+    "A03AA05": "TRIMEBUTINE"
+  },
+  {
+    "A03AA06": "ROCIVERINE"
+  },
+  {
+    "A03AA07": "DICYCLOVERINE"
+  },
+  {
+    "A03AA08": "DIHEXYVERINE"
+  },
+  {
+    "A03AA09": "DIFEMERINE"
+  },
+  {
+    "A03AA30": "PIPERIDOLATE"
+  },
+  {
+    "A03AB01": "BENZILONE"
+  },
+  {
+    "A03AB02": "GLYCOPYRRONIUM"
+  },
+  {
+    "A03AB03": "OXYPHENONIUM"
+  },
+  {
+    "A03AB04": "PENTHIENATE"
+  },
+  {
+    "A03AB05": "PROPANTHELINE"
+  },
+  {
+    "A03AB06": "OTILONIUM BROMIDE"
+  },
+  {
+    "A03AB07": "METHANTHELINE"
+  },
+  {
+    "A03AB08": "TRIDIHEXETHYL"
+  },
+  {
+    "A03AB09": "ISOPROPAMIDE"
+  },
+  {
+    "A03AB10": "HEXOCYCLIUM"
+  },
+  {
+    "A03AB11": "POLDINE"
+  },
+  {
+    "A03AB12": "MEPENZOLATE"
+  },
+  {
+    "A03AB13": "BEVONIUM"
+  },
+  {
+    "A03AB14": "PIPENZOLATE"
+  },
+  {
+    "A03AB15": "DIPHEMANIL"
+  },
+  {
+    "A03AB16": "(2-BENZHYDRYLOXYETHYL)DIETHYL-METHYLAMMONIUM IODIDE"
+  },
+  {
+    "A03AB17": "TIEMONIUM IODIDE"
+  },
+  {
+    "A03AB18": "PRIFINIUM BROMIDE"
+  },
+  {
+    "A03AB19": "TIMEPIDIUM BROMIDE"
+  },
+  {
+    "A03AB20": "TROSPIUM"
+  },
+  {
+    "A03AB21": "FENPIVERINIUM"
+  },
+  {
+    "A03AB53": "OXYPHENONIUM, COMBINATIONS"
+  },
+  {
+    "A03AC02": "DIMETHYLAMINOPROPIONYLPHENOTHIAZINE"
+  },
+  {
+    "A03AC04": "NICOFETAMIDE"
+  },
+  {
+    "A03AC05": "TIROPRAMIDE"
+  },
+  {
+    "A03AD01": "PAPAVERINE"
+  },
+  {
+    "A03AD02": "DROTAVERINE"
+  },
+  {
+    "A03AD30": "MOXAVERINE"
+  },
+  {
+    "A03AX01": "FENPIPRANE"
+  },
+  {
+    "A03AX02": "DIISOPROMINE"
+  },
+  {
+    "A03AX03": "CHLORBENZOXAMINE"
+  },
+  {
+    "A03AX04": "PINAVERIUM"
+  },
+  {
+    "A03AX05": "FENOVERINE"
+  },
+  {
+    "A03AX06": "IDANPRAMINE"
+  },
+  {
+    "A03AX07": "PROXAZOLE"
+  },
+  {
+    "A03AX08": "ALVERINE"
+  },
+  {
+    "A03AX09": "TREPIBUTONE"
+  },
+  {
+    "A03AX10": "ISOMETHEPTENE"
+  },
+  {
+    "A03AX11": "CAROVERINE"
+  },
+  {
+    "A03AX30": "TRIMETHYLDIPHENYLPROPYLAMINE"
+  },
+  {
+    "A03AX58": "ALVERINE, COMBINATIONS"
+  },
+  {
+    "A03BA01": "ATROPINE"
+  },
+  {
+    "A03BA03": "HYOSCYAMINE"
+  },
+  {
+    "A03BA04": "BELLADONNA TOTAL ALKALOIDS"
+  },
+  {
+    "A03BB01": "BUTYLSCOPOLAMINE"
+  },
+  {
+    "A03BB02": "METHYLATROPINE"
+  },
+  {
+    "A03BB03": "METHYLSCOPOLAMINE"
+  },
+  {
+    "A03BB04": "FENTONIUM"
+  },
+  {
+    "A03BB05": "CIMETROPIUM BROMIDE"
+  },
+  {
+    "A03CA01": "ISOPROPAMIDE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA02": "CLIDINIUM AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA03": "OXYPHENCYCLIMINE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA04": "OTILONIUM BROMIDE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA05": "GLYCOPYRRONIUM AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA06": "BEVONIUM AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA07": "AMBUTONIUM AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA08": "DIPHEMANIL AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA30": "EMEPRONIUM AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CA34": "PROPANTHELINE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CB01": "METHYLSCOPOLAMINE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CB02": "BELLADONNA TOTAL ALKALOIDS AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CB03": "ATROPINE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CB04": "METHYLHOMATROPINE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03CB31": "HYOSCYAMINE AND PSYCHOLEPTICS"
+  },
+  {
+    "A03DA01": "TROPENZILONE AND ANALGESICS"
+  },
+  {
+    "A03DA02": "PITOFENONE AND ANALGESICS"
+  },
+  {
+    "A03DA03": "BEVONIUM AND ANALGESICS"
+  },
+  {
+    "A03DA04": "CICLONIUM AND ANALGESICS"
+  },
+  {
+    "A03DA05": "CAMYLOFIN AND ANALGESICS"
+  },
+  {
+    "A03DA06": "TROSPIUM AND ANALGESICS"
+  },
+  {
+    "A03DB04": "BUTYLSCOPOLAMINE AND ANALGESICS"
+  },
+  {
+    "A03FA01": "METOCLOPRAMIDE"
+  },
+  {
+    "A03FA02": "CISAPRIDE"
+  },
+  {
+    "A03FA03": "DOMPERIDONE"
+  },
+  {
+    "A03FA03": "DOMPERIDONE"
+  },
+  {
+    "A03FA04": "BROMOPRIDE"
+  },
+  {
+    "A03FA05": "ALIZAPRIDE"
+  },
+  {
+    "A03FA06": "CLEBOPRIDE"
+  },
+  {
+    "A04AA01": "ONDANSETRON"
+  },
+  {
+    "A04AA02": "GRANISETRON"
+  },
+  {
+    "A04AA02": "GRANISETRON"
+  },
+  {
+    "A04AA03": "TROPISETRON"
+  },
+  {
+    "A04AA04": "DOLASETRON"
+  },
+  {
+    "A04AD01": "SCOPOLAMINE"
+  },
+  {
+    "A04AD02": "CERIUM OXALATE"
+  },
+  {
+    "A04AD04": "CHLOROBUTANOL"
+  },
+  {
+    "A04AD05": "METOPIMAZINE"
+  },
+  {
+    "A04AD51": "SCOPOLAMINE, COMBINATIONS"
+  },
+  {
+    "A04AD54": "CHLOROBUTANOL, COMBINATIONS"
+  },
+  {
+    "A05AA01": "CHENODEOXYCHOLIC ACID"
+  },
+  {
+    "A05AA02": "URSODEOXYCHOLIC ACID"
+  },
+  {
+    "A05AB01": "NICOTINYL METHYLAMIDE"
+  },
+  {
+    "A05AX01": "PIPROZOLIN"
+  },
+  {
+    "A05AX02": "HYMECROMONE"
+  },
+  {
+    "A05AX03": "CYCLOBUTYROL"
+  },
+  {
+    "A05BA01": "ARGININE GLUTAMATE"
+  },
+  {
+    "A05BA03": "SILYMARIN"
+  },
+  {
+    "A05BA04": "CITIOLONE"
+  },
+  {
+    "A05BA05": "EPOMEDIOL"
+  },
+  {
+    "A05BA06": "ORNITHINE OXOGLURATE"
+  },
+  {
+    "A05BA07": "TIDIACIC ARGININE"
+  },
+  {
+    "A06AA01": "LIQUID PARAFFIN"
+  },
+  {
+    "A06AA02": "DOCUSATE SODIUM"
+  },
+  {
+    "A06AA51": "LIQUID PARAFFIN, COMBINATIONS"
+  },
+  {
+    "A06AB01": "ACETPHENOLISATIN"
+  },
+  {
+    "A06AB02": "BISACODYL"
+  },
+  {
+    "A06AB03": "DANTRON"
+  },
+  {
+    "A06AB04": "PHENOLPHTHALEIN"
+  },
+  {
+    "A06AB05": "CASTOR OIL"
+  },
+  {
+    "A06AB06": "SENNA GLYCOSIDES"
+  },
+  {
+    "A06AB07": "CASCARA"
+  },
+  {
+    "A06AB08": "SODIUM PICOSULFATE"
+  },
+  {
+    "A06AB20": "CONTACT LAXATIVES IN COMBINATION"
+  },
+  {
+    "A06AB30": "CONTACT LAXATIVES IN COMBINATION WITH BELLADONNA ALKALOIDS"
+  },
+  {
+    "A06AB53": "DANTRON, COMBINATIONS"
+  },
+  {
+    "A06AB56": "SENNA GLYCOSIDES, COMBINATIONS"
+  },
+  {
+    "A06AB57": "CASCARA, COMBINATIONS"
+  },
+  {
+    "A06AB58": "SODIUM PICOSULFATE, COMBINATIONS"
+  },
+  {
+    "A06AC01": "ISPAGHULA (PSYLLA SEEDS)"
+  },
+  {
+    "A06AC02": "ETHULOSE"
+  },
+  {
+    "A06AC03": "STERCULIA"
+  },
+  {
+    "A06AC05": "LINSEED"
+  },
+  {
+    "A06AC06": "METHYLCELLULOSE"
+  },
+  {
+    "A06AC07": "TRITICUM (WHEAT FIBRE)"
+  },
+  {
+    "A06AC08": "POLYCARBOPHIL CALCIUM"
+  },
+  {
+    "A06AC51": "ISPAGHULA, COMBINATIONS"
+  },
+  {
+    "A06AC53": "STERCULIA, COMBINATIONS"
+  },
+  {
+    "A06AC55": "LINSEED, COMBINATIONS"
+  },
+  {
+    "A06AD01": "MAGNESIUM CARBONATE"
+  },
+  {
+    "A06AD02": "MAGNESIUM OXIDE"
+  },
+  {
+    "A06AD03": "MAGNESIUM PEROXIDE"
+  },
+  {
+    "A06AD04": "MAGNESIUM SULFATE"
+  },
+  {
+    "A06AD10": "MINERAL SALTS IN COMBINATION"
+  },
+  {
+    "A06AD11": "LACTULOSE"
+  },
+  {
+    "A06AD12": "LACTITOL"
+  },
+  {
+    "A06AD13": "SODIUM SULFATE"
+  },
+  {
+    "A06AD14": "PENTAERYTHRITYL TETRANITRATE"
+  },
+  {
+    "A06AD61": "LACTULOSE, COMBINATIONS"
+  },
+  {
+    "A06AD65": "MACROGOL, COMBINATIONS"
+  },
+  {
+    "A06AG01": "SODIUM PHOSPHATE"
+  },
+  {
+    "A06AG02": "BISACODYL"
+  },
+  {
+    "A06AG03": "DANTRON, INCL. COMBINATIONS"
+  },
+  {
+    "A06AG04": "GLYCEROL"
+  },
+  {
+    "A06AG06": "OIL"
+  },
+  {
+    "A06AG07": "SORBITOL"
+  },
+  {
+    "A06AG10": "DOCUSATE SODIUM, INCL. COMBINATIONS"
+  },
+  {
+    "A06AG11": "LAURILSULFATE, INCL. COMBINATIONS"
+  },
+  {
+    "A06AG20": "ENEMAS, COMBINATIONS"
+  },
+  {
+    "A06AX01": "GLYCEROL"
+  },
+  {
+    "A06AX02": "CARBON DIOXIDE PRODUCING DRUGS"
+  },
+  {
+    "A07AA01": "NEOMYCIN"
+  },
+  {
+    "A07AA02": "NYSTATIN"
+  },
+  {
+    "A07AA03": "NATAMYCIN"
+  },
+  {
+    "A07AA04": "STREPTOMYCIN"
+  },
+  {
+    "A07AA05": "POLYMYXIN B"
+  },
+  {
+    "A07AA06": "PAROMOMYCIN"
+  },
+  {
+    "A07AA07": "AMPHOTERICIN"
+  },
+  {
+    "A07AA08": "KANAMYCIN"
+  },
+  {
+    "A07AA09": "VANCOMYCIN"
+  },
+  {
+    "A07AA10": "COLISTIN"
+  },
+  {
+    "A07AA11": "RIFAXIMIN"
+  },
+  {
+    "A07AA51": "NEOMYCIN, COMBINATIONS"
+  },
+  {
+    "A07AA54": "STREPTOMYCIN, COMBINATIONS"
+  },
+  {
+    "A07AB02": "PHTHALYLSULFATHIAZOLE"
+  },
+  {
+    "A07AB03": "SULFAGUANIDINE"
+  },
+  {
+    "A07AB04": "SUCCINYLSULFATHIAZOLE"
+  },
+  {
+    "A07AC01": "MICONAZOLE"
+  },
+  {
+    "A07AX01": "BROXYQUINOLINE"
+  },
+  {
+    "A07AX02": "ACETARSOL"
+  },
+  {
+    "A07AX03": "NIFUROXAZIDE"
+  },
+  {
+    "A07AX04": "NIFURZIDE"
+  },
+  {
+    "A07BA01": "MEDICINAL CHARCOAL"
+  },
+  {
+    "A07BA51": "MEDICINAL CHARCOAL, COMBINATIONS"
+  },
+  {
+    "A07BC01": "PECTIN"
+  },
+  {
+    "A07BC02": "KAOLIN"
+  },
+  {
+    "A07BC03": "CROSPOVIDONE"
+  },
+  {
+    "A07BC04": "ATTAPULGITE"
+  },
+  {
+    "A07BC30": "OTHER INTESTINAL ADSORBENTS, COMBINATIONS"
+  },
+  {
+    "A07BC54": "ATTAPULGITE, COMBINATIONS"
+  },
+  {
+    "A07DA01": "DIPHENOXYLATE"
+  },
+  {
+    "A07DA02": "OPIUM"
+  },
+  {
+    "A07DA03": "LOPERAMIDE"
+  },
+  {
+    "A07DA04": "DIFENOXIN"
+  },
+  {
+    "A07DA05": "LOPERAMIDE OXIDE"
+  },
+  {
+    "A07DA52": "MORPHINE, COMBINATIONS"
+  },
+  {
+    "A07EA01": "PREDNISOLONE"
+  },
+  {
+    "A07EA02": "HYDROCORTISONE"
+  },
+  {
+    "A07EA03": "PREDNISONE"
+  },
+  {
+    "A07EA04": "BETAMETHASONE"
+  },
+  {
+    "A07EA05": "TIXOCORTOL"
+  },
+  {
+    "A07EA06": "BUDESONIDE"
+  },
+  {
+    "A07EA07": "BECLOMETASONE"
+  },
+  {
+    "A07EB01": "CROMOGLICIC ACID"
+  },
+  {
+    "A07EC01": "SULFASALAZINE"
+  },
+  {
+    "A07EC02": "MESALAZINE"
+  },
+  {
+    "A07EC03": "OLSALAZINE"
+  },
+  {
+    "A07EC04": "BALSALAZIDE"
+  },
+  {
+    "A07FA01": "LACTIC ACID PRODUCING ORGANISMS"
+  },
+  {
+    "A07FA02": "SACCHAROMYCES BOULARDII"
+  },
+  {
+    "A07FA51": "LACTIC ACID PRODUCING ORGANISMS, COMBINATIONS"
+  },
+  {
+    "A07XA01": "ALBUMIN TANNATE"
+  },
+  {
+    "A07XA02": "CERATONIA"
+  },
+  {
+    "A07XA03": "CALCIUM COMPOUNDS"
+  },
+  {
+    "A07XA04": "ACETORPHAN"
+  },
+  {
+    "A07XA51": "ALBUMIN TANNATE, COMBINATIONS"
+  },
+  {
+    "A08AA01": "PHENTERMINE"
+  },
+  {
+    "A08AA02": "FENFLURAMINE"
+  },
+  {
+    "A08AA03": "AMFEPRAMONE"
+  },
+  {
+    "A08AA04": "DEXFENFLURAMINE"
+  },
+  {
+    "A08AA05": "MAZINDOL"
+  },
+  {
+    "A08AA06": "ETILAMFETAMINE"
+  },
+  {
+    "A08AA07": "CATHINE"
+  },
+  {
+    "A08AA08": "CLOBENZOREX"
+  },
+  {
+    "A08AA09": "MEFENOREX"
+  },
+  {
+    "A08AA10": "SIBUTRAMINE"
+  },
+  {
+    "A08AA56": "EPHEDRINE, COMBINATIONS"
+  },
+  {
+    "A08AB01": "ORLISTAT"
+  },
+  {
+    "A09AA01": "DIASTASE"
+  },
+  {
+    "A09AA02": "MULTIENZYMES (LIPASE, PROTEASE ETC.)"
+  },
+  {
+    "A09AA03": "PEPSIN"
+  },
+  {
+    "A09AB01": "GLUTAMIC ACID HYDROCHLORIDE"
+  },
+  {
+    "A09AB02": "BETAINE HYDROCHLORIDE"
+  },
+  {
+    "A09AB03": "HYDROCHLORIC ACID"
+  },
+  {
+    "A09AB04": "CITRIC ACID"
+  },
+  {
+    "A09AC01": "PEPSIN AND ACID PREPARATIONS"
+  },
+  {
+    "A10AB01": "INSULIN (HUMAN)"
+  },
+  {
+    "A10AB02": "INSULIN (BEEF)"
+  },
+  {
+    "A10AB03": "INSULIN (PORK)"
+  },
+  {
+    "A10AB04": "INSULIN LISPRO"
+  },
+  {
+    "A10AB30": "INSULIN COMBINATIONS, FAST-ACTING"
+  },
+  {
+    "A10AC01": "INSULIN (HUMAN)"
+  },
+  {
+    "A10AC02": "INSULIN (BEEF)"
+  },
+  {
+    "A10AC03": "INSULIN (PORK)"
+  },
+  {
+    "A10AC30": "INSULIN COMBINATIONS INTERMEDIATE-ACTING"
+  },
+  {
+    "A10AD01": "INSULIN (HUMAN)"
+  },
+  {
+    "A10AD02": "INSULIN (BEEF)"
+  },
+  {
+    "A10AD03": "INSULIN (PORK)"
+  },
+  {
+    "A10AD30": "INSULING COMBINATIONS INTERMED+FAST"
+  },
+  {
+    "A10AE01": "INSULIN (HUMAN)"
+  },
+  {
+    "A10AE02": "INSULIN (BEEF)"
+  },
+  {
+    "A10AE03": "INSULIN (PORK)"
+  },
+  {
+    "A10AE30": "INSULIN OMBINATIONS, LONG-ACTING"
+  },
+  {
+    "A10BA01": "PHENFORMIN"
+  },
+  {
+    "A10BA02": "METFORMIN"
+  },
+  {
+    "A10BA03": "BUFORMIN"
+  },
+  {
+    "A10BB01": "GLIBENCLAMIDE"
+  },
+  {
+    "A10BB01": "GLIBENCLAMIDE"
+  },
+  {
+    "A10BB02": "CHLORPROPAMIDE"
+  },
+  {
+    "A10BB03": "TOLBUTAMIDE"
+  },
+  {
+    "A10BB04": "GLIBORNURIDE"
+  },
+  {
+    "A10BB05": "TOLAZAMIDE"
+  },
+  {
+    "A10BB06": "CARBUTAMIDE"
+  },
+  {
+    "A10BB07": "GLIPIZIDE"
+  },
+  {
+    "A10BB08": "GLIQUIDONE"
+  },
+  {
+    "A10BB09": "GLICLAZIDE"
+  },
+  {
+    "A10BB10": "METAHEXAMIDE"
+  },
+  {
+    "A10BB11": "GLISOXEPIDE"
+  },
+  {
+    "A10BB12": "GLIMEPIRIDE"
+  },
+  {
+    "A10BB31": "ACETOHEXAMIDE"
+  },
+  {
+    "A10BC01": "GLYMIDINE"
+  },
+  {
+    "A10BD01": "PHENFORMIN AND SULFONAMIDES"
+  },
+  {
+    "A10BD02": "METFORMIN AND SULFONAMIDES"
+  },
+  {
+    "A10BF01": "ACARBOSE"
+  },
+  {
+    "A10BF02": "MIGLITOL"
+  },
+  {
+    "A10BG01": "TROGLITAZONE"
+  },
+  {
+    "A10BX01": "GUAR GUM"
+  },
+  {
+    "A10XA01": "TOLRESTAT"
+  },
+  {
+    "A11AA01": "MULTIVITAMINS AND IRON"
+  },
+  {
+    "A11AA02": "MULTIVITAMINS AND CALCIUM"
+  },
+  {
+    "A11AA03": "MULTIVITAMINS AND OTHER MINERALS, INCL. COMBINATIONS"
+  },
+  {
+    "A11AA04": "MULTIVITAMINS AND TRACE ELEMENTS"
+  },
+  {
+    "A11CA01": "RETINOL (VIT A)"
+  },
+  {
+    "A11CC01": "ERGOCALCIFEROL"
+  },
+  {
+    "A11CC02": "DIHYDROTACHYSTEROL"
+  },
+  {
+    "A11CC03": "ALFACALCIDOL"
+  },
+  {
+    "A11CC04": "CALCITRIOL"
+  },
+  {
+    "A11CC05": "COLECALCIFEROL"
+  },
+  {
+    "A11CC06": "CALCIFEDIOL"
+  },
+  {
+    "A11CC20": "VITAMIN A&D COMBINATIONS"
+  },
+  {
+    "A11DA01": "THIAMINE (VIT B1)"
+  },
+  {
+    "A11DA02": "SULBUTIAMINE"
+  },
+  {
+    "A11GA01": "ASCORBIC ACID (VIT C)"
+  },
+  {
+    "A11GB01": "ASCORBIC ACID (VIT C) AND CALCIUM"
+  },
+  {
+    "A11HA01": "NICOTINAMIDE"
+  },
+  {
+    "A11HA02": "PYRIDOXINE (VIT B6)"
+  },
+  {
+    "A11HA03": "TOCOPHEROL (VIT E)"
+  },
+  {
+    "A11HA04": "RIBOFLAVIN (VIT B2)"
+  },
+  {
+    "A11HA05": "BIOTIN"
+  },
+  {
+    "A11HA06": "PYRIDOXAL PHOSPHATE"
+  },
+  {
+    "A11HA30": "DEXPANTHENOL"
+  },
+  {
+    "A11HA31": "CALCIUM PANTOTHENATE"
+  },
+  {
+    "A11HA32": "PANTETHINE"
+  },
+  {
+    "A12AA01": "CALCIUM PHOSPHATE"
+  },
+  {
+    "A12AA02": "CALCIUM GLUBIONATE"
+  },
+  {
+    "A12AA03": "CALCIUM GLUCONATE"
+  },
+  {
+    "A12AA04": "CALCIUM CARBONATE"
+  },
+  {
+    "A12AA05": "CALCIUM LACTATE"
+  },
+  {
+    "A12AA06": "CALCIUM LACTATE GLUCONATE"
+  },
+  {
+    "A12AA07": "CALCIUM CHLORIDE"
+  },
+  {
+    "A12AA08": "CALCIUM GLYCERYLPHOSPHATE"
+  },
+  {
+    "A12AA09": "CALCIUM CITRATE LYSINE COMPLEX"
+  },
+  {
+    "A12AA10": "CALCIUM GLUCOHEPTONATE"
+  },
+  {
+    "A12AA11": "CALCIUM PANGAMATE"
+  },
+  {
+    "A12AA12": "CALCIUM ACETATE ANHYDROUS"
+  },
+  {
+    "A12AA20": "CALCIUM (DIFFERENT SALTS IN COMBINATION)"
+  },
+  {
+    "A12AA30": "CALCIUM LAEVULATE"
+  },
+  {
+    "A12BA01": "POTASSIUM CHLORIDE"
+  },
+  {
+    "A12BA02": "POTASSIUM CITRATE"
+  },
+  {
+    "A12BA03": "POTASSIUM HYDROGENTARTRATE"
+  },
+  {
+    "A12BA04": "POTASSIUM HYDROGENCARBONATE"
+  },
+  {
+    "A12BA05": "POTASSIUM GLUCONATE"
+  },
+  {
+    "A12BA30": "POTASSIUM COMBINATIONS"
+  },
+  {
+    "A12BA51": "POTASSIUM CHLORIDE, COMBINATIONS"
+  },
+  {
+    "A12CA01": "SODIUM CHLORIDE"
+  },
+  {
+    "A12CA02": "SODIUM SULFATE"
+  },
+  {
+    "A12CB01": "ZINC SULFATE"
+  },
+  {
+    "A12CB02": "ZINC GLUCONATE"
+  },
+  {
+    "A12CB03": "ZINC PROTEIN COMPLEX"
+  },
+  {
+    "A12CC01": "MAGNESIUM CHLORIDE"
+  },
+  {
+    "A12CC01": "MAGNESIUM CHLORIDE"
+  },
+  {
+    "A12CC02": "MAGNESIUM SULFATE"
+  },
+  {
+    "A12CC02": "MAGNESIUM SULFATE"
+  },
+  {
+    "A12CC03": "MAGNESIUM GLUCONATE"
+  },
+  {
+    "A12CC04": "MAGNESIUM CITRATE"
+  },
+  {
+    "A12CC05": "MAGNESIUM ASPARTATE"
+  },
+  {
+    "A12CC06": "MAGNESIUM LACTATE"
+  },
+  {
+    "A12CC07": "MAGNESIUM LEVULINATE"
+  },
+  {
+    "A12CC08": "MAGNESIUM PIDOLATE"
+  },
+  {
+    "A12CC09": "MAGNESIUM OROTATE"
+  },
+  {
+    "A12CC30": "MAGNESIUM (DIFFERENT SALTS IN COMBINATION)"
+  },
+  {
+    "A12CD01": "SODIUM FLUORIDE"
+  },
+  {
+    "A12CD02": "SODIUM MONOFLUOROPHOSPHATE"
+  },
+  {
+    "A12CD51": "FLUORIDE, COMBINATIONS"
+  },
+  {
+    "A12CE01": "SODIUM SELENATE"
+  },
+  {
+    "A14AA01": "ANDROSTANOLONE"
+  },
+  {
+    "A14AA02": "STANOZOLOL"
+  },
+  {
+    "A14AA02": "STANOZOLOL"
+  },
+  {
+    "A14AA03": "METANDIENONE"
+  },
+  {
+    "A14AA04": "METENOLONE"
+  },
+  {
+    "A14AA04": "METENOLONE"
+  },
+  {
+    "A14AA05": "OXYMETHOLONE"
+  },
+  {
+    "A14AA06": "QUINBOLONE"
+  },
+  {
+    "A14AA07": "PRASTERONE"
+  },
+  {
+    "A14AA08": "OXANDROLONE"
+  },
+  {
+    "A14AA09": "NORETHANDROLONE"
+  },
+  {
+    "A14AB01": "NANDROLONE"
+  },
+  {
+    "A14AB02": "ETHYLESTRENOL"
+  },
+  {
+    "A14AB03": "OXABOLONE CIPIONATE"
+  },
+  {
+    "A16AA01": "LEVOCARNITINE"
+  },
+  {
+    "A16AA02": "ADEMETIONINE"
+  },
+  {
+    "A16AA03": "LEVOGLUTAMIDE"
+  },
+  {
+    "A16AA04": "MERCAPTAMINE"
+  },
+  {
+    "A16AB01": "ALGLUCERASE"
+  },
+  {
+    "A16AB02": "IMIGLUCERASE"
+  },
+  {
+    "A16AX01": "TIOCTIC ACID"
+  },
+  {
+    "A16AX02": "ANETHOLE TRITHIONE"
+  },
+  {
+    "A16AX03": "SODIUM PHENYLBUTYRATE"
+  },
+  {
+    "B01AA01": "DICOUMAROL"
+  },
+  {
+    "B01AA02": "PHENINDIONE"
+  },
+  {
+    "B01AA03": "WARFARIN"
+  },
+  {
+    "B01AA04": "PHENPROCOUMON"
+  },
+  {
+    "B01AA07": "ACENOCOUMAROL"
+  },
+  {
+    "B01AA08": "ETHYL BISCOUMACETATE"
+  },
+  {
+    "B01AA09": "CLORINDIONE"
+  },
+  {
+    "B01AA10": "DIPHENADIONE"
+  },
+  {
+    "B01AA11": "TIOCLOMAROL"
+  },
+  {
+    "B01AB01": "HEPARIN"
+  },
+  {
+    "B01AB02": "ANTITHROMBIN III"
+  },
+  {
+    "B01AB04": "DALTEPARIN"
+  },
+  {
+    "B01AB05": "ENOXAPARIN"
+  },
+  {
+    "B01AB06": "NADROPARIN"
+  },
+  {
+    "B01AB07": "PARNAPARIN"
+  },
+  {
+    "B01AB08": "REVIPARIN"
+  },
+  {
+    "B01AB09": "DANAPAROID"
+  },
+  {
+    "B01AB10": "TINZAPARIN"
+  },
+  {
+    "B01AB11": "SULODEXIDE"
+  },
+  {
+    "B01AB51": "HEPARIN, COMBINATIONS"
+  },
+  {
+    "B01AC01": "DITAZOLE"
+  },
+  {
+    "B01AC02": "CLORICROMEN"
+  },
+  {
+    "B01AC03": "PICOTAMIDE"
+  },
+  {
+    "B01AC04": "CLOPIDOGREL"
+  },
+  {
+    "B01AC05": "TICLOPIDINE"
+  },
+  {
+    "B01AC06": "ACETYLSALICYLIC ACID"
+  },
+  {
+    "B01AC07": "DIPYRIDAMOLE"
+  },
+  {
+    "B01AC07": "DIPYRIDAMOLE"
+  },
+  {
+    "B01AC08": "CARBASALATE CALCIUM"
+  },
+  {
+    "B01AC09": "EPOPROSTENOL"
+  },
+  {
+    "B01AC10": "INDOBUFEN"
+  },
+  {
+    "B01AC11": "ILOPROST"
+  },
+  {
+    "B01AC13": "ABCIXIMAB"
+  },
+  {
+    "B01AC14": "ANAGRELIDE"
+  },
+  {
+    "B01AC15": "ALOXIPRIN"
+  },
+  {
+    "B01AC16": "INTRIFIBAN"
+  },
+  {
+    "B01AC30": "PLATELET AGGREGATION INHIBITORS - COMBINATIONS"
+  },
+  {
+    "B01AD01": "STREPTOKINASE"
+  },
+  {
+    "B01AD02": "ALTEPLASE"
+  },
+  {
+    "B01AD03": "ANISTREPLASE"
+  },
+  {
+    "B01AD04": "UROKINASE"
+  },
+  {
+    "B01AD05": "FIBRINOLYSIN"
+  },
+  {
+    "B01AD06": "BRINASE"
+  },
+  {
+    "B01AD07": "RETEPLASE"
+  },
+  {
+    "B01AD08": "SARUPLASE"
+  },
+  {
+    "B01AX01": "DEFIBROTIDE"
+  },
+  {
+    "B01AX02": "DESIRUDIN"
+  },
+  {
+    "B01AX03": "LEPIRUDIN"
+  },
+  {
+    "B02AA01": "AMINOCAPROIC ACID"
+  },
+  {
+    "B02AA02": "TRANEXAMIC ACID"
+  },
+  {
+    "B02AA03": "AMINOMETHYLBENZOIC ACID"
+  },
+  {
+    "B02AB01": "APROTININ"
+  },
+  {
+    "B02AB02": "ALFA1 ANTITRYPSIN"
+  },
+  {
+    "B02AB03": "C1-INHIBITOR"
+  },
+  {
+    "B02AB04": "CAMOSTAT"
+  },
+  {
+    "B02BA01": "PHYTOMENADIONE"
+  },
+  {
+    "B02BA02": "MENADIONE"
+  },
+  {
+    "B02BA02": "MENADIONE"
+  },
+  {
+    "B02BB01": "HUMAN FIBRINOGEN"
+  },
+  {
+    "B02BC01": "ABSORBABLE GELATIN SPONGE"
+  },
+  {
+    "B02BC02": "OXIDIZED CELLULOSE"
+  },
+  {
+    "B02BC03": "TETRAGALACTURONIC ACID HYDROXYMETHYLESTER"
+  },
+  {
+    "B02BC05": "ADRENALONE"
+  },
+  {
+    "B02BC06": "THROMBIN"
+  },
+  {
+    "B02BC07": "COLLAGEN"
+  },
+  {
+    "B02BC08": "CALCIUM ALGINATE"
+  },
+  {
+    "B02BC09": "EPINEPHRINE"
+  },
+  {
+    "B02BC10": "FIBRINOGEN, HUMAN"
+  },
+  {
+    "B02BD01": "COAGULATION FACTOR IX, II, VII AND X IN COMBINATION"
+  },
+  {
+    "B02BD02": "COAGULATION FACTOR VIII"
+  },
+  {
+    "B02BD03": "FACTOR VIII INHIBITOR BYPASSING ACTIVITY"
+  },
+  {
+    "B02BD04": "COAGULATION FACTOR IX"
+  },
+  {
+    "B02BD05": "COAGULATION FACTOR VII"
+  },
+  {
+    "B02BD06": "VON WILLEBRAND FACTOR AND COAGULA-TION FACTOR VIII IN COMBINATION"
+  },
+  {
+    "B02BD07": "COAGULATION FACTOR XIII"
+  },
+  {
+    "B02BD08": "EPTACOG ALFA (ACTIVATED)"
+  },
+  {
+    "B02BD30": "THROMBIN"
+  },
+  {
+    "B02BX01": "ETAMSYLATE"
+  },
+  {
+    "B02BX02": "CARBAZOCHROME"
+  },
+  {
+    "B02BX03": "BATROXOBIN"
+  },
+  {
+    "B03AA01": "FERROUS GLYCINE SULFATE"
+  },
+  {
+    "B03AA02": "FERROUS FUMARATE"
+  },
+  {
+    "B03AA03": "FERROUS GLUCONATE"
+  },
+  {
+    "B03AA04": "FERROUS CARBONATE"
+  },
+  {
+    "B03AA05": "FERROUS CHLORIDE"
+  },
+  {
+    "B03AA06": "FERROUS SUCCINATE"
+  },
+  {
+    "B03AA07": "FERROUS SULFATE"
+  },
+  {
+    "B03AA08": "FERROUS TARTRATE"
+  },
+  {
+    "B03AA09": "FERROUS ASPARTATE"
+  },
+  {
+    "B03AA10": "FERROUS ASCORBATE"
+  },
+  {
+    "B03AA11": "FERROUS IODINE"
+  },
+  {
+    "B03AB01": "FERRIC SODIUM CITRATE"
+  },
+  {
+    "B03AB02": "SACCHARATED IRON OXIDE"
+  },
+  {
+    "B03AB03": "SODIUM FEREDETATE"
+  },
+  {
+    "B03AB04": "FERRIC HYDROXIDE"
+  },
+  {
+    "B03AB05": "DEXTRIFERRON"
+  },
+  {
+    "B03AB06": "FERRIC CITRATE"
+  },
+  {
+    "B03AB07": "CHONDROITIN SULFATE-IRON COMPLEX"
+  },
+  {
+    "B03AB08": "FERRIC ACETYL TRANSFERRIN"
+  },
+  {
+    "B03AB09": "FERRIC PROTEINSUCCINYLATE"
+  },
+  {
+    "B03AC01": "DEXTRIFERRON"
+  },
+  {
+    "B03AC02": "SACCHARATED IRON OXIDE"
+  },
+  {
+    "B03AC03": "IRON-SORBITOL-CITRIC ACID COMPLEX"
+  },
+  {
+    "B03AC05": "FERRIC SORBITOL GLUCONIC ACID COMPLEX"
+  },
+  {
+    "B03AC06": "FERRIC OXIDE DEXTRAN COMPLEX"
+  },
+  {
+    "B03AD01": "FERROUS AMINO ACID COMPLEX"
+  },
+  {
+    "B03AD02": "FERROUS FUMARATE"
+  },
+  {
+    "B03AD03": "FERROUS SULFATE"
+  },
+  {
+    "B03AE01": "IRON, VITAMIN B12 AND FOLIC ACID"
+  },
+  {
+    "B03AE02": "IRON, MULTIVITAMINS AND FOLIC ACID"
+  },
+  {
+    "B03AE03": "IRON AND MULTIVITAMINS"
+  },
+  {
+    "B03AE04": "IRON, MULTIVITAMINS AND MINERALS"
+  },
+  {
+    "B03AE10": "IRON- VARIOUS COMBINATIONS"
+  },
+  {
+    "B03BA01": "CYANOCOBALAMIN"
+  },
+  {
+    "B03BA01": "CYANOCOBALAMIN"
+  },
+  {
+    "B03BA02": "CYANOCOBALAMIN TANNIN COMPLEX"
+  },
+  {
+    "B03BA03": "HYDROXOCOBALAMIN"
+  },
+  {
+    "B03BA04": "COBAMAMIDE"
+  },
+  {
+    "B03BA51": "CYANOCOBALAMIN, COMBINATIONS"
+  },
+  {
+    "B03BA53": "HYDROXOCOBALAMIN, COMBINATIONS"
+  },
+  {
+    "B03BB01": "FOLIC ACID"
+  },
+  {
+    "B03BB01": "FOLIC ACID"
+  },
+  {
+    "B03BB51": "FOLIC ACID, COMBINATIONS"
+  },
+  {
+    "B03XA01": "ERYTHROPOIETIN"
+  },
+  {
+    "B05AA01": "ALBUMIN"
+  },
+  {
+    "B05AA02": "OTHER PLASMA PROTEIN FRACTIONS"
+  },
+  {
+    "B05AA03": "FLUOROCARBON BLOOD SUBSTITUTES"
+  },
+  {
+    "B05AA05": "DEXTRAN"
+  },
+  {
+    "B05AA06": "GELATIN AGENTS"
+  },
+  {
+    "B05AA07": "HETASTARCH"
+  },
+  {
+    "B05AA08": "HEMOGLOBIN CROSFUMARIL"
+  },
+  {
+    "B05BA01": "AMINO ACIDS"
+  },
+  {
+    "B05BA02": "FAT EMULSIONS"
+  },
+  {
+    "B05BA03": "CARBOHYDRATES"
+  },
+  {
+    "B05BA04": "PROTEIN HYDROLYSATES"
+  },
+  {
+    "B05BA10": "PARENTERAL NUTRITION SOLUTION COMBINATIONS"
+  },
+  {
+    "B05BB01": "ELECTROLYTES"
+  },
+  {
+    "B05BB02": "ELECTROLYTES WITH CARBOHYDRATES"
+  },
+  {
+    "B05BB03": "TROMETAMOL"
+  },
+  {
+    "B05BC01": "MANNITOL"
+  },
+  {
+    "B05BC02": "CARBAMIDE"
+  },
+  {
+    "B05CA01": "CETYLPYRIDINIUM"
+  },
+  {
+    "B05CA02": "CHLORHEXIDINE"
+  },
+  {
+    "B05CA03": "NITROFURAL"
+  },
+  {
+    "B05CA04": "SULFAMETHIZOLE"
+  },
+  {
+    "B05CA05": "TAUROLIDINE"
+  },
+  {
+    "B05CA06": "MANDELIC ACID"
+  },
+  {
+    "B05CA07": "NOXYTIOLIN"
+  },
+  {
+    "B05CA08": "ETHACRIDINE LACTATE"
+  },
+  {
+    "B05CA09": "NEOMYCIN"
+  },
+  {
+    "B05CA10": "IRRIGATING SOL- ANTIINFECTIVE COMBINATIONS"
+  },
+  {
+    "B05CB01": "SODIUM CHLORIDE"
+  },
+  {
+    "B05CB02": "SODIUM CITRATE"
+  },
+  {
+    "B05CB03": "MAGNESIUM CITRATE"
+  },
+  {
+    "B05CB04": "SODIUM BICARBONATE"
+  },
+  {
+    "B05CB10": "IRRIGATING SOLUTION SALT COMBINATIONS"
+  },
+  {
+    "B05CX01": "GLUCOSE"
+  },
+  {
+    "B05CX02": "SORBITOL"
+  },
+  {
+    "B05CX03": "GLYCINE"
+  },
+  {
+    "B05CX04": "MANNITOL"
+  },
+  {
+    "B05CX10": "IRRIGATING SOLUTIONS- OTHER COMBINATIONS"
+  },
+  {
+    "B05XA01": "POTASSIUM CHLORIDE"
+  },
+  {
+    "B05XA02": "SODIUM BICARBONATE"
+  },
+  {
+    "B05XA03": "SODIUM CHLORIDE"
+  },
+  {
+    "B05XA04": "AMMONIUM CHLORIDE"
+  },
+  {
+    "B05XA05": "MAGNESIUM SULFATE"
+  },
+  {
+    "B05XA06": "POTASSIUM PHOSPHATE, INCL. COMB. WITH OTHER POTASSIUM SALTS"
+  },
+  {
+    "B05XA07": "CALCIUM CHLORIDE"
+  },
+  {
+    "B05XA08": "SODIUM ACETATE"
+  },
+  {
+    "B05XA09": "SODIUM PHOSPHATE"
+  },
+  {
+    "B05XA10": "MAGNESIUM PHOSPHATE"
+  },
+  {
+    "B05XA11": "MAGNESIUM CHLORIDE"
+  },
+  {
+    "B05XA12": "ZINC CHLORIDE"
+  },
+  {
+    "B05XA13": "HYDROCHLORIC ACID"
+  },
+  {
+    "B05XA14": "SODIUM GLYCEROPHOSPHATE"
+  },
+  {
+    "B05XA15": "POTASSIUM LACTATE"
+  },
+  {
+    "B05XA16": "CARDIOPLEGIA SOLUTIONS"
+  },
+  {
+    "B05XA30": "COMBINATIONS OF ELECTROLYTES"
+  },
+  {
+    "B05XA31": "ELECTROLYTES IN COMBINATION WITH OTHER DRUGS"
+  },
+  {
+    "B05XB01": "ARGININE HYDROCHLORIDE"
+  },
+  {
+    "B05XB02": "ALANYL GLUTAMINE"
+  },
+  {
+    "B05XB03": "LYSINE"
+  },
+  {
+    "B05XX02": "TROMETAMOL"
+  },
+  {
+    "B06AA02": "FIBRINOLYSIN AND DESOXYRIBONUCLEASE"
+  },
+  {
+    "B06AA03": "HYALURONIDASE"
+  },
+  {
+    "B06AA04": "CHYMOTRYPSIN"
+  },
+  {
+    "B06AA07": "TRYPSIN"
+  },
+  {
+    "B06AA10": "DESOXYRIBONUCLEASE"
+  },
+  {
+    "B06AA11": "BROMELAINS"
+  },
+  {
+    "B06AA55": "STREPTOKINASE, COMBINATIONS"
+  },
+  {
+    "B06AB01": "HEMATIN"
+  },
+  {
+    "C01AA01": "ACETYLDIGITOXIN"
+  },
+  {
+    "C01AA02": "ACETYLDIGOXIN"
+  },
+  {
+    "C01AA03": "DIGITALIS LEAVES"
+  },
+  {
+    "C01AA04": "DIGITOXIN"
+  },
+  {
+    "C01AA05": "DIGOXIN"
+  },
+  {
+    "C01AA06": "LANATOSIDE C"
+  },
+  {
+    "C01AA07": "DESLANOSIDE"
+  },
+  {
+    "C01AA08": "METILDIGOXIN"
+  },
+  {
+    "C01AA09": "GITOFORMATE"
+  },
+  {
+    "C01AB01": "PROSCILLARIDIN"
+  },
+  {
+    "C01AB51": "PROSCILLARIDIN, COMBINATIONS"
+  },
+  {
+    "C01AC01": "G-STROPHANTHIN"
+  },
+  {
+    "C01AC03": "CYMARIN"
+  },
+  {
+    "C01AX02": "PERUVOSIDE"
+  },
+  {
+    "C01BA01": "QUINIDINE"
+  },
+  {
+    "C01BA02": "PROCAINAMIDE"
+  },
+  {
+    "C01BA03": "DISOPYRAMIDE"
+  },
+  {
+    "C01BA04": "SPARTEINE"
+  },
+  {
+    "C01BA05": "AJMALINE"
+  },
+  {
+    "C01BA08": "PRAJMALINE"
+  },
+  {
+    "C01BA12": "LORAJMINE"
+  },
+  {
+    "C01BA51": "QUINIDINE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "C01BA71": "QUINIDINE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "C01BB01": "LIDOCAINE"
+  },
+  {
+    "C01BB02": "MEXILETINE"
+  },
+  {
+    "C01BB03": "TOCAINIDE"
+  },
+  {
+    "C01BB04": "APRINDINE"
+  },
+  {
+    "C01BC03": "PROPAFENONE"
+  },
+  {
+    "C01BC04": "FLECAINIDE"
+  },
+  {
+    "C01BC07": "LORCAINIDE"
+  },
+  {
+    "C01BC08": "ENCAINIDE"
+  },
+  {
+    "C01BD01": "AMIODARONE"
+  },
+  {
+    "C01BD02": "BRETYLIUM TOSILATE"
+  },
+  {
+    "C01BD03": "BUNAFTINE"
+  },
+  {
+    "C01BD04": "DOFETILIDE"
+  },
+  {
+    "C01BD05": "IBUTILIDE"
+  },
+  {
+    "C01BG01": "MORACIZINE"
+  },
+  {
+    "C01BG07": "CIBENZOLINE"
+  },
+  {
+    "C01CA01": "ETILEFRINE"
+  },
+  {
+    "C01CA02": "ISOPRENALINE"
+  },
+  {
+    "C01CA03": "NOREPINEPHRINE"
+  },
+  {
+    "C01CA04": "DOPAMINE"
+  },
+  {
+    "C01CA05": "NORFENEFRINE"
+  },
+  {
+    "C01CA06": "PHENYLEPHRINE"
+  },
+  {
+    "C01CA07": "DOBUTAMINE"
+  },
+  {
+    "C01CA08": "OXEDRINE"
+  },
+  {
+    "C01CA09": "METARAMINOL"
+  },
+  {
+    "C01CA10": "METHOXAMINE"
+  },
+  {
+    "C01CA11": "MEPHENTERMINE"
+  },
+  {
+    "C01CA12": "DIMETOFRINE"
+  },
+  {
+    "C01CA13": "PRENALTEROL"
+  },
+  {
+    "C01CA14": "DOPEXAMINE"
+  },
+  {
+    "C01CA15": "GEPEFRINE"
+  },
+  {
+    "C01CA16": "IBOPAMINE"
+  },
+  {
+    "C01CA17": "MIDODRINE"
+  },
+  {
+    "C01CA18": "OCTOPAMINE"
+  },
+  {
+    "C01CA19": "FENOLDOPAM"
+  },
+  {
+    "C01CA21": "CAFEDRINE"
+  },
+  {
+    "C01CA22": "ARBUTAMINE"
+  },
+  {
+    "C01CA23": "THEODRENALINE"
+  },
+  {
+    "C01CA24": "EPINEPHRINE"
+  },
+  {
+    "C01CA30": "ADRENERGIC & DOPAMINERGIC AGENTS - COMBINATIONS"
+  },
+  {
+    "C01CA51": "ETILEFRINE, COMBINATIONS"
+  },
+  {
+    "C01CE01": "AMRINONE"
+  },
+  {
+    "C01CE02": "MILRINONE"
+  },
+  {
+    "C01CE03": "ENOXIMONE"
+  },
+  {
+    "C01CE04": "BUCLADESINE"
+  },
+  {
+    "C01CX06": "ANGIOTENSINAMIDE"
+  },
+  {
+    "C01CX07": "XAMOTEROL"
+  },
+  {
+    "C01DA02": "GLYCERYL TRINITRATE"
+  },
+  {
+    "C01DA02": "GLYCERYL TRINITRATE"
+  },
+  {
+    "C01DA04": "METHYLPROPYLPROPANEDIOL DINITRATE"
+  },
+  {
+    "C01DA05": "PENTAERITRITYL TETRANITRATE"
+  },
+  {
+    "C01DA07": "PROPATYLNITRATE"
+  },
+  {
+    "C01DA08": "ISOSORBIDE DINITRATE"
+  },
+  {
+    "C01DA08": "ISOSORBIDE DINITRATE"
+  },
+  {
+    "C01DA08": "ISOSORBIDE DINITRATE"
+  },
+  {
+    "C01DA09": "TROLNITRATE"
+  },
+  {
+    "C01DA13": "ERITRITYL TETRANITRATE"
+  },
+  {
+    "C01DA14": "ISOSORBIDE MONONITRATE"
+  },
+  {
+    "C01DA20": "ORGANIC NITRATES IN COMBINATION"
+  },
+  {
+    "C01DA38": "TENITRAMINE"
+  },
+  {
+    "C01DA52": "GLYCERYL TRINITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA54": "METHYLPROPYLPROPANEDIOL DINITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA55": "PENTAERITRITYL TETRANITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA57": "PROPATYLNITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA58": "ISOSORBIDE DINITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA59": "TROLNITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA63": "ERITRITYL TETRANITRATE, COMBINATIONS"
+  },
+  {
+    "C01DA70": "ORGANIC NITRATES IN COMBINATION WITH PSYCHOLEPTICS"
+  },
+  {
+    "C01DB01": "FLOSEQUINAN"
+  },
+  {
+    "C01DX01": "ITRAMIN TOSILATE"
+  },
+  {
+    "C01DX02": "PRENYLAMINE"
+  },
+  {
+    "C01DX03": "OXYFEDRINE"
+  },
+  {
+    "C01DX04": "BENZIODARONE"
+  },
+  {
+    "C01DX05": "CARBOCROMEN"
+  },
+  {
+    "C01DX06": "HEXOBENDINE"
+  },
+  {
+    "C01DX07": "ETAFENONE"
+  },
+  {
+    "C01DX08": "HEPTAMINOL"
+  },
+  {
+    "C01DX09": "IMOLAMINE"
+  },
+  {
+    "C01DX10": "DILAZEP"
+  },
+  {
+    "C01DX11": "TRAPIDIL"
+  },
+  {
+    "C01DX12": "MOLSIDOMINE"
+  },
+  {
+    "C01DX13": "EFLOXATE"
+  },
+  {
+    "C01DX14": "CINEPAZET"
+  },
+  {
+    "C01DX15": "CLORIDAROL"
+  },
+  {
+    "C01DX16": "NICORANDIL"
+  },
+  {
+    "C01DX18": "LINSIDOMINE"
+  },
+  {
+    "C01DX51": "ITRAMIN TOSILATE, COMBINATIONS"
+  },
+  {
+    "C01DX52": "PRENYLAMINE, COMBINATIONS"
+  },
+  {
+    "C01DX53": "OXYFEDRINE, COMBINATIONS"
+  },
+  {
+    "C01DX54": "BENZIODARONE, COMBINATIONS"
+  },
+  {
+    "C01EA01": "ALPROSTADIL"
+  },
+  {
+    "C01EB02": "CAMPHORA"
+  },
+  {
+    "C01EB03": "INDOMETACIN"
+  },
+  {
+    "C01EB04": "CRATAEGUS GLYCOSIDES"
+  },
+  {
+    "C01EB05": "CREATINOLFOSFATE"
+  },
+  {
+    "C01EB06": "FOSFOCREATINE"
+  },
+  {
+    "C01EB07": "FRUCTOSE 1,6-DIPHOSPHATE"
+  },
+  {
+    "C01EB09": "UBIDECARENONE"
+  },
+  {
+    "C01EB10": "ADENOSINE"
+  },
+  {
+    "C01EB11": "TIRACIZINE"
+  },
+  {
+    "C01EB12": "TEDISAMIL"
+  },
+  {
+    "C01EB13": "ACADESINE"
+  },
+  {
+    "C01EB15": "TRIMETAZIDINE"
+  },
+  {
+    "C02AA01": "RESCINNAMINE"
+  },
+  {
+    "C02AA02": "RESERPINE"
+  },
+  {
+    "C02AA03": "COMBINATIONS OF RAUWOLFIA ALKALOIDS"
+  },
+  {
+    "C02AA04": "RAUWOLFIA ALKALOIDS, WHOLE ROOT"
+  },
+  {
+    "C02AA05": "DESERPIDINE"
+  },
+  {
+    "C02AA06": "METHOSERPIDINE"
+  },
+  {
+    "C02AA07": "BIETASERPINE"
+  },
+  {
+    "C02AA52": "RESERPINE, COMBINATIONS"
+  },
+  {
+    "C02AA53": "COMBINATIONS OF RAUWOLFIA ALKOLOIDS, COMBINATIONS"
+  },
+  {
+    "C02AA57": "BIETASERPINE, COMBINATIONS"
+  },
+  {
+    "C02AB01": "METHYLDOPA (LEVOROTATORY)"
+  },
+  {
+    "C02AB02": "METHYLDOPA (RACEMIC)"
+  },
+  {
+    "C02AC01": "CLONIDINE"
+  },
+  {
+    "C02AC02": "GUANFACINE"
+  },
+  {
+    "C02AC04": "TOLONIDINE"
+  },
+  {
+    "C02AC05": "MOXONIDINE"
+  },
+  {
+    "C02AC06": "RILMENIDINE"
+  },
+  {
+    "C02BA01": "TRIMETAPHAN"
+  },
+  {
+    "C02BB01": "MECAMYLAMINE"
+  },
+  {
+    "C02CA01": "PRAZOSIN"
+  },
+  {
+    "C02CA02": "INDORAMIN"
+  },
+  {
+    "C02CA03": "TRIMAZOSIN"
+  },
+  {
+    "C02CA04": "DOXAZOSIN"
+  },
+  {
+    "C02CA06": "URAPIDIL"
+  },
+  {
+    "C02CA06": "URAPIDIL"
+  },
+  {
+    "C02CC01": "BETANIDINE"
+  },
+  {
+    "C02CC02": "GUANETHIDINE"
+  },
+  {
+    "C02CC03": "GUANOXAN"
+  },
+  {
+    "C02CC04": "DEBRISOQUINE"
+  },
+  {
+    "C02CC05": "GUANOCLOR"
+  },
+  {
+    "C02CC06": "GUANAZODINE"
+  },
+  {
+    "C02CC07": "GUANOXABENZ"
+  },
+  {
+    "C02DA01": "DIAZOXIDE"
+  },
+  {
+    "C02DB01": "DIHYDRALAZINE"
+  },
+  {
+    "C02DB01": "DIHYDRALAZINE"
+  },
+  {
+    "C02DB02": "HYDRALAZINE"
+  },
+  {
+    "C02DB03": "ENDRALAZINE"
+  },
+  {
+    "C02DB04": "CADRALAZINE"
+  },
+  {
+    "C02DC01": "MINOXIDIL"
+  },
+  {
+    "C02DD01": "NITROPRUSSIDE"
+  },
+  {
+    "C02DG01": "PINACIDIL"
+  },
+  {
+    "C02KA01": "VERATRUM"
+  },
+  {
+    "C02KB01": "METIROSINE"
+  },
+  {
+    "C02KC01": "PARGYLINE"
+  },
+  {
+    "C02KD01": "KETANSERIN"
+  },
+  {
+    "C02LA01": "RESERPINE AND DIURETICS"
+  },
+  {
+    "C02LA02": "RESCINNAMINE AND DIURETICS"
+  },
+  {
+    "C02LA03": "DESERPIDINE AND DIURETICS"
+  },
+  {
+    "C02LA04": "METHOSERPIDINE AND DIURETICS"
+  },
+  {
+    "C02LA07": "BIETASERPINE AND DIURETICS"
+  },
+  {
+    "C02LA08": "RAUWOLFIA ALKALOIDS, WHOLE ROOT AND DIURETICS"
+  },
+  {
+    "C02LA09": "SYROSINGOPINE AND DIURETICS"
+  },
+  {
+    "C02LA50": "COMB. OF RAUWOLFIA ALKALOIDS AND DIURETICS INCL. OTHER COMBINATIONS"
+  },
+  {
+    "C02LA51": "RESERPINE AND DIURETICS, COMBINATIONS WITH OTHER DRUGS"
+  },
+  {
+    "C02LA52": "RESCINNAMINE AND DIURETICS, COMBINATIONS WITH OTHER DRUGS"
+  },
+  {
+    "C02LA71": "RESERPINE AND DIURETICS, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "C02LB01": "METHYLDOPA (LEVOROTATORY) AND DIURETICS"
+  },
+  {
+    "C02LC01": "CLONIDINE AND DIURETICS"
+  },
+  {
+    "C02LC51": "CLONIDINE AND DIURETICS, COMBINATIONS WITH OTHER DRUGS"
+  },
+  {
+    "C02LE01": "PRAZOSIN AND DIURETICS"
+  },
+  {
+    "C02LF01": "GUANETHIDINE AND DIURETICS"
+  },
+  {
+    "C02LG01": "DIHYDRALAZINE AND DIURETICS"
+  },
+  {
+    "C02LG02": "HYDRALAZINE AND DIURETICS"
+  },
+  {
+    "C02LG03": "PICODRALAZINE AND DIURETICS"
+  },
+  {
+    "C02LG73": "PICODRALAZINE AND DIURETICS, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "C02LK01": "VERATRUM AND DIURETICS"
+  },
+  {
+    "C02LL01": "PARGYLINE AND DIURETICS"
+  },
+  {
+    "C02LX01": "PINACIDIL AND DIURETICS"
+  },
+  {
+    "C03AA01": "BENDROFLUMETHIAZIDE"
+  },
+  {
+    "C03AA02": "HYDROFLUMETHIAZIDE"
+  },
+  {
+    "C03AA03": "HYDROCHLOROTHIAZIDE"
+  },
+  {
+    "C03AA04": "CHLOROTHIAZIDE"
+  },
+  {
+    "C03AA05": "POLYTHIAZIDE"
+  },
+  {
+    "C03AA06": "TRICHLORMETHIAZIDE"
+  },
+  {
+    "C03AA07": "CYCLOPENTHIAZIDE"
+  },
+  {
+    "C03AA08": "METHYCLOTHIAZIDE"
+  },
+  {
+    "C03AA09": "CYCLOTHIAZIDE"
+  },
+  {
+    "C03AA13": "MEBUTIZIDE"
+  },
+  {
+    "C03AB01": "BENDROFLUMETHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB02": "HYDROFLUMETHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB03": "HYDROCHLOROTHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB04": "CHLOROTHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB05": "POLYTHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB06": "TRICHLORMETHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB07": "CYCLOPENTHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB08": "METHYCLOTHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AB09": "CYCLOTHIAZIDE AND POTASSIUM"
+  },
+  {
+    "C03AH01": "CHLOROTHIAZIDE, COMBINATIONS"
+  },
+  {
+    "C03AH02": "HYDROFLUMETHIAZIDE, COMBINATIONS"
+  },
+  {
+    "C03AX01": "HYDROCHLOROTHIAZIDE, COMBINATIONS"
+  },
+  {
+    "C03BA02": "QUINETHAZONE"
+  },
+  {
+    "C03BA03": "CLOPAMIDE"
+  },
+  {
+    "C03BA04": "CHLORTALIDONE"
+  },
+  {
+    "C03BA05": "MEFRUSIDE"
+  },
+  {
+    "C03BA07": "CLOFENAMIDE"
+  },
+  {
+    "C03BA08": "METOLAZONE"
+  },
+  {
+    "C03BA09": "METICRANE"
+  },
+  {
+    "C03BA10": "XIPAMIDE"
+  },
+  {
+    "C03BA11": "INDAPAMIDE"
+  },
+  {
+    "C03BA12": "CLOREXOLONE"
+  },
+  {
+    "C03BA13": "FENQUIZONE"
+  },
+  {
+    "C03BA82": "CLOREXOLONE, COMB. WITH PSYCHOLEPTICS"
+  },
+  {
+    "C03BB02": "QUINETHAZONE AND POTASSIUM"
+  },
+  {
+    "C03BB03": "CLOPAMIDE AND POTASSIUM"
+  },
+  {
+    "C03BB04": "CHLORTALIDONE AND POTASSIUM"
+  },
+  {
+    "C03BB05": "MEFRUSIDE AND POTASSIUM"
+  },
+  {
+    "C03BB07": "CLOFENAMIDE AND POTASSIUM"
+  },
+  {
+    "C03BC01": "MERSALYL"
+  },
+  {
+    "C03BD01": "THEOBROMINE"
+  },
+  {
+    "C03BX03": "CICLETANINE"
+  },
+  {
+    "C03CA01": "FUROSEMIDE"
+  },
+  {
+    "C03CA02": "BUMETANIDE"
+  },
+  {
+    "C03CA03": "PIRETANIDE"
+  },
+  {
+    "C03CA04": "TORASEMIDE"
+  },
+  {
+    "C03CB01": "FUROSEMIDE AND POTASSIUM"
+  },
+  {
+    "C03CB02": "BUMETANIDE AND POTASSIUM"
+  },
+  {
+    "C03CC01": "ETACRYNIC ACID"
+  },
+  {
+    "C03CC02": "TIENILIC ACID"
+  },
+  {
+    "C03CD01": "MUZOLIMINE"
+  },
+  {
+    "C03CX01": "ETOZOLIN"
+  },
+  {
+    "C03DA01": "SPIRONOLACTONE"
+  },
+  {
+    "C03DA02": "POTASSIUM CANRENOATE"
+  },
+  {
+    "C03DA03": "CANRENONE"
+  },
+  {
+    "C03DB01": "AMILORIDE"
+  },
+  {
+    "C03DB02": "TRIAMTERENE"
+  },
+  {
+    "C03EA01": "HYDROCHLOROTHIAZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA02": "TRICHLORMETHIAZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA03": "EPITIZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA04": "ALTIZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA05": "MEBUTIZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA06": "CHLORTALIDONE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA07": "CYCLOPENTHIAZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA12": "METOLAZONE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA13": "BENDROFLUMETHIAZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EA14": "BUTIZIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EB01": "FUROSEMIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C03EB02": "BUMETANIDE AND POTASSIUM-SPARING AGENTS"
+  },
+  {
+    "C04AA01": "ISOXSUPRINE"
+  },
+  {
+    "C04AA02": "BUPHENINE"
+  },
+  {
+    "C04AA31": "BAMETHAN"
+  },
+  {
+    "C04AB01": "PHENTOLAMINE"
+  },
+  {
+    "C04AB02": "TOLAZOLINE"
+  },
+  {
+    "C04AC01": "NICOTINIC ACID"
+  },
+  {
+    "C04AC02": "NICOTINYL ALCOHOL (PYRIDYLCARBINOL)"
+  },
+  {
+    "C04AC03": "INOSITOL NICOTINATE"
+  },
+  {
+    "C04AC07": "CICLONICATE"
+  },
+  {
+    "C04AD01": "PENTIFYLLINE"
+  },
+  {
+    "C04AD02": "XANTINOL NICOTINATE"
+  },
+  {
+    "C04AD03": "PENTOXIFYLLINE"
+  },
+  {
+    "C04AD03": "PENTOXIFYLLINE"
+  },
+  {
+    "C04AD04": "ETOFYLLINE NICOTINATE"
+  },
+  {
+    "C04AE01": "ERGOLOID MESYLATES"
+  },
+  {
+    "C04AE02": "NICERGOLINE"
+  },
+  {
+    "C04AE04": "DIHYDROERGOCRISTINE"
+  },
+  {
+    "C04AE51": "ERGOLOID MESYLATES, COMBINATIONS"
+  },
+  {
+    "C04AE54": "DIHYDROERGOCRISTINE, COMBINATIONS"
+  },
+  {
+    "C04AF01": "KALLIDINOGENASE"
+  },
+  {
+    "C04AX01": "CYCLANDELATE"
+  },
+  {
+    "C04AX02": "PHENOXYBENZAMINE"
+  },
+  {
+    "C04AX07": "VINCAMINE"
+  },
+  {
+    "C04AX10": "MOXISYLYTE"
+  },
+  {
+    "C04AX11": "BENCYCLANE"
+  },
+  {
+    "C04AX13": "PIRIBEDIL"
+  },
+  {
+    "C04AX17": "VINBURNINE"
+  },
+  {
+    "C04AX19": "SULCOTIDIL"
+  },
+  {
+    "C04AX20": "BUFLOMEDIL"
+  },
+  {
+    "C04AX21": "NAFTIDROFURYL"
+  },
+  {
+    "C04AX23": "BUTALAMINE"
+  },
+  {
+    "C04AX24": "VISNADINE"
+  },
+  {
+    "C04AX26": "CETIEDIL"
+  },
+  {
+    "C04AX27": "CINEPAZIDE"
+  },
+  {
+    "C04AX28": "IFENPRODIL"
+  },
+  {
+    "C04AX30": "AZAPETINE"
+  },
+  {
+    "C05AA01": "HYDROCORTISONE"
+  },
+  {
+    "C05AA04": "PREDNISOLONE"
+  },
+  {
+    "C05AA05": "BETAMETHASONE"
+  },
+  {
+    "C05AA06": "FLUOROMETHOLONE"
+  },
+  {
+    "C05AA08": "FLUOCORTOLONE"
+  },
+  {
+    "C05AA09": "DEXAMETHASONE"
+  },
+  {
+    "C05AA10": "FLUOCINOLONE ACETONIDE"
+  },
+  {
+    "C05AA11": "FLUOCINONIDE"
+  },
+  {
+    "C05AD01": "LIDOCAINE"
+  },
+  {
+    "C05AD02": "TETRACAINE"
+  },
+  {
+    "C05AD03": "BENZOCAINE"
+  },
+  {
+    "C05AD04": "CINCHOCAINE"
+  },
+  {
+    "C05AD05": "PROCAINE"
+  },
+  {
+    "C05AD06": "OXETACAINE"
+  },
+  {
+    "C05AD07": "PRAMOCAINE"
+  },
+  {
+    "C05AX01": "ALUMINIUM ACETOTARTRATE"
+  },
+  {
+    "C05AX02": "BISMUTH PREPARATIONS, COMBINATIONS"
+  },
+  {
+    "C05AX03": "OTHER PREPARATIONS, COMBINATIONS"
+  },
+  {
+    "C05AX04": "ZINC PREPARATIONS"
+  },
+  {
+    "C05AX05": "TRIBENOSIDE"
+  },
+  {
+    "C05BA01": "ORGANO-HEPARINOID"
+  },
+  {
+    "C05BA02": "SODIUM APOLATE"
+  },
+  {
+    "C05BA03": "HEPARIN"
+  },
+  {
+    "C05BA04": "PENTOSAN POLYSULFATE SODIUM"
+  },
+  {
+    "C05BA51": "HEPARINOID, COMBINATIONS"
+  },
+  {
+    "C05BA53": "HEPARIN, COMBINATIONS"
+  },
+  {
+    "C05BB01": "MONOETHANOLAMINE OLEATE"
+  },
+  {
+    "C05BB02": "POLIDOCANOL"
+  },
+  {
+    "C05BB03": "INVERT SUGAR"
+  },
+  {
+    "C05BB04": "SODIUM TETRADECYL SULFATE"
+  },
+  {
+    "C05BB05": "PHENOL"
+  },
+  {
+    "C05BX01": "CALCIUM DOBESILATE"
+  },
+  {
+    "C05BX51": "CALCIUM DOBESILATE, COMBINATIONS"
+  },
+  {
+    "C05CA01": "RUTOSIDE"
+  },
+  {
+    "C05CA02": "MONOXERUTIN"
+  },
+  {
+    "C05CA03": "DIOSMIN"
+  },
+  {
+    "C05CA04": "TROXERUTIN"
+  },
+  {
+    "C05CA05": "HIDROSMIN"
+  },
+  {
+    "C05CA51": "RUTOSIDE, COMBINATIONS"
+  },
+  {
+    "C05CA53": "DIOSMIN, COMBINATIONS"
+  },
+  {
+    "C05CA54": "TROXERUTIN, COMBINATIONS"
+  },
+  {
+    "C07AA01": "ALPRENOLOL"
+  },
+  {
+    "C07AA02": "OXPRENOLOL"
+  },
+  {
+    "C07AA03": "PINDOLOL"
+  },
+  {
+    "C07AA05": "PROPRANOLOL"
+  },
+  {
+    "C07AA06": "TIMOLOL"
+  },
+  {
+    "C07AA07": "SOTALOL"
+  },
+  {
+    "C07AA12": "NADOLOL"
+  },
+  {
+    "C07AA14": "MEPINDOLOL"
+  },
+  {
+    "C07AA15": "CARTEOLOL"
+  },
+  {
+    "C07AA16": "TERTATOLOL"
+  },
+  {
+    "C07AA17": "BOPINDOLOL"
+  },
+  {
+    "C07AA19": "BUPRANOLOL"
+  },
+  {
+    "C07AA23": "PENBUTOLOL"
+  },
+  {
+    "C07AA27": "CLORANOLOL"
+  },
+  {
+    "C07AA57": "SOTALOL, COMBINATION PACKAGES"
+  },
+  {
+    "C07AB01": "PRACTOLOL"
+  },
+  {
+    "C07AB01": "PRACTOLOL"
+  },
+  {
+    "C07AB02": "METOPROLOL"
+  },
+  {
+    "C07AB03": "ATENOLOL"
+  },
+  {
+    "C07AB04": "ACEBUTOLOL"
+  },
+  {
+    "C07AB05": "BETAXOLOL"
+  },
+  {
+    "C07AB06": "BEVANTOLOL"
+  },
+  {
+    "C07AB07": "BISOPROLOL"
+  },
+  {
+    "C07AB08": "CELIPROLOL"
+  },
+  {
+    "C07AB09": "ESMOLOL"
+  },
+  {
+    "C07AB10": "EPANOLOL"
+  },
+  {
+    "C07AB11": "S-ATENOLOL"
+  },
+  {
+    "C07AB12": "NEBIVOLOL"
+  },
+  {
+    "C07AG01": "LABETALOL"
+  },
+  {
+    "C07AG02": "CARVEDILOL"
+  },
+  {
+    "C07BA02": "OXPRENOLOL AND THIAZIDES"
+  },
+  {
+    "C07BA05": "PROPRANOLOL AND THIAZIDES"
+  },
+  {
+    "C07BA06": "TIMOLOL AND THIAZIDES"
+  },
+  {
+    "C07BA07": "SOTALOL AND THIAZIDES"
+  },
+  {
+    "C07BA12": "NADOLOL AND THIAZIDES"
+  },
+  {
+    "C07BA68": "METIPRANOLOL AND THIAZIDES, COMBINATIONS"
+  },
+  {
+    "C07BB02": "METOPROLOL AND THIAZIDES"
+  },
+  {
+    "C07BB03": "ATENOLOL AND THIAZIDES"
+  },
+  {
+    "C07BB04": "ACEBUTOLOL AND THIAZIDES"
+  },
+  {
+    "C07BB06": "BEVANTOLOL AND THIAZIDES"
+  },
+  {
+    "C07BB07": "BISOPROLOL AND THIAZIDES"
+  },
+  {
+    "C07BB52": "METOPROLOL AND THIAZIDES, COMBINATIONS"
+  },
+  {
+    "C07BG01": "LABETALOL AND THIAZIDES"
+  },
+  {
+    "C07CA02": "OXPRENOLOL AND OTHER DIURETICS"
+  },
+  {
+    "C07CA03": "PINDOLOL AND OTHER DIURETICS"
+  },
+  {
+    "C07CA17": "BOPINDOLOL AND OTHER DIURETICS"
+  },
+  {
+    "C07CA23": "PENBUTOLOL AND OTHER DIURETICS"
+  },
+  {
+    "C07CB02": "METOPROLOL AND OTHER DIURETICS"
+  },
+  {
+    "C07CB03": "ATENOLOL AND OTHER DIURETICS"
+  },
+  {
+    "C07CB53": "ATENOLOL AND OTHER DIURETICS, COMBINATIONS"
+  },
+  {
+    "C07CG01": "LABETALOL AND OTHER DIURETICS"
+  },
+  {
+    "C07DA06": "TIMOLOL, THIAZIDES AND OTHER DIURETICS"
+  },
+  {
+    "C07DB01": "ATENOLOL, THIAZIDES AND OTHER DIURETICS"
+  },
+  {
+    "C07FA05": "PROPRANOLOL AND OTHER ANTIHYPERTENSIVES"
+  },
+  {
+    "C07FB02": "METOPROLOL AND OTHER ANTIHYPERTENSIVES"
+  },
+  {
+    "C07FB03": "ATENOLOL AND OTHER ANTIHYPERTENSIVES"
+  },
+  {
+    "C08CA01": "AMLODIPINE"
+  },
+  {
+    "C08CA02": "FELODIPINE"
+  },
+  {
+    "C08CA03": "ISRADIPINE"
+  },
+  {
+    "C08CA04": "NICARDIPINE"
+  },
+  {
+    "C08CA05": "NIFEDIPINE"
+  },
+  {
+    "C08CA06": "NIMODIPINE"
+  },
+  {
+    "C08CA06": "NIMODIPINE"
+  },
+  {
+    "C08CA07": "NISOLDIPINE"
+  },
+  {
+    "C08CA08": "NITRENDIPINE"
+  },
+  {
+    "C08CA09": "LACIDIPINE"
+  },
+  {
+    "C08CA10": "NILVADIPINE"
+  },
+  {
+    "C08CA11": "MANIDIPINE"
+  },
+  {
+    "C08CA12": "BARNIDIPINE"
+  },
+  {
+    "C08CA13": "LERCANIDIPINE"
+  },
+  {
+    "C08CA55": "NIFEDIPINE, COMBINATIONS"
+  },
+  {
+    "C08CX01": "MIBEFRADIL"
+  },
+  {
+    "C08DA01": "VERAPAMIL"
+  },
+  {
+    "C08DA02": "GALLOPAMIL"
+  },
+  {
+    "C08DA51": "VERAPAMIL, COMBINATIONS"
+  },
+  {
+    "C08DB01": "DILTIAZEM"
+  },
+  {
+    "C08EA01": "FENDILINE"
+  },
+  {
+    "C08EA02": "BEPRIDIL"
+  },
+  {
+    "C08EX01": "LIDOFLAZINE"
+  },
+  {
+    "C08EX02": "PERHEXILINE"
+  },
+  {
+    "C08GA01": "NIFEDIPINE AND DIURETICS"
+  },
+  {
+    "C09AA01": "CAPTOPRIL"
+  },
+  {
+    "C09AA02": "ENALAPRIL"
+  },
+  {
+    "C09AA03": "LISINOPRIL"
+  },
+  {
+    "C09AA04": "PERINDOPRIL"
+  },
+  {
+    "C09AA05": "RAMIPRIL"
+  },
+  {
+    "C09AA06": "QUINAPRIL"
+  },
+  {
+    "C09AA07": "BENAZEPRIL"
+  },
+  {
+    "C09AA08": "CILAZAPRIL"
+  },
+  {
+    "C09AA09": "FOSINOPRIL"
+  },
+  {
+    "C09AA10": "TRANDOLAPRIL"
+  },
+  {
+    "C09AA11": "SPIRAPRIL"
+  },
+  {
+    "C09AA12": "DELAPRIL"
+  },
+  {
+    "C09AA13": "MOEXIPRIL"
+  },
+  {
+    "C09BA01": "CAPTOPRIL AND DIURETICS"
+  },
+  {
+    "C09BA02": "ENALAPRIL AND DIURETICS"
+  },
+  {
+    "C09BA03": "LISINOPRIL AND DIURETICS"
+  },
+  {
+    "C09BA05": "RAMIPRIL AND DIURETICS"
+  },
+  {
+    "C09BA06": "QUINAPRIL AND DIURETICS"
+  },
+  {
+    "C09BA07": "BENAZEPRIL AND DIURETICS"
+  },
+  {
+    "C09BA08": "CILAZAPRIL AND DIURETICS"
+  },
+  {
+    "C09BA09": "FOSINOPRIL AND DIURETICS"
+  },
+  {
+    "C09BA12": "DELAPRIL AND DIURETICS"
+  },
+  {
+    "C09BB05": "RAMIPRIL AND CALCIUM CHANNEL BLOCKERS"
+  },
+  {
+    "C09BB10": "TRANDOLAPRIL AND CALCIUM CHANNEL BLOCKERS"
+  },
+  {
+    "C09CA01": "LOSARTAN"
+  },
+  {
+    "C09CA02": "EPROSARTAN"
+  },
+  {
+    "C09CA03": "VALSARTAN"
+  },
+  {
+    "C09CA04": "IRBESARTAN"
+  },
+  {
+    "C09CA05": "TASOSARTAN"
+  },
+  {
+    "C09CA06": "CANDESARTAN"
+  },
+  {
+    "C09DA01": "LOSARTAN AND DIURETICS"
+  },
+  {
+    "C09DA06": "CANDESARTAN AND DIURETICS"
+  },
+  {
+    "C09XA01": "REMIKIREN"
+  },
+  {
+    "C10AA01": "SIMVASTATIN"
+  },
+  {
+    "C10AA02": "LOVASTATIN"
+  },
+  {
+    "C10AA03": "PRAVASTATIN"
+  },
+  {
+    "C10AA04": "FLUVASTATIN"
+  },
+  {
+    "C10AA05": "ATORVASTATIN"
+  },
+  {
+    "C10AA06": "CERIVASTATIN"
+  },
+  {
+    "C10AB01": "CLOFIBRATE"
+  },
+  {
+    "C10AB02": "BEZAFIBRATE"
+  },
+  {
+    "C10AB03": "ALUMINIUM CLOFIBRATE"
+  },
+  {
+    "C10AB04": "GEMFIBROZIL"
+  },
+  {
+    "C10AB05": "FENOFIBRATE"
+  },
+  {
+    "C10AB06": "SIMFIBRATE"
+  },
+  {
+    "C10AB07": "RONIFIBRATE"
+  },
+  {
+    "C10AB08": "CIPROFIBRATE"
+  },
+  {
+    "C10AB09": "ETOFIBRATE"
+  },
+  {
+    "C10AB10": "CLOFIBRIDE"
+  },
+  {
+    "C10AC01": "COLESTYRAMINE"
+  },
+  {
+    "C10AC02": "COLESTIPOL"
+  },
+  {
+    "C10AC03": "DETAXTRAN"
+  },
+  {
+    "C10AD01": "NICERITROL"
+  },
+  {
+    "C10AD02": "NICOTINIC ACID"
+  },
+  {
+    "C10AD03": "NICOFURANOSE"
+  },
+  {
+    "C10AD04": "ALUMINIUM NICOTINATE"
+  },
+  {
+    "C10AD05": "NICOTINYL ALCOHOL (PYRIDYLCARBINOL)"
+  },
+  {
+    "C10AD06": "ACIPIMOX"
+  },
+  {
+    "C10AX01": "DEXTROTHYROXINE"
+  },
+  {
+    "C10AX02": "PROBUCOL"
+  },
+  {
+    "C10AX03": "TIADENOL"
+  },
+  {
+    "C10AX04": "BENFLUOREX"
+  },
+  {
+    "C10AX05": "MEGLUTOL"
+  },
+  {
+    "C10AX06": "OMEGA-3-TRIGLYCERIDES"
+  },
+  {
+    "C10AX07": "MAGNESIUM PYRIDOXAL 5-PHOSPHATE GLUTAMATE"
+  },
+  {
+    "D01AA01": "NYSTATIN"
+  },
+  {
+    "D01AA02": "NATAMYCIN"
+  },
+  {
+    "D01AA03": "HACHIMYCIN"
+  },
+  {
+    "D01AA04": "PECILOCIN"
+  },
+  {
+    "D01AA06": "MEPARTRICIN"
+  },
+  {
+    "D01AA07": "PYRROLNITRIN"
+  },
+  {
+    "D01AA08": "GRISEOFULVIN"
+  },
+  {
+    "D01AA20": "ANTIFUNGALS, DERMATOLOGICAL, COMBINATIONS"
+  },
+  {
+    "D01AC01": "CLOTRIMAZOLE"
+  },
+  {
+    "D01AC02": "MICONAZOLE"
+  },
+  {
+    "D01AC03": "ECONAZOLE"
+  },
+  {
+    "D01AC04": "CLOMIDAZOLE"
+  },
+  {
+    "D01AC05": "ISOCONAZOLE"
+  },
+  {
+    "D01AC06": "TIABENDAZOLE"
+  },
+  {
+    "D01AC07": "TIOCONAZOLE"
+  },
+  {
+    "D01AC08": "KETOCONAZOLE"
+  },
+  {
+    "D01AC09": "SULCONAZOLE"
+  },
+  {
+    "D01AC10": "BIFONAZOLE"
+  },
+  {
+    "D01AC11": "OXICONAZOLE"
+  },
+  {
+    "D01AC12": "FENTICONAZOLE"
+  },
+  {
+    "D01AC13": "OMOCONAZOLE"
+  },
+  {
+    "D01AC20": "IMIDAZOLE ANTIFUGALS- COMBINATIONS"
+  },
+  {
+    "D01AC60": "BIFONAZOLE, COMBINATIONS"
+  },
+  {
+    "D01AE01": "BROMOCHLOROSALICYLANILIDE"
+  },
+  {
+    "D01AE02": "METHYLROSANILINE"
+  },
+  {
+    "D01AE03": "TRIBROMOMETACRESOL"
+  },
+  {
+    "D01AE04": "UNDECYLENIC ACID"
+  },
+  {
+    "D01AE05": "POLYNOXYLIN"
+  },
+  {
+    "D01AE06": "2-(4-CHLORPHENOXY)-ETHANOL"
+  },
+  {
+    "D01AE07": "CHLORPHENESIN"
+  },
+  {
+    "D01AE08": "TICLATONE"
+  },
+  {
+    "D01AE09": "SULBENTINE"
+  },
+  {
+    "D01AE10": "ETHYL HYDROXYBENZOATE"
+  },
+  {
+    "D01AE11": "HALOPROGIN"
+  },
+  {
+    "D01AE12": "SALICYLIC ACID"
+  },
+  {
+    "D01AE13": "SELENIUM SULFIDE"
+  },
+  {
+    "D01AE14": "CICLOPIROX"
+  },
+  {
+    "D01AE15": "TERBINAFINE"
+  },
+  {
+    "D01AE16": "AMOROLFINE"
+  },
+  {
+    "D01AE17": "DIMAZOLE"
+  },
+  {
+    "D01AE18": "TOLNAFTATE"
+  },
+  {
+    "D01AE19": "TOLCICLATE"
+  },
+  {
+    "D01AE20": "OTHER ANTIFUNGALS- COMBINATIONS"
+  },
+  {
+    "D01AE21": "FLUCYTOSINE"
+  },
+  {
+    "D01AE22": "NAFTIFINE"
+  },
+  {
+    "D01BA01": "GRISEOFULVIN"
+  },
+  {
+    "D01BA02": "TERBINAFINE"
+  },
+  {
+    "D02AE01": "CARBAMIDE"
+  },
+  {
+    "D02AE51": "CARBAMIDE, COMBINATIONS"
+  },
+  {
+    "D02BA01": "AMINOBENZOIC ACID"
+  },
+  {
+    "D02BA02": "OCTYL METHOXYCINNAMATE"
+  },
+  {
+    "D02BB01": "BETACAROTENE"
+  },
+  {
+    "D03AX01": "CADEXOMER IODINE"
+  },
+  {
+    "D03AX02": "DEXTRANOMER"
+  },
+  {
+    "D03AX03": "DEXPANTHENOL"
+  },
+  {
+    "D03AX04": "CALCIUM PANTOTHENATE"
+  },
+  {
+    "D03AX05": "HYALURONIC ACID"
+  },
+  {
+    "D03BA01": "TRYPSIN"
+  },
+  {
+    "D03BA02": "CLOSTRIDIOPEPTIDASE"
+  },
+  {
+    "D03BA52": "CLOSTRIDIOPEPTIDASE, COMBINATIONS"
+  },
+  {
+    "D04AA01": "THONZYLAMINE"
+  },
+  {
+    "D04AA02": "MEPYRAMINE"
+  },
+  {
+    "D04AA03": "THENALIDINE"
+  },
+  {
+    "D04AA04": "TRIPELENNAMINE"
+  },
+  {
+    "D04AA09": "CHLOROPYRAMINE"
+  },
+  {
+    "D04AA10": "PROMETHAZINE"
+  },
+  {
+    "D04AA12": "TOLPROPAMINE"
+  },
+  {
+    "D04AA13": "DIMETINDENE"
+  },
+  {
+    "D04AA14": "CLEMASTINE"
+  },
+  {
+    "D04AA15": "BAMIPINE"
+  },
+  {
+    "D04AA22": "ISOTHIPENDYL"
+  },
+  {
+    "D04AA32": "DIPHENHYDRAMINE"
+  },
+  {
+    "D04AA33": "DIPHENHYDRAMINE METHYLBROMIDE"
+  },
+  {
+    "D04AA34": "CHLORPHENOXAMINE"
+  },
+  {
+    "D04AB01": "LIDOCAINE"
+  },
+  {
+    "D04AB02": "CINCHOCAINE"
+  },
+  {
+    "D04AB03": "OXYBUPROCAINE"
+  },
+  {
+    "D04AB04": "BENZOCAINE"
+  },
+  {
+    "D04AB05": "QUINISOCAINE"
+  },
+  {
+    "D04AB06": "TETRACAINE"
+  },
+  {
+    "D05AC01": "DITHRANOL"
+  },
+  {
+    "D05AC51": "DITHRANOL, COMBINATIONS"
+  },
+  {
+    "D05AD01": "TRIOXYSALEN"
+  },
+  {
+    "D05AD02": "METHOXSALEN"
+  },
+  {
+    "D05AX01": "FUMARIC ACID"
+  },
+  {
+    "D05AX02": "CALCIPOTRIOL"
+  },
+  {
+    "D05AX03": "CALCITRIOL"
+  },
+  {
+    "D05AX04": "TACALCITOL"
+  },
+  {
+    "D05AX05": "TAZAROTENE"
+  },
+  {
+    "D05BA01": "TRIOXYSALEN"
+  },
+  {
+    "D05BA02": "METHOXSALEN"
+  },
+  {
+    "D05BA03": "BERGAPTEN"
+  },
+  {
+    "D05BB01": "ETRETINATE"
+  },
+  {
+    "D05BB02": "ACITRETIN"
+  },
+  {
+    "D05BX51": "FUMARIC ACID DERIVATIVES, COMBINATIONS"
+  },
+  {
+    "D06AA01": "DEMECLOCYCLINE"
+  },
+  {
+    "D06AA02": "CHLORTETRACYCLINE"
+  },
+  {
+    "D06AA03": "OXYTETRACYCLINE"
+  },
+  {
+    "D06AA04": "TETRACYCLINE"
+  },
+  {
+    "D06AX01": "FUSIDIC ACID"
+  },
+  {
+    "D06AX02": "CHLORAMPHENICOL"
+  },
+  {
+    "D06AX04": "NEOMYCIN"
+  },
+  {
+    "D06AX05": "BACITRACIN"
+  },
+  {
+    "D06AX07": "GENTAMICIN"
+  },
+  {
+    "D06AX08": "TYROTHRICIN"
+  },
+  {
+    "D06AX09": "MUPIROCIN"
+  },
+  {
+    "D06AX10": "VIRGINIAMYCIN"
+  },
+  {
+    "D06AX11": "RIFAXIMIN"
+  },
+  {
+    "D06AX12": "AMIKACIN"
+  },
+  {
+    "D06BA01": "SILVER SULFADIAZINE"
+  },
+  {
+    "D06BA02": "SULFATHIAZOLE"
+  },
+  {
+    "D06BA03": "MAFENIDE"
+  },
+  {
+    "D06BA04": "SULFAMETHIZOLE"
+  },
+  {
+    "D06BA51": "SILVER SULFADIAZINE, COMBINATIONS"
+  },
+  {
+    "D06BB01": "IDOXURIDINE"
+  },
+  {
+    "D06BB02": "TROMANTADINE"
+  },
+  {
+    "D06BB03": "ACICLOVIR"
+  },
+  {
+    "D06BB04": "PODOPHYLLOTOXIN"
+  },
+  {
+    "D06BB05": "INOSINE"
+  },
+  {
+    "D06BB06": "PENCICLOVIR"
+  },
+  {
+    "D06BB07": "LYSOZYME"
+  },
+  {
+    "D06BB08": "IBACITABINE"
+  },
+  {
+    "D06BB09": "EDOXUDINE"
+  },
+  {
+    "D06BB10": "IMIQUIMOD"
+  },
+  {
+    "D06BX01": "METRONIDAZOLE"
+  },
+  {
+    "D07AA01": "METHYLPREDNISOLONE"
+  },
+  {
+    "D07AA02": "HYDROCORTISONE"
+  },
+  {
+    "D07AA03": "PREDNISOLONE"
+  },
+  {
+    "D07AB01": "CLOBETASONE"
+  },
+  {
+    "D07AB02": "HYDROCORTISONE BUTYRATE"
+  },
+  {
+    "D07AB03": "FLUMETASONE"
+  },
+  {
+    "D07AB04": "FLUOCORTIN"
+  },
+  {
+    "D07AB05": "FLUPEROLONE"
+  },
+  {
+    "D07AB06": "FLUOROMETHOLONE"
+  },
+  {
+    "D07AB07": "FLUPREDNIDENE"
+  },
+  {
+    "D07AB08": "DESONIDE"
+  },
+  {
+    "D07AB09": "TRIAMCINOLONE"
+  },
+  {
+    "D07AB10": "ALCLOMETASONE"
+  },
+  {
+    "D07AB11": "HYDROCORTISONE BUTEPRATE"
+  },
+  {
+    "D07AB19": "DEXAMETHASONE"
+  },
+  {
+    "D07AB21": "CLOCORTOLONE"
+  },
+  {
+    "D07AB30": "COMBINATIONS OF CORTICOSTEROIDS"
+  },
+  {
+    "D07AC01": "BETAMETHASONE"
+  },
+  {
+    "D07AC02": "FLUCLOROLONE"
+  },
+  {
+    "D07AC03": "DESOXIMETASONE"
+  },
+  {
+    "D07AC04": "FLUOCINOLONE ACETONIDE"
+  },
+  {
+    "D07AC05": "FLUOCORTOLONE"
+  },
+  {
+    "D07AC06": "DIFLUCORTOLONE"
+  },
+  {
+    "D07AC07": "FLUDROXYCORTIDE"
+  },
+  {
+    "D07AC08": "FLUOCINONIDE"
+  },
+  {
+    "D07AC09": "BUDESONIDE"
+  },
+  {
+    "D07AC10": "DIFLORASONE"
+  },
+  {
+    "D07AC11": "AMCINONIDE"
+  },
+  {
+    "D07AC12": "HALOMETASONE"
+  },
+  {
+    "D07AC13": "MOMETASONE"
+  },
+  {
+    "D07AC14": "METHYLPREDNISOLONE ACEPONATE"
+  },
+  {
+    "D07AC15": "BECLOMETASONE"
+  },
+  {
+    "D07AC16": "HYDROCORTISONE ACEPONATE"
+  },
+  {
+    "D07AC17": "FLUTICASONE"
+  },
+  {
+    "D07AC18": "PREDNICARBATE"
+  },
+  {
+    "D07AC19": "DIFLUPREDNATE"
+  },
+  {
+    "D07AC21": "ULOBETASOL"
+  },
+  {
+    "D07AD01": "CLOBETASOL"
+  },
+  {
+    "D07AD02": "HALCINONIDE"
+  },
+  {
+    "D07BA01": "PREDNISOLONE AND ANTISEPTICS"
+  },
+  {
+    "D07BA04": "HYDROCORTISONE AND ANTISEPTICS"
+  },
+  {
+    "D07BB01": "FLUMETASONE AND ANTISEPTICS"
+  },
+  {
+    "D07BB02": "DESONIDE AND ANTISEPTICS"
+  },
+  {
+    "D07BB03": "TRIAMCINOLONE AND ANTISEPTICS"
+  },
+  {
+    "D07BB04": "HYDROCORTISONE BUTYRATE AND ANTISEPTICS"
+  },
+  {
+    "D07BC01": "BETAMETHASONE AND ANTISEPTICS"
+  },
+  {
+    "D07BC02": "FLUOCINOLONE ACETONIDE AND ANTISEPTICS"
+  },
+  {
+    "D07BC03": "FLUOCORTOLONE AND ANTISEPTICS"
+  },
+  {
+    "D07BC04": "DIFLUCORTOLONE AND ANTISEPTICS"
+  },
+  {
+    "D07CA01": "HYDROCORTISONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CA02": "METHYLPREDNISOLONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CA03": "PREDNISOLONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CB01": "TRIAMCINOLONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CB02": "FLUPREDNIDENE AND ANTIBIOTICS"
+  },
+  {
+    "D07CB03": "FLUOROMETHOLONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CB04": "DEXAMETHASONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CB05": "FLUMETASONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CC01": "BETAMETHASONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CC02": "FLUOCINOLONE ACETONIDE AND ANTIBIOTICS"
+  },
+  {
+    "D07CC03": "FLUDROXYCORTIDE AND ANTIBIOTICS"
+  },
+  {
+    "D07CC04": "BECLOMETASONE AND ANTIBIOTICS"
+  },
+  {
+    "D07CC05": "FLUOCINONIDE AND ANTIBIOTICS"
+  },
+  {
+    "D07XA01": "HYDROCORTISONE"
+  },
+  {
+    "D07XA02": "PREDNISOLONE"
+  },
+  {
+    "D07XB01": "FLUMETASONE"
+  },
+  {
+    "D07XB02": "TRIAMCINOLONE"
+  },
+  {
+    "D07XB03": "FLUPREDNIDENE"
+  },
+  {
+    "D07XB04": "FLUOROMETHOLONE"
+  },
+  {
+    "D07XB05": "DEXAMETHASONE"
+  },
+  {
+    "D07XB30": "COMBINATIONS OF CORTICOSTEROIDS"
+  },
+  {
+    "D07XC01": "BETAMETHASONE"
+  },
+  {
+    "D07XC02": "DESOXIMETASONE"
+  },
+  {
+    "D08AA01": "ETHACRIDINE LACTATE"
+  },
+  {
+    "D08AA02": "AMINOACRIDINE"
+  },
+  {
+    "D08AA03": "EUFLAVINE"
+  },
+  {
+    "D08AC01": "DIBROMPROPAMIDINE"
+  },
+  {
+    "D08AC02": "CHLORHEXIDINE"
+  },
+  {
+    "D08AC03": "PROPAMIDINE"
+  },
+  {
+    "D08AC04": "HEXAMIDINE"
+  },
+  {
+    "D08AC05": "POLIHEXANIDE"
+  },
+  {
+    "D08AC52": "CHLORHEXIDINE, COMBINATIONS"
+  },
+  {
+    "D08AE01": "HEXACHLOROPHENE"
+  },
+  {
+    "D08AE02": "POLICRESULEN"
+  },
+  {
+    "D08AE03": "PHENOL"
+  },
+  {
+    "D08AE04": "TRICLOSAN"
+  },
+  {
+    "D08AE05": "CHLOROXYLENOL"
+  },
+  {
+    "D08AF01": "NITROFURAL"
+  },
+  {
+    "D08AG01": "IODINE/OCTYLPHENOXYPOLYGLYCOLETHER"
+  },
+  {
+    "D08AG02": "POVIDONE-IODINE"
+  },
+  {
+    "D08AG03": "IODINE"
+  },
+  {
+    "D08AG04": "DIIODOHYDROXYPROPANE"
+  },
+  {
+    "D08AH01": "DEQUALINIUM"
+  },
+  {
+    "D08AH02": "CHLORQUINALDOL"
+  },
+  {
+    "D08AH03": "OXYQUINOLINE"
+  },
+  {
+    "D08AH30": "CLIOQUINOL"
+  },
+  {
+    "D08AJ01": "BENZALKONIUM"
+  },
+  {
+    "D08AJ02": "CETRIMONIUM"
+  },
+  {
+    "D08AJ03": "CETYLPYRIDINIUM"
+  },
+  {
+    "D08AJ04": "CETRIMIDE"
+  },
+  {
+    "D08AJ05": "BENZOXONIUM CHLORIDE"
+  },
+  {
+    "D08AJ06": "DIDECYLDIMETHYLAMMONIUM CHLORIDE"
+  },
+  {
+    "D08AK01": "MERCURIC AMIDOCHLORIDE"
+  },
+  {
+    "D08AK02": "PHENYLMERCURIC BORATE"
+  },
+  {
+    "D08AK03": "MERCURIC CHLORIDE"
+  },
+  {
+    "D08AK04": "MERCUROCHROME"
+  },
+  {
+    "D08AK05": "MERCURY, METALLIC"
+  },
+  {
+    "D08AK06": "THIOMERSAL"
+  },
+  {
+    "D08AK30": "MERCURIC IODIDE"
+  },
+  {
+    "D08AL01": "SILVER NITRATE"
+  },
+  {
+    "D08AL30": "SILVER"
+  },
+  {
+    "D08AX01": "HYDROGEN PEROXIDE"
+  },
+  {
+    "D08AX02": "EOSIN"
+  },
+  {
+    "D08AX03": "PROPANOL"
+  },
+  {
+    "D08AX04": "TOSYLCHLORAMIDE SODIUM"
+  },
+  {
+    "D08AX05": "ISOPROPANOL"
+  },
+  {
+    "D08AX53": "PROPANOL, COMBINATIONS"
+  },
+  {
+    "D09AA01": "FRAMYCETIN"
+  },
+  {
+    "D09AA02": "FUSIDIC ACID"
+  },
+  {
+    "D09AA03": "NITROFURAL"
+  },
+  {
+    "D09AA04": "PHENYLMERCURIC NITRATE"
+  },
+  {
+    "D09AA05": "BENZODODECINIUM"
+  },
+  {
+    "D09AA06": "TRICLOSAN"
+  },
+  {
+    "D09AA07": "CETYLPYRIDINIUM"
+  },
+  {
+    "D09AA08": "ALUMINIUM CHLOROHYDRATE"
+  },
+  {
+    "D09AA09": "POVIDONE-IODINE"
+  },
+  {
+    "D09AA10": "CLIOQUINOL"
+  },
+  {
+    "D09AA11": "BENZALKONIUM"
+  },
+  {
+    "D09AA12": "CHLORHEXIDINE"
+  },
+  {
+    "D09AB01": "ZINC BANDAGE WITHOUT SUPPLEMENTS"
+  },
+  {
+    "D09AB02": "ZINC BANDAGE WITH SUPPLEMENTS"
+  },
+  {
+    "D10AA01": "FLUOROMETHOLONE"
+  },
+  {
+    "D10AA02": "METHYLPREDNISOLONE"
+  },
+  {
+    "D10AA03": "DEXAMETHASONE"
+  },
+  {
+    "D10AB01": "BITHIONOL"
+  },
+  {
+    "D10AB02": "SULFUR"
+  },
+  {
+    "D10AB03": "TIOXOLONE"
+  },
+  {
+    "D10AB05": "MESULFEN"
+  },
+  {
+    "D10AD01": "TRETINOIN"
+  },
+  {
+    "D10AD02": "RETINOL"
+  },
+  {
+    "D10AD03": "ADAPALENE"
+  },
+  {
+    "D10AD04": "ISOTRETINOIN"
+  },
+  {
+    "D10AD05": "MOTRETINIDE"
+  },
+  {
+    "D10AD51": "TRETINOIN, COMBINATIONS"
+  },
+  {
+    "D10AE01": "BENZOYL PEROXIDE"
+  },
+  {
+    "D10AE51": "BENZOYL PEROXIDE, COMBINATIONS"
+  },
+  {
+    "D10AF01": "CLINDAMYCIN"
+  },
+  {
+    "D10AF02": "ERYTHROMYCIN"
+  },
+  {
+    "D10AF03": "CHLORAMPHENICOL"
+  },
+  {
+    "D10AF04": "MECLOCYCLINE"
+  },
+  {
+    "D10AF52": "ERYTHROMYCIN, COMBINATIONS"
+  },
+  {
+    "D10AX01": "ALUMINIUM CHLORIDE"
+  },
+  {
+    "D10AX02": "RESORCINOL"
+  },
+  {
+    "D10AX03": "AZELAIC ACID"
+  },
+  {
+    "D10AX04": "ALUMINIUM OXIDE"
+  },
+  {
+    "D10AX30": "VARIOUS COMBINATIONS"
+  },
+  {
+    "D10BA01": "ISOTRETINOIN"
+  },
+  {
+    "D10BX01": "ICHTAMMOL"
+  },
+  {
+    "D11AC01": "CETRIMIDE"
+  },
+  {
+    "D11AC02": "CADMIUM COMPOUNDS"
+  },
+  {
+    "D11AC03": "SELENIUM COMPOUNDS"
+  },
+  {
+    "D11AC06": "POVIDONE-IODINE"
+  },
+  {
+    "D11AC08": "SULFUR COMPOUNDS"
+  },
+  {
+    "D11AC09": "XENYSALATE"
+  },
+  {
+    "D11AC30": "OTHERS"
+  },
+  {
+    "D11AE01": "METANDIENONE"
+  },
+  {
+    "D11AX01": "MINOXIDIL"
+  },
+  {
+    "D11AX02": "GAMOLENIC ACID"
+  },
+  {
+    "D11AX03": "CALCIUM GLUCONATE"
+  },
+  {
+    "D11AX04": "LITHIUM SUCCINATE"
+  },
+  {
+    "D11AX05": "MAGNESIUM SULFATE"
+  },
+  {
+    "D11AX06": "MEQUINOL"
+  },
+  {
+    "D11AX08": "TIRATRICOL"
+  },
+  {
+    "D11AX09": "OXACEPROL"
+  },
+  {
+    "D11AX52": "GAMOLENIC ACID, COMBINATIONS"
+  },
+  {
+    "D11AX57": "COLLAGEN, COMBINATIONS"
+  },
+  {
+    "G01AA01": "NYSTATIN"
+  },
+  {
+    "G01AA02": "NATAMYCIN"
+  },
+  {
+    "G01AA03": "AMPHOTERICIN"
+  },
+  {
+    "G01AA04": "CANDICIDIN"
+  },
+  {
+    "G01AA05": "CHLORAMPHENICOL"
+  },
+  {
+    "G01AA06": "HACHIMYCIN"
+  },
+  {
+    "G01AA07": "OXYTETRACYCLINE"
+  },
+  {
+    "G01AA08": "CARFECILLIN"
+  },
+  {
+    "G01AA09": "MEPARTRICIN"
+  },
+  {
+    "G01AA10": "CLINDAMYCIN"
+  },
+  {
+    "G01AA11": "PENTAMYCIN"
+  },
+  {
+    "G01AA51": "NYSTATIN, COMBINATIONS"
+  },
+  {
+    "G01AB01": "ACETARSOL"
+  },
+  {
+    "G01AC01": "DIIODOHYDROXYQUINOLINE"
+  },
+  {
+    "G01AC02": "CLIOQUINOL"
+  },
+  {
+    "G01AC03": "CHLORQUINALDOL"
+  },
+  {
+    "G01AC05": "DEQUALINIUM"
+  },
+  {
+    "G01AC06": "BROXYQUINOLINE"
+  },
+  {
+    "G01AC30": "OXYQUINOLINE"
+  },
+  {
+    "G01AD01": "LACTIC ACID"
+  },
+  {
+    "G01AD02": "ACETIC ACID"
+  },
+  {
+    "G01AE01": "SULFATOLAMIDE"
+  },
+  {
+    "G01AE10": "COMBINATIONS OF SULFONAMIDES"
+  },
+  {
+    "G01AF01": "METRONIDAZOLE"
+  },
+  {
+    "G01AF02": "CLOTRIMAZOLE"
+  },
+  {
+    "G01AF04": "MICONAZOLE"
+  },
+  {
+    "G01AF05": "ECONAZOLE"
+  },
+  {
+    "G01AF06": "ORNIDAZOLE"
+  },
+  {
+    "G01AF07": "ISOCONAZOLE"
+  },
+  {
+    "G01AF08": "TIOCONAZOLE"
+  },
+  {
+    "G01AF11": "KETOCONAZOLE"
+  },
+  {
+    "G01AF12": "FENTICONAZOLE"
+  },
+  {
+    "G01AF13": "AZANIDAZOLE"
+  },
+  {
+    "G01AF14": "PROPENIDAZOLE"
+  },
+  {
+    "G01AF15": "BUTOCONAZOLE"
+  },
+  {
+    "G01AF16": "OMOCONAZOLE"
+  },
+  {
+    "G01AF17": "OXICONAZOLE"
+  },
+  {
+    "G01AF20": "COMBINATIONS OF IMIDAZOLE DERIVATIVES"
+  },
+  {
+    "G01AG02": "TERCONAZOLE"
+  },
+  {
+    "G01AX01": "CLODANTOIN"
+  },
+  {
+    "G01AX02": "INOSINE"
+  },
+  {
+    "G01AX03": "POLICRESULEN"
+  },
+  {
+    "G01AX05": "NIFURATEL"
+  },
+  {
+    "G01AX06": "FURAZOLIDONE"
+  },
+  {
+    "G01AX09": "METHYLROSANILINE"
+  },
+  {
+    "G01AX11": "POVIDONE-IODINE"
+  },
+  {
+    "G01AX12": "CICLOPIROX"
+  },
+  {
+    "G01AX13": "PROTIOFATE"
+  },
+  {
+    "G01AX14": "LACTOBACILLUS FERMENTUM"
+  },
+  {
+    "G01AX15": "COPPER USNATE"
+  },
+  {
+    "G02AB01": "METHYLERGOMETRINE"
+  },
+  {
+    "G02AB02": "ERGOT ALKALOIDS"
+  },
+  {
+    "G02AB03": "ERGOMETRINE"
+  },
+  {
+    "G02AC01": "METHYLERGOMETRINE AND OXYTOCIN"
+  },
+  {
+    "G02AD01": "DINOPROST"
+  },
+  {
+    "G02AD02": "DINOPROSTONE"
+  },
+  {
+    "G02AD03": "GEMEPROST"
+  },
+  {
+    "G02AD04": "CARBOPROST"
+  },
+  {
+    "G02AD05": "SULPROSTONE"
+  },
+  {
+    "G02BA01": "PLASTIC IUD"
+  },
+  {
+    "G02BA02": "PLASTIC IUD WITH COPPER"
+  },
+  {
+    "G02BA03": "PLASTIC IUD WITH PROGESTOGENS"
+  },
+  {
+    "G02CA01": "RITODRINE"
+  },
+  {
+    "G02CA02": "BUPHENINE"
+  },
+  {
+    "G02CA03": "FENOTEROL"
+  },
+  {
+    "G02CB01": "BROMOCRIPTINE"
+  },
+  {
+    "G02CB02": "LISURIDE"
+  },
+  {
+    "G02CB03": "CABERGOLINE"
+  },
+  {
+    "G02CB04": "QUINAGOLIDE"
+  },
+  {
+    "G02CB05": "METERGOLINE"
+  },
+  {
+    "G02CC01": "IBUPROFEN"
+  },
+  {
+    "G02CC02": "NAPROXEN"
+  },
+  {
+    "G02CC03": "BENZYDAMINE"
+  },
+  {
+    "G02CC04": "FLUNOXAPROFEN"
+  },
+  {
+    "G03AA01": "ETYNODIOL AND ESTROGEN"
+  },
+  {
+    "G03AA02": "QUINGESTANOL AND ESTROGEN"
+  },
+  {
+    "G03AA03": "LYNESTRENOL AND ESTROGEN"
+  },
+  {
+    "G03AA04": "MEGESTROL AND ESTROGEN"
+  },
+  {
+    "G03AA05": "NORETHISTERONE AND ESTROGEN"
+  },
+  {
+    "G03AA06": "NORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03AA07": "LEVONORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03AA08": "MEDROXYPROGESTERONE AND ESTROGEN"
+  },
+  {
+    "G03AA09": "DESOGESTREL AND ESTROGEN"
+  },
+  {
+    "G03AA10": "GESTODENE AND ESTROGEN"
+  },
+  {
+    "G03AA11": "NORGESTIMATE AND ESTROGEN"
+  },
+  {
+    "G03AB01": "MEGESTROL AND ESTROGEN"
+  },
+  {
+    "G03AB02": "LYNESTRENOL AND ESTROGEN"
+  },
+  {
+    "G03AB03": "LEVONORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03AB04": "NORETHISTERONE AND ESTROGEN"
+  },
+  {
+    "G03AB05": "DESOGESTREL AND ESTROGEN"
+  },
+  {
+    "G03AB06": "GESTODENE AND ESTROGEN"
+  },
+  {
+    "G03AB07": "CHLORMADINONE AND ESTROGEN"
+  },
+  {
+    "G03AC01": "NORETHISTERONE"
+  },
+  {
+    "G03AC02": "LYNESTRENOL"
+  },
+  {
+    "G03AC03": "LEVONORGESTREL"
+  },
+  {
+    "G03AC04": "QUINGESTANOL"
+  },
+  {
+    "G03AC05": "MEGESTROL"
+  },
+  {
+    "G03AC06": "MEDROXYPROGESTERONE"
+  },
+  {
+    "G03AC07": "NORGESTRIENONE"
+  },
+  {
+    "G03AC08": "ETONOGESTREL"
+  },
+  {
+    "G03AC09": "DESOGESTREL"
+  },
+  {
+    "G03BA01": "FLUOXYMESTERONE"
+  },
+  {
+    "G03BA02": "METHYLTESTOSTERONE"
+  },
+  {
+    "G03BA03": "TESTOSTERONE"
+  },
+  {
+    "G03BA03": "TESTOSTERONE"
+  },
+  {
+    "G03BA03": "TESTOSTERONE"
+  },
+  {
+    "G03BB01": "MESTEROLONE"
+  },
+  {
+    "G03CA01": "ETHINYLESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL"
+  },
+  {
+    "G03CA03": "ESTRADIOL1"
+  },
+  {
+    "G03CA04": "ESTRIOL"
+  },
+  {
+    "G03CA04": "ESTRIOL"
+  },
+  {
+    "G03CA06": "CHLOROTRIANISENE"
+  },
+  {
+    "G03CA07": "ESTRONE"
+  },
+  {
+    "G03CA09": "PROMESTRIENE"
+  },
+  {
+    "G03CA53": "ESTRADIOL, COMBINATIONS"
+  },
+  {
+    "G03CA57": "CONJUGATED ESTROGENS"
+  },
+  {
+    "G03CB01": "DIENESTROL"
+  },
+  {
+    "G03CB01": "DIENESTROL"
+  },
+  {
+    "G03CB01": "DIENESTROL"
+  },
+  {
+    "G03CB02": "DIETHYLSTILBESTROL"
+  },
+  {
+    "G03CB03": "METHALLENESTRIL"
+  },
+  {
+    "G03CB04": "MOXESTROL"
+  },
+  {
+    "G03CC02": "DIENESTROL"
+  },
+  {
+    "G03CC03": "METHALLENESTRIL"
+  },
+  {
+    "G03CC04": "ESTRONE"
+  },
+  {
+    "G03CC05": "DIETHYLSTILBESTROL"
+  },
+  {
+    "G03DA01": "GESTONORONE"
+  },
+  {
+    "G03DA02": "MEDROXYPROGESTERONE"
+  },
+  {
+    "G03DA02": "MEDROXYPROGESTERONE"
+  },
+  {
+    "G03DA03": "HYDROXYPROGESTERONE"
+  },
+  {
+    "G03DA04": "PROGESTERONE"
+  },
+  {
+    "G03DA04": "PROGESTERONE"
+  },
+  {
+    "G03DA04": "PROGESTERONE"
+  },
+  {
+    "G03DA04": "PROGESTERONE"
+  },
+  {
+    "G03DB01": "DYDROGESTERONE"
+  },
+  {
+    "G03DB02": "MEGESTROL"
+  },
+  {
+    "G03DB03": "MEDROGESTONE"
+  },
+  {
+    "G03DB04": "NOMEGESTROL"
+  },
+  {
+    "G03DB05": "DEMEGESTONE"
+  },
+  {
+    "G03DB06": "CHLORMADINONE"
+  },
+  {
+    "G03DB07": "PROMEGESTONE"
+  },
+  {
+    "G03DC01": "ALLYLESTRENOL"
+  },
+  {
+    "G03DC02": "NORETHISTERONE"
+  },
+  {
+    "G03DC03": "LYNESTRENOL"
+  },
+  {
+    "G03DC04": "ETHISTERONE"
+  },
+  {
+    "G03DC05": "TIBOLONE"
+  },
+  {
+    "G03DC06": "ETYNODIOL"
+  },
+  {
+    "G03DC31": "METHYLESTRENOLONE"
+  },
+  {
+    "G03EA01": "METHYLTESTOSTERONE AND ESTROGEN"
+  },
+  {
+    "G03EA02": "TESTOSTERONE AND ESTROGEN"
+  },
+  {
+    "G03EA03": "PRASTERONE AND ESTROGEN"
+  },
+  {
+    "G03EK01": "METHYLTESTOSTERONE"
+  },
+  {
+    "G03FA01": "NORETHISTERONE AND ESTROGEN"
+  },
+  {
+    "G03FA02": "HYDROXYPROGESTERONE AND ESTROGEN"
+  },
+  {
+    "G03FA03": "ETHISTERONE AND ESTROGEN"
+  },
+  {
+    "G03FA04": "PROGESTERONE AND ESTROGEN"
+  },
+  {
+    "G03FA05": "METHYLNORTESTOSTERONE AND ESTROGEN"
+  },
+  {
+    "G03FA06": "ETYNODIOL AND ESTROGEN"
+  },
+  {
+    "G03FA07": "LYNESTRENOL AND ESTROGEN"
+  },
+  {
+    "G03FA08": "MEGESTROL AND ESTROGEN"
+  },
+  {
+    "G03FA09": "NORETYNODREL AND ESTROGEN"
+  },
+  {
+    "G03FA10": "NORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03FA11": "LEVONORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03FA12": "MEDROXYPROGESTERONE AND ESTROGEN"
+  },
+  {
+    "G03FB01": "NORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03FB02": "LYNESTRENOL AND ESTROGEN"
+  },
+  {
+    "G03FB03": "CHLORMADINONE AND ESTROGEN"
+  },
+  {
+    "G03FB04": "MEGESTROL AND ESTROGEN"
+  },
+  {
+    "G03FB05": "NORETHISTERONE AND ESTROGEN"
+  },
+  {
+    "G03FB06": "MEDROXYPROGESTERONE AND ESTROGEN"
+  },
+  {
+    "G03FB07": "MEDROGESTONE AND ESTROGEN"
+  },
+  {
+    "G03FB08": "DYDROGESTERONE AND ESTROGEN"
+  },
+  {
+    "G03FB09": "LEVONORGESTREL AND ESTROGEN"
+  },
+  {
+    "G03FB10": "DESOGESTREL AND ESTROGEN"
+  },
+  {
+    "G03GA01": "CHORIONIC GONADOTROPIN"
+  },
+  {
+    "G03GA02": "HUMAN MENOPAUSAL GONADOTROPIN"
+  },
+  {
+    "G03GA03": "SERUM GONADOTROPIN"
+  },
+  {
+    "G03GA04": "UROFOLLITROPIN"
+  },
+  {
+    "G03GA05": "FOLLITROPIN ALFA"
+  },
+  {
+    "G03GA06": "FOLLITROPIN BETA"
+  },
+  {
+    "G03GB01": "CYCLOFENIL"
+  },
+  {
+    "G03GB02": "CLOMIFENE"
+  },
+  {
+    "G03GB03": "EPIMESTROL"
+  },
+  {
+    "G03HA01": "CYPROTERONE"
+  },
+  {
+    "G03HB01": "CYPROTERONE AND ESTROGEN"
+  },
+  {
+    "G03XA01": "DANAZOL"
+  },
+  {
+    "G03XA02": "GESTRINONE"
+  },
+  {
+    "G03XB01": "MIFEPRISTONE"
+  },
+  {
+    "G04AA01": "METHENAMINE"
+  },
+  {
+    "G04AA01": "METHENAMINE"
+  },
+  {
+    "G04AB01": "NALIDIXIC ACID"
+  },
+  {
+    "G04AB02": "PIROMIDIC ACID"
+  },
+  {
+    "G04AB03": "PIPEMIDIC ACID"
+  },
+  {
+    "G04AB04": "OXOLINIC ACID"
+  },
+  {
+    "G04AB05": "CINOXACIN"
+  },
+  {
+    "G04AB06": "FLUMEQUINE"
+  },
+  {
+    "G04AC01": "NITROFURANTOIN"
+  },
+  {
+    "G04AC02": "NIFURTOINOL"
+  },
+  {
+    "G04AD01": "PHENYL SALICYLATE"
+  },
+  {
+    "G04AG05": "MANDELIC ACID"
+  },
+  {
+    "G04AG06": "NITROXOLINE"
+  },
+  {
+    "G04AH01": "METHENAMINE AND SULFONAMIDES"
+  },
+  {
+    "G04AH02": "PHENAZOPYRIDINE AND SULFONAMIDES"
+  },
+  {
+    "G04BA01": "AMMONIUM CHLORIDE"
+  },
+  {
+    "G04BA03": "CALCIUM CHLORIDE"
+  },
+  {
+    "G04BD01": "EMEPRONIUM"
+  },
+  {
+    "G04BD01": "EMEPRONIUM"
+  },
+  {
+    "G04BD02": "FLAVOXATE"
+  },
+  {
+    "G04BD03": "MELADRAZINE"
+  },
+  {
+    "G04BD04": "OXYBUTYNIN"
+  },
+  {
+    "G04BD05": "TERODILINE"
+  },
+  {
+    "G04BD06": "PROPIVERINE"
+  },
+  {
+    "G04BD07": "TOLTERODINE"
+  },
+  {
+    "G04BE01": "ALPROSTADIL"
+  },
+  {
+    "G04BE02": "PAPAVERINE"
+  },
+  {
+    "G04BE03": "SILDENAFIL"
+  },
+  {
+    "G04BE04": "YOHIMBIN"
+  },
+  {
+    "G04BE05": "PHENTOLAMINE"
+  },
+  {
+    "G04BE52": "PAPAVERINE, COMBINATIONS"
+  },
+  {
+    "G04BX01": "MAGNESIUM HYDROXIDE"
+  },
+  {
+    "G04BX03": "ACETOHYDROXAMIC ACID"
+  },
+  {
+    "G04BX06": "PHENAZOPYRIDINE"
+  },
+  {
+    "G04BX10": "SUCCINIMIDE"
+  },
+  {
+    "G04BX11": "COLLAGEN"
+  },
+  {
+    "G04CA01": "ALFUZOSIN"
+  },
+  {
+    "G04CA02": "TAMSULOSIN"
+  },
+  {
+    "G04CA03": "TERAZOSIN"
+  },
+  {
+    "G04CB01": "FINASTERIDE"
+  },
+  {
+    "G04CX01": "PYGEUM AFRICANUM"
+  },
+  {
+    "G04CX02": "SERENOA REPENS"
+  },
+  {
+    "G04CX03": "MEPARTRICIN"
+  },
+  {
+    "H01AA01": "CORTICOTROPIN"
+  },
+  {
+    "H01AA02": "TETRACOSACTIDE"
+  },
+  {
+    "H01AB01": "THYROTROPIN"
+  },
+  {
+    "H01AC01": "SOMATROPIN"
+  },
+  {
+    "H01AC02": "SOMATREM"
+  },
+  {
+    "H01AC03": "MECASERMIN"
+  },
+  {
+    "H01AC04": "SERMORELIN"
+  },
+  {
+    "H01BA01": "VASOPRESSIN"
+  },
+  {
+    "H01BA02": "DESMOPRESSIN"
+  },
+  {
+    "H01BA02": "DESMOPRESSIN"
+  },
+  {
+    "H01BA02": "DESMOPRESSIN"
+  },
+  {
+    "H01BA03": "LYPRESSIN"
+  },
+  {
+    "H01BA04": "TERLIPRESSIN"
+  },
+  {
+    "H01BA05": "ORNIPRESSIN"
+  },
+  {
+    "H01BA06": "ARGIPRESSIN"
+  },
+  {
+    "H01BB01": "DEMOXYTOCIN"
+  },
+  {
+    "H01BB02": "OXYTOCIN"
+  },
+  {
+    "H01BB02": "OXYTOCIN"
+  },
+  {
+    "H01CA01": "GONADORELIN"
+  },
+  {
+    "H01CA02": "NAFARELIN"
+  },
+  {
+    "H01CA03": "HISTRELIN"
+  },
+  {
+    "H01CB01": "SOMATOSTATIN"
+  },
+  {
+    "H01CB02": "OCTREOTIDE"
+  },
+  {
+    "H01CB03": "LANREOTIDE"
+  },
+  {
+    "H02AA01": "ALDOSTERONE"
+  },
+  {
+    "H02AA02": "FLUDROCORTISONE"
+  },
+  {
+    "H02AA03": "DESOXYCORTONE"
+  },
+  {
+    "H02AB01": "BETAMETHASONE"
+  },
+  {
+    "H02AB01": "BETAMETHASONE"
+  },
+  {
+    "H02AB02": "DEXAMETHASONE"
+  },
+  {
+    "H02AB03": "FLUOCORTOLONE"
+  },
+  {
+    "H02AB04": "METHYLPREDNISOLONE"
+  },
+  {
+    "H02AB04": "METHYLPREDNISOLONE"
+  },
+  {
+    "H02AB05": "PARAMETHASONE"
+  },
+  {
+    "H02AB06": "PREDNISOLONE"
+  },
+  {
+    "H02AB07": "PREDNISONE"
+  },
+  {
+    "H02AB08": "TRIAMCINOLONE"
+  },
+  {
+    "H02AB09": "HYDROCORTISONE"
+  },
+  {
+    "H02AB10": "CORTISONE"
+  },
+  {
+    "H02AB11": "PREDNYLIDENE"
+  },
+  {
+    "H02AB12": "RIMEXOLONE"
+  },
+  {
+    "H02AB13": "DEFLAZACORT"
+  },
+  {
+    "H02AB14": "CLOPREDNOL"
+  },
+  {
+    "H02AB15": "MEPREDNISONE"
+  },
+  {
+    "H02AB16": "BUDESONIDE"
+  },
+  {
+    "H02AB17": "CORTIVAZOL"
+  },
+  {
+    "H02BX01": "METHYLPREDNISOLONE, COMBINATIONS"
+  },
+  {
+    "H02CA01": "TRILOSTANE"
+  },
+  {
+    "H03AA01": "LEVOTHYROXINE SODIUM"
+  },
+  {
+    "H03AA02": "LIOTHYRONINE SODIUM"
+  },
+  {
+    "H03AA03": "COMBINATIONS OF LEVOTHYROXINE AND LIOTHYRONINE"
+  },
+  {
+    "H03AA04": "TIRATRICOL"
+  },
+  {
+    "H03AA05": "THYROID GLAND PREPARATIONS"
+  },
+  {
+    "H03BA01": "METHYLTHIOURACIL"
+  },
+  {
+    "H03BA02": "PROPYLTHIOURACIL"
+  },
+  {
+    "H03BA03": "BENZYLTHIOURACIL"
+  },
+  {
+    "H03BB01": "CARBIMAZOLE"
+  },
+  {
+    "H03BB02": "THIAMAZOLE"
+  },
+  {
+    "H03BB52": "THIAMAZOLE, COMBINATIONS"
+  },
+  {
+    "H03BC01": "POTASSIUM PERCHLORATE"
+  },
+  {
+    "H03BX01": "DIIODOTYROSINE"
+  },
+  {
+    "H03BX02": "DIBROMOTYROSINE"
+  },
+  {
+    "H04AA01": "GLUCAGON"
+  },
+  {
+    "H05AA01": "PARATHYROID GLAND EXTRACT"
+  },
+  {
+    "H05BA01": "CALCITONIN (SALMON SYNTHETIC)"
+  },
+  {
+    "H05BA01": "CALCITONIN (SALMON SYNTHETIC)"
+  },
+  {
+    "H05BA02": "CALCITONIN (PORK NATURAL)"
+  },
+  {
+    "H05BA03": "CALCITONIN (HUMAN SYNTHETIC)"
+  },
+  {
+    "H05BA04": "ELCATONIN"
+  },
+  {
+    "J01AA01": "DEMECLOCYCLINE"
+  },
+  {
+    "J01AA02": "DOXYCYCLINE"
+  },
+  {
+    "J01AA03": "CHLORTETRACYCLINE"
+  },
+  {
+    "J01AA04": "LYMECYCLINE"
+  },
+  {
+    "J01AA05": "METACYCLINE"
+  },
+  {
+    "J01AA06": "OXYTETRACYCLINE"
+  },
+  {
+    "J01AA07": "TETRACYCLINE"
+  },
+  {
+    "J01AA08": "MINOCYCLINE"
+  },
+  {
+    "J01AA09": "ROLITETRACYCLINE"
+  },
+  {
+    "J01AA10": "PENIMEPICYCLINE"
+  },
+  {
+    "J01AA11": "CLOMOCYCLINE"
+  },
+  {
+    "J01AA20": "COMBINATIONS OF TETRACYCLINES"
+  },
+  {
+    "J01AA56": "OXYTETRACYCLINE, COMBINATIONS"
+  },
+  {
+    "J01BA01": "CHLORAMPHENICOL"
+  },
+  {
+    "J01BA02": "THIAMPHENICOL"
+  },
+  {
+    "J01CA01": "AMPICILLIN"
+  },
+  {
+    "J01CA02": "PIVAMPICILLIN"
+  },
+  {
+    "J01CA03": "CARBENICILLIN"
+  },
+  {
+    "J01CA04": "AMOXICILLIN"
+  },
+  {
+    "J01CA05": "CARINDACILLIN"
+  },
+  {
+    "J01CA06": "BACAMPICILLIN"
+  },
+  {
+    "J01CA07": "EPICILLIN"
+  },
+  {
+    "J01CA08": "PIVMECILLINAM"
+  },
+  {
+    "J01CA09": "AZLOCILLIN"
+  },
+  {
+    "J01CA10": "MEZLOCILLIN"
+  },
+  {
+    "J01CA11": "MECILLINAM"
+  },
+  {
+    "J01CA12": "PIPERACILLIN"
+  },
+  {
+    "J01CA13": "TICARCILLIN"
+  },
+  {
+    "J01CA14": "METAMPICILLIN"
+  },
+  {
+    "J01CA15": "TALAMPICILLIN"
+  },
+  {
+    "J01CA16": "SULBENICILLIN"
+  },
+  {
+    "J01CA17": "TEMOCILLIN"
+  },
+  {
+    "J01CA18": "HETACILLIN"
+  },
+  {
+    "J01CA20": "PENICILLIN, EXTENDED SPECTURM, COMBINATIONS"
+  },
+  {
+    "J01CA51": "AMPICILLIN, COMBINATIONS"
+  },
+  {
+    "J01CE01": "BENZYLPENICILLIN"
+  },
+  {
+    "J01CE02": "PHENOXYMETHYLPENICILLIN"
+  },
+  {
+    "J01CE03": "PROPICILLIN"
+  },
+  {
+    "J01CE04": "AZIDOCILLIN"
+  },
+  {
+    "J01CE05": "PHENETICILLIN"
+  },
+  {
+    "J01CE06": "PENAMECILLIN"
+  },
+  {
+    "J01CE07": "CLOMETOCILLIN"
+  },
+  {
+    "J01CE08": "BENZATHINE BENZYLPENICILLIN"
+  },
+  {
+    "J01CE09": "PROCAINE PENICILLIN"
+  },
+  {
+    "J01CE10": "BENZATHINE PHENOXYMETHYLPENICILLIN"
+  },
+  {
+    "J01CE30": "PENICILLINS, BETA LACTAMASE SENSITIVE, COMBINATIONS"
+  },
+  {
+    "J01CF01": "DICLOXACILLIN"
+  },
+  {
+    "J01CF02": "CLOXACILLIN"
+  },
+  {
+    "J01CF03": "METHICILLIN"
+  },
+  {
+    "J01CF04": "OXACILLIN"
+  },
+  {
+    "J01CF05": "FLUCLOXACILLIN"
+  },
+  {
+    "J01CG01": "SULBACTAM"
+  },
+  {
+    "J01CG02": "TAZOBACTAM"
+  },
+  {
+    "J01CR01": "AMPICILLIN AND ENZYME INHIBITOR"
+  },
+  {
+    "J01CR02": "AMOXICILLIN AND ENZYME INHIBITOR"
+  },
+  {
+    "J01CR03": "TICARCILLIN AND ENZYME INHIBITOR"
+  },
+  {
+    "J01CR04": "SULTAMICILLIN"
+  },
+  {
+    "J01CR05": "PIPERACILLIN AND ENZYME INHIBITOR"
+  },
+  {
+    "J01CR50": "PENICILLIN COMBINATIONS, INCL. BETA-LACTAMASE INHIBITORS"
+  },
+  {
+    "J01DA01": "CEFALEXIN"
+  },
+  {
+    "J01DA02": "CEFALORIDINE"
+  },
+  {
+    "J01DA03": "CEFALOTIN"
+  },
+  {
+    "J01DA04": "CEFAZOLIN"
+  },
+  {
+    "J01DA05": "CEFOXITIN"
+  },
+  {
+    "J01DA06": "CEFUROXIME"
+  },
+  {
+    "J01DA06": "CEFUROXIME"
+  },
+  {
+    "J01DA07": "CEFAMANDOLE"
+  },
+  {
+    "J01DA08": "CEFACLOR"
+  },
+  {
+    "J01DA09": "CEFADROXIL"
+  },
+  {
+    "J01DA10": "CEFOTAXIME"
+  },
+  {
+    "J01DA11": "CEFTAZIDIME"
+  },
+  {
+    "J01DA12": "CEFSULODIN"
+  },
+  {
+    "J01DA13": "CEFTRIAXONE"
+  },
+  {
+    "J01DA14": "CEFOTETAN"
+  },
+  {
+    "J01DA15": "CEFAZEDONE"
+  },
+  {
+    "J01DA16": "CEFMENOXIME"
+  },
+  {
+    "J01DA17": "CEFONICIDE"
+  },
+  {
+    "J01DA18": "LATAMOXEF"
+  },
+  {
+    "J01DA19": "CEFOTIAM"
+  },
+  {
+    "J01DA21": "CEFATRIZINE"
+  },
+  {
+    "J01DA22": "CEFTIZOXIME"
+  },
+  {
+    "J01DA23": "CEFIXIME"
+  },
+  {
+    "J01DA24": "CEFEPIME"
+  },
+  {
+    "J01DA25": "CEFODIZIME"
+  },
+  {
+    "J01DA26": "CEFETAMET"
+  },
+  {
+    "J01DA27": "CEFPIRAMIDE"
+  },
+  {
+    "J01DA30": "CEFAPIRIN"
+  },
+  {
+    "J01DA31": "CEFRADINE"
+  },
+  {
+    "J01DA32": "CEFOPERAZONE"
+  },
+  {
+    "J01DA33": "CEFPODOXIME"
+  },
+  {
+    "J01DA34": "CEFACETRILE"
+  },
+  {
+    "J01DA35": "CEFROXADINE"
+  },
+  {
+    "J01DA36": "CEFTEZOLE"
+  },
+  {
+    "J01DA37": "CEFPIROME"
+  },
+  {
+    "J01DA38": "LORACARBEF"
+  },
+  {
+    "J01DA39": "CEFTIBUTEN"
+  },
+  {
+    "J01DA40": "CEFMETAZOLE"
+  },
+  {
+    "J01DA41": "CEFPROZIL"
+  },
+  {
+    "J01DA42": "CEFDINIR"
+  },
+  {
+    "J01DA63": "CEFTRIAXONE, COMBINATIONS"
+  },
+  {
+    "J01DF01": "AZTREONAM"
+  },
+  {
+    "J01DH02": "MEROPENEM"
+  },
+  {
+    "J01DH51": "IMIPENEM AND ENZYME INHIBITOR"
+  },
+  {
+    "J01EA01": "TRIMETHOPRIM"
+  },
+  {
+    "J01EA02": "BRODIMOPRIM"
+  },
+  {
+    "J01EB01": "SULFAISODIMIDINE"
+  },
+  {
+    "J01EB02": "SULFAMETHIZOLE"
+  },
+  {
+    "J01EB03": "SULFADIMIDINE"
+  },
+  {
+    "J01EB04": "SULFAPYRIDINE"
+  },
+  {
+    "J01EB05": "SULFAFURAZOLE"
+  },
+  {
+    "J01EB06": "SULFANILAMIDE"
+  },
+  {
+    "J01EB07": "SULFATHIAZOLE"
+  },
+  {
+    "J01EB08": "SULFATHIOUREA"
+  },
+  {
+    "J01EB20": "SHORT-ACTING SULFONAMIDES COMBINATIONS"
+  },
+  {
+    "J01EC01": "SULFAMETHOXAZOLE"
+  },
+  {
+    "J01EC02": "SULFADIAZINE"
+  },
+  {
+    "J01EC03": "SULFAMOXOLE"
+  },
+  {
+    "J01EC20": "INTERMEDIATE-ACTING SULFONAMIDES COMBINATIONS"
+  },
+  {
+    "J01ED01": "SULFADIMETHOXINE"
+  },
+  {
+    "J01ED02": "SULFALENE"
+  },
+  {
+    "J01ED03": "SULFAMETOMIDINE"
+  },
+  {
+    "J01ED04": "SULFAMETOXYDIAZINE"
+  },
+  {
+    "J01ED05": "SULFAMETHOXYPYRIDAZINE"
+  },
+  {
+    "J01ED06": "SULFAPERIN"
+  },
+  {
+    "J01ED07": "SULFAMERAZINE"
+  },
+  {
+    "J01ED08": "SULFAPHENAZOLE"
+  },
+  {
+    "J01ED09": "SULFAMAZON"
+  },
+  {
+    "J01ED20": "LONG-ACTING SULFONAMIDES COMBINATIONS"
+  },
+  {
+    "J01EE01": "SULFAMETHOXAZOLE AND TRIMETHOPRIM"
+  },
+  {
+    "J01EE02": "SULFADIAZINE AND TRIMETHOPRIM"
+  },
+  {
+    "J01EE03": "SULFAMETROLE AND TRIMETHOPRIM"
+  },
+  {
+    "J01EE04": "SULFAMOXOLE AND TRIMETHOPRIM"
+  },
+  {
+    "J01EE05": "SULFADIMIDINE AND TRIMETHOPRIM"
+  },
+  {
+    "J01FA01": "ERYTHROMYCIN"
+  },
+  {
+    "J01FA01": "ERYTHROMYCIN"
+  },
+  {
+    "J01FA02": "SPIRAMYCIN"
+  },
+  {
+    "J01FA03": "MIDECAMYCIN"
+  },
+  {
+    "J01FA04": "PRISTINAMYCIN"
+  },
+  {
+    "J01FA05": "OLEANDOMYCIN"
+  },
+  {
+    "J01FA06": "ROXITHROMYCIN"
+  },
+  {
+    "J01FA07": "JOSAMYCIN"
+  },
+  {
+    "J01FA08": "TROLEANDOMYCIN"
+  },
+  {
+    "J01FA09": "CLARITHROMYCIN"
+  },
+  {
+    "J01FA10": "AZITHROMYCIN"
+  },
+  {
+    "J01FA11": "MIOCAMYCIN"
+  },
+  {
+    "J01FA12": "ROKITAMYCIN"
+  },
+  {
+    "J01FA13": "DIRITHROMYCIN"
+  },
+  {
+    "J01FF01": "CLINDAMYCIN"
+  },
+  {
+    "J01FF01": "CLINDAMYCIN"
+  },
+  {
+    "J01FF02": "LINCOMYCIN"
+  },
+  {
+    "J01GA01": "STREPTOMYCIN"
+  },
+  {
+    "J01GA02": "STREPTODUOCIN"
+  },
+  {
+    "J01GB01": "TOBRAMYCIN"
+  },
+  {
+    "J01GB03": "GENTAMICIN"
+  },
+  {
+    "J01GB04": "KANAMYCIN"
+  },
+  {
+    "J01GB05": "NEOMYCIN"
+  },
+  {
+    "J01GB06": "AMIKACIN"
+  },
+  {
+    "J01GB07": "NETILMICIN"
+  },
+  {
+    "J01GB08": "SISOMICIN"
+  },
+  {
+    "J01GB09": "DIBEKACIN"
+  },
+  {
+    "J01GB10": "RIBOSTAMYCIN"
+  },
+  {
+    "J01GB11": "ISEPAMICIN"
+  },
+  {
+    "J01MA01": "OFLOXACIN"
+  },
+  {
+    "J01MA02": "CIPROFLOXACIN"
+  },
+  {
+    "J01MA02": "CIPROFLOXACIN"
+  },
+  {
+    "J01MA03": "PEFLOXACIN"
+  },
+  {
+    "J01MA04": "ENOXACIN"
+  },
+  {
+    "J01MA05": "TEMAFLOXACIN"
+  },
+  {
+    "J01MA06": "NORFLOXACIN"
+  },
+  {
+    "J01MA07": "LOMEFLOXACIN"
+  },
+  {
+    "J01MA08": "FLEROXACIN"
+  },
+  {
+    "J01MA09": "SPARFLOXACIN"
+  },
+  {
+    "J01MA10": "RUFLOXACIN"
+  },
+  {
+    "J01MA11": "GREPAFLOXACIN"
+  },
+  {
+    "J01MA12": "LEVOFLOXACIN"
+  },
+  {
+    "J01MB01": "ROSOXACIN"
+  },
+  {
+    "J01RA01": "PENICILLINS, COMB. WITH OTHER ANTIBACTERIALS"
+  },
+  {
+    "J01RA02": "SULFONAMIDES, COMB. WITH OTHER ANTIBACTERIALS (EXCL. TRIMETHOPRIM)"
+  },
+  {
+    "J01RA03": "CEFUROXIME, COMB. WITH OTHER ANTIBACTERIALS"
+  },
+  {
+    "J01XA01": "VANCOMYCIN"
+  },
+  {
+    "J01XA02": "TEICOPLANIN"
+  },
+  {
+    "J01XB01": "COLISTIN"
+  },
+  {
+    "J01XB02": "POLYMYXIN B"
+  },
+  {
+    "J01XC01": "FUSIDIC ACID"
+  },
+  {
+    "J01XD01": "METRONIDAZOLE"
+  },
+  {
+    "J01XD02": "TINIDAZOLE"
+  },
+  {
+    "J01XD03": "ORNIDAZOLE"
+  },
+  {
+    "J01XX01": "FOSFOMYCIN"
+  },
+  {
+    "J01XX02": "XIBORNOL"
+  },
+  {
+    "J01XX03": "CLOFOCTOL"
+  },
+  {
+    "J01XX04": "SPECTINOMYCIN"
+  },
+  {
+    "J02AA01": "AMPHOTERICIN"
+  },
+  {
+    "J02AA02": "HACHIMYCIN"
+  },
+  {
+    "J02AB01": "MICONAZOLE"
+  },
+  {
+    "J02AB02": "KETOCONAZOLE"
+  },
+  {
+    "J02AC01": "FLUCONAZOLE"
+  },
+  {
+    "J02AC02": "ITRACONAZOLE"
+  },
+  {
+    "J02AX01": "FLUCYTOSINE"
+  },
+  {
+    "J04AA01": "AMINOSALICYLIC ACID"
+  },
+  {
+    "J04AA02": "SODIUM AMINOSALICYLATE"
+  },
+  {
+    "J04AA03": "CALCIUM AMINOSALICYLATE"
+  },
+  {
+    "J04AB01": "CYCLOSERINE"
+  },
+  {
+    "J04AB02": "RIFAMPICIN"
+  },
+  {
+    "J04AB03": "RIFAMYCIN"
+  },
+  {
+    "J04AB04": "RIFABUTIN"
+  },
+  {
+    "J04AB30": "CAPREOMYCIN"
+  },
+  {
+    "J04AC01": "ISONIAZID"
+  },
+  {
+    "J04AC51": "ISONIAZID, COMBINATIONS"
+  },
+  {
+    "J04AD01": "PROTIONAMIDE"
+  },
+  {
+    "J04AD02": "TIOCARLIDE"
+  },
+  {
+    "J04AD03": "ETHIONAMIDE"
+  },
+  {
+    "J04AK01": "PYRAZINAMIDE"
+  },
+  {
+    "J04AK02": "ETHAMBUTOL"
+  },
+  {
+    "J04AK03": "TERIZIDONE"
+  },
+  {
+    "J04AK04": "MORINAMIDE"
+  },
+  {
+    "J04AM01": "STREPTOMYCIN, COMBINATIONS"
+  },
+  {
+    "J04AM02": "RIFAMPICIN, COMBINATIONS"
+  },
+  {
+    "J04AM03": "ETHAMBUTOL, COMBINATIONS"
+  },
+  {
+    "J04BA01": "CLOFAZIMINE"
+  },
+  {
+    "J04BA02": "DAPSONE"
+  },
+  {
+    "J04BA03": "ALDESULFONE SODIUM"
+  },
+  {
+    "J05AA01": "METISAZONE"
+  },
+  {
+    "J05AB01": "ACICLOVIR"
+  },
+  {
+    "J05AB02": "IDOXURIDINE"
+  },
+  {
+    "J05AB03": "VIDARABINE"
+  },
+  {
+    "J05AB04": "RIBAVIRIN"
+  },
+  {
+    "J05AB06": "GANCICLOVIR"
+  },
+  {
+    "J05AB06": "GANCICLOVIR"
+  },
+  {
+    "J05AB09": "FAMCICLOVIR"
+  },
+  {
+    "J05AB11": "VALACICLOVIR"
+  },
+  {
+    "J05AB12": "CIDOFOVIR"
+  },
+  {
+    "J05AB13": "PENCICLOVIR"
+  },
+  {
+    "J05AC02": "RIMANTADINE"
+  },
+  {
+    "J05AC03": "TROMANTADINE"
+  },
+  {
+    "J05AD01": "FOSCARNET"
+  },
+  {
+    "J05AD02": "FOSFONET"
+  },
+  {
+    "J05AE01": "SAQUINAVIR"
+  },
+  {
+    "J05AE02": "INDINAVIR"
+  },
+  {
+    "J05AE03": "RITONAVIR"
+  },
+  {
+    "J05AE04": "NELFINAVIR"
+  },
+  {
+    "J05AF01": "ZIDOVUDINE"
+  },
+  {
+    "J05AF02": "DIDANOSINE"
+  },
+  {
+    "J05AF03": "ZALCITABINE"
+  },
+  {
+    "J05AF04": "STAVUDINE"
+  },
+  {
+    "J05AF05": "LAMIVUDINE"
+  },
+  {
+    "J05AF30": "NUCLEOSIDE REVERSE TRANSCRIPTASE INHIBITORS COMBINATIONS"
+  },
+  {
+    "J05AG01": "NEVIRAPINE"
+  },
+  {
+    "J05AG02": "DELAVIRDINE"
+  },
+  {
+    "J05AG03": "EFAVIRENZ"
+  },
+  {
+    "J05AX01": "MOROXYDINE"
+  },
+  {
+    "J05AX02": "LYSOZYME"
+  },
+  {
+    "J05AX05": "INOSINE PRANOBEX"
+  },
+  {
+    "J06AA01": "DIPHTERIA ANTITOXIN"
+  },
+  {
+    "J06AA02": "TETANUS ANTITOXIN"
+  },
+  {
+    "J06AA03": "SNAKE VENOM ANTISERUM"
+  },
+  {
+    "J06AA04": "BOTULINUM ANTITOXIN"
+  },
+  {
+    "J06AA05": "GAS-GANGRENE SERA"
+  },
+  {
+    "J06AA06": "RABIES SERUM"
+  },
+  {
+    "J06BA01": "IMMUNOGLOBULINS, NORMAL HUMAN, FOR EXTRAVASCULAR ADM."
+  },
+  {
+    "J06BA02": "IMMUNOGLOBULINS, NORMAL HUMAN, FOR INTRAVASCULAR ADM."
+  },
+  {
+    "J06BB01": "ANTI-D (RH) IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB02": "TETANUS IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB03": "VARICELLA/ZOSTER IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB04": "HEPATITIS B IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB05": "RABIES IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB06": "RUBELLA IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB07": "VACCINIA IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB08": "STAPHYLOCOCCUS IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB09": "CYTOMEGALOVIRUS IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB10": "DIPHTHERIA IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB11": "HEPATITIS A IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB12": "ENCEPHALITIS, TICK BORNE IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB13": "PERTUSSIS IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB14": "MORBILLI IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB15": "PAROTITIS IMMUNOGLOBULIN"
+  },
+  {
+    "J06BB30": "SPECIFIC IMMUNOGLOBULINS COMBINATIONS"
+  },
+  {
+    "J06BC01": "NEBACUMAB (CENTOXIN)"
+  },
+  {
+    "J07AC01": "ANTHRAX ANTIGEN"
+  },
+  {
+    "J07AD01": "BRUCELLA ANTIGEN"
+  },
+  {
+    "J07AE01": "CHOLERA, INACTIVATED, WHOLE CELL"
+  },
+  {
+    "J07AE02": "CHOLERA, LIVE ATTENUATED"
+  },
+  {
+    "J07AE51": "CHOLERA, COMBINATIONS WITH TYPHOID VACCINE, INACTIVATED, WHOLE CELL"
+  },
+  {
+    "J07AF01": "DIPHTHERIA TOXOID"
+  },
+  {
+    "J07AG01": "HEMOPHILUS INFLUENZAE B, PURIFIED ANTIGEN CONJUGATED"
+  },
+  {
+    "J07AG51": "HEMOPHILUS INFLUENZAE B, COMBINATIONS WITH TOXOIDS"
+  },
+  {
+    "J07AG52": "HEMOPHILUS INFLUENZAE B, COMBINATIONS WITH PERTUSSIS AND TOXOIDS"
+  },
+  {
+    "J07AH01": "MENINGOCOCCUS A, PURIFIED POLYSACCHARIDES ANTIGEN"
+  },
+  {
+    "J07AH02": "OTHER MENINGOCOCCAL MONOVALENT PURIFIED POLYSACCHARIDES ANTIGEN"
+  },
+  {
+    "J07AH03": "MENINGOCOCCUS, BIVALENT PURIFIED POLYSACCHARIDES ANTIGEN"
+  },
+  {
+    "J07AH04": "MENINGOCOCCUS, TETRAVALENT PURIFIED POLYSACCHARIDES ANTIGEN"
+  },
+  {
+    "J07AH05": "OTHER MENINGOCOCCAL POLYVALENT PURIFIED POLYSACCHARIDES ANTIGEN"
+  },
+  {
+    "J07AH06": "MENINGOCOCCUS B, OUTER MEMBRANE VESICLE VACCINE"
+  },
+  {
+    "J07AJ01": "PERTUSSIS, INACTIVATED, WHOLE CELL"
+  },
+  {
+    "J07AJ02": "PERTUSSIS, PURIFIED ANTIGEN"
+  },
+  {
+    "J07AJ51": "PERTUSSIS, INACTIVATED, WHOLE CELL, COMBINATIONS WITH TOXOIDS"
+  },
+  {
+    "J07AJ52": "PERTUSSIS, PURIFIED ANTIGEN, COMBINATIONS WITH TOXOIDS"
+  },
+  {
+    "J07AK01": "PLAGUE, INACTIVATED, WHOLE CELL"
+  },
+  {
+    "J07AL01": "PNEUMOCOCCUS, PURIFIED POLYSACCHARIDES ANTIGEN"
+  },
+  {
+    "J07AM01": "TETANUS TOXOID"
+  },
+  {
+    "J07AM51": "TETANUS TOXOID, COMBINATIONS WITH DIPHTHERIA TOXOID"
+  },
+  {
+    "J07AM52": "TETANUS TOXOID, COMBINATIONS WITH TETANUS IMMUNOGLOBULIN"
+  },
+  {
+    "J07AN01": "TUBERCULOSIS, LIVE ATTENUATED"
+  },
+  {
+    "J07AP01": "TYPHOID, ORAL, LIVE ATTENUATED"
+  },
+  {
+    "J07AP02": "TYPHOID, INACTIVATED, WHOLE CELL"
+  },
+  {
+    "J07AP03": "TYPHOID, PURIFIED POLYSACCHARIDE ANTIGEN"
+  },
+  {
+    "J07AP10": "TYPHOID, COMBINATIONS WITH PARATYPHI TYPES"
+  },
+  {
+    "J07AR01": "TYPHUS EXANTHEMATICUS, INACTIVATED, WHOLE CELL"
+  },
+  {
+    "J07BA01": "ENCEPHALITIS, TICK BORNE, INACTIVATED, WHOLE VIRUS"
+  },
+  {
+    "J07BA02": "ENCEPHALITIS, JAPANESE, INACTIVATED, WHOLE VIRUS"
+  },
+  {
+    "J07BB01": "INFLUENZA, INACTIVATED, WHOLE VIRUS"
+  },
+  {
+    "J07BB02": "INFLUENZA, PURIFIED ANTIGEN"
+  },
+  {
+    "J07BC01": "HEPATITIS B, PURIFIED ANTIGEN"
+  },
+  {
+    "J07BC02": "HEPATITIS A, INACTIVATED, WHOLE VIRUS"
+  },
+  {
+    "J07BC20": "HEPATITIS VACCINES COMBINATIONS"
+  },
+  {
+    "J07BD01": "MORBILLI, LIVE ATTENUATED"
+  },
+  {
+    "J07BD51": "MORBILLI, COMBINATIONS WITH PAROTITIS, LIVE ATTENUATED"
+  },
+  {
+    "J07BD52": "MORBILLI, COMBINATIONS WITH PAROTITIS AND RUBELLA, LIVE ATTENUATED"
+  },
+  {
+    "J07BD53": "MORBILLI, COMBINATIONS WITH RUBELLA, LIVE ATTENUATED"
+  },
+  {
+    "J07BE01": "PAROTITIS, LIVE ATTENUATED"
+  },
+  {
+    "J07BF01": "POLIOMYELITIS ORAL, MONOVALENT LIVE ATTENUATED"
+  },
+  {
+    "J07BF02": "POLIOMYELITIS ORAL, TRIVALENT, LIVE ATTENUATED"
+  },
+  {
+    "J07BF03": "POLIOMYELITIS, TRIVALENT, INACTIVATED, WHOLE VIRUS"
+  },
+  {
+    "J07BG01": "RABIES, INACTIVATED, WHOLE VIRUS"
+  },
+  {
+    "J07BH01": "ROTA VIRUS, LIVE ATTENUATED"
+  },
+  {
+    "J07BJ01": "RUBELLA, LIVE ATTENUATED"
+  },
+  {
+    "J07BJ51": "RUBELLA, COMBINATION WITH PAROTITIDIS, LIVE ATTENUATED"
+  },
+  {
+    "J07BK01": "VARICELLA, LIVE ATTENUATED"
+  },
+  {
+    "J07BL01": "YELLOW FEVER, LIVE ATTENUATED"
+  },
+  {
+    "J07CA01": "DIPHTHERIA-POLIOMYELITIS-TETANUS"
+  },
+  {
+    "J07CA02": "DIPHTHERIA-PERTUSSIS-POLIOMYELITIS-TETANUS"
+  },
+  {
+    "J07CA03": "DIPHTHERIA-RUBELLA-TETANUS"
+  },
+  {
+    "J07CA04": "HEMOPHILUS INFLUENZAE B AND POLIOMYELITIS"
+  },
+  {
+    "J07CA05": "DIPHTHERIA-HEPATITIS B-PERTUSSIS-TETANUS"
+  },
+  {
+    "J07CA06": "DIPHTHERIA-HEMOPHILUS INFLUENZAE B-PERTUSSIS-POLIOMYELITIS-TETANUS"
+  },
+  {
+    "L01AA01": "CYCLOPHOSPHAMIDE"
+  },
+  {
+    "L01AA02": "CHLORAMBUCIL"
+  },
+  {
+    "L01AA03": "MELPHALAN"
+  },
+  {
+    "L01AA05": "CHLORMETHINE"
+  },
+  {
+    "L01AA06": "IFOSFAMIDE"
+  },
+  {
+    "L01AA07": "TROFOSFAMIDE"
+  },
+  {
+    "L01AA08": "PREDNIMUSTINE"
+  },
+  {
+    "L01AB01": "BUSULFAN"
+  },
+  {
+    "L01AB02": "TREOSULFAN"
+  },
+  {
+    "L01AB03": "MANNOSULFAN"
+  },
+  {
+    "L01AC01": "THIOTEPA"
+  },
+  {
+    "L01AC02": "TRIAZIQUONE"
+  },
+  {
+    "L01AC03": "CARBOQUONE"
+  },
+  {
+    "L01AD01": "CARMUSTINE"
+  },
+  {
+    "L01AD02": "LOMUSTINE"
+  },
+  {
+    "L01AD03": "SEMUSTINE"
+  },
+  {
+    "L01AD04": "STREPTOZOCIN"
+  },
+  {
+    "L01AD05": "FOTEMUSTINE"
+  },
+  {
+    "L01AD06": "NIMUSTINE"
+  },
+  {
+    "L01AD07": "RANIMUSTINE"
+  },
+  {
+    "L01AG01": "ETOGLUCID"
+  },
+  {
+    "L01AX01": "MITOBRONITOL"
+  },
+  {
+    "L01AX02": "PIPOBROMAN"
+  },
+  {
+    "L01AX03": "TEMOZOLOMIDE"
+  },
+  {
+    "L01AX04": "DACARBAZINE"
+  },
+  {
+    "L01BA01": "METHOTREXATE"
+  },
+  {
+    "L01BA03": "RALTITREXED"
+  },
+  {
+    "L01BB02": "MERCAPTOPURINE"
+  },
+  {
+    "L01BB03": "TIOGUANINE"
+  },
+  {
+    "L01BB04": "CLADRIBINE"
+  },
+  {
+    "L01BB05": "FLUDARABINE"
+  },
+  {
+    "L01BC01": "CYTARABINE"
+  },
+  {
+    "L01BC02": "FLUOROURACIL"
+  },
+  {
+    "L01BC03": "TEGAFUR"
+  },
+  {
+    "L01BC04": "CARMOFUR"
+  },
+  {
+    "L01BC05": "GEMCITABINE"
+  },
+  {
+    "L01BC06": "CAPECITABINE"
+  },
+  {
+    "L01BC52": "FLUOROURACIL, COMBINATIONS"
+  },
+  {
+    "L01CA01": "VINBLASTINE"
+  },
+  {
+    "L01CA02": "VINCRISTINE"
+  },
+  {
+    "L01CA03": "VINDESINE"
+  },
+  {
+    "L01CA04": "VINORELBINE"
+  },
+  {
+    "L01CB01": "ETOPOSIDE"
+  },
+  {
+    "L01CB02": "TENIPOSIDE"
+  },
+  {
+    "L01CC01": "DEMECOLCINE"
+  },
+  {
+    "L01CD01": "PACLITAXEL"
+  },
+  {
+    "L01CD02": "DOCETAXEL"
+  },
+  {
+    "L01DA01": "DACTINOMYCIN"
+  },
+  {
+    "L01DB01": "DOXORUBICIN"
+  },
+  {
+    "L01DB02": "DAUNORUBICIN"
+  },
+  {
+    "L01DB03": "EPIRUBICIN"
+  },
+  {
+    "L01DB04": "ACLARUBICIN"
+  },
+  {
+    "L01DB05": "ZORUBICIN"
+  },
+  {
+    "L01DB06": "IDARUBICIN"
+  },
+  {
+    "L01DB07": "MITOXANTRONE"
+  },
+  {
+    "L01DB08": "PIRARUBICIN"
+  },
+  {
+    "L01DC01": "BLEOMYCIN"
+  },
+  {
+    "L01DC02": "PLICAMYCIN"
+  },
+  {
+    "L01DC03": "MITOMYCIN"
+  },
+  {
+    "L01XA01": "CISPLATIN"
+  },
+  {
+    "L01XA02": "CARBOPLATIN"
+  },
+  {
+    "L01XA03": "OXALIPLATIN"
+  },
+  {
+    "L01XB01": "PROCARBAZINE"
+  },
+  {
+    "L01XX01": "AMSACRINE"
+  },
+  {
+    "L01XX02": "ASPARAGINASE"
+  },
+  {
+    "L01XX03": "ALTRETAMINE"
+  },
+  {
+    "L01XX05": "HYDROXYCARBAMIDE"
+  },
+  {
+    "L01XX07": "LONIDAMINE"
+  },
+  {
+    "L01XX08": "PENTOSTATIN"
+  },
+  {
+    "L01XX09": "MILTEFOSINE"
+  },
+  {
+    "L01XX10": "MASOPROCOL"
+  },
+  {
+    "L01XX11": "ESTRAMUSTINE"
+  },
+  {
+    "L01XX14": "TRETINOIN"
+  },
+  {
+    "L01XX15": "PORFIMER SODIUM"
+  },
+  {
+    "L01XX16": "MITOGUAZONE"
+  },
+  {
+    "L01XX17": "TOPOTECAN"
+  },
+  {
+    "L01XX18": "TIAZOFURINE"
+  },
+  {
+    "L01XX19": "IRINOTECAN"
+  },
+  {
+    "L01XX21": "RITUXIMAB"
+  },
+  {
+    "L02AA01": "DIETHYLSTILBESTROL"
+  },
+  {
+    "L02AA02": "POLYESTRADIOL PHOSPHATE"
+  },
+  {
+    "L02AA03": "ETHINYLESTRADIOL"
+  },
+  {
+    "L02AA04": "FOSFESTROL"
+  },
+  {
+    "L02AB01": "MEGESTROL"
+  },
+  {
+    "L02AB02": "MEDROXYPROGESTERONE"
+  },
+  {
+    "L02AB03": "GESTONORONE"
+  },
+  {
+    "L02AE01": "BUSERELIN"
+  },
+  {
+    "L02AE01": "BUSERELIN"
+  },
+  {
+    "L02AE01": "BUSERELIN"
+  },
+  {
+    "L02AE02": "LEUPRORELIN"
+  },
+  {
+    "L02AE02": "LEUPRORELIN"
+  },
+  {
+    "L02AE03": "GOSERELIN"
+  },
+  {
+    "L02AE04": "TRIPTORELIN"
+  },
+  {
+    "L02BA01": "TAMOXIFEN"
+  },
+  {
+    "L02BA02": "TOREMIFENE"
+  },
+  {
+    "L02BB01": "FLUTAMIDE"
+  },
+  {
+    "L02BB02": "NILUTAMIDE"
+  },
+  {
+    "L02BB03": "BICALUTAMIDE"
+  },
+  {
+    "L02BG01": "AMINOGLUTHETIMIDE"
+  },
+  {
+    "L02BG02": "FORMESTANE"
+  },
+  {
+    "L02BG03": "ANASTROZOLE"
+  },
+  {
+    "L02BG04": "LETROZOLE"
+  },
+  {
+    "L02BG05": "VOROZOLE"
+  },
+  {
+    "L03AA02": "FILGRASTIM"
+  },
+  {
+    "L03AA03": "MOLGRAMOSTIM"
+  },
+  {
+    "L03AA09": "SARGRAMOSTIM"
+  },
+  {
+    "L03AA10": "LENOGRASTIM"
+  },
+  {
+    "L03AA12": "ANCESTIM"
+  },
+  {
+    "L03AB01": "INTERFERON ALFA NATURAL"
+  },
+  {
+    "L03AB02": "INTERFERON BETA NATURAL"
+  },
+  {
+    "L03AB03": "INTERFERON GAMMA"
+  },
+  {
+    "L03AB04": "INTERFERON ALFA-2A"
+  },
+  {
+    "L03AB05": "INTERFERON ALFA-2B"
+  },
+  {
+    "L03AB06": "INTERFERON ALFA-N1"
+  },
+  {
+    "L03AB07": "INTERFERON BETA-1A"
+  },
+  {
+    "L03AB08": "INTERFERON BETA-1B"
+  },
+  {
+    "L03AC01": "ALDESLEUKIN"
+  },
+  {
+    "L03AC02": "OPRELVEKIN"
+  },
+  {
+    "L03AX01": "LENTINAN"
+  },
+  {
+    "L03AX02": "ROQUINIMEX"
+  },
+  {
+    "L03AX03": "BCG VACCINE"
+  },
+  {
+    "L03AX04": "PEGADEMASE"
+  },
+  {
+    "L03AX05": "PIDOTIMOD"
+  },
+  {
+    "L03AX06": "EDRECOLOMAB"
+  },
+  {
+    "L03AX07": "POLY I:C"
+  },
+  {
+    "L03AX08": "POLY ICLC"
+  },
+  {
+    "L03AX09": "THYMOPENTIN"
+  },
+  {
+    "L03AX10": "IMMUNOCYANIN"
+  },
+  {
+    "L04AA01": "CICLOSPORIN"
+  },
+  {
+    "L04AA02": "MUROMONAB-CD3"
+  },
+  {
+    "L04AA03": "ANTILYMPHOCYTE IMMUNOGLOBULIN (HORSE)"
+  },
+  {
+    "L04AA04": "ANTITHYMOCYTE IMMUNOGLOBULIN (RABBIT)"
+  },
+  {
+    "L04AA05": "TACROLIMUS"
+  },
+  {
+    "L04AA06": "MYCOPHENOLIC ACID"
+  },
+  {
+    "L04AA07": "GLATIRAMER ACETATE"
+  },
+  {
+    "L04AA08": "DACLIZUMAB"
+  },
+  {
+    "L04AX01": "AZATHIOPRINE"
+  },
+  {
+    "L04AX02": "THALIDOMIDE"
+  },
+  {
+    "M01AA01": "PHENYLBUTAZONE"
+  },
+  {
+    "M01AA02": "MOFEBUTAZONE"
+  },
+  {
+    "M01AA03": "OXYPHENBUTAZONE"
+  },
+  {
+    "M01AA05": "CLOFEZONE"
+  },
+  {
+    "M01AA06": "KEBUZONE"
+  },
+  {
+    "M01AB01": "INDOMETACIN"
+  },
+  {
+    "M01AB02": "SULINDAC"
+  },
+  {
+    "M01AB03": "TOLMETIN"
+  },
+  {
+    "M01AB04": "ZOMEPIRAC"
+  },
+  {
+    "M01AB05": "DICLOFENAC"
+  },
+  {
+    "M01AB06": "ALCLOFENAC"
+  },
+  {
+    "M01AB07": "BUMADIZONE"
+  },
+  {
+    "M01AB08": "ETODOLAC"
+  },
+  {
+    "M01AB09": "LONAZOLAC"
+  },
+  {
+    "M01AB10": "FENTIAZAC"
+  },
+  {
+    "M01AB11": "ACEMETACIN"
+  },
+  {
+    "M01AB12": "DIFENPIRAMIDE"
+  },
+  {
+    "M01AB13": "OXAMETACIN"
+  },
+  {
+    "M01AB14": "PROGLUMETACIN"
+  },
+  {
+    "M01AB15": "KETOROLAC"
+  },
+  {
+    "M01AB16": "ACECLOFENAC"
+  },
+  {
+    "M01AB51": "INDOMETACIN, COMBINATIONS"
+  },
+  {
+    "M01AB55": "DICLOFENAC, COMBINATIONS"
+  },
+  {
+    "M01AC01": "PIROXICAM"
+  },
+  {
+    "M01AC02": "TENOXICAM"
+  },
+  {
+    "M01AC04": "DROXICAM"
+  },
+  {
+    "M01AC05": "LORNOXICAM"
+  },
+  {
+    "M01AC06": "MELOXICAM"
+  },
+  {
+    "M01AE01": "IBUPROFEN"
+  },
+  {
+    "M01AE02": "NAPROXEN"
+  },
+  {
+    "M01AE03": "KETOPROFEN"
+  },
+  {
+    "M01AE04": "FENOPROFEN"
+  },
+  {
+    "M01AE05": "FENBUFEN"
+  },
+  {
+    "M01AE06": "BENOXAPROFEN"
+  },
+  {
+    "M01AE07": "SUPROFEN"
+  },
+  {
+    "M01AE08": "PIRPROFEN"
+  },
+  {
+    "M01AE09": "FLURBIPROFEN"
+  },
+  {
+    "M01AE10": "INDOPROFEN"
+  },
+  {
+    "M01AE11": "TIAPROFENIC ACID"
+  },
+  {
+    "M01AE12": "OXAPROZIN"
+  },
+  {
+    "M01AE13": "IBUPROXAM"
+  },
+  {
+    "M01AE14": "DEXIBUPROFEN"
+  },
+  {
+    "M01AE15": "FLUNOXAPROFEN"
+  },
+  {
+    "M01AE16": "ALMINOPROFEN"
+  },
+  {
+    "M01AE51": "IBUPROFEN, COMBINATIONS"
+  },
+  {
+    "M01AE53": "KETOPROFEN, COMBINATIONS"
+  },
+  {
+    "M01AG01": "MEFENAMIC ACID"
+  },
+  {
+    "M01AG02": "TOLFENAMIC ACID"
+  },
+  {
+    "M01AG03": "FLUFENAMIC ACID"
+  },
+  {
+    "M01AG04": "MECLOFENAMIC ACID"
+  },
+  {
+    "M01AX01": "NABUMETONE"
+  },
+  {
+    "M01AX02": "NIFLUMIC ACID"
+  },
+  {
+    "M01AX04": "AZAPROPAZONE"
+  },
+  {
+    "M01AX05": "GLUCOSAMINE"
+  },
+  {
+    "M01AX07": "BENZYDAMINE"
+  },
+  {
+    "M01AX12": "GLUCOSAMINOGLYCAN POLYSULFATE"
+  },
+  {
+    "M01AX13": "PROQUAZONE"
+  },
+  {
+    "M01AX14": "ORGOTEIN"
+  },
+  {
+    "M01AX17": "NIMESULIDE"
+  },
+  {
+    "M01AX18": "FEPRAZONE"
+  },
+  {
+    "M01AX21": "DIACEREIN"
+  },
+  {
+    "M01AX22": "MORNIFLUMATE"
+  },
+  {
+    "M01AX23": "TENIDAP"
+  },
+  {
+    "M01AX68": "FEPRAZONE, COMBINATIONS"
+  },
+  {
+    "M01BA01": "PHENYLBUTAZONE AND CORTICOSTEROIDS"
+  },
+  {
+    "M01BA02": "DIPYROCETYL AND CORTICOSTEROIDS"
+  },
+  {
+    "M01BA03": "ACETYLSALICYLIC ACID AND CORTICOSTEROIDS"
+  },
+  {
+    "M01CA03": "OXYCINCHOPHEN"
+  },
+  {
+    "M01CB01": "SODIUM AUROTHIOMALATE"
+  },
+  {
+    "M01CB02": "SODIUM AUROTHIOSULFATE"
+  },
+  {
+    "M01CB03": "AURANOFIN"
+  },
+  {
+    "M01CB04": "AUROTHIOGLUCOSE"
+  },
+  {
+    "M01CB05": "AUROTIOPROL"
+  },
+  {
+    "M01CC01": "PENICILLAMINE"
+  },
+  {
+    "M01CC02": "BUCILLAMINE"
+  },
+  {
+    "M02AA01": "PHENYLBUTAZONE"
+  },
+  {
+    "M02AA02": "MOFEBUTAZONE"
+  },
+  {
+    "M02AA03": "CLOFEZONE"
+  },
+  {
+    "M02AA04": "OXYPHENBUTAZONE"
+  },
+  {
+    "M02AA05": "BENZYDAMINE"
+  },
+  {
+    "M02AA06": "ETOFENAMATE"
+  },
+  {
+    "M02AA07": "PIROXICAM"
+  },
+  {
+    "M02AA08": "FELBINAC"
+  },
+  {
+    "M02AA09": "BUFEXAMAC"
+  },
+  {
+    "M02AA10": "KETOPROFEN"
+  },
+  {
+    "M02AA11": "BENDAZAC"
+  },
+  {
+    "M02AA12": "NAPROXEN"
+  },
+  {
+    "M02AA13": "IBUPROFEN"
+  },
+  {
+    "M02AA14": "FENTIAZAC"
+  },
+  {
+    "M02AA15": "DICLOFENAC"
+  },
+  {
+    "M02AA16": "FEPRAZONE"
+  },
+  {
+    "M02AA17": "NIFLUMIC ACID"
+  },
+  {
+    "M02AA18": "MECLOFENAMIC ACID"
+  },
+  {
+    "M02AA19": "FLURBIPROFEN"
+  },
+  {
+    "M02AA21": "TOLMETIN"
+  },
+  {
+    "M02AA22": "SUXIBUZONE"
+  },
+  {
+    "M02AA23": "INDOMETACIN"
+  },
+  {
+    "M02AX02": "TOLAZOLINE"
+  },
+  {
+    "M02AX03": "DIMETHYL SULFOXIDE"
+  },
+  {
+    "M02AX10": "VARIOUS"
+  },
+  {
+    "M03AA01": "ALCURONIUM"
+  },
+  {
+    "M03AA02": "TUBOCURARINE"
+  },
+  {
+    "M03AA04": "DIMETHYLTUBOCURARINE"
+  },
+  {
+    "M03AB01": "SUXAMETHONIUM"
+  },
+  {
+    "M03AC01": "PANCURONIUM"
+  },
+  {
+    "M03AC02": "GALLAMINE"
+  },
+  {
+    "M03AC03": "VECURONIUM"
+  },
+  {
+    "M03AC04": "ATRACURIUM"
+  },
+  {
+    "M03AC05": "HEXAFLURONIUM"
+  },
+  {
+    "M03AC06": "PIPECURONIUM BROMIDE"
+  },
+  {
+    "M03AC07": "DOXACURIUM CHLORIDE"
+  },
+  {
+    "M03AC08": "FAZADINIUM BROMIDE"
+  },
+  {
+    "M03AC09": "ROCURONIUM BROMIDE"
+  },
+  {
+    "M03AC10": "MIVACURIUM CHLORIDE"
+  },
+  {
+    "M03AC11": "CISATRACURIUM"
+  },
+  {
+    "M03AX01": "BOTULINUM TOXIN"
+  },
+  {
+    "M03BA01": "PHENPROBAMATE"
+  },
+  {
+    "M03BA02": "CARISOPRODOL"
+  },
+  {
+    "M03BA03": "METHOCARBAMOL"
+  },
+  {
+    "M03BA04": "STYRAMATE"
+  },
+  {
+    "M03BA05": "FEBARBAMATE"
+  },
+  {
+    "M03BA51": "PHENPROBAMATE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "M03BA52": "CARISOPRODOL, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "M03BA53": "METHOCARBAMOL, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "M03BA71": "PHENPROBAMATE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "M03BA72": "CARISOPRODOL, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "M03BA73": "METHOCARBAMOL, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "M03BB02": "CHLORMEZANONE"
+  },
+  {
+    "M03BB03": "CHLORZOXAZONE"
+  },
+  {
+    "M03BB52": "CHLORMEZANONE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "M03BB53": "CHLORZOXAZONE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "M03BB72": "CHLORMEZANONE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "M03BB73": "CHLORZOXAZONE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "M03BC01": "ORPHENADRINE (CITRATE)"
+  },
+  {
+    "M03BC51": "ORPHENADRINE, COMBINATIONS"
+  },
+  {
+    "M03BX01": "BACLOFEN"
+  },
+  {
+    "M03BX02": "TIZANIDINE"
+  },
+  {
+    "M03BX03": "PRIDINOL"
+  },
+  {
+    "M03BX04": "TOLPERISONE"
+  },
+  {
+    "M03BX05": "THIOCOLCHICOSIDE"
+  },
+  {
+    "M03BX06": "MEPHENESIN"
+  },
+  {
+    "M03BX07": "TETRAZEPAM"
+  },
+  {
+    "M03BX08": "CYCLOBENZAPRINE"
+  },
+  {
+    "M03BX30": "PHENYRAMIDOL"
+  },
+  {
+    "M03CA01": "DANTROLENE"
+  },
+  {
+    "M04AA01": "ALLOPURINOL"
+  },
+  {
+    "M04AA02": "TISOPURINE"
+  },
+  {
+    "M04AA51": "ALLOPURINOL, COMBINATIONS"
+  },
+  {
+    "M04AB01": "PROBENECID"
+  },
+  {
+    "M04AB02": "SULFINPYRAZONE"
+  },
+  {
+    "M04AB03": "BENZBROMARONE"
+  },
+  {
+    "M04AB04": "ISOBROMINDIONE"
+  },
+  {
+    "M04AC01": "COLCHICINE"
+  },
+  {
+    "M04AC02": "CINCHOPHEN"
+  },
+  {
+    "M04AX01": "URATE OXIDASE"
+  },
+  {
+    "M05BA01": "ETIDRONIC ACID"
+  },
+  {
+    "M05BA01": "ETIDRONIC ACID"
+  },
+  {
+    "M05BA02": "CLODRONIC ACID"
+  },
+  {
+    "M05BA02": "CLODRONIC ACID"
+  },
+  {
+    "M05BA03": "PAMIDRONIC ACID"
+  },
+  {
+    "M05BA04": "ALENDRONIC ACID"
+  },
+  {
+    "M05BA05": "TILUDRONIC ACID"
+  },
+  {
+    "M05BA06": "IBANDRONIC ACID"
+  },
+  {
+    "M05BB01": "ETIDRONIC ACID AND CALCIUM"
+  },
+  {
+    "M05BX01": "IPRIFLAVONE"
+  },
+  {
+    "M05BX02": "ALUMINIUM CHLOROHYDRATE"
+  },
+  {
+    "M09AA01": "HYDROQUININE"
+  },
+  {
+    "M09AA72": "QUININE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "M09AB01": "CHYMOPAPAIN"
+  },
+  {
+    "M09AX01": "HYALURONIC ACID"
+  },
+  {
+    "M09AX02": "CHONDROITIN SULFATE"
+  },
+  {
+    "N01AA01": "ANESTHETIC ETHER (DIETHYL ETHER)"
+  },
+  {
+    "N01AA02": "VINYL ETHER"
+  },
+  {
+    "N01AB01": "HALOTHANE"
+  },
+  {
+    "N01AB02": "CHLOROFORM"
+  },
+  {
+    "N01AB03": "METHOXYFLURANE"
+  },
+  {
+    "N01AB04": "ENFLURANE"
+  },
+  {
+    "N01AB05": "TRICHLOROETHYLENE"
+  },
+  {
+    "N01AB06": "ISOFLURANE"
+  },
+  {
+    "N01AB07": "DESFLURANE"
+  },
+  {
+    "N01AB08": "SEVOFLURANE"
+  },
+  {
+    "N01AF01": "METHOHEXITAL"
+  },
+  {
+    "N01AF02": "HEXOBARBITAL"
+  },
+  {
+    "N01AF03": "THIOPENTAL"
+  },
+  {
+    "N01AG01": "NARCOBARBITAL"
+  },
+  {
+    "N01AH01": "FENTANYL"
+  },
+  {
+    "N01AH02": "ALFENTANIL"
+  },
+  {
+    "N01AH03": "SUFENTANIL"
+  },
+  {
+    "N01AH04": "PHENOPERIDINE"
+  },
+  {
+    "N01AH05": "ANILERIDINE"
+  },
+  {
+    "N01AH06": "REMIFENTANIL"
+  },
+  {
+    "N01AH51": "FENTANYL, COMBINATIONS"
+  },
+  {
+    "N01AX01": "DROPERIDOL"
+  },
+  {
+    "N01AX03": "KETAMINE"
+  },
+  {
+    "N01AX04": "PROPANIDID"
+  },
+  {
+    "N01AX05": "ALFAXALONE"
+  },
+  {
+    "N01AX07": "ETOMIDATE"
+  },
+  {
+    "N01AX10": "PROPOFOL"
+  },
+  {
+    "N01AX11": "HYDROXYBUTYRIC ACID"
+  },
+  {
+    "N01AX13": "NITROUS OXIDE"
+  },
+  {
+    "N01AX14": "S-KETAMINE"
+  },
+  {
+    "N01BA01": "METABUTETHAMINE"
+  },
+  {
+    "N01BA02": "PROCAINE"
+  },
+  {
+    "N01BA03": "TETRACAINE"
+  },
+  {
+    "N01BA04": "CHLOROPROCAINE"
+  },
+  {
+    "N01BA05": "BENZOCAINE"
+  },
+  {
+    "N01BA52": "PROCAINE, COMBINATIONS"
+  },
+  {
+    "N01BB01": "BUPIVACAINE"
+  },
+  {
+    "N01BB02": "LIDOCAINE"
+  },
+  {
+    "N01BB03": "MEPIVACAINE"
+  },
+  {
+    "N01BB04": "PRILOCAINE"
+  },
+  {
+    "N01BB05": "BUTANILICAINE"
+  },
+  {
+    "N01BB06": "CINCHOCAINE"
+  },
+  {
+    "N01BB07": "ETIDOCAINE"
+  },
+  {
+    "N01BB08": "ARTICAINE"
+  },
+  {
+    "N01BB09": "ROPIVACAINE"
+  },
+  {
+    "N01BB10": "LEVOBUPIVACAINE"
+  },
+  {
+    "N01BB20": "AMIDE ANAESTHETICS, LOCAL, COMBINATIONS"
+  },
+  {
+    "N01BB51": "BUPIVACAINE, COMBINATIONS"
+  },
+  {
+    "N01BB52": "LIDOCAINE, COMBINATIONS"
+  },
+  {
+    "N01BB53": "MEPIVACAINE, COMBINATIONS"
+  },
+  {
+    "N01BB54": "PRILOCAINE, COMBINATIONS"
+  },
+  {
+    "N01BB57": "ETIDOCAINE, COMBINATIONS"
+  },
+  {
+    "N01BB58": "ARTICAINE, COMBINATIONS"
+  },
+  {
+    "N01BC01": "COCAINE"
+  },
+  {
+    "N01BX01": "ETHYL CHLORIDE"
+  },
+  {
+    "N01BX02": "DYCLONINE"
+  },
+  {
+    "N01BX03": "PHENOL"
+  },
+  {
+    "N01BX04": "CAPSAICIN"
+  },
+  {
+    "N02AA01": "MORPHINE"
+  },
+  {
+    "N02AA01": "MORPHINE"
+  },
+  {
+    "N02AA02": "OPIUM"
+  },
+  {
+    "N02AA03": "HYDROMORPHONE"
+  },
+  {
+    "N02AA04": "NICOMORPHINE"
+  },
+  {
+    "N02AA05": "OXYCODONE"
+  },
+  {
+    "N02AA08": "DIHYDROCODEINE"
+  },
+  {
+    "N02AA09": "DIAMORPHINE"
+  },
+  {
+    "N02AA10": "PAPAVERETUM"
+  },
+  {
+    "N02AA51": "MORPHINE, COMBINATIONS"
+  },
+  {
+    "N02AA58": "DIHYDROCODEINE, COMBINATIONS"
+  },
+  {
+    "N02AA59": "CODEINE, COMBINATIONS"
+  },
+  {
+    "N02AB01": "KETOBEMIDONE"
+  },
+  {
+    "N02AB02": "PETHIDINE"
+  },
+  {
+    "N02AB03": "FENTANYL"
+  },
+  {
+    "N02AB52": "PETHIDINE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02AB72": "PETHIDINE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02AC01": "DEXTROMORAMIDE"
+  },
+  {
+    "N02AC01": "DEXTROMORAMIDE"
+  },
+  {
+    "N02AC02": "METHADONE"
+  },
+  {
+    "N02AC03": "PIRITRAMIDE"
+  },
+  {
+    "N02AC04": "DEXTROPROPOXYPHENE"
+  },
+  {
+    "N02AC04": "DEXTROPROPOXYPHENE"
+  },
+  {
+    "N02AC05": "BEZITRAMIDE"
+  },
+  {
+    "N02AC52": "METHADONE, COMB. EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02AC54": "DEXTROPROPOXYPHENE, COMB. EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02AC74": "DEXTROPROPOXYPHENE, COMB. WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02AD01": "PENTAZOCINE"
+  },
+  {
+    "N02AD02": "PHENAZOCINE"
+  },
+  {
+    "N02AE01": "BUPRENORPHINE"
+  },
+  {
+    "N02AF01": "BUTORPHANOL"
+  },
+  {
+    "N02AF02": "NALBUFINE"
+  },
+  {
+    "N02AG01": "MORPHINE AND ANTISPASMODICS"
+  },
+  {
+    "N02AG02": "KETOBEMIDONE AND ANTISPASMODICS"
+  },
+  {
+    "N02AG03": "PETHIDINE AND ANTISPASMODICS"
+  },
+  {
+    "N02AG04": "HYDROMORPHONE AND ANTISPASMODICS"
+  },
+  {
+    "N02AX01": "TILIDINE"
+  },
+  {
+    "N02AX02": "TRAMADOL"
+  },
+  {
+    "N02AX03": "DEZOCINE"
+  },
+  {
+    "N02BA01": "ACETYLSALICYLIC ACID"
+  },
+  {
+    "N02BA01": "ACETYLSALICYLIC ACID"
+  },
+  {
+    "N02BA02": "ALOXIPRIN"
+  },
+  {
+    "N02BA03": "CHOLINE SALICYLATE"
+  },
+  {
+    "N02BA04": "SODIUM SALICYLATE"
+  },
+  {
+    "N02BA05": "SALICYLAMIDE"
+  },
+  {
+    "N02BA06": "SALICYLOYLSALICYLIC ACID"
+  },
+  {
+    "N02BA07": "ETHENZAMIDE"
+  },
+  {
+    "N02BA08": "MORPHOLINE SALICYLATE"
+  },
+  {
+    "N02BA09": "DIPYROCETYL"
+  },
+  {
+    "N02BA10": "BENORILATE"
+  },
+  {
+    "N02BA11": "DIFLUNISAL"
+  },
+  {
+    "N02BA12": "POTASSIUM SALICYLATE"
+  },
+  {
+    "N02BA14": "GUACETISAL"
+  },
+  {
+    "N02BA15": "CARBASALATE CALCIUM"
+  },
+  {
+    "N02BA16": "IMIDAZOLE SALICYLATE"
+  },
+  {
+    "N02BA51": "ACETYLSALICYLIC ACID, COMB. EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BA55": "SALICYLAMIDE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BA57": "ETHENZAMIDE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BA59": "DIPYROCETYL, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BA65": "CARBASALATE CALCIUM COMB. EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BA71": "ACETYLSALICYLIC ACID, COMB. WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BA75": "SALICYLAMIDE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BA77": "ETHENZAMIDE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BA79": "DIPYROCETYL, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BB01": "PHENAZONE"
+  },
+  {
+    "N02BB02": "METAMIZOLE SODIUM"
+  },
+  {
+    "N02BB03": "AMINOPHENAZONE"
+  },
+  {
+    "N02BB04": "PROPYPHENAZONE"
+  },
+  {
+    "N02BB05": "NIFENAZONE"
+  },
+  {
+    "N02BB51": "PHENAZONE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BB52": "METAMIZOLE SODIUM, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BB53": "AMINOPHENAZONE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BB54": "PROPYPHENAZONE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BB71": "PHENAZONE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BB72": "METAMIZOLE SODIUM, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BB73": "AMINOPHENAZONE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BB74": "PROPYPHENAZONE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BE01": "PARACETAMOL"
+  },
+  {
+    "N02BE03": "PHENACETIN"
+  },
+  {
+    "N02BE04": "BUCETIN"
+  },
+  {
+    "N02BE05": "PROPACETAMOL"
+  },
+  {
+    "N02BE51": "PARACETAMOL, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BE53": "PHENACETIN, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BE54": "BUCETIN, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02BE71": "PARACETAMOL, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BE73": "PHENACETIN, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BE74": "BUCETIN, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02BG02": "RIMAZOLIUM"
+  },
+  {
+    "N02BG03": "GLAFENINE"
+  },
+  {
+    "N02BG04": "FLOCTAFENINE"
+  },
+  {
+    "N02BG05": "VIMINOL"
+  },
+  {
+    "N02BG06": "NEFOPAM"
+  },
+  {
+    "N02BG07": "FLUPIRTINE"
+  },
+  {
+    "N02CA01": "DIHYDROERGOTAMINE"
+  },
+  {
+    "N02CA02": "ERGOTAMINE"
+  },
+  {
+    "N02CA02": "ERGOTAMINE"
+  },
+  {
+    "N02CA04": "METHYSERGIDE"
+  },
+  {
+    "N02CA07": "LISURIDE"
+  },
+  {
+    "N02CA51": "DIHYDROERGOTAMINE, COMBINATIONS"
+  },
+  {
+    "N02CA52": "ERGOTAMINE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "N02CA72": "ERGOTAMINE, COMB. WITH PSYCHOLEPTICS"
+  },
+  {
+    "N02CB01": "FLUMEDROXONE"
+  },
+  {
+    "N02CC01": "SUMATRIPTAN"
+  },
+  {
+    "N02CC01": "SUMATRIPTAN"
+  },
+  {
+    "N02CC01": "SUMATRIPTAN"
+  },
+  {
+    "N02CC01": "SUMATRIPTAN"
+  },
+  {
+    "N02CC02": "NARATRIPTAN"
+  },
+  {
+    "N02CC03": "ZOLMITRIPTAN"
+  },
+  {
+    "N02CX01": "PIZOTIFEN"
+  },
+  {
+    "N02CX02": "CLONIDINE"
+  },
+  {
+    "N02CX03": "IPRAZOCHROME"
+  },
+  {
+    "N02CX05": "DIMETOTIAZINE"
+  },
+  {
+    "N02CX06": "OXETORONE"
+  },
+  {
+    "N03AA01": "METHYLPHENOBARBITAL"
+  },
+  {
+    "N03AA02": "PHENOBARBITAL"
+  },
+  {
+    "N03AA03": "PRIMIDONE"
+  },
+  {
+    "N03AA04": "BARBEXACLONE"
+  },
+  {
+    "N03AA30": "METHARBITAL"
+  },
+  {
+    "N03AB01": "ETHOTOIN"
+  },
+  {
+    "N03AB02": "PHENYTOIN"
+  },
+  {
+    "N03AB03": "AMINO(DIPHENYLHYDANTOIN) VALERIC ACID"
+  },
+  {
+    "N03AB04": "MEPHENYTOIN"
+  },
+  {
+    "N03AB52": "PHENYTOIN, COMBINATIONS"
+  },
+  {
+    "N03AB54": "MEPHENYTOIN, COMBINATIONS"
+  },
+  {
+    "N03AC01": "PARAMETHADIONE"
+  },
+  {
+    "N03AC02": "TRIMETHADIONE"
+  },
+  {
+    "N03AC03": "ETHADIONE"
+  },
+  {
+    "N03AD01": "ETHOSUXIMIDE"
+  },
+  {
+    "N03AD02": "PHENSUXIMIDE"
+  },
+  {
+    "N03AD03": "MESUXIMIDE"
+  },
+  {
+    "N03AD51": "ETHOSUXIMIDE, COMBINATIONS"
+  },
+  {
+    "N03AE01": "CLONAZEPAM"
+  },
+  {
+    "N03AF01": "CARBAMAZEPINE"
+  },
+  {
+    "N03AF02": "OXCARBAZEPINE"
+  },
+  {
+    "N03AG01": "VALPROIC ACID"
+  },
+  {
+    "N03AG02": "VALPROMIDE"
+  },
+  {
+    "N03AG03": "AMINOBUTYRIC ACID"
+  },
+  {
+    "N03AG04": "VIGABATRIN"
+  },
+  {
+    "N03AG05": "PROGABIDE"
+  },
+  {
+    "N03AG06": "TIAGABINE"
+  },
+  {
+    "N03AX03": "SULTIAME"
+  },
+  {
+    "N03AX07": "PHENACEMIDE"
+  },
+  {
+    "N03AX09": "LAMOTRIGINE"
+  },
+  {
+    "N03AX10": "FELBAMATE"
+  },
+  {
+    "N03AX11": "TOPIRAMATE"
+  },
+  {
+    "N03AX12": "GABAPENTIN"
+  },
+  {
+    "N03AX13": "PHENETURIDE"
+  },
+  {
+    "N03AX30": "BECLAMIDE"
+  },
+  {
+    "N04AA01": "TRIHEXYPHENIDYL"
+  },
+  {
+    "N04AA02": "BIPERIDEN"
+  },
+  {
+    "N04AA03": "METIXENE"
+  },
+  {
+    "N04AA04": "PROCYCLIDINE"
+  },
+  {
+    "N04AA05": "PROFENAMINE"
+  },
+  {
+    "N04AA08": "DEXETIMIDE"
+  },
+  {
+    "N04AA08": "DEXETIMIDE"
+  },
+  {
+    "N04AA09": "PHENGLUTARIMIDE"
+  },
+  {
+    "N04AA10": "MAZATICOL"
+  },
+  {
+    "N04AA11": "BORNAPRINE"
+  },
+  {
+    "N04AA12": "TROPATEPINE"
+  },
+  {
+    "N04AB01": "ETANAUTINE"
+  },
+  {
+    "N04AB02": "ORPHENADRINE (CHLORIDE)"
+  },
+  {
+    "N04AC01": "BENZATROPINE"
+  },
+  {
+    "N04AC30": "ETYBENZATROPINE"
+  },
+  {
+    "N04BA01": "LEVODOPA"
+  },
+  {
+    "N04BA02": "LEVODOPA AND DECARBOXYLASE INHIBITOR"
+  },
+  {
+    "N04BB01": "AMANTADINE"
+  },
+  {
+    "N04BC01": "BROMOCRIPTINE"
+  },
+  {
+    "N04BC02": "PERGOLIDE"
+  },
+  {
+    "N04BC03": "DIHYDROERGOCRYPTINE MESYLATE"
+  },
+  {
+    "N04BC04": "ROPINIROLE"
+  },
+  {
+    "N04BC05": "PRAMIPEXOLE"
+  },
+  {
+    "N04BC06": "CABERGOLINE"
+  },
+  {
+    "N04BC07": "APOMORPHINE"
+  },
+  {
+    "N04BD01": "SELEGILINE"
+  },
+  {
+    "N04BX01": "TOLCAPONE"
+  },
+  {
+    "N04BX02": "ENTACAPONE"
+  },
+  {
+    "N05AA01": "CHLORPROMAZINE"
+  },
+  {
+    "N05AA01": "CHLORPROMAZINE"
+  },
+  {
+    "N05AA02": "LEVOMEPROMAZINE"
+  },
+  {
+    "N05AA02": "LEVOMEPROMAZINE"
+  },
+  {
+    "N05AA03": "PROMAZINE"
+  },
+  {
+    "N05AA03": "PROMAZINE"
+  },
+  {
+    "N05AA04": "ACEPROMAZINE"
+  },
+  {
+    "N05AA04": "ACEPROMAZINE"
+  },
+  {
+    "N05AA05": "TRIFLUPROMAZINE"
+  },
+  {
+    "N05AA06": "CYAMEMAZINE"
+  },
+  {
+    "N05AA07": "CHLORPROETHAZINE"
+  },
+  {
+    "N05AB01": "DIXYRAZINE"
+  },
+  {
+    "N05AB01": "DIXYRAZINE"
+  },
+  {
+    "N05AB02": "FLUPHENAZINE"
+  },
+  {
+    "N05AB02": "FLUPHENAZINE"
+  },
+  {
+    "N05AB03": "PERPHENAZINE"
+  },
+  {
+    "N05AB03": "PERPHENAZINE"
+  },
+  {
+    "N05AB03": "PERPHENAZINE"
+  },
+  {
+    "N05AB03": "PERPHENAZINE"
+  },
+  {
+    "N05AB04": "PROCHLORPERAZINE"
+  },
+  {
+    "N05AB04": "PROCHLORPERAZINE"
+  },
+  {
+    "N05AB05": "THIOPROPAZATE"
+  },
+  {
+    "N05AB06": "TRIFLUOPERAZINE"
+  },
+  {
+    "N05AB06": "TRIFLUOPERAZINE"
+  },
+  {
+    "N05AB07": "ACETOPHENAZINE"
+  },
+  {
+    "N05AB08": "THIOPROPERAZINE"
+  },
+  {
+    "N05AB08": "THIOPROPERAZINE"
+  },
+  {
+    "N05AB09": "BUTAPERAZINE"
+  },
+  {
+    "N05AB10": "PERAZINE"
+  },
+  {
+    "N05AC01": "PERICIAZINE"
+  },
+  {
+    "N05AC01": "PERICIAZINE"
+  },
+  {
+    "N05AC02": "THIORIDAZINE"
+  },
+  {
+    "N05AC03": "MESORIDAZINE"
+  },
+  {
+    "N05AC04": "PIPOTIAZINE"
+  },
+  {
+    "N05AC04": "PIPOTIAZINE"
+  },
+  {
+    "N05AD01": "HALOPERIDOL"
+  },
+  {
+    "N05AD01": "HALOPERIDOL"
+  },
+  {
+    "N05AD02": "TRIFLUPERIDOL"
+  },
+  {
+    "N05AD03": "MELPERONE"
+  },
+  {
+    "N05AD04": "MOPERONE"
+  },
+  {
+    "N05AD05": "PIPAMPERONE"
+  },
+  {
+    "N05AD06": "BROMPERIDOL"
+  },
+  {
+    "N05AD06": "BROMPERIDOL"
+  },
+  {
+    "N05AD07": "BENPERIDOL"
+  },
+  {
+    "N05AD08": "DROPERIDOL"
+  },
+  {
+    "N05AD09": "FLUANISONE"
+  },
+  {
+    "N05AE01": "OXYPERTINE"
+  },
+  {
+    "N05AE02": "MOLINDONE"
+  },
+  {
+    "N05AE03": "SERTINDOLE"
+  },
+  {
+    "N05AF01": "FLUPENTIXOL"
+  },
+  {
+    "N05AF01": "FLUPENTIXOL"
+  },
+  {
+    "N05AF02": "CLOPENTHIXOL"
+  },
+  {
+    "N05AF03": "CHLORPROTHIXENE"
+  },
+  {
+    "N05AF03": "CHLORPROTHIXENE"
+  },
+  {
+    "N05AF04": "TIOTIXENE"
+  },
+  {
+    "N05AF05": "ZUCLOPENTHIXOL"
+  },
+  {
+    "N05AF05": "ZUCLOPENTHIXOL"
+  },
+  {
+    "N05AG01": "FLUSPIRILENE"
+  },
+  {
+    "N05AG02": "PIMOZIDE"
+  },
+  {
+    "N05AG03": "PENFLURIDOL"
+  },
+  {
+    "N05AH01": "LOXAPINE"
+  },
+  {
+    "N05AH02": "CLOZAPINE"
+  },
+  {
+    "N05AH03": "OLANZAPINE"
+  },
+  {
+    "N05AH04": "QUETIAPINE"
+  },
+  {
+    "N05AK01": "TETRABENAZINE"
+  },
+  {
+    "N05AL01": "SULPIRIDE"
+  },
+  {
+    "N05AL02": "SULTOPRIDE"
+  },
+  {
+    "N05AL03": "TIAPRIDE"
+  },
+  {
+    "N05AL04": "REMOXIPRIDE"
+  },
+  {
+    "N05AL05": "AMISULPRIDE"
+  },
+  {
+    "N05AL06": "VERALIPRID"
+  },
+  {
+    "N05AN01": "LITHIUM"
+  },
+  {
+    "N05AX07": "PROTHIPENDYL"
+  },
+  {
+    "N05AX08": "RISPERIDONE"
+  },
+  {
+    "N05AX09": "CLOTIAPINE"
+  },
+  {
+    "N05AX10": "MOSAPRAMINE"
+  },
+  {
+    "N05BA01": "DIAZEPAM"
+  },
+  {
+    "N05BA02": "CHLORDIAZEPOXIDE"
+  },
+  {
+    "N05BA02": "CHLORDIAZEPOXIDE"
+  },
+  {
+    "N05BA03": "MEDAZEPAM"
+  },
+  {
+    "N05BA04": "OXAZEPAM"
+  },
+  {
+    "N05BA05": "CLORAZEPATE POTASSIUM"
+  },
+  {
+    "N05BA06": "LORAZEPAM"
+  },
+  {
+    "N05BA07": "ADINAZOLAM"
+  },
+  {
+    "N05BA08": "BROMAZEPAM"
+  },
+  {
+    "N05BA09": "CLOBAZAM"
+  },
+  {
+    "N05BA10": "KETAZOLAM"
+  },
+  {
+    "N05BA11": "PRAZEPAM"
+  },
+  {
+    "N05BA12": "ALPRAZOLAM"
+  },
+  {
+    "N05BA13": "HALAZEPAM"
+  },
+  {
+    "N05BA14": "PINAZEPAM"
+  },
+  {
+    "N05BA15": "CAMAZEPAM"
+  },
+  {
+    "N05BA16": "NORDAZEPAM"
+  },
+  {
+    "N05BA17": "FLUDIAZEPAM"
+  },
+  {
+    "N05BA18": "ETHYL LOFLAZEPATE"
+  },
+  {
+    "N05BA19": "ETIZOLAM"
+  },
+  {
+    "N05BA21": "CLOTIAZEPAM"
+  },
+  {
+    "N05BA22": "CLOXAZOLAM"
+  },
+  {
+    "N05BA23": "TOFISOPAM"
+  },
+  {
+    "N05BA56": "LORAZEPAM, COMBINATIONS"
+  },
+  {
+    "N05BB01": "HYDROXYZINE"
+  },
+  {
+    "N05BB02": "CAPTODIAME"
+  },
+  {
+    "N05BB51": "HYDROXYZINE, COMBINATIONS"
+  },
+  {
+    "N05BC01": "MEPROBAMATE"
+  },
+  {
+    "N05BC03": "EMYLCAMATE"
+  },
+  {
+    "N05BC04": "MEBUTAMATE"
+  },
+  {
+    "N05BC51": "MEPROBAMATE, COMBINATIONS"
+  },
+  {
+    "N05BD01": "BENZOCTAMINE"
+  },
+  {
+    "N05BE01": "BUSPIRONE"
+  },
+  {
+    "N05BX01": "MEPHENOXALONE"
+  },
+  {
+    "N05BX02": "GEDOCARNIL"
+  },
+  {
+    "N05BX03": "ETIFOXINE"
+  },
+  {
+    "N05CA01": "PENTOBARBITAL"
+  },
+  {
+    "N05CA02": "AMOBARBITAL"
+  },
+  {
+    "N05CA03": "BUTOBARBITAL"
+  },
+  {
+    "N05CA04": "BARBITAL"
+  },
+  {
+    "N05CA05": "APROBARBITAL"
+  },
+  {
+    "N05CA06": "SECOBARBITAL"
+  },
+  {
+    "N05CA07": "TALBUTAL"
+  },
+  {
+    "N05CA08": "VINYLBITAL"
+  },
+  {
+    "N05CA09": "VINBARBITAL"
+  },
+  {
+    "N05CA10": "CYCLOBARBITAL"
+  },
+  {
+    "N05CA11": "HEPTABARBITAL"
+  },
+  {
+    "N05CA12": "REPOSAL"
+  },
+  {
+    "N05CA15": "METHOHEXITAL"
+  },
+  {
+    "N05CA16": "HEXOBARBITAL"
+  },
+  {
+    "N05CA19": "THIOPENTAL"
+  },
+  {
+    "N05CA20": "ETALLOBARBITAL"
+  },
+  {
+    "N05CA21": "ALLOBARBITAL"
+  },
+  {
+    "N05CA22": "PROXIBARBAL"
+  },
+  {
+    "N05CB01": "COMBINATIONS OF BARBITURATES"
+  },
+  {
+    "N05CB02": "BARBITURATES IN COMBINATION WITH OTHER DRUGS"
+  },
+  {
+    "N05CC01": "CHLORAL HYDRATE"
+  },
+  {
+    "N05CC02": "CHLORALODOL"
+  },
+  {
+    "N05CC03": "ACETYLGLYCINAMIDE CHLORAL HYDRATE"
+  },
+  {
+    "N05CC04": "DICHLORALPHENAZONE"
+  },
+  {
+    "N05CC05": "PARALDEHYDE"
+  },
+  {
+    "N05CD01": "FLURAZEPAM"
+  },
+  {
+    "N05CD02": "NITRAZEPAM"
+  },
+  {
+    "N05CD03": "FLUNITRAZEPAM"
+  },
+  {
+    "N05CD04": "ESTAZOLAM"
+  },
+  {
+    "N05CD05": "TRIAZOLAM"
+  },
+  {
+    "N05CD05": "TRIAZOLAM"
+  },
+  {
+    "N05CD06": "LORMETAZEPAM"
+  },
+  {
+    "N05CD07": "TEMAZEPAM"
+  },
+  {
+    "N05CD08": "MIDAZOLAM"
+  },
+  {
+    "N05CD09": "BROTIZOLAM"
+  },
+  {
+    "N05CD10": "QUAZEPAM"
+  },
+  {
+    "N05CD11": "LOPRAZOLAM"
+  },
+  {
+    "N05CD12": "DOXEFAZEPAM"
+  },
+  {
+    "N05CD13": "CINOLAZEPAM"
+  },
+  {
+    "N05CE01": "GLUTETHIMIDE"
+  },
+  {
+    "N05CE02": "METHYPRYLON"
+  },
+  {
+    "N05CE03": "PYRITHYLDIONE"
+  },
+  {
+    "N05CF01": "ZOPICLONE"
+  },
+  {
+    "N05CF02": "ZOLPIDEM"
+  },
+  {
+    "N05CF03": "ZALEPLON"
+  },
+  {
+    "N05CM01": "METHAQUALONE"
+  },
+  {
+    "N05CM02": "CLOMETHIAZOLE"
+  },
+  {
+    "N05CM03": "BROMISOVAL"
+  },
+  {
+    "N05CM04": "CARBROMAL"
+  },
+  {
+    "N05CM05": "SCOPOLAMINE"
+  },
+  {
+    "N05CM06": "PROPIOMAZINE"
+  },
+  {
+    "N05CM07": "TRICLOFOS"
+  },
+  {
+    "N05CM08": "ETHCHLORVYNOL"
+  },
+  {
+    "N05CM09": "VALERIAN"
+  },
+  {
+    "N05CM10": "HEXAPROPYMATE"
+  },
+  {
+    "N05CM11": "BROMIDES"
+  },
+  {
+    "N05CM12": "APRONAL"
+  },
+  {
+    "N05CM13": "VALNOCTAMIDE"
+  },
+  {
+    "N05CM15": "METHYLPENTYNOL"
+  },
+  {
+    "N05CM16": "NIAPRAZINE"
+  },
+  {
+    "N05CX01": "MEPROBAMATE, COMBINATIONS"
+  },
+  {
+    "N05CX02": "METHAQUALONE, COMBINATIONS"
+  },
+  {
+    "N05CX03": "METHYLPENTYNOL, COMBINATIONS"
+  },
+  {
+    "N05CX04": "CLOMETHIAZOLE, COMBINATIONS"
+  },
+  {
+    "N05CX05": "EMEPRONIUM, COMBINATIONS"
+  },
+  {
+    "N05CX06": "DIPIPERONYLAMINOETHANOL, COMBINATIONS"
+  },
+  {
+    "N06AA01": "DESIPRAMINE"
+  },
+  {
+    "N06AA02": "IMIPRAMINE"
+  },
+  {
+    "N06AA03": "IMIPRAMINE OXIDE"
+  },
+  {
+    "N06AA04": "CLOMIPRAMINE"
+  },
+  {
+    "N06AA05": "OPIPRAMOL"
+  },
+  {
+    "N06AA06": "TRIMIPRAMINE"
+  },
+  {
+    "N06AA07": "LOFEPRAMINE"
+  },
+  {
+    "N06AA08": "DIBENZEPIN"
+  },
+  {
+    "N06AA09": "AMITRIPTYLINE"
+  },
+  {
+    "N06AA10": "NORTRIPTYLINE"
+  },
+  {
+    "N06AA10": "NORTRIPTYLINE"
+  },
+  {
+    "N06AA11": "PROTRIPTYLINE"
+  },
+  {
+    "N06AA12": "DOXEPIN"
+  },
+  {
+    "N06AA13": "IPRINDOLE"
+  },
+  {
+    "N06AA14": "MELITRACEN"
+  },
+  {
+    "N06AA15": "BUTRIPTYLINE"
+  },
+  {
+    "N06AA16": "DOSULEPIN"
+  },
+  {
+    "N06AA17": "AMOXAPINE"
+  },
+  {
+    "N06AA18": "DIMETACRINE"
+  },
+  {
+    "N06AA19": "AMINEPTINE"
+  },
+  {
+    "N06AA21": "MAPROTILINE"
+  },
+  {
+    "N06AA23": "QUINUPRAMINE"
+  },
+  {
+    "N06AB02": "ZIMELDINE"
+  },
+  {
+    "N06AB03": "FLUOXETINE"
+  },
+  {
+    "N06AB04": "CITALOPRAM"
+  },
+  {
+    "N06AB05": "PAROXETINE"
+  },
+  {
+    "N06AB06": "SERTRALINE"
+  },
+  {
+    "N06AB07": "ALAPROCLATE"
+  },
+  {
+    "N06AB08": "FLUVOXAMINE"
+  },
+  {
+    "N06AB09": "ETOPERIDONE"
+  },
+  {
+    "N06AF01": "ISOCARBOXAZID"
+  },
+  {
+    "N06AF02": "NIALAMIDE"
+  },
+  {
+    "N06AF03": "PHENELZINE"
+  },
+  {
+    "N06AF04": "TRANYLCYPROMINE"
+  },
+  {
+    "N06AF05": "IPRONIAZIDE"
+  },
+  {
+    "N06AG02": "MOCLOBEMIDE"
+  },
+  {
+    "N06AG03": "TOLOXATONE"
+  },
+  {
+    "N06AX01": "OXITRIPTAN"
+  },
+  {
+    "N06AX02": "TRYPTOPHAN"
+  },
+  {
+    "N06AX03": "MIANSERIN"
+  },
+  {
+    "N06AX04": "NOMIFENSINE"
+  },
+  {
+    "N06AX05": "TRAZODONE"
+  },
+  {
+    "N06AX06": "NEFAZODONE"
+  },
+  {
+    "N06AX07": "MINAPRINE"
+  },
+  {
+    "N06AX08": "BIFEMELANE"
+  },
+  {
+    "N06AX09": "VILOXAZINE"
+  },
+  {
+    "N06AX10": "OXAFLOZANE"
+  },
+  {
+    "N06AX11": "MIRTAZAPINE"
+  },
+  {
+    "N06AX12": "AMFEBUTAMONE"
+  },
+  {
+    "N06AX13": "MEDIFOXAMINE"
+  },
+  {
+    "N06AX14": "TIANEPTINE"
+  },
+  {
+    "N06AX15": "PIVAGABINE"
+  },
+  {
+    "N06AX16": "VENLAFAXINE"
+  },
+  {
+    "N06AX17": "MILNACIPRAN"
+  },
+  {
+    "N06AX18": "REBOXETINE"
+  },
+  {
+    "N06BA01": "AMFETAMINE"
+  },
+  {
+    "N06BA02": "DEXAMFETAMINE"
+  },
+  {
+    "N06BA03": "METAMFETAMINE"
+  },
+  {
+    "N06BA04": "METHYLPHENIDATE"
+  },
+  {
+    "N06BA05": "PEMOLINE"
+  },
+  {
+    "N06BA06": "FENCAMFAMIN"
+  },
+  {
+    "N06BA07": "MODAFINIL"
+  },
+  {
+    "N06BA08": "FENOZOLONE"
+  },
+  {
+    "N06BC01": "CAFFEINE"
+  },
+  {
+    "N06BX01": "MECLOFENOXATE"
+  },
+  {
+    "N06BX02": "PYRITINOL"
+  },
+  {
+    "N06BX03": "PIRACETAM"
+  },
+  {
+    "N06BX03": "PIRACETAM"
+  },
+  {
+    "N06BX04": "DEANOL"
+  },
+  {
+    "N06BX05": "FIPEXIDE"
+  },
+  {
+    "N06BX06": "CITICOLINE"
+  },
+  {
+    "N06BX07": "OXIRACETAM"
+  },
+  {
+    "N06BX08": "PIRISUDANOL"
+  },
+  {
+    "N06BX09": "LINOPIRDINE"
+  },
+  {
+    "N06BX10": "NIZOFENONE"
+  },
+  {
+    "N06BX11": "ANIRACETAM"
+  },
+  {
+    "N06BX12": "ACETYLCARNITINE"
+  },
+  {
+    "N06BX13": "IDEBENONE"
+  },
+  {
+    "N06BX14": "PROLINTANE"
+  },
+  {
+    "N06BX15": "PIPRADROL"
+  },
+  {
+    "N06BX16": "PRAMIRACETAM"
+  },
+  {
+    "N06BX17": "ADRAFINIL"
+  },
+  {
+    "N06BX18": "VINPOCETINE"
+  },
+  {
+    "N06BX19": "GINKGO BILOBA"
+  },
+  {
+    "N06CA01": "AMITRIPTYLINE AND PSYCHOLEPTICS"
+  },
+  {
+    "N06CA02": "MELITRACEN AND PSYCHOLEPTICS"
+  },
+  {
+    "N07AA01": "NEOSTIGMINE"
+  },
+  {
+    "N07AA01": "NEOSTIGMINE"
+  },
+  {
+    "N07AA02": "PYRIDOSTIGMINE"
+  },
+  {
+    "N07AA02": "PYRIDOSTIGMINE"
+  },
+  {
+    "N07AA03": "DISTIGMINE"
+  },
+  {
+    "N07AA03": "DISTIGMINE"
+  },
+  {
+    "N07AA04": "TACRINE"
+  },
+  {
+    "N07AA05": "DONEPEZIL"
+  },
+  {
+    "N07AA06": "RIVASTIGMINE"
+  },
+  {
+    "N07AA30": "AMBENONIUM"
+  },
+  {
+    "N07AA51": "NEOSTIGMINE, COMBINATIONS"
+  },
+  {
+    "N07AB01": "CARBACHOL"
+  },
+  {
+    "N07AB01": "CARBACHOL"
+  },
+  {
+    "N07AB02": "BETHANECHOL"
+  },
+  {
+    "N07AX01": "PILOCARPINE"
+  },
+  {
+    "N07AX01": "PILOCARPINE"
+  },
+  {
+    "N07AX02": "CHOLINE ALFOSCERATE"
+  },
+  {
+    "N07BA01": "NICOTINE"
+  },
+  {
+    "N07BA01": "NICOTINE"
+  },
+  {
+    "N07BA01": "NICOTINE"
+  },
+  {
+    "N07BA01": "NICOTINE"
+  },
+  {
+    "N07CA01": "BETAHISTINE"
+  },
+  {
+    "N07CA02": "CINNARIZINE"
+  },
+  {
+    "N07CA03": "FLUNARIZINE"
+  },
+  {
+    "N07CA04": "ACETYLLEUCINE"
+  },
+  {
+    "N07XX01": "TIRILAZAD"
+  },
+  {
+    "N07XX02": "RILUZOLE"
+  },
+  {
+    "P01AA01": "BROXYQUINOLINE"
+  },
+  {
+    "P01AA02": "CLIOQUINOL"
+  },
+  {
+    "P01AA04": "CHLORQUINALDOL"
+  },
+  {
+    "P01AA05": "TILBROQUINOL"
+  },
+  {
+    "P01AA52": "CLIOQUINOL, COMBINATIONS"
+  },
+  {
+    "P01AB01": "METRONIDAZOLE"
+  },
+  {
+    "P01AB02": "TINIDAZOLE"
+  },
+  {
+    "P01AB03": "ORNIDAZOLE"
+  },
+  {
+    "P01AB04": "AZANIDAZOLE"
+  },
+  {
+    "P01AB05": "PROPENIDAZOLE"
+  },
+  {
+    "P01AB06": "NIMORAZOLE"
+  },
+  {
+    "P01AB07": "SECNIDAZOLE"
+  },
+  {
+    "P01AC01": "DILOXANIDE"
+  },
+  {
+    "P01AC02": "CLEFAMIDE"
+  },
+  {
+    "P01AC03": "ETOFAMIDE"
+  },
+  {
+    "P01AC04": "TECLOZAN"
+  },
+  {
+    "P01AR01": "ARSTHINOL"
+  },
+  {
+    "P01AR02": "DIFETARSONE"
+  },
+  {
+    "P01AR03": "GLYCOBIARSOL"
+  },
+  {
+    "P01AR53": "GLYCOBIARSOL, COMBINATIONS"
+  },
+  {
+    "P01AX01": "CHINIOFON"
+  },
+  {
+    "P01AX02": "EMETINE"
+  },
+  {
+    "P01AX04": "PHANQUINONE"
+  },
+  {
+    "P01AX05": "MEPACRINE"
+  },
+  {
+    "P01AX06": "ATOVAQUONE"
+  },
+  {
+    "P01AX07": "TRIMETREXATE"
+  },
+  {
+    "P01AX08": "TENONITROZOLE"
+  },
+  {
+    "P01AX52": "EMETINE, COMBINATIONS"
+  },
+  {
+    "P01BA01": "CHLOROQUINE"
+  },
+  {
+    "P01BA02": "HYDROXYCHLOROQUINE"
+  },
+  {
+    "P01BA03": "PRIMAQUINE"
+  },
+  {
+    "P01BA05": "MEFLOQUINE"
+  },
+  {
+    "P01BA06": "AMODIAQUINE"
+  },
+  {
+    "P01BB01": "PROGUANIL"
+  },
+  {
+    "P01BB01": "PROGUANIL"
+  },
+  {
+    "P01BB02": "CYCLOGUANIL EMBONATE"
+  },
+  {
+    "P01BB51": "PROGUANIL, COMBINATIONS"
+  },
+  {
+    "P01BC01": "QUININE"
+  },
+  {
+    "P01BD01": "PYRIMETHAMINE"
+  },
+  {
+    "P01BD51": "PYRIMETHAMINE, COMBINATIONS"
+  },
+  {
+    "P01BX01": "HALOFANTRINE"
+  },
+  {
+    "P01CA02": "BENZNIDAZOLE"
+  },
+  {
+    "P01CB01": "MEGLUMINE ANTIMONATE"
+  },
+  {
+    "P01CB02": "SODIUM STIBOGLUCONATE"
+  },
+  {
+    "P01CC01": "NIFURTIMOX"
+  },
+  {
+    "P01CC02": "NITROFURAL"
+  },
+  {
+    "P01CD01": "MELARSOPROL"
+  },
+  {
+    "P01CD02": "ACETARSOL"
+  },
+  {
+    "P01CX01": "PENTAMIDINE ISETHIONATE"
+  },
+  {
+    "P01CX02": "SURAMIN SODIUM"
+  },
+  {
+    "P01CX03": "EFLORNITHINE"
+  },
+  {
+    "P02BA01": "PRAZIQUANTEL"
+  },
+  {
+    "P02BA02": "OXAMNIQUINE"
+  },
+  {
+    "P02BB01": "METRIFONATE"
+  },
+  {
+    "P02BX01": "BITHIONOL"
+  },
+  {
+    "P02BX02": "NIRIDAZOLE"
+  },
+  {
+    "P02BX03": "STIBOPHEN"
+  },
+  {
+    "P02CA01": "MEBENDAZOLE"
+  },
+  {
+    "P02CA02": "TIABENDAZOLE"
+  },
+  {
+    "P02CA03": "ALBENDAZOLE"
+  },
+  {
+    "P02CA04": "CICLOBENDAZOLE"
+  },
+  {
+    "P02CA05": "FLUBENDAZOLE"
+  },
+  {
+    "P02CA06": "FENBENDAZOLE"
+  },
+  {
+    "P02CA51": "MEBENDAZOLE, COMBINATIONS"
+  },
+  {
+    "P02CB01": "PIPERAZINE"
+  },
+  {
+    "P02CB02": "DIETHYLCARBAMAZINE"
+  },
+  {
+    "P02CC01": "PYRANTEL"
+  },
+  {
+    "P02CC02": "OXANTEL"
+  },
+  {
+    "P02CE01": "LEVAMISOLE"
+  },
+  {
+    "P02CF01": "IVERMECTIN"
+  },
+  {
+    "P02CX01": "PYRVINIUM"
+  },
+  {
+    "P02CX02": "BEPHENIUM"
+  },
+  {
+    "P02DA01": "NICLOSAMIDE"
+  },
+  {
+    "P02DX01": "DESASPIDIN"
+  },
+  {
+    "P02DX02": "DICHLOROPHEN"
+  },
+  {
+    "P03AA01": "DIXANTHOGEN"
+  },
+  {
+    "P03AA02": "POTASSIUM POLYSULFIDE"
+  },
+  {
+    "P03AA03": "MESULFEN"
+  },
+  {
+    "P03AA04": "DISULFIRAM"
+  },
+  {
+    "P03AA05": "THIRAM"
+  },
+  {
+    "P03AA54": "DISULFIRAM, COMBINATIONS"
+  },
+  {
+    "P03AB01": "CLOFENOTANE"
+  },
+  {
+    "P03AB02": "LINDANE"
+  },
+  {
+    "P03AB51": "CLOFENOTANE, COMBINATIONS"
+  },
+  {
+    "P03AC01": "PYRETHRUM"
+  },
+  {
+    "P03AC02": "BIOALLETHRIN"
+  },
+  {
+    "P03AC03": "PHENOTHRIN"
+  },
+  {
+    "P03AC04": "PERMETHRIN"
+  },
+  {
+    "P03AC51": "PYRETHRUM, COMBINATIONS"
+  },
+  {
+    "P03AC52": "BIOALLETHRIN, COMBINATIONS"
+  },
+  {
+    "P03AC53": "PHENOTHRIN, COMBINATIONS"
+  },
+  {
+    "P03AX01": "BENZYL BENZOATE"
+  },
+  {
+    "P03AX02": "COPPER OLEINATE"
+  },
+  {
+    "P03AX03": "MALATHION"
+  },
+  {
+    "P03AX04": "QUASSIA"
+  },
+  {
+    "P03BA01": "CYFLUTHRIN"
+  },
+  {
+    "P03BA02": "CYPERMETHRIN"
+  },
+  {
+    "P03BA03": "DECAMETHRIN"
+  },
+  {
+    "P03BA04": "TETRAMETHRIN"
+  },
+  {
+    "P03BX01": "DIETHYLTOLUAMIDE"
+  },
+  {
+    "P03BX02": "DIMETHYLPHTHALATE"
+  },
+  {
+    "P03BX03": "DIBUTYLPHTHALATE"
+  },
+  {
+    "P03BX04": "DIBUTYLSUCCINATE"
+  },
+  {
+    "P03BX05": "DIMETHYLCARBATE"
+  },
+  {
+    "P03BX06": "ETOHEXADIOL"
+  },
+  {
+    "R01AA02": "CYCLOPENTAMINE"
+  },
+  {
+    "R01AA03": "EPHEDRINE"
+  },
+  {
+    "R01AA04": "PHENYLEPHRINE"
+  },
+  {
+    "R01AA05": "OXYMETAZOLINE"
+  },
+  {
+    "R01AA06": "TETRYZOLINE"
+  },
+  {
+    "R01AA07": "XYLOMETAZOLINE"
+  },
+  {
+    "R01AA08": "NAPHAZOLINE"
+  },
+  {
+    "R01AA09": "TRAMAZOLINE"
+  },
+  {
+    "R01AA10": "METIZOLINE"
+  },
+  {
+    "R01AA11": "TUAMINOHEPTANE"
+  },
+  {
+    "R01AA12": "FENOXAZOLINE"
+  },
+  {
+    "R01AA13": "TYMAZOLINE"
+  },
+  {
+    "R01AB01": "PHENYLEPHRINE"
+  },
+  {
+    "R01AB02": "NAPHAZOLINE"
+  },
+  {
+    "R01AB03": "TETRYZOLINE"
+  },
+  {
+    "R01AB05": "EPHEDRINE"
+  },
+  {
+    "R01AB06": "XYLOMETAZOLINE"
+  },
+  {
+    "R01AB07": "OXYMETAZOLINE"
+  },
+  {
+    "R01AB08": "TUAMINOHEPTANE"
+  },
+  {
+    "R01AC01": "CROMOGLICIC ACID"
+  },
+  {
+    "R01AC02": "LEVOCABASTINE"
+  },
+  {
+    "R01AC03": "AZELASTINE"
+  },
+  {
+    "R01AC04": "ANTAZOLINE"
+  },
+  {
+    "R01AC05": "SPAGLUMIC ACID"
+  },
+  {
+    "R01AC06": "THONZYLAMINE"
+  },
+  {
+    "R01AC07": "NEDOCROMIL"
+  },
+  {
+    "R01AC51": "CROMOGLICIC ACID, COMBINATIONS"
+  },
+  {
+    "R01AD01": "BECLOMETASONE"
+  },
+  {
+    "R01AD02": "PREDNISOLONE"
+  },
+  {
+    "R01AD03": "DEXAMETHASONE"
+  },
+  {
+    "R01AD04": "FLUNISOLIDE"
+  },
+  {
+    "R01AD05": "BUDESONIDE"
+  },
+  {
+    "R01AD06": "BETAMETHASONE"
+  },
+  {
+    "R01AD07": "TIXOCORTOL"
+  },
+  {
+    "R01AD08": "FLUTICASONE"
+  },
+  {
+    "R01AD09": "MOMETASONE"
+  },
+  {
+    "R01AD11": "TRIAMCINOLONE"
+  },
+  {
+    "R01AD53": "DEXAMETHASONE, COMBINATIONS"
+  },
+  {
+    "R01AD57": "TIXOCORTOL, COMBINATIONS"
+  },
+  {
+    "R01AD60": "HYDROCORTISONE, COMBINATIONS"
+  },
+  {
+    "R01AX01": "CALCIUM HEXAMINE THIOCYANATE"
+  },
+  {
+    "R01AX02": "RETINOL"
+  },
+  {
+    "R01AX03": "IPRATROPIUM BROMIDE"
+  },
+  {
+    "R01AX05": "RITIOMETAN"
+  },
+  {
+    "R01AX06": "MUPIROCIN"
+  },
+  {
+    "R01AX07": "HEXAMIDINE"
+  },
+  {
+    "R01AX10": "VARIOUS"
+  },
+  {
+    "R01AX30": "NASAL PREPARATIONS, COMBINATIONS"
+  },
+  {
+    "R01BA01": "PHENYLPROPANOLAMINE"
+  },
+  {
+    "R01BA02": "PSEUDOEPHEDRINE"
+  },
+  {
+    "R01BA03": "PHENYLEPHRINE"
+  },
+  {
+    "R01BA51": "PHENYLPROPANOLAMINE, COMBINATIONS"
+  },
+  {
+    "R01BA52": "PSEUDOEPHEDRINE, COMBINATIONS"
+  },
+  {
+    "R01BA53": "PHENYLEPHRINE, COMBINATIONS"
+  },
+  {
+    "R02AA01": "AMBAZONE"
+  },
+  {
+    "R02AA02": "DEQUALINIUM"
+  },
+  {
+    "R02AA03": "DICHLOROBENZYL ALCOHOL"
+  },
+  {
+    "R02AA05": "CHLORHEXIDINE"
+  },
+  {
+    "R02AA06": "CETYLPYRIDINIUM"
+  },
+  {
+    "R02AA09": "BENZETHONIUM"
+  },
+  {
+    "R02AA10": "MYRISTYL-BENZALKONIUM"
+  },
+  {
+    "R02AA11": "CHLORQUINALDOL"
+  },
+  {
+    "R02AA12": "HEXYLRESORCINOL"
+  },
+  {
+    "R02AA13": "ACRIFLAVINIUM CHLORIDE"
+  },
+  {
+    "R02AA14": "OXYQUINOLINE"
+  },
+  {
+    "R02AA15": "POVIDONE-IODINE"
+  },
+  {
+    "R02AA16": "BENZALKONIUM"
+  },
+  {
+    "R02AA20": "VARIOUS"
+  },
+  {
+    "R02AB01": "NEOMYCIN"
+  },
+  {
+    "R02AB02": "TYROTHRICIN"
+  },
+  {
+    "R02AB03": "FUSAFUNGINE"
+  },
+  {
+    "R02AB04": "BACITRACIN"
+  },
+  {
+    "R02AB30": "GRAMICIDIN"
+  },
+  {
+    "R02AD01": "BENZOCAINE"
+  },
+  {
+    "R02AD02": "LIDOCAINE"
+  },
+  {
+    "R02AD03": "COCAINE"
+  },
+  {
+    "R03AA01": "EPINEPHRINE"
+  },
+  {
+    "R03AA01": "EPINEPHRINE"
+  },
+  {
+    "R03AB02": "ISOPRENALINE"
+  },
+  {
+    "R03AB02": "ISOPRENALINE"
+  },
+  {
+    "R03AB03": "ORCIPRENALINE"
+  },
+  {
+    "R03AC02": "SALBUTAMOL"
+  },
+  {
+    "R03AC02": "SALBUTAMOL"
+  },
+  {
+    "R03AC03": "TERBUTALINE"
+  },
+  {
+    "R03AC03": "TERBUTALINE"
+  },
+  {
+    "R03AC04": "FENOTEROL"
+  },
+  {
+    "R03AC04": "FENOTEROL"
+  },
+  {
+    "R03AC05": "RIMITEROL"
+  },
+  {
+    "R03AC06": "HEXOPRENALINE"
+  },
+  {
+    "R03AC07": "ISOETARINE"
+  },
+  {
+    "R03AC08": "PIRBUTEROL"
+  },
+  {
+    "R03AC09": "TRETOQUINOL"
+  },
+  {
+    "R03AC10": "CARBUTEROL"
+  },
+  {
+    "R03AC11": "TULOBUTEROL"
+  },
+  {
+    "R03AC12": "SALMETEROL"
+  },
+  {
+    "R03AC13": "FORMOTEROL"
+  },
+  {
+    "R03AC14": "CLENBUTEROL"
+  },
+  {
+    "R03AC15": "REPROTEROL"
+  },
+  {
+    "R03AC16": "PROCATEROL"
+  },
+  {
+    "R03AC17": "BITOLTEROL"
+  },
+  {
+    "R03AK01": "EPINEPHRINE AND OTHER ANTI-ASTHMATICS"
+  },
+  {
+    "R03AK02": "ISOPRENALINE AND OTHER ANTI-ASTHMATICS"
+  },
+  {
+    "R03AK03": "FENOTEROL AND OTHER ANTI-ASTHMATICS"
+  },
+  {
+    "R03AK04": "SALBUTAMOL AND OTHER ANTI-ASTHMATICS"
+  },
+  {
+    "R03AK05": "REPROTEROL AND OTHER ANTI-ASTHMATICS"
+  },
+  {
+    "R03AK06": "SALMETEROL AND OTHER ANTI-ASTHMATICS"
+  },
+  {
+    "R03BA01": "BECLOMETASONE"
+  },
+  {
+    "R03BA01": "BECLOMETASONE"
+  },
+  {
+    "R03BA02": "BUDESONIDE"
+  },
+  {
+    "R03BA02": "BUDESONIDE"
+  },
+  {
+    "R03BA03": "FLUNISOLIDE"
+  },
+  {
+    "R03BA04": "BETAMETHASONE"
+  },
+  {
+    "R03BA05": "FLUTICASONE"
+  },
+  {
+    "R03BB01": "IPRATROPIUM BROMIDE"
+  },
+  {
+    "R03BB01": "IPRATROPIUM BROMIDE"
+  },
+  {
+    "R03BB02": "OXITROPIUM BROMIDE"
+  },
+  {
+    "R03BB02": "OXITROPIUM BROMIDE"
+  },
+  {
+    "R03BB03": "STRAMONI PREPARATIONS"
+  },
+  {
+    "R03BC01": "CROMOGLICIC ACID"
+  },
+  {
+    "R03BC01": "CROMOGLICIC ACID"
+  },
+  {
+    "R03BC03": "NEDOCROMIL"
+  },
+  {
+    "R03BX01": "FENSPIRIDE"
+  },
+  {
+    "R03CA02": "EPHEDRINE"
+  },
+  {
+    "R03CB01": "ISOPRENALINE"
+  },
+  {
+    "R03CB02": "METHOXYPHENAMINE"
+  },
+  {
+    "R03CB03": "ORCIPRENALINE"
+  },
+  {
+    "R03CB51": "ISOPRENALINE, COMBINATIONS"
+  },
+  {
+    "R03CB53": "ORCIPRENALINE, COMBINATIONS"
+  },
+  {
+    "R03CC02": "SALBUTAMOL"
+  },
+  {
+    "R03CC03": "TERBUTALINE"
+  },
+  {
+    "R03CC04": "FENOTEROL"
+  },
+  {
+    "R03CC05": "HEXOPRENALINE"
+  },
+  {
+    "R03CC06": "ISOETARINE"
+  },
+  {
+    "R03CC07": "PIRBUTEROL"
+  },
+  {
+    "R03CC08": "PROCATEROL"
+  },
+  {
+    "R03CC09": "TRETOQUINOL"
+  },
+  {
+    "R03CC09": "TRETOQUINOL"
+  },
+  {
+    "R03CC10": "CARBUTEROL"
+  },
+  {
+    "R03CC11": "TULOBUTEROL"
+  },
+  {
+    "R03CC12": "BAMBUTEROL"
+  },
+  {
+    "R03CC13": "CLENBUTEROL"
+  },
+  {
+    "R03CC14": "REPROTEROL"
+  },
+  {
+    "R03CC53": "TERBUTALINE, COMBINATIONS"
+  },
+  {
+    "R03DA01": "DIPROPHYLLINE"
+  },
+  {
+    "R03DA02": "CHOLINE THEOPHYLLINATE"
+  },
+  {
+    "R03DA03": "PROXYPHYLLINE"
+  },
+  {
+    "R03DA04": "THEOPHYLLINE"
+  },
+  {
+    "R03DA05": "AMINOPHYLLINE"
+  },
+  {
+    "R03DA06": "ETAMIPHYLLINE"
+  },
+  {
+    "R03DA07": "THEOBROMINE"
+  },
+  {
+    "R03DA08": "BAMIFYLLINE"
+  },
+  {
+    "R03DA09": "ACEFYLLINE PIPERAZINE"
+  },
+  {
+    "R03DA10": "BUFYLLINE"
+  },
+  {
+    "R03DA11": "DOXOFYLLINE"
+  },
+  {
+    "R03DA20": "COMBINATIONS OF XANTHINES"
+  },
+  {
+    "R03DA51": "DIPROPHYLLINE, COMBINATIONS"
+  },
+  {
+    "R03DA54": "THEOPHYLLINE, COMBINATIONS EXCL. PSYCHOLEPTICS"
+  },
+  {
+    "R03DA55": "AMINOPHYLLINE, COMBINATIONS"
+  },
+  {
+    "R03DA57": "THEOBROMINE, COMBINATIONS"
+  },
+  {
+    "R03DA74": "THEOPHYLLINE, COMBINATIONS WITH PSYCHOLEPTICS"
+  },
+  {
+    "R03DB01": "DIPROPHYLLINE AND ADRENERGICS"
+  },
+  {
+    "R03DB02": "CHOLINE THEOPHYLLINATE AND ADRENERGICS"
+  },
+  {
+    "R03DB03": "PROXYPHYLLINE AND ADRENERGICS"
+  },
+  {
+    "R03DB04": "THEOPHYLLINE AND ADRENERGICS"
+  },
+  {
+    "R03DB05": "AMINOPHYLLINE AND ADRENERGICS"
+  },
+  {
+    "R03DB06": "ETAMIPHYLLINE AND ADRENERGICS"
+  },
+  {
+    "R03DC01": "ZAFIRLUKAST"
+  },
+  {
+    "R03DC02": "PRANLUKAST"
+  },
+  {
+    "R03DC03": "MONTELUKAST"
+  },
+  {
+    "R03DX01": "AMLEXANOX"
+  },
+  {
+    "R03DX02": "EPROZINOL"
+  },
+  {
+    "R03DX03": "FENSPIRIDE"
+  },
+  {
+    "R03DX04": "IBUDILAST"
+  },
+  {
+    "R05CA01": "TYLOXAPOL"
+  },
+  {
+    "R05CA02": "POTASSIUM IODIDE"
+  },
+  {
+    "R05CA03": "GUAIFENESIN"
+  },
+  {
+    "R05CA04": "IPECACUANHA"
+  },
+  {
+    "R05CA05": "ALTHEA ROOT"
+  },
+  {
+    "R05CA06": "SENEGA"
+  },
+  {
+    "R05CA07": "ANTIMONY PENTASULFIDE"
+  },
+  {
+    "R05CA08": "CREOSOTE"
+  },
+  {
+    "R05CA09": "GUAIACOLSULFONATE"
+  },
+  {
+    "R05CA10": "EXPECTORANTS, COMBINATIONS"
+  },
+  {
+    "R05CA11": "LEVOVERBENONE"
+  },
+  {
+    "R05CB01": "ACETYLCYSTEINE"
+  },
+  {
+    "R05CB01": "ACETYLCYSTEINE"
+  },
+  {
+    "R05CB02": "BROMHEXINE"
+  },
+  {
+    "R05CB03": "CARBOCISTEINE"
+  },
+  {
+    "R05CB04": "EPRAZINONE"
+  },
+  {
+    "R05CB05": "MESNA"
+  },
+  {
+    "R05CB06": "AMBROXOL"
+  },
+  {
+    "R05CB07": "SOBREROL"
+  },
+  {
+    "R05CB08": "DOMIODOL"
+  },
+  {
+    "R05CB09": "LETOSTEINE"
+  },
+  {
+    "R05CB10": "MUCOLYTICS, COMBINATIONS"
+  },
+  {
+    "R05CB11": "STEPRONIN"
+  },
+  {
+    "R05CB12": "TIOPRONIN"
+  },
+  {
+    "R05CB13": "DORNASE ALFA (DESOXYRIBONUCLEASE)"
+  },
+  {
+    "R05CB14": "NELTENEXINE"
+  },
+  {
+    "R05CB15": "ERDOSTEINE"
+  },
+  {
+    "R05DA01": "ETHYLMORPHINE"
+  },
+  {
+    "R05DA03": "HYDROCODONE"
+  },
+  {
+    "R05DA04": "CODEINE"
+  },
+  {
+    "R05DA05": "OPIUM ALKALOIDS WITH MORPHINE"
+  },
+  {
+    "R05DA06": "NORMETHADONE"
+  },
+  {
+    "R05DA07": "NOSCAPINE"
+  },
+  {
+    "R05DA08": "PHOLCODINE"
+  },
+  {
+    "R05DA09": "DEXTROMETHORPHAN"
+  },
+  {
+    "R05DA10": "THEBACON"
+  },
+  {
+    "R05DA11": "DIMEMORFAN"
+  },
+  {
+    "R05DA20": "OPIUM ALKALOIDS AND DERIVATIVES, COMBINATIONS"
+  },
+  {
+    "R05DB01": "BENZONATATE"
+  },
+  {
+    "R05DB02": "BENPROPERINE"
+  },
+  {
+    "R05DB03": "CLOBUTINOL"
+  },
+  {
+    "R05DB04": "ISOAMINILE"
+  },
+  {
+    "R05DB05": "PENTOXYVERINE"
+  },
+  {
+    "R05DB07": "OXOLAMINE"
+  },
+  {
+    "R05DB09": "OXELADIN"
+  },
+  {
+    "R05DB10": "CLOFEDANOL"
+  },
+  {
+    "R05DB11": "PIPAZETATE"
+  },
+  {
+    "R05DB12": "BIBENZONIUM BROMIDE"
+  },
+  {
+    "R05DB13": "BUTAMIRATE"
+  },
+  {
+    "R05DB14": "FEDRILATE"
+  },
+  {
+    "R05DB15": "ZIPEPROL"
+  },
+  {
+    "R05DB16": "DIBUNATE"
+  },
+  {
+    "R05DB17": "DROXYPROPINE"
+  },
+  {
+    "R05DB18": "PRENOXDIAZINE"
+  },
+  {
+    "R05DB19": "DROPROPIZINE"
+  },
+  {
+    "R05DB20": "OTHER COUGH SUPPRESSANTS, COMBINATIONS"
+  },
+  {
+    "R05DB21": "CLOPERASTINE"
+  },
+  {
+    "R05DB22": "MEPROTIXOL"
+  },
+  {
+    "R05DB23": "PIPERIDIONE"
+  },
+  {
+    "R05DB24": "TIPEPIDINE"
+  },
+  {
+    "R05DB25": "MORCLOFONE"
+  },
+  {
+    "R05DB26": "NEPINALONE"
+  },
+  {
+    "R05FA01": "OPIUM DERIVATIVES AND MUCOLYTICS"
+  },
+  {
+    "R05FA02": "OPIUM DERIVATIVES AND EXPECTORANTS"
+  },
+  {
+    "R05FB01": "COUGH SUPPRESSANTS AND MUCOLYTICS"
+  },
+  {
+    "R05FB02": "COUGH SUPPRESSANTS AND EXPECTORANTS"
+  },
+  {
+    "R06AA01": "BROMAZINE"
+  },
+  {
+    "R06AA02": "DIPHENHYDRAMINE"
+  },
+  {
+    "R06AA02": "DIPHENHYDRAMINE"
+  },
+  {
+    "R06AA04": "CLEMASTINE"
+  },
+  {
+    "R06AA06": "CHLORPHENOXAMINE"
+  },
+  {
+    "R06AA07": "DIPHENYLPYRALINE"
+  },
+  {
+    "R06AA08": "CARBINOXAMINE"
+  },
+  {
+    "R06AA09": "DOXYLAMINE"
+  },
+  {
+    "R06AA52": "DIPHENHYDRAMINE, COMBINATIONS"
+  },
+  {
+    "R06AA54": "CLEMASTINE, COMBINATIONS"
+  },
+  {
+    "R06AA56": "CHLORPHENOXAMINE, COMBINATIONS"
+  },
+  {
+    "R06AA57": "DIPHENYLPYRALINE, COMBINATIONS"
+  },
+  {
+    "R06AB01": "BROMPHENIRAMINE"
+  },
+  {
+    "R06AB02": "DEXCHLORPHENIRAMINE"
+  },
+  {
+    "R06AB03": "DIMETINDENE"
+  },
+  {
+    "R06AB04": "CHLORPHENIRAMINE"
+  },
+  {
+    "R06AB05": "PHENIRAMINE"
+  },
+  {
+    "R06AB06": "DEXBROMPHENIRAMINE"
+  },
+  {
+    "R06AB07": "TALASTINE"
+  },
+  {
+    "R06AB51": "BROMPHENIRAMINE, COMBINATIONS"
+  },
+  {
+    "R06AB52": "DEXCHLORPHENIRAMINE, COMBINATIONS"
+  },
+  {
+    "R06AB54": "CHLORPHENIRAMINE, COMBINATIONS"
+  },
+  {
+    "R06AB56": "DEXBROMPHENIRAMINE, COMBINATIONS"
+  },
+  {
+    "R06AC01": "MEPYRAMINE"
+  },
+  {
+    "R06AC02": "HISTAPYRRODINE"
+  },
+  {
+    "R06AC03": "CHLOROPYRAMINE"
+  },
+  {
+    "R06AC03": "CHLOROPYRAMINE"
+  },
+  {
+    "R06AC04": "TRIPELENNAMINE"
+  },
+  {
+    "R06AC05": "METHAPYRILENE"
+  },
+  {
+    "R06AC06": "THONZYLAMINE"
+  },
+  {
+    "R06AC52": "HISTAPYRRODINE, COMBINATIONS"
+  },
+  {
+    "R06AC53": "CHLOROPYRAMINE, COMBINATIONS"
+  },
+  {
+    "R06AD01": "ALIMEMAZINE"
+  },
+  {
+    "R06AD02": "PROMETHAZINE"
+  },
+  {
+    "R06AD03": "THIETHYLPERAZINE"
+  },
+  {
+    "R06AD04": "METHDILAZINE"
+  },
+  {
+    "R06AD05": "HYDROXYETHYLPROMETHAZINE"
+  },
+  {
+    "R06AD06": "THIAZINAM"
+  },
+  {
+    "R06AD06": "THIAZINAM"
+  },
+  {
+    "R06AD07": "MEQUITAZINE"
+  },
+  {
+    "R06AD08": "OXOMEMAZINE"
+  },
+  {
+    "R06AD09": "ISOTHIPENDYL"
+  },
+  {
+    "R06AD52": "PROMETHAZINE, COMBINATIONS"
+  },
+  {
+    "R06AD55": "HYDROXYETHYLPROMETHAZINE, COMBINATIONS"
+  },
+  {
+    "R06AE01": "BUCLIZINE"
+  },
+  {
+    "R06AE03": "CYCLIZINE"
+  },
+  {
+    "R06AE03": "CYCLIZINE"
+  },
+  {
+    "R06AE04": "CHLORCYCLIZINE"
+  },
+  {
+    "R06AE05": "MECLOZINE"
+  },
+  {
+    "R06AE06": "OXATOMIDE"
+  },
+  {
+    "R06AE07": "CETIRIZINE"
+  },
+  {
+    "R06AE51": "BUCLIZINE, COMBINATIONS"
+  },
+  {
+    "R06AE53": "CYCLIZINE, COMBINATIONS"
+  },
+  {
+    "R06AE55": "MECLOZINE, COMBINATIONS"
+  },
+  {
+    "R06AX01": "BAMIPINE"
+  },
+  {
+    "R06AX02": "CYPROHEPTADINE"
+  },
+  {
+    "R06AX03": "THENALIDINE"
+  },
+  {
+    "R06AX04": "PHENINDAMINE"
+  },
+  {
+    "R06AX05": "ANTAZOLINE"
+  },
+  {
+    "R06AX07": "TRIPROLIDINE"
+  },
+  {
+    "R06AX08": "PYRROBUTAMINE"
+  },
+  {
+    "R06AX09": "AZATADINE"
+  },
+  {
+    "R06AX11": "ASTEMIZOLE"
+  },
+  {
+    "R06AX12": "TERFENADINE"
+  },
+  {
+    "R06AX13": "LORATADINE"
+  },
+  {
+    "R06AX15": "MEBHYDROLIN"
+  },
+  {
+    "R06AX16": "DEPTROPINE"
+  },
+  {
+    "R06AX17": "KETOTIFEN"
+  },
+  {
+    "R06AX18": "ACRIVASTINE"
+  },
+  {
+    "R06AX19": "AZELASTINE"
+  },
+  {
+    "R06AX21": "TRITOQUALINE"
+  },
+  {
+    "R06AX22": "EBASTINE"
+  },
+  {
+    "R06AX23": "PIMETHIXENE"
+  },
+  {
+    "R06AX24": "EPINASTINE"
+  },
+  {
+    "R06AX25": "MIZOLASTINE"
+  },
+  {
+    "R06AX26": "FEXOFENADINE"
+  },
+  {
+    "R06AX53": "THENALIDINE, COMBINATIONS"
+  },
+  {
+    "R06AX58": "PYRROBUTAMINE, COMBINATIONS"
+  },
+  {
+    "R07AA01": "COLFOSCERIL PALMITATE"
+  },
+  {
+    "R07AA02": "NATURAL PHOSPHOLIPIDS"
+  },
+  {
+    "R07AA30": "LUNG SURFACTANTS COMBINATIONS"
+  },
+  {
+    "R07AB01": "DOXAPRAM"
+  },
+  {
+    "R07AB02": "NIKETHAMIDE"
+  },
+  {
+    "R07AB03": "PENTETRAZOL"
+  },
+  {
+    "R07AB04": "ETAMIVAN"
+  },
+  {
+    "R07AB05": "BEMEGRIDE"
+  },
+  {
+    "R07AB06": "PRETHCAMIDE"
+  },
+  {
+    "R07AB07": "ALMITRINE"
+  },
+  {
+    "R07AB08": "DIMEFLINE"
+  },
+  {
+    "R07AB09": "MEPIXANOX"
+  },
+  {
+    "R07AB52": "NIKETHAMIDE, COMBINATIONS"
+  },
+  {
+    "R07AB53": "PENTETRAZOL, COMBINATIONS"
+  },
+  {
+    "S01AA01": "CHLORAMPHENICOL"
+  },
+  {
+    "S01AA02": "CHLORTETRACYCLINE"
+  },
+  {
+    "S01AA03": "NEOMYCIN"
+  },
+  {
+    "S01AA04": "OXYTETRACYCLINE"
+  },
+  {
+    "S01AA05": "TYROTHRICIN"
+  },
+  {
+    "S01AA07": "FRAMYCETIN"
+  },
+  {
+    "S01AA09": "TETRACYCLINE"
+  },
+  {
+    "S01AA10": "NATAMYCIN"
+  },
+  {
+    "S01AA11": "GENTAMICIN"
+  },
+  {
+    "S01AA12": "TOBRAMYCIN"
+  },
+  {
+    "S01AA13": "FUSIDIC ACID"
+  },
+  {
+    "S01AA14": "BENZYLPENICILLIN"
+  },
+  {
+    "S01AA15": "DIHYDROSTREPTOMYCIN"
+  },
+  {
+    "S01AA16": "RIFAMYCINE"
+  },
+  {
+    "S01AA17": "ERYTHROMYCIN"
+  },
+  {
+    "S01AA18": "POLYMYXIN B"
+  },
+  {
+    "S01AA19": "AMPICILLIN"
+  },
+  {
+    "S01AA20": "ANTIBIOTICS IN COMBINATION WITH OTHER DRUGS"
+  },
+  {
+    "S01AA21": "AMIKACIN"
+  },
+  {
+    "S01AA22": "MICRONOMICIN"
+  },
+  {
+    "S01AA23": "NETILMICIN"
+  },
+  {
+    "S01AA24": "KANAMYCIN"
+  },
+  {
+    "S01AA25": "AZIDAMFENICOL"
+  },
+  {
+    "S01AA30": "OPTHALMOLOGICALS, COMBINATIONS OF DIFFERENT ANTIBIOTICS"
+  },
+  {
+    "S01AB01": "SULFAMETHIZOLE"
+  },
+  {
+    "S01AB02": "SULFAFURAZOLE"
+  },
+  {
+    "S01AB03": "SULFADICRAMIDE"
+  },
+  {
+    "S01AB04": "SULFACETAMIDE"
+  },
+  {
+    "S01AB05": "SULFAFENAZOL"
+  },
+  {
+    "S01AD01": "IDOXURIDINE"
+  },
+  {
+    "S01AD02": "TRIFLURIDINE"
+  },
+  {
+    "S01AD03": "ACICLOVIR"
+  },
+  {
+    "S01AD05": "INTERFERON"
+  },
+  {
+    "S01AD06": "VIDARABINE"
+  },
+  {
+    "S01AD07": "FAMCICLOVIR"
+  },
+  {
+    "S01AX01": "MERCURY COMPOUNDS"
+  },
+  {
+    "S01AX02": "SILVER COMPOUNDS"
+  },
+  {
+    "S01AX03": "ZINC COMPOUNDS"
+  },
+  {
+    "S01AX04": "NITROFURAL"
+  },
+  {
+    "S01AX05": "BIBROCATHOL"
+  },
+  {
+    "S01AX06": "RESORCINOL"
+  },
+  {
+    "S01AX07": "SODIUM BORATE"
+  },
+  {
+    "S01AX08": "HEXAMIDINE"
+  },
+  {
+    "S01AX09": "CHLORHEXIDINE"
+  },
+  {
+    "S01AX10": "SODIUM PROPIONATE"
+  },
+  {
+    "S01AX11": "OFLOXACIN"
+  },
+  {
+    "S01AX12": "NORFLOXACIN"
+  },
+  {
+    "S01AX13": "CIPROFLOXACIN"
+  },
+  {
+    "S01AX14": "DIBROMPROPAMIDINE"
+  },
+  {
+    "S01AX15": "PROPAMIDINE"
+  },
+  {
+    "S01AX16": "PICLOXYDINE"
+  },
+  {
+    "S01AX17": "LOMEFLOXACIN"
+  },
+  {
+    "S01BA01": "DEXAMETHASONE"
+  },
+  {
+    "S01BA02": "HYDROCORTISONE"
+  },
+  {
+    "S01BA03": "CORTISONE"
+  },
+  {
+    "S01BA04": "PREDNISOLONE"
+  },
+  {
+    "S01BA05": "TRIAMCINOLONE"
+  },
+  {
+    "S01BA06": "BETAMETHASONE"
+  },
+  {
+    "S01BA07": "FLUOROMETHOLONE"
+  },
+  {
+    "S01BA08": "MEDRYSONE"
+  },
+  {
+    "S01BA09": "CLOBETASONE"
+  },
+  {
+    "S01BA10": "ALCLOMETASONE"
+  },
+  {
+    "S01BA11": "DESONIDE"
+  },
+  {
+    "S01BA12": "FORMOCORTAL"
+  },
+  {
+    "S01BA13": "RIMEXOLONE"
+  },
+  {
+    "S01BB01": "HYDROCORTISONE AND MYDRIATICS"
+  },
+  {
+    "S01BB02": "PREDNISOLONE AND MYDRIATICS"
+  },
+  {
+    "S01BB03": "FLUOROMETHOLONE AND MYDRIATICS"
+  },
+  {
+    "S01BB04": "BETAMETHASONE AND MYDRIATICS"
+  },
+  {
+    "S01BC01": "INDOMETACIN"
+  },
+  {
+    "S01BC02": "OXYPHENBUTAZONE"
+  },
+  {
+    "S01BC03": "DICLOFENAC"
+  },
+  {
+    "S01BC04": "FLURBIPROFEN"
+  },
+  {
+    "S01BC05": "KETOROLAC"
+  },
+  {
+    "S01BC06": "PIROXICAM"
+  },
+  {
+    "S01BC07": "BENDAZAC"
+  },
+  {
+    "S01BC08": "SALICYLIC ACID"
+  },
+  {
+    "S01CA01": "DEXAMETHASONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA02": "PREDNISOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA03": "HYDROCORTISONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA04": "FLUOCORTOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA05": "BETAMETHASONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA06": "FLUDROCORTISONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA07": "FLUOROMETHOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA08": "METHYLPREDNISOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA09": "CHLOROPREDNISONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA10": "FLUOCINOLONE ACETONIDE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CA11": "CLOBETASONE AND ANTIINFECTIVES"
+  },
+  {
+    "S01CB01": "DEXAMETHASONE"
+  },
+  {
+    "S01CB02": "PREDNISOLONE"
+  },
+  {
+    "S01CB03": "HYDROCORTISONE"
+  },
+  {
+    "S01CB04": "BETAMETHASONE"
+  },
+  {
+    "S01CB05": "FLUOROMETHOLONE"
+  },
+  {
+    "S01CC01": "DICLOFENAC AND ANTIINFECTIVES"
+  },
+  {
+    "S01EA01": "EPINEPHRINE"
+  },
+  {
+    "S01EA02": "DIPIVEFRINE"
+  },
+  {
+    "S01EA03": "APRACLONIDINE"
+  },
+  {
+    "S01EA04": "CLONIDINE"
+  },
+  {
+    "S01EA05": "BRIMONIDINE"
+  },
+  {
+    "S01EA51": "EPINEPHRINE, COMBINATIONS"
+  },
+  {
+    "S01EB01": "PILOCARPINE"
+  },
+  {
+    "S01EB01": "PILOCARPINE"
+  },
+  {
+    "S01EB01": "PILOCARPINE"
+  },
+  {
+    "S01EB02": "CARBACHOL"
+  },
+  {
+    "S01EB03": "ECOTHIOPATE"
+  },
+  {
+    "S01EB04": "DEMECARIUM"
+  },
+  {
+    "S01EB05": "PHYSOSTIGMINE"
+  },
+  {
+    "S01EB06": "NEOSTIGMINE"
+  },
+  {
+    "S01EB06": "NEOSTIGMINE"
+  },
+  {
+    "S01EB07": "FLUOSTIGMINE"
+  },
+  {
+    "S01EB08": "ACECLIDINE"
+  },
+  {
+    "S01EB09": "ACETYLCHOLINE"
+  },
+  {
+    "S01EB10": "PARAOXON"
+  },
+  {
+    "S01EB51": "PILOCARPINE, COMBINATIONS"
+  },
+  {
+    "S01EB58": "ACECLIDINE, COMBINATIONS"
+  },
+  {
+    "S01EC01": "ACETAZOLAMIDE"
+  },
+  {
+    "S01EC02": "DICLOFENAMIDE"
+  },
+  {
+    "S01EC03": "DORZOLAMIDE"
+  },
+  {
+    "S01ED01": "TIMOLOL"
+  },
+  {
+    "S01ED02": "BETAXOLOL"
+  },
+  {
+    "S01ED03": "LEVOBUNOLOL"
+  },
+  {
+    "S01ED04": "METIPRANOLOL"
+  },
+  {
+    "S01ED05": "CARTEOLOL"
+  },
+  {
+    "S01ED06": "BEFUNOLOL"
+  },
+  {
+    "S01ED51": "TIMOLOL, COMBINATIONS"
+  },
+  {
+    "S01ED54": "METIPRANOLOL, COMBINATIONS"
+  },
+  {
+    "S01EX01": "GUANETHIDINE"
+  },
+  {
+    "S01EX02": "DAPIPRAZOLE"
+  },
+  {
+    "S01EX03": "LATANOPROST"
+  },
+  {
+    "S01FA01": "ATROPINE"
+  },
+  {
+    "S01FA02": "SCOPOLAMINE"
+  },
+  {
+    "S01FA03": "METHYLSCOPOLAMINE"
+  },
+  {
+    "S01FA04": "CYCLOPENTOLATE"
+  },
+  {
+    "S01FA05": "HOMATROPINE"
+  },
+  {
+    "S01FA06": "TROPICAMIDE"
+  },
+  {
+    "S01FA56": "TROPICAMIDE, COMBINATIONS"
+  },
+  {
+    "S01FB01": "PHENYLEPHRINE"
+  },
+  {
+    "S01FB02": "EPHEDRINE"
+  },
+  {
+    "S01FB03": "IBOPAMINE"
+  },
+  {
+    "S01GA01": "NAPHAZOLINE"
+  },
+  {
+    "S01GA02": "TETRYZOLINE"
+  },
+  {
+    "S01GA03": "XYLOMETAZOLINE"
+  },
+  {
+    "S01GA04": "OXYMETAZOLINE"
+  },
+  {
+    "S01GA05": "PHENYLEPHRINE"
+  },
+  {
+    "S01GA06": "OXEDRINE"
+  },
+  {
+    "S01GA51": "NAPHAZOLINE, COMBINATIONS"
+  },
+  {
+    "S01GA52": "TETRYZOLINE, COMBINATIONS"
+  },
+  {
+    "S01GA53": "XYLOMETAZOLINE, COMBINATIONS"
+  },
+  {
+    "S01GA55": "PHENYLEPHRINE, COMBINATIONS"
+  },
+  {
+    "S01GA56": "OXEDRINE, COMBINATIONS"
+  },
+  {
+    "S01GX01": "CROMOGLICIC ACID"
+  },
+  {
+    "S01GX02": "LEVOCABASTINE"
+  },
+  {
+    "S01GX03": "SPAGLUMIC ACID"
+  },
+  {
+    "S01GX04": "NEDOCROMIL"
+  },
+  {
+    "S01GX05": "LODOXAMIDE"
+  },
+  {
+    "S01GX06": "EMEDASTINE"
+  },
+  {
+    "S01GX51": "CROMOGLICIC ACID, COMBINATIONS"
+  },
+  {
+    "S01HA01": "COCAINE"
+  },
+  {
+    "S01HA02": "OXYBUPROCAINE"
+  },
+  {
+    "S01HA03": "TETRACAINE"
+  },
+  {
+    "S01HA04": "PROXYMETACAINE"
+  },
+  {
+    "S01HA05": "PROCAINE"
+  },
+  {
+    "S01HA06": "CINCHOCAINE"
+  },
+  {
+    "S01HA07": "LIDOCAINE"
+  },
+  {
+    "S01HA30": "OPTHALMALOGICAL LOCAL ANESTHETICS, COMBINATIONS"
+  },
+  {
+    "S01JA01": "FLUORESCEIN"
+  },
+  {
+    "S01JA02": "ROSE BENGAL SODIUM"
+  },
+  {
+    "S01JA51": "FLUORESCEIN, COMBINATIONS"
+  },
+  {
+    "S01KA01": "HYALURONIC ACID"
+  },
+  {
+    "S01KA02": "HYPROMELLOSE"
+  },
+  {
+    "S01KA51": "HYALURONIC ACID, COMBINATIONS"
+  },
+  {
+    "S01KX01": "CHYMOTRYPSIN"
+  },
+  {
+    "S01XA01": "GUAIAZULEN"
+  },
+  {
+    "S01XA02": "RETINOL"
+  },
+  {
+    "S01XA03": "SODIUM CHLORIDE, HYPERTONIC"
+  },
+  {
+    "S01XA04": "POTASSIUM IODIDE"
+  },
+  {
+    "S01XA05": "SODIUM EDETATE"
+  },
+  {
+    "S01XA06": "ETHYLMORPHINE"
+  },
+  {
+    "S01XA07": "ALUM"
+  },
+  {
+    "S01XA08": "ACETYLCYSTEINE"
+  },
+  {
+    "S01XA09": "IODOHEPARINATE"
+  },
+  {
+    "S01XA10": "INOSINE"
+  },
+  {
+    "S01XA11": "NANDROLONE"
+  },
+  {
+    "S01XA12": "DEXPANTHENOL"
+  },
+  {
+    "S01XA13": "ALTEPLASE"
+  },
+  {
+    "S01XA14": "HEPARIN"
+  },
+  {
+    "S01XA20": "ARTIFICIAL TEARS AND OTHER INDIFFERENT PREPARATIONS"
+  },
+  {
+    "S02AA01": "CHLORAMPHENICOL"
+  },
+  {
+    "S02AA02": "NITROFURAL"
+  },
+  {
+    "S02AA03": "BORIC ACID"
+  },
+  {
+    "S02AA04": "ALUMINIUM ACETOTARTRATE"
+  },
+  {
+    "S02AA05": "CLIOQUINOL"
+  },
+  {
+    "S02AA06": "HYDROGEN PEROXIDE"
+  },
+  {
+    "S02AA07": "NEOMYCIN"
+  },
+  {
+    "S02AA08": "TETRACYCLINE"
+  },
+  {
+    "S02AA09": "CHLORHEXIDINE"
+  },
+  {
+    "S02AA10": "ACETIC ACID"
+  },
+  {
+    "S02AA11": "POLYMYXIN B"
+  },
+  {
+    "S02AA12": "RIFAMYCIN"
+  },
+  {
+    "S02AA13": "MICONAZOLE"
+  },
+  {
+    "S02AA30": "ANTIINFECTIVES, COMBINATIONS"
+  },
+  {
+    "S02BA01": "HYDROCORTISONE"
+  },
+  {
+    "S02BA03": "PREDNISOLONE"
+  },
+  {
+    "S02BA06": "DEXAMETHASONE"
+  },
+  {
+    "S02BA07": "BETAMETHASONE"
+  },
+  {
+    "S02CA01": "PREDNISOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S02CA02": "FLUMETASONE AND ANTIINFECTIVES"
+  },
+  {
+    "S02CA03": "HYDROCORTISONE AND ANTIINFECTIVES"
+  },
+  {
+    "S02CA04": "TRIAMCINOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S02CA05": "FLUOCINOLONE ACETONIDE AND ANTIINFECTIVES"
+  },
+  {
+    "S02CA06": "DEXAMETHASONE AND ANTIINFECTIVES"
+  },
+  {
+    "S02CA07": "FLUDROCORTISONE AND ANTIINFECTIVES"
+  },
+  {
+    "S02DA01": "LIDOCAINE"
+  },
+  {
+    "S02DA02": "COCAINE"
+  },
+  {
+    "S02DA30": "OTOLOGICAL ANALGESICS & ANESTHETICS, COMBINATIONS"
+  },
+  {
+    "S03AA01": "NEOMYCIN"
+  },
+  {
+    "S03AA02": "TETRACYCLINE"
+  },
+  {
+    "S03AA03": "POLYMYXIN B"
+  },
+  {
+    "S03AA04": "CHLORHEXIDINE"
+  },
+  {
+    "S03AA05": "HEXAMIDINE"
+  },
+  {
+    "S03AA06": "GENTAMICIN"
+  },
+  {
+    "S03AA30": "ANTIINFECTIVES, COMBINATIONS"
+  },
+  {
+    "S03BA01": "DEXAMETHASONE"
+  },
+  {
+    "S03BA02": "PREDNISOLONE"
+  },
+  {
+    "S03CA01": "DEXAMETHASONE AND ANTIINFECTIVES"
+  },
+  {
+    "S03CA02": "PREDNISOLONE AND ANTIINFECTIVES"
+  },
+  {
+    "S03CA04": "HYDROCORTISONE AND ANTIINFECTIVES"
+  },
+  {
+    "S03CA05": "FLUDROCORTISONE AND ANTIINFECTIVES"
+  },
+  {
+    "V01AA01": "FEATHER"
+  },
+  {
+    "V01AA02": "GRASS POLLEN"
+  },
+  {
+    "V01AA03": "HOUSE DUST"
+  },
+  {
+    "V01AA04": "MOULD FUNGUS AND YEAST FUNGUS"
+  },
+  {
+    "V01AA05": "TREE POLLEN"
+  },
+  {
+    "V01AA07": "INSECTS"
+  },
+  {
+    "V01AA08": "FOOD"
+  },
+  {
+    "V01AA09": "TEXTILES"
+  },
+  {
+    "V01AA10": "FLOWERS"
+  },
+  {
+    "V01AA11": "ANIMALS"
+  },
+  {
+    "V01AA20": "VARIOUS"
+  },
+  {
+    "V03AA01": "DISULFIRAM"
+  },
+  {
+    "V03AA02": "CALCIUM CARBIMIDE"
+  },
+  {
+    "V03AA03": "ACAMPROSATE"
+  },
+  {
+    "V03AB01": "IPECACUANHA"
+  },
+  {
+    "V03AB02": "NALORPHINE"
+  },
+  {
+    "V03AB03": "EDETATES"
+  },
+  {
+    "V03AB04": "PRALIDOXIME"
+  },
+  {
+    "V03AB05": "PREDNISOLONE AND PROMETHAZINE"
+  },
+  {
+    "V03AB06": "THIOSULFATE"
+  },
+  {
+    "V03AB08": "SODIUM NITRITE"
+  },
+  {
+    "V03AB09": "DIMERCAPROL"
+  },
+  {
+    "V03AB13": "OBIDOXIME"
+  },
+  {
+    "V03AB14": "PROTAMINE"
+  },
+  {
+    "V03AB15": "NALOXONE"
+  },
+  {
+    "V03AB16": "ETHANOL"
+  },
+  {
+    "V03AB17": "METHYLTHIONINIUM CHLORIDE"
+  },
+  {
+    "V03AB18": "POTASSIUM PERMANGANATE"
+  },
+  {
+    "V03AB19": "PHYSOSTIGMINE"
+  },
+  {
+    "V03AB20": "COPPER SULFATE"
+  },
+  {
+    "V03AB21": "POTASSIUM IODIDE"
+  },
+  {
+    "V03AB22": "AMYL NITRITE"
+  },
+  {
+    "V03AB23": "ACETYLCYSTEINE"
+  },
+  {
+    "V03AB24": "DIGITALIS ANTITOXIN"
+  },
+  {
+    "V03AB25": "FLUMAZENIL"
+  },
+  {
+    "V03AB26": "METHIONINE"
+  },
+  {
+    "V03AB27": "4-DIMETHYLAMINOPHENOL"
+  },
+  {
+    "V03AB29": "CHOLINESTERASE"
+  },
+  {
+    "V03AB30": "NALTREXONE"
+  },
+  {
+    "V03AB31": "PRUSSIAN BLUE"
+  },
+  {
+    "V03AB32": "GLUTATHIONE"
+  },
+  {
+    "V03AB33": "HYDROXOCOBALAMIN"
+  },
+  {
+    "V03AC01": "DEFEROXAMINE"
+  },
+  {
+    "V03AC02": "DEFERIPRONE"
+  },
+  {
+    "V03AE01": "POLYSTYRENE SULFONATE"
+  },
+  {
+    "V03AF01": "MESNA"
+  },
+  {
+    "V03AF02": "DEXRAZOXANE"
+  },
+  {
+    "V03AF03": "CALCIUM FOLINATE"
+  },
+  {
+    "V03AF04": "CALCIUM LEVOFOLINATE"
+  },
+  {
+    "V03AF05": "AMIFOSTINE"
+  },
+  {
+    "V03AG01": "SODIUM CELLULOSE PHOSPHATE"
+  },
+  {
+    "V03AH01": "DIAZOXIDE"
+  },
+  {
+    "V03AZ01": "ETHANOL"
+  },
+  {
+    "V04CA01": "TOLBUTAMIDE"
+  },
+  {
+    "V04CA02": "GLUCOSE"
+  },
+  {
+    "V04CB01": "VITAMIN A CONCENTRATES"
+  },
+  {
+    "V04CC01": "SORBITOL"
+  },
+  {
+    "V04CC02": "MAGNESIUM SULFATE"
+  },
+  {
+    "V04CC03": "SINCALIDE"
+  },
+  {
+    "V04CC04": "CERULETIDE"
+  },
+  {
+    "V04CD01": "METYRAPONE"
+  },
+  {
+    "V04CD03": "SERMORELIN"
+  },
+  {
+    "V04CD04": "CORTICOLIBERIN"
+  },
+  {
+    "V04CD05": "SOMATORELIN"
+  },
+  {
+    "V04CE01": "GALACTOSE"
+  },
+  {
+    "V04CE02": "SULFOBROMOPHTALEIN"
+  },
+  {
+    "V04CF01": "TUBERCULIN"
+  },
+  {
+    "V04CG01": "CATION EXCHANGE RESINS"
+  },
+  {
+    "V04CG02": "BETAZOLE"
+  },
+  {
+    "V04CG03": "HISTAMINE"
+  },
+  {
+    "V04CG04": "PENTAGASTRIN"
+  },
+  {
+    "V04CG05": "METHYLTHIONINIUM CHLORIDE"
+  },
+  {
+    "V04CG30": "CAFFEINE AND SODIUM BENZOATE"
+  },
+  {
+    "V04CH01": "INULIN AND OTHER POLYFRUCTOSANS"
+  },
+  {
+    "V04CH02": "INDIGO CARMINE"
+  },
+  {
+    "V04CH03": "PHENOLSULFONPHTHALEIN"
+  },
+  {
+    "V04CH04": "ALSACTIDE"
+  },
+  {
+    "V04CH30": "AMINOHIPPURIC ACID"
+  },
+  {
+    "V04CJ01": "THYROTROPIN"
+  },
+  {
+    "V04CJ02": "PROTIRELIN"
+  },
+  {
+    "V04CK01": "SECRETIN"
+  },
+  {
+    "V04CK02": "PANCREOZYMIN (CHOLECYSTOKININ)"
+  },
+  {
+    "V04CK03": "BENTIROMIDE"
+  },
+  {
+    "V04CM01": "GONADORELIN"
+  },
+  {
+    "V06DC01": "GLUCOSE"
+  },
+  {
+    "V06DC02": "FRUCTOSE"
+  },
+  {
+    "V08AA01": "DIATRIZOIC ACID"
+  },
+  {
+    "V08AA02": "METRIZOIC ACID"
+  },
+  {
+    "V08AA03": "IODAMIDE"
+  },
+  {
+    "V08AA04": "IOTALAMIC ACID"
+  },
+  {
+    "V08AA05": "IOXITALAMIC ACID"
+  },
+  {
+    "V08AA06": "IOGLICIC ACID"
+  },
+  {
+    "V08AA07": "ACETRIZOIC ACID"
+  },
+  {
+    "V08AA08": "IOCARMIC ACID"
+  },
+  {
+    "V08AA09": "METHIODAL"
+  },
+  {
+    "V08AA10": "DIODONE"
+  },
+  {
+    "V08AB01": "METRIZAMIDE"
+  },
+  {
+    "V08AB02": "IOHEXOL"
+  },
+  {
+    "V08AB03": "IOXAGLIC ACID"
+  },
+  {
+    "V08AB04": "IOPAMIDOL"
+  },
+  {
+    "V08AB05": "IOPROMIDE"
+  },
+  {
+    "V08AB06": "IOTROLAN"
+  },
+  {
+    "V08AB07": "IOVERSOL"
+  },
+  {
+    "V08AB08": "IOPENTOL"
+  },
+  {
+    "V08AB09": "IODIXANOL"
+  },
+  {
+    "V08AB10": "IOMEPROL"
+  },
+  {
+    "V08AB11": "IOBITRIDOL"
+  },
+  {
+    "V08AC01": "IODOXAMIC ACID"
+  },
+  {
+    "V08AC02": "IOTROXIC ACID"
+  },
+  {
+    "V08AC03": "IOGLYCAMIC ACID"
+  },
+  {
+    "V08AC04": "ADIPIODONE"
+  },
+  {
+    "V08AC05": "IOBENZAMIC ACID"
+  },
+  {
+    "V08AC06": "IOPANOIC ACID"
+  },
+  {
+    "V08AC07": "IOCETAMIC ACID"
+  },
+  {
+    "V08AC08": "SODIUM IOPODATE"
+  },
+  {
+    "V08AC09": "TYROPANOIC ACID"
+  },
+  {
+    "V08AC10": "CALCIUM IOPODATE"
+  },
+  {
+    "V08AD01": "ETHYL ESTERS OF IODISED FATTY ACIDS"
+  },
+  {
+    "V08AD02": "IOPYDOL"
+  },
+  {
+    "V08AD03": "PROPYLIODONE"
+  },
+  {
+    "V08AD04": "IOFENDYLATE"
+  },
+  {
+    "V08BA01": "BARIUM SULFATE WITH SUSPENDING AGENTS"
+  },
+  {
+    "V08BA02": "BARIUM SULFATE WITHOUT SUSPENDING AGENTS"
+  },
+  {
+    "V08CA01": "GADOPENTETIC ACID"
+  },
+  {
+    "V08CA02": "GADOTERIC ACID"
+  },
+  {
+    "V08CA03": "GADODIAMIDE"
+  },
+  {
+    "V08CA04": "GADOTERIDOL"
+  },
+  {
+    "V08CA05": "MANGAFODIPIR"
+  },
+  {
+    "V08CA06": "GADOVERSETAMIDE"
+  },
+  {
+    "V08CB01": "FERUMOXSIL"
+  },
+  {
+    "V08CB02": "FERRISTENE"
+  },
+  {
+    "V08CB03": "IRON OXIDE, NANOPARTICLES"
+  },
+  {
+    "V08CX01": "PERFLUBRON"
+  },
+  {
+    "V08DA01": "MICROSPHERES OF HUMAN ALBUMIN"
+  },
+  {
+    "V08DA02": "MICROPARTICLES OF GALACTOSE"
+  },
+  {
+    "V08DA03": "PERFLENAPENT"
+  },
+  {
+    "V08DA04": "MICROSPHERES OF PHOSPHOLIPIDS"
+  },
+  {
+    "V09AA01": "TECHNETIUM (99MTC) EXAMETAZIME"
+  },
+  {
+    "V09AA02": "TECHNETIUM (99MTC) BICISATE"
+  },
+  {
+    "V09AB01": "IODINE IOFETAMINE (123I)"
+  },
+  {
+    "V09AB02": "IODINE IOLOPRIDE (123I)"
+  },
+  {
+    "V09AX01": "INDIUM (111IN) PENTETIC ACID"
+  },
+  {
+    "V09AX02": "FLUDEOXYGLUCOSE (18F)"
+  },
+  {
+    "V09BA01": "TECHNETIUM (99MTC) OXIDRONIC ACID"
+  },
+  {
+    "V09BA02": "TECHNETIUM (99MTC) MEDRONIC ACID"
+  },
+  {
+    "V09BA03": "TECHNETIUM (99MTC) PYROPHOSPHATE"
+  },
+  {
+    "V09BA04": "TECHNETIUM (99MTC) BUTEDRONIC ACID"
+  },
+  {
+    "V09CA01": "TECHNETIUM (99MTC) PENTETIC ACID"
+  },
+  {
+    "V09CA02": "TECHNETIUM (99MTC) SUCCIMER"
+  },
+  {
+    "V09CA03": "TECHNETIUM (99MTC) MERTIATIDE"
+  },
+  {
+    "V09CA04": "TECHNETIUM (99MTC) GLUCOPTATE"
+  },
+  {
+    "V09CA05": "TECHNETIUM (99MTC) GLUCONATE"
+  },
+  {
+    "V09CX01": "SODIUM IODOHIPPURATE (123I)"
+  },
+  {
+    "V09CX02": "SODIUM IODOHIPPURATE (131I)"
+  },
+  {
+    "V09CX03": "SODIUM IOTHALAMATE (125I)"
+  },
+  {
+    "V09CX04": "CHROMIUM (51CR) EDETATE"
+  },
+  {
+    "V09DA01": "TECHNETIUM (99MTC) DISOFENIN"
+  },
+  {
+    "V09DA02": "TECHNETIUM (99MTC) ETIFENIN"
+  },
+  {
+    "V09DA03": "TECHNETIUM (99MTC) LIDOFENIN"
+  },
+  {
+    "V09DA04": "TECHNETIUM (99MTC) MEBROFENIN"
+  },
+  {
+    "V09DA05": "TECHNETIUM (99MTC) GALTIFENIN"
+  },
+  {
+    "V09DB01": "TECHNETIUM (99MTC) NANOCOLLOID"
+  },
+  {
+    "V09DB02": "TECHNETIUM (99MTC) MICROCOLLOID"
+  },
+  {
+    "V09DB03": "TECHNETIUM (99MTC) MILLIMICROSPHERES"
+  },
+  {
+    "V09DB04": "TECHNETIUM (99MTC) TIN COLLOID"
+  },
+  {
+    "V09DB05": "TECHNETIUM (99MTC) SULFUR COLLOID"
+  },
+  {
+    "V09DB06": "TECHNETIUM (99MTC) RHENIUMSULFIDE COLLOID"
+  },
+  {
+    "V09DB07": "TECHNETIUM (99MTC) PHYTATE"
+  },
+  {
+    "V09DX01": "SELENIUM (75SE) TAUROSELCHOLIC ACID"
+  },
+  {
+    "V09EA01": "TECHNETIUM (99MTC) PENTETIC ACID"
+  },
+  {
+    "V09EA02": "TECHNETIUM (99MTC) TECHNEGAS"
+  },
+  {
+    "V09EB01": "MACROSALB (99MTC)"
+  },
+  {
+    "V09EB02": "TECHNETIUM (99MTC) MICROSPHERES"
+  },
+  {
+    "V09EX01": "KRYPTON (81MKR) GAS"
+  },
+  {
+    "V09EX02": "XENON (127XE) GAS"
+  },
+  {
+    "V09EX03": "XENON (133XE) GAS"
+  },
+  {
+    "V09FX01": "TECHNETIUM (99MTC) PERTECHNETATE"
+  },
+  {
+    "V09FX02": "SODIUM IODIDE (123I)"
+  },
+  {
+    "V09FX03": "SODIUM IODIDE (131I)"
+  },
+  {
+    "V09GA01": "TECHNETIUM (99MTC) SESTAMIBI"
+  },
+  {
+    "V09GA02": "TECHNETIUM (99MTC) TETROFOSMIN"
+  },
+  {
+    "V09GA03": "TECHNETIUM (99MTC) TEBOROXIME"
+  },
+  {
+    "V09GA04": "TECHNETIUM (99MTC) HUMAN ALBUMIN"
+  },
+  {
+    "V09GA05": "TECHNETIUM (99MTC) FURIFOSMIN"
+  },
+  {
+    "V09GA06": "TECHNETIUM (99MTC) STANNOUS AGENT LABELLED CELLS"
+  },
+  {
+    "V09GA07": "TECHNETIUM(99MTC) APCITIDE"
+  },
+  {
+    "V09GB01": "FIBRINOGEN (125I)"
+  },
+  {
+    "V09GB02": "IODINE (125I) HUMAN ALBUMIN"
+  },
+  {
+    "V09HA01": "TECHNETIUM (99MTC) HUMAN IMMUNOGLOBULIN"
+  },
+  {
+    "V09HA02": "TECHNETIUM (99MTC) EXAMETAZIME LABELLED CELLS"
+  },
+  {
+    "V09HA03": "TECHNETIUM (99MTC) ANTIGRANULOCYTE ANTIBODY"
+  },
+  {
+    "V09HB01": "INDIUM (111IN) OXINATE LABELLED CELLS"
+  },
+  {
+    "V09HB02": "INDIUM (111IN) TROPOLONATE LABELLED CELLS"
+  },
+  {
+    "V09HX01": "GALLIUM (67GA) CITRATE"
+  },
+  {
+    "V09IA01": "TECHNETIUM (99MTC) ANTICARCINOEMBRYONICANTIGEN ANTIBODY"
+  },
+  {
+    "V09IA02": "TECHNETIUM (99MTC) ANTIMELANOMA ANTIBODY"
+  },
+  {
+    "V09IA03": "TECHNETIUM (99MTC) PENTAVALENT SUCCIMER"
+  },
+  {
+    "V09IA04": "TECHNETIUM (99MTC) VOTUMUMAB"
+  },
+  {
+    "V09IB01": "INDIUM (111IN) PENTETREOTIDE"
+  },
+  {
+    "V09IB02": "INDIUM (111IN) SATUMOMAB PENDETIDE"
+  },
+  {
+    "V09IB03": "INDIUM (111IN) ANTIOVARIUMCARCINOMA ANTIBODY"
+  },
+  {
+    "V09IX01": "IOBENGUANE (123I)"
+  },
+  {
+    "V09IX02": "IOBENGUANE (131I)"
+  },
+  {
+    "V09IX03": "IODINE (125I) CC49-MONOCLONAL ANTIBODY"
+  },
+  {
+    "V09XA01": "IODINE (131I) NORCHOLESTEROL"
+  },
+  {
+    "V09XA02": "IODOCHOLESTEROL (131I)"
+  },
+  {
+    "V09XX01": "COBALT (57CO) CYANOCOBALAMINE"
+  },
+  {
+    "V09XX02": "COBALT (58CO) CYANOCOBALAMINE"
+  },
+  {
+    "V09XX03": "SELENIUM (75SE) NORCHOLESTEROL"
+  },
+  {
+    "V09XX04": "FERRIC (59FE) CITRATE"
+  },
+  {
+    "V10AA01": "YTTRIUM (90Y) CITRATE COLLOID"
+  },
+  {
+    "V10AA02": "YTTRIUM (90Y) FERRIHYDROXIDE COLLOID"
+  },
+  {
+    "V10AA03": "YTTRIUM (90Y) SILICATE COLLOID"
+  },
+  {
+    "V10AX01": "PHOSPHOROUS (32P) CHROMICPHOSPHATE COLLOID"
+  },
+  {
+    "V10AX02": "SAMARIUM (153SM) HYDROXYAPATITE COLLOID"
+  },
+  {
+    "V10AX03": "DYSPROSIUM (165DY) COLLOID"
+  },
+  {
+    "V10AX04": "ERBIUM (169ER) CITRATE COLLOID"
+  },
+  {
+    "V10AX05": "RHENIUM (186RE) SULFIDE COLLOID"
+  },
+  {
+    "V10AX06": "GOLD (198AU) COLLOIDAL"
+  },
+  {
+    "V10BX01": "STRONTIUM (89SR) CHLORIDE"
+  },
+  {
+    "V10BX02": "SAMARIUM (153SM) LEXIDRONAM"
+  },
+  {
+    "V10BX03": "RHENIUM (186RE) ETIDRONIC ACID"
+  },
+  {
+    "V10XA01": "SODIUM IODIDE (131I)"
+  },
+  {
+    "V10XA02": "IOBENGUANE (131I)"
+  },
+  {
+    "V10XX01": "SODIUM PHOSPHATE (32P)"
+  }
+]
