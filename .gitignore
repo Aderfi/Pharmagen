@@ -1,3 +1,4 @@
-.env_pharmagen/Lib
+.env_pharmagen
 Machine_Learning/
 **/*.pyc
+!.env_pharmagen/requirements.txt
