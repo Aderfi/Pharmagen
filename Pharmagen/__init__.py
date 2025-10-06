@@ -1,3 +1,14 @@
+# Pharmagen/__init__.py
+
+if __name__ == "Pharmagen":
+    import sys
+    from pathlib import Path
+
+    PHARMAGEN_DIR = Path(__file__).resolve()
+    if str(PHARMAGEN_DIR) not in sys.path:
+        sys.path.insert(0, str(PHARMAGEN_DIR))
+
+from . import *
 
 from .config import (
     DATA_DIR,
@@ -20,6 +31,8 @@ from .config import (
     MODEL_CSV_DIR,
     MODEL_JSON_DIR,
     CONFIG_FILE,
+    MODEL_TRAIN_DATA,
+    MODELS_DIR,
 )
 
 __all__ = [
@@ -43,4 +56,6 @@ __all__ = [
     "MODEL_CSV_DIR",
     "MODEL_JSON_DIR",
     "CONFIG_FILE",
+    "MODEL_TRAIN_DATA",
+    "MODELS_DIR",
 ]

@@ -1,35 +1,26 @@
 import csv
 import json
-import pandas as pd
-import re
 
-# Name;Mutation;Mutation type;PID;Type;Evidence;Asociation
-# HYDROCHLOROTHIAZIDE;ANKFN1;Gene;PA449899;Chemical;ClinicalAnnotation;associated
+# Load drug list from the ATC JSON file
+with open('ATC_farmaco_ENG.json', 'r') as f:
+    atc_data = json.load(f)
+drug_list = [str(list(entry.values())[0]) for entry in atc_data]
 
+# Build a mapping from drug name to list of genes
+drug_to_genes = {drug: [] for drug in drug_list}
 
-# La estructura del OUTPUT json es la siguiente:
-# [
-#   {
-#     "Drug1": [
-#       "Gene1",
-#           Gene2
-#       "Gene2"
-#     ],
-#     "Drug2": [
-#       "Gene3"
-#     ]
-#   }
-# ]
+with open('relationships_trimmed.csv', 'r', encoding='utf-8') as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=';')
+    next(csvreader, None)  # Skip header if present
+    for row in csvreader:
+        drug, gene = row[0], row[1]
+        if drug in drug_to_genes:
+            drug_to_genes[drug].append(gene)
 
-relationships_list = []
+# Convert to desired output format: a list of dicts, each with the drug as key and gene list as value
+output = [{drug: genes} for drug, genes in drug_to_genes.items() if genes]
 
-with open ('ATC_farmaco_ENG.json', 'r', encoding='utf-8') as atc_file:
-    atc_data = json.load(atc_file)
-    for drug in atc_data:
+# Write to output JSON
+with open('drug_gene_output.json', 'w', encoding='utf-8') as f:
+    json.dump(output, f, indent=2, ensure_ascii=False)
         
-
-
-with open('relationships_trimmed.csv', 'r', encoding='utf-8') as csv_input:
-    csv_df = pd.read_csv(csv_input, delimiter=';')
-
-    for index, column in csv_df.iterrows
