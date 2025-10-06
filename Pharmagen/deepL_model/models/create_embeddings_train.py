@@ -21,6 +21,20 @@ file = Path(path_train_data_path, var_drugs_csv)
 
 model_files_training = str(MODELS_DIR)
 
+###############################
+# Lista de tus archivos CSV
+csv_files = ["var_fa_ann_with_ATC.csv", "var_pheno_ann.csv", "drug_gene_output.csv"]
+
+# Define las columnas comunes que quieres usar
+columnas_comunes = ["Drug", "Gene", "Variant/Haplotypes", "Alleles", "Outcome", "Effect"]  # ajusta según tus necesidades
+
+# Lee y combina solo las columnas comunes de cada CSV
+df = pd.concat([pd.read_csv(f, sep=';')[columnas_comunes] for f in csv_files], ignore_index=True)
+
+# Ahora df tiene solo las columnas comunes de todos los CSV y puedes seguir con el preprocesamiento y entrenamiento
+print(df.head())
+###############################
+
 
 # 1. Cargar y limpiar los datos
 df = pd.read_csv("var_drug_ann_with_ATC.csv", sep=';')
@@ -81,7 +95,7 @@ loss, acc = model.evaluate([X_test[:, i] for i in range(len(cat_cols))], y_test)
 print(f"Test accuracy: {acc:.3f}")
 
 # 10. Guardar el modelo y los diccionarios de índices para uso futuro
-model.save("modelo_genes_drugs_emb.h5")
+model.save("modelo_genes_drugs_emb.keras")
 import pickle
 with open("cat2idx.pkl", "wb") as f:
     pickle.dump(cat2idx, f)
