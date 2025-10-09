@@ -1,13 +1,15 @@
 import pandas as pd
 import json
+import re
+import numpy as np
 
 # --- 1. Carga de Archivos ---
 
 # Rutas a tus archivos de entrada
 ruta_csv = 'var_drug_ann_with_ATC.csv'
-ruta_json = 'ATC_farmaco(ENG_dict).json'
+ruta_json = 'ATC_drug_dict_ENG.json'
 nombre_columna_farmacos = 'Drug' 
-nombre_columna_nueva = 'ATC.1' 
+nombre_columna_editar = 'ATC'
 
 # Cargar el diccionario de traducción desde el archivo JSON
 try:
@@ -19,7 +21,7 @@ except FileNotFoundError:
 
 # Cargar los datos del CSV en un DataFrame de pandas
 try:
-    df = pd.read_csv(ruta_csv, sep=';')
+    df = pd.read_csv(ruta_csv, sep=';', encoding='utf-8')
 except FileNotFoundError:
     print(f"Error: No se encontró el archivo CSV en la ruta: {ruta_csv}")
     exit()
@@ -28,74 +30,37 @@ except FileNotFoundError:
 
 print("Procesando los datos con un bucle for...")
 
-# Creamos una lista vacía para guardar los resultados de cada fila
-lista_resultados = []
-diccionario_atc = dict(diccionario_atc)
-df = pd.DataFrame(df)
+## A10BH01;SITAGLIPTIN;GLP1R;rs3765467;AG;Efficacy;increased response to ⮕ SITAGLIPTIN;Genotype AG is associated with increased response to sitagliptin in people with Diabetes Mellitus, Type 2.;"""Conversely, patients with the rs3765467 AG genotype in the study group demonstrated a median HbA1c improvement of 1.42 (IQR, 1.22Ã‘1.68) compared with 1.08 (IQR, 0.97Ã‘1.15) in the control group (P?=?.023), indicating favorable responses to both treatments."""; in people with Other:Diabetes Mellitus, Type 2;
+##        ;IVACAFTOR / LUMACAFTOR;
 
-df.insert(0, 'ATC.1', None)  # Añadir una columna de índice para referencia
 
-# Iteramos sobre cada fila del DataFrame con df.iterrows()
-# 'index' es el número de la fila y 'row' contiene todos los datos de esa fila
-for index, row in df.iterrows():
-    # Obtenemos el valor de la celda en la columna de fármacos
-    celda_farmacos = row['Drug']
-    celda_nueva = row['ATC.1']
-    resultado_final_fila = "" # Variable para guardar el resultado de esta fila
-        # Si detectamos una coma, significa que hay múltiples fármacos
-    if ',' in celda_farmacos:
-            # 1. Separamos los fármacos por la coma y limpiamos espacios
-            lista_farmacos = [f.strip() for f in str(celda_farmacos).split(',')]
-            
-            # 2. Creamos una lista para las traducciones individuales
-            traducciones_individuales = []
-            
-            # 3. Recorremos la lista de fármacos para traducir cada uno
-            for farmaco in lista_farmacos:
-                # Usamos .get() para traducir de forma segura
-                trad = diccionario_atc.get(farmaco)
-                traducciones_individuales.append(trad)
+for ind, row in df.iterrows():  # Bucle para procesar columnas donde solo hay 1 medicamento
+    farmaco = str(row['Drug']).strip().upper()
+    atc_code = [k for k, v in diccionario_atc.items() if v.strip().upper() == farmaco]
+    
 
-            df.at[df.index[0],'ATC_1'] = ', '.join(traducciones_individuales)
+    df.at[ind, 'ATC'] = '/'.join(atc_code)  # Asigna el código ATC o NaN si no se encuentra
 
-    elif '/' in celda_farmacos:
-            # 1. Separamos los fármacos por la coma y limpiamos espacios
-            lista_farmacos = [f.strip() for f in str(celda_farmacos).split('/')]
-            
-            # 2. Creamos una lista para las traducciones individuales
-            traducciones_individuales = []
-            
-            # 3. Recorremos la lista de fármacos para traducir cada uno
-            for farmaco in lista_farmacos:
-                # Usamos .get() para traducir de forma segura
-                trad = diccionario_atc.get(farmaco)
-                traducciones_individuales.append(trad)
+# --- 3. Procesamiento sin Bucle (usando map) ---
+print("Procesando los datos sin bucle (usando map)...")
+# Crea una función para mapear los fármacos a sus códigos ATC
 
-            df.at[row.index, 'ATC.1'] = ', '.join(traducciones_individuales)
 
-    # Si no hay coma, es un único fármaco
-    else:
-        traducciones_individuales = []
+def mapear_varios_atc(farmaco):
+    farmaco = str(farmaco)
+    farmacos_lista = [re.split(r'[, ]', farmaco)][0]
+    atc_codes = set()  # Usar un conjunto para evitar duplicados
+    for f in farmacos_lista:
+            codigos = [k for k, v in diccionario_atc.items() if v == f]
+            atc_codes.update(codigos)
+    return '/'.join(atc_codes)
 
-        farmaco_individual = (str(celda_farmacos).strip())  # Limpiamos espacios
-        farmaco = diccionario_atc.get(farmaco_individual)
-        farmaco = str(farmaco).strip() if farmaco is not None else ""
 
-        df.at[row.index, 'ATC.1'] = df['ATC.1'].replace('nan' or '', farmaco)
-    # Rellenamos NaN con cadenas vacías
 
-    # Añadimos el resultado de la fila (ya sea traducido o vacío) a nuestra lista principal
-   # lista_resultados.append(resultado_final_fila)
+# Aplica la función de mapeo a la columna 'Drug' y asigna los resultados a la columna 'ATC'
+df['ATC'] = df['Drug'].map(mapear_varios_atc)
 
-# --- 3. Asignación de Resultados y Salida ---
-
-# Asignamos la lista completa de resultados a la nueva columna del DataFrame.
-# La lista tiene el mismo orden y tamaño que las filas del DataFrame.
-
-print("\n" + "="*40 + "\n")
-print("DataFrame con la Columna Traducida:")
-print(df)
-
+print(df.head())
 # Guardamos el resultado en un nuevo archivo CSV
 ruta_salida_csv = 'resultados_traducidos_bucle.csv'
 df.to_csv(ruta_salida_csv, sep=';', index=False, encoding='utf-8-')

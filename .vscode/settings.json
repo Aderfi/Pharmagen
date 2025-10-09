@@ -5,5 +5,7 @@
             "envManager": "ms-python.python:venv",
             "packageManager": "ms-python.python:pip"
         }
-    ]
+    ],
+    "python.envFile": "${workspaceFolder}/.env_pharmagen",
+    "python.globalModuleInstallation": false
 }
