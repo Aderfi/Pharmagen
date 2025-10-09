@@ -1,6 +1,10 @@
 import json
 import pandas as pd
 import numpy as np
+import os
+import sys
+import csv
+import re
 
 '''
 with open("drug_gene_output.json", "r", encoding="utf-8") as f:
@@ -22,7 +26,7 @@ for i in range(len(drug_gene_dict)):
     Convierte los archivos JSON que contienen listas de diccionarios en un solo diccionario.
 '''
 
-
+''''
 import json
 
 # Leer el archivo con la lista de diccionarios
@@ -43,8 +47,8 @@ with open('resultado.json', 'w', encoding='utf-8') as f:
 
 # Imprimir el resultado en pantalla
 
-
-'''''
+'''
+'''
 with open('ATC_farmaco(ENG_dict).json', 'r', encoding='utf-8') as f:
     data1 = json.load(f)
 print("Claves de ATC_farmaco(ENG_dict).json:", data1.keys())
@@ -53,3 +57,11 @@ with open('drug_gene_output.json', 'r', encoding='utf-8') as f:
     data2 = json.load(f)
 print("Claves de drug_gene_output.json:", data2.keys())
 '''
+
+with open('train_data/jeso_ATC-drugs.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+for k,v in data.items():
+    match = re.match(r'(.*?)\s*\+\s*(.*?)', v) # Busca los values que tengan una estructura concreta de [String][spaces](+)[spaces][String]
+    if match:
+        print (f"Clave: '{k}' ----  {v} --- [{', '.join(match.groups())}]")
