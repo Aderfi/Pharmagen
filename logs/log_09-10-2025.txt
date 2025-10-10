@@ -1,0 +1,131 @@
+2025-10-09 19:29:20,840 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\__init__.py", line 2, in <module>
+    from data_handle import *
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\data_handle\__init__.py", line 5, in <module>
+    import Pharmagen
+ModuleNotFoundError: No module named 'Pharmagen'
+2025-10-09 19:29:35,235 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\__init__.py", line 2, in <module>
+    from data_handle import *
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\data_handle\__init__.py", line 5, in <module>
+    import Pharmagen
+ModuleNotFoundError: No module named 'Pharmagen'
+2025-10-09 19:29:55,439 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\__init__.py", line 2, in <module>
+    from data_handle import *
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\data_handle\__init__.py", line 5, in <module>
+    import Pharmagen
+ModuleNotFoundError: No module named 'Pharmagen'
+2025-10-09 19:30:30,523 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'CACHE_DIR' is not defined
+2025-10-09 19:30:55,596 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'config'
+2025-10-09 19:31:26,578 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: cannot import name '__dirPaths__' from 'src.scripts' (C:\Users\rukia\Documents\Master\Pharmagen\src\scripts\__init__.py)
+2025-10-09 19:33:43,663 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: 'builtin_function_or_method' object is not iterable
+2025-10-09 19:34:50,719 [CRITICAL] - Excepción no controlada:
+  File "<stdin>", line 2
+    print (f'\n{k} ---- {v}')
+    ^^^^^
+IndentationError: expected an indented block after 'for' statement on line 1
+2025-10-09 20:27:02,026 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\__init__.py", line 2, in <module>
+    from data_handle import *
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\data_handle\__init__.py", line 5, in <module>
+    import Pharmagen
+ModuleNotFoundError: No module named 'Pharmagen'
+2025-10-09 20:28:07,132 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: module 'src.scripts.config' has no attribute 'PROJECT_ROOT'
+2025-10-09 20:29:00,467 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'PROJECT_ROOT' is not defined
+2025-10-09 20:29:09,430 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: module 'src.scripts.config' has no attribute 'PROJECT_ROOT'
+2025-10-09 20:29:59,217 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\scripts\__init__.py", line 7, in <module>
+    from config import __dirPaths__
+ModuleNotFoundError: No module named 'config'
+2025-10-09 20:30:45,126 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: cannot import name 'scripts' from 'src' (C:\Users\rukia\Documents\Master\Pharmagen\src\__init__.py)
+2025-10-09 20:31:18,960 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\scripts\__init__.py", line 7, in <module>
+    from config import __dirPaths__
+ModuleNotFoundError: No module named 'config'
+2025-10-09 20:32:32,929 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\rukia\Documents\Master\Pharmagen\src\scripts\__init__.py", line 7, in <module>
+    from config import __dirPaths__
+ModuleNotFoundError: No module named 'config'
+2025-10-09 20:33:00,597 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: cannot import name 'scripts' from 'src' (C:\Users\rukia\Documents\Master\Pharmagen\src\__init__.py)
+2025-10-09 21:45:58,039 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 34, in <module>
+    extract_vocab(json_dir / json_files[i])
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 25, in extract_vocab
+    with open(Path(cfg.MODEL_LABEL_VOCABS_DIR + json_file.split('.')[0] + '_vocab.json'), 'w', encoding='utf-8') as f:
+AttributeError: 'WindowsPath' object has no attribute 'split'
+2025-10-09 21:48:07,954 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 39, in <module>
+    vocab_files = [f for f in os.listdir(cfg.MODEL_LABEL_VOCABS_DIR) if f.endswith('_vocab.json')]
+FileNotFoundError: [WinError 3] El sistema no puede encontrar la ruta especificada: 'C:\\Users\\rukia\\Documents\\Master\\Pharmagen\\pgen_model\\label_vocabs'
+2025-10-09 21:49:01,565 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 36, in <module>
+    extract_vocab(json_dir / json_files[i])
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 19, in extract_vocab
+    for key, value in data.items():
+AttributeError: 'list' object has no attribute 'items'
+2025-10-09 21:50:33,439 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 36, in <module>
+    vocab = extract_vocab(json_dir / json_files[i])
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 19, in extract_vocab
+    for key, value in data.items():
+AttributeError: 'list' object has no attribute 'items'
+2025-10-09 21:56:24,934 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 41, in <module>
+    vocab = extract_vocab(json_dir / json_files[i])
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 32, in extract_vocab
+    with open(f"{cfg.MODEL_LABEL_VOCABS_DIR}/{json_file_base}_vocab.json", 'w', encoding='utf-8') as f:
+OSError: [Errno 22] Invalid argument: 'C:\\Users\\rukia\\Documents\\Master\\Pharmagen\\pgen_model\\labels_vocabs/C:\\Users\\rukia\\Documents\\Master\\Pharmagen\\pgen_model\\docs_data\\json\\ATC_drug_dict_ENG_vocab.json'
+2025-10-09 21:58:14,882 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 41, in <module>
+    vocab = extract_vocab(json_dir / json_files[i])
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\scripts\vocab_emb.py", line 32, in extract_vocab
+    with open(Path(f"{cfg.MODEL_LABEL_VOCABS_DIR}/{json_file_base}_vocab.json"), 'x', encoding='utf-8') as f:
+OSError: [Errno 22] Invalid argument: 'C:\\Users\\rukia\\Documents\\Master\\Pharmagen\\pgen_model\\labels_vocabs\\C:\\Users\\rukia\\Documents\\Master\\Pharmagen\\pgen_model\\docs_data\\json\\ATC_drug_dict_ENG_vocab.json'

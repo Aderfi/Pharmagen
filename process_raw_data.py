@@ -1,17 +1,10 @@
+from pathlib import Path
 import pandas as pd
 import csv
-import os               
 import sys
-from pathlib import Path
+import os
 
-project_root = Path(str(Path(__file__).parent.resolve()))
-pharma_dir = Path(project_root / "Pharmagen")
-sys.path.append(str(pharma_dir))
-
-RAW_DATA_DIR = Path(pharma_dir / "data" / "raw")
-PROCESSED_DATA_DIR = Path(pharma_dir / "data" / "processed")
-CACHE_DIR = Path(pharma_dir / "cache")
-
+from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
 
 def increase_csv_field_limit():
     """Aumenta el límite de tamaño de campo para el lector CSV de Python."""
@@ -27,9 +20,11 @@ def increase_csv_field_limit():
 
 def convert_tsv_to_csv(raw_dir, processed_csv_dir, cache_dir):
     """Convierte todos los archivos .tsv en raw_dir a .csv en processed_csv_dir."""
-    raw_dir = Path(RAW_DATA_DIR)
-    processed_csv_dir = Path(PROCESSED_DATA_DIR) / "csv"
-    cache_dir = Path(CACHE_DIR)
+    raw_dir = RAW_DATA_DIR
+    processed_csv_dir = PROCESSED_DATA_DIR / "csv"
+    cache_dir = CACHE_DIR
+    
+    
 
     # Encuentra todos los archivos .tsv en RAW_DATA_DIR
     tsv_files = list(raw_dir.glob("*.tsv"))
