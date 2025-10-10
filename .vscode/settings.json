@@ -1,11 +1,9 @@
 {
-    "python-envs.pythonProjects": [
-        {
-            "path": "",
-            "envManager": "ms-python.python:venv",
-            "packageManager": "ms-python.python:pip"
-        }
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.launchArgs": [],
+    "python.analysis.fixAll": [],
+    "python.analysis.extraPaths": [
+        "."
     ],
-    "python.envFile": "${workspaceFolder}/.env_pharmagen",
-    "python.globalModuleInstallation": false
+    "python.analysis.supportDocstringTemplate": false
 }

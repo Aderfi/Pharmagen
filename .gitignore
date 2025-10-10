@@ -1,4 +1,2 @@
-.env_pharmagen
-Machine_Learning/
-**/*.pyc
-!.env_pharmagen/requirements.txt
+.env/*
+.vscode/*
