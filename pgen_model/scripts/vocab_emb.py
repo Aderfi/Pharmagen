@@ -8,7 +8,7 @@ sys.path.append(str(Pharmagen))
 os.chdir(str(Pharmagen))
 
 
-import src.scripts.config as cfg
+import src.config.config as cfg
 
 def extract_vocab(json_file):
     json_file_name = str(json_file).split('/')[-1]

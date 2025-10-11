@@ -4,10 +4,7 @@ import pandas as pd
 from pathlib import Path
 import csv
 import json
-import Pharmagen
-import Pharmagen.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
-
-
+from src.config.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
 
 def increase_csv_field_limit():
     """Aumenta el límite de tamaño de campo para el lector CSV de Python."""
@@ -66,6 +63,9 @@ def cleanup_temp_files(temp_files):
 
 
 if __name__ == "__main__":
+    raw_dir = RAW_DATA_DIR
+    processed_csv_dir = Path(PROCESSED_DATA_DIR) / "csv"
+    cache_dir = Path(CACHE_DIR)
     increase_csv_field_limit()
     # Ajusta el subdirectorio "csv" dentro de PROCESSED_DATA_DIR si no existe
     processed_csv_dir = PROCESSED_DATA_DIR / "csv"

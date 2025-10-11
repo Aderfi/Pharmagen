@@ -6,7 +6,7 @@ import sys
 import os
 import datetime
 from pathlib import Path
-from .config import LOGS_DIR
+from ..config.config import LOGS_DIR
 
 def unit_logging():    #   Captura de errores del programa
         

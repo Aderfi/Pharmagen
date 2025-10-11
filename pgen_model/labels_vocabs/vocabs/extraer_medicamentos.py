@@ -1,15 +1,21 @@
 import json
+import pandas as pd
+import numpy as np
 
 # Carga el archivo JSON
-with open('ATC_drug_dict_ENG.json', 'r', encoding='utf-8') as f:
+with open('drug_gene.json', 'r', encoding='utf-8') as f:
     drug_gene_dict = json.load(f)
 
-# Extrae las claves (drugs) y ordénalas si quieres
-drugs = sorted(drug_gene_dict.keys())
+genes_list = []
+drug_list = []
 
-# Escribe el vocabulario a un archivo .txt, uno por línea
-with open('ATC_vocab.txt', 'w', encoding='utf-8') as f:
-    for drug in drugs:
-        f.write(f"{drug}\n")
+for drug, genes in drug_gene_dict.items():
+    drug_list.append(drug)
+    for gene in genes:
+        genes_list.append(gene)
 
-print("Vocabulario de fármacos guardado en drug_vocab.txt")
+with open('genes_list.txt', 'w', encoding='utf-8') as f_gene, open('drug_list.txt', 'w', encoding='utf-8') as f_drug:
+    for drug in drug_list:
+        f_drug.write(f"{drug}\n")
+    for gene in genes_list:
+        f_gene.write(f"{gene}\n")
