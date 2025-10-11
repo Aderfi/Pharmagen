@@ -2,7 +2,7 @@ import json
 import sys
 import os
 import subprocess
-from .config import *
+from ..config.config import *
 import shutil
 
 __all__ = ['mensaje_introduccion', 'load_config', 'check_config']

@@ -17,7 +17,7 @@ import numpy as np
 from pathlib import Path
 
 #### Import de librerías propias ####
-import src.scripts.config as cfg
+import src.config.config as cfg
 from src.scripts import *
 
 os.getcwd()
