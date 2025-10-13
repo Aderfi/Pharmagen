@@ -4,7 +4,7 @@ import csv
 import sys
 import os
 
-from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
+from src.config.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
 
 def increase_csv_field_limit():
     """Aumenta el límite de tamaño de campo para el lector CSV de Python."""
