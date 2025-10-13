@@ -10,7 +10,9 @@ import sys
 import json
 import glob
 from pathlib import Path
-
+import optuna.trial
+from optuna import Trial as trial
+from optuna import Study as study
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Usando dispositivo: {device}")
@@ -32,13 +34,15 @@ PATIENCE = 10
 
 DATA_PATH = "var_pheno_ann_long.csv"
 SAVE_MODEL_AS = "modelo_farmaco.pth"
-SAVE_ENCODERS_AS = "encoders.pkl"
+SAVE_ENCODERS_AS = "encoders_.pkl"
 RESULTS_DIR = "../../results/"
 # ==========================================
 
-csv_files = glob.glob("../labels_vocabs/*.csv")
+csv_files = glob.glob("../docs_data/csv/*_long.csv")
 
-df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Outcome', 'Variation'], index_col=False, dtype=str) for f in csv_files], ignore_index=True)
+print(csv_files)
+
+df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Effect', 'Outcome'], index_col=False, dtype=str) for f in csv_files], ignore_index=True)
 
 
 # ------------- PREDICTION INPUT -------------
@@ -54,11 +58,11 @@ PREDICTION_INPUT = pd.DataFrame(predict_json)
 # Cargar equivalencias de genotipos
 with open("geno_alleles_dict.json", "r") as f:
     equivalencias = json.load(f)
-
+'''
 # 1. Cargar y preprocesar los datos
 df = pd.read_csv(DATA_PATH, sep=';')
 df = df[['Drug', 'Genotype', 'Effect', 'Outcome']]  # Selecciona solo las columnas relevantes
-
+'''
 df['Genotype'] = df['Genotype'].map(lambda x: equivalencias.get(x, x))
 
 # Codifica las variables categóricas a índices numéricos
@@ -132,15 +136,17 @@ n_effects = len(encoders['Effect'].classes_)
 n_outcomes = len(encoders['Outcome'].classes_)
 
 
-'''
-import optuna
-emb_dim = trial.suggest_categorical('emb_dim', [8, 16, 32, 64])
-hidden_dim = trial.suggest_int('hidden_dim', 64, 1024, step=64)
-lr = trial.suggest_loguniform('lr', 1e-5, 1e-2)
-dropout = trial.suggest_uniform('dropout', 0.1, 0.5)
+
+
+
 # ...arma y entrena tu modelo usando estos valores...
 # ...devuelve la valid_loss o 1 - valid_accuracy...
-'''
+
+EMB_DIM = emb_dim
+HIDDEN_DIM = hidden_dim
+LEARNING_RATE = lr
+DROPOUT_RATE = dropout
+
 
 model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM)
 criterion = nn.CrossEntropyLoss()
@@ -150,14 +156,14 @@ optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
 best_loss = float('inf')       # Puedes ajustar cuántas épocas esperar sin mejora
 trigger_times = 0
-
+'''
 for epoch in range(EPOCHS):
 
     '''
-        Entrenamiento del modelo con barra de progreso y verbose
-        Muestra average loss, accuracy por tarea y accuracy promedio
-        Guarda los resultados en logs/training_log.txt
-    '''
+    # Entrenamiento del modelo con barra de progreso y verbose
+    # Muestra average loss, accuracy por tarea y accuracy promedio
+    # Guarda los resultados en logs/training_log.txt
+'''
 
     model.train()
     total_loss = 0
@@ -198,10 +204,10 @@ for epoch in range(EPOCHS):
     acc_outcome = total_correct_outcome / total_samples
     avg_acc = (acc_effect + acc_outcome) / 2
         
-    '''
-    Evaluación en el conjunto de validación
-    Muestra la pérdida de validación al final de cada época
-    '''
+'''
+    # Evaluación en el conjunto de validación
+    # Muestra la pérdida de validación al final de cada época
+'''
         
     model.eval()
     val_loss = 0
@@ -235,9 +241,8 @@ for epoch in range(EPOCHS):
         f.write(f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Outcome accuracy: {acc_outcome:.4f} | Avg accuracy: {avg_acc:.4f}")
         print((f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Outcome accuracy: {acc_outcome:.4f} | Avg accuracy: {avg_acc:.4f}"))    
 
-'''TRIAL PARA MEJORES HIPERPARÁMETROS'''
-'''
-
+'''#TRIAL PARA MEJORES HIPERPARÁMETROS'''
+''''''
 
 def objective(trial):
     emb_dim = trial.suggest_categorical('emb_dim', [8, 16, 32, 64])
@@ -355,9 +360,9 @@ else:
             f.write(result_str)
 
     print(f"\nPredicciones guardadas en {RESULTS_DIR}/predicciones.txt")
+    
 '''
 # 6. OPTIMIZACIÓN DE HIPERPARÁMETROS CON OPTUNA
 study = optuna.create_study(direction='minimize')
 study.optimize(objective, n_trials=50)
 print("Mejores hiperparámetros:", study.best_params)
-'''

@@ -10,7 +10,8 @@ import sys
 import json
 import glob
 from pathlib import Path
-
+import optuna.trial
+from optuna import Trial, Study
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Usando dispositivo: {device}")
@@ -19,10 +20,10 @@ print(f"Usando dispositivo: {device}")
 # Puedes editar aquí los hiperparámetros principales:
 BATCH_SIZE = 8
 EPOCHS = 100
-LEARNING_RATE = 2.996788185777191e-05
+LEARNING_RATE = 1.5258586638387263e-05
 EMB_DIM = 64
 HIDDEN_DIM = 704
-DROPOUT_RATE = 0.2893325389845274
+DROPOUT_RATE = 0.49086195278699424
 PATIENCE = 10
 
 #EMB_DIM = OPORTUNA: 64
@@ -31,14 +32,14 @@ PATIENCE = 10
 #DROPOUT_RATE = OPORTUNA: 0.2893325389845274
 
 DATA_PATH = "var_pheno_ann_long.csv"
-SAVE_MODEL_AS = "modelo_farmaco.pth"
-SAVE_ENCODERS_AS = "encoders.pkl"
+SAVE_MODEL_AS = "modelo_effect_entity.pth"
+SAVE_ENCODERS_AS = "encoders_effect_entity.pkl"
 RESULTS_DIR = "../../results/"
 # ==========================================
 
 csv_files = glob.glob("../labels_vocabs/*.csv")
 
-df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Outcome', 'Variation'], index_col=False, dtype=str) for f in csv_files], ignore_index=True)
+df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Effect', 'Entity'], index_col=False, dtype=str) for f in csv_files], ignore_index=True)
 
 
 # ------------- PREDICTION INPUT -------------
@@ -56,8 +57,9 @@ with open("geno_alleles_dict.json", "r") as f:
     equivalencias = json.load(f)
 
 # 1. Cargar y preprocesar los datos
-df = pd.read_csv(DATA_PATH, sep=';')
-df = df[['Drug', 'Genotype', 'Effect', 'Outcome']]  # Selecciona solo las columnas relevantes
+df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Effect', 'Entity'], index_col=False, dtype=str) for f in csv_files], ignore_index=True)
+df['stratify_col'] = df['Effect'] + "_" + df['Entity']
+
 
 df['Genotype'] = df['Genotype'].map(lambda x: equivalencias.get(x, x))
 
@@ -68,12 +70,12 @@ for col in df.columns:
     df[col] = encoders[col].fit_transform(df[col].astype(str))
 
 
-counts = df['Outcome'].value_counts()
+counts = df['Entity'].value_counts()
 suficientes = counts[counts > 1].index
-df = df[df['Outcome'].isin(suficientes)]
+df = df[df['Entity'].isin(suficientes)]
 
 
-df_train, df_val = train_test_split(df, test_size=0.2, stratify=df['Outcome'])
+df_train, df_val = train_test_split(df, test_size=0.2, stratify=df['Entity'])
 
 # 2. Definir Dataset personalizado
 class PharmacoDataset(Dataset):
@@ -81,7 +83,7 @@ class PharmacoDataset(Dataset):
         self.drug = torch.tensor(df['Drug'].values, dtype=torch.long)
         self.genotype = torch.tensor(df['Genotype'].values, dtype=torch.long)
         self.effect = torch.tensor(df['Effect'].values, dtype=torch.long)
-        self.outcome = torch.tensor(df['Outcome'].values, dtype=torch.long)
+        self.entity = torch.tensor(df['Entity'].values, dtype=torch.long)
     
     def __len__(self):
         return len(self.drug)
@@ -91,7 +93,7 @@ class PharmacoDataset(Dataset):
             'drug': self.drug[idx],
             'genotype': self.genotype[idx],
             'effect': self.effect[idx],
-            'outcome': self.outcome[idx]
+            'entity': self.entity[idx]
         }
 
 dataset = PharmacoDataset(df)
@@ -104,14 +106,14 @@ val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 # 3. Definir el modelo
 class PharmacoModel(nn.Module):
-    def __init__(self, n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=8, hidden_dim=64):
+    def __init__(self, n_drugs, n_genotypes, n_effects, n_entitys, emb_dim=8, hidden_dim=64):
         super().__init__()
         self.drug_emb = nn.Embedding(n_drugs, emb_dim)
         self.geno_emb = nn.Embedding(n_genotypes, emb_dim)
         self.fc1 = nn.Linear(emb_dim * 2, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim//2)
         self.effect_out = nn.Linear(hidden_dim//2, n_effects)
-        self.outcome_out = nn.Linear(hidden_dim//2, n_outcomes)
+        self.entity_out = nn.Linear(hidden_dim//2, n_entitys)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(DROPOUT_RATE)
     
@@ -123,13 +125,13 @@ class PharmacoModel(nn.Module):
         x = self.dropout(x)
         x = self.relu(self.fc2(x))
         effect = self.effect_out(x)
-        outcome = self.outcome_out(x)
-        return effect, outcome
+        entity = self.entity_out(x)
+        return effect, entity
 
 n_drugs = len(encoders['Drug'].classes_)
 n_genotypes = len(encoders['Genotype'].classes_)
 n_effects = len(encoders['Effect'].classes_)
-n_outcomes = len(encoders['Outcome'].classes_)
+n_entitys = len(encoders['Entity'].classes_)
 
 
 '''
@@ -142,7 +144,7 @@ dropout = trial.suggest_uniform('dropout', 0.1, 0.5)
 # ...devuelve la valid_loss o 1 - valid_accuracy...
 '''
 
-model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM)
+model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_entitys, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
@@ -162,7 +164,7 @@ for epoch in range(EPOCHS):
     model.train()
     total_loss = 0
     total_correct_effect = 0
-    total_correct_outcome = 0
+    total_correct_entity = 0
     total_samples = 0
     n_batches = len(loader)
     print(f"\nEpoch {epoch + 1}/{EPOCHS}")
@@ -170,12 +172,12 @@ for epoch in range(EPOCHS):
         drug = batch['drug']
         genotype = batch['genotype']
         effect = batch['effect']
-        outcome = batch['outcome']
+        entity = batch['entity']
 
         optimizer.zero_grad()
-        effect_pred, outcome_pred = model(drug, genotype)
+        effect_pred, entity_pred = model(drug, genotype)
         loss1 = criterion(effect_pred, effect)
-        loss2 = criterion(outcome_pred, outcome)
+        loss2 = criterion(entity_pred, entity)
         loss = loss1 + loss2
         loss.backward()
         optimizer.step()
@@ -183,9 +185,9 @@ for epoch in range(EPOCHS):
             
         # Accuracy cálculo
         _, effect_pred_labels = torch.max(effect_pred, dim=1)
-        _, outcome_pred_labels = torch.max(outcome_pred, dim=1)
+        _, entity_pred_labels = torch.max(entity_pred, dim=1)
         total_correct_effect += (effect_pred_labels == effect).sum().item()
-        total_correct_outcome += (outcome_pred_labels == outcome).sum().item()
+        total_correct_entity += (entity_pred_labels == entity).sum().item()
         total_samples += effect.size(0)
             
         # Progreso con porcentaje
@@ -195,8 +197,8 @@ for epoch in range(EPOCHS):
         sys.stdout.flush()
     avg_loss = total_loss / n_batches
     acc_effect = total_correct_effect / total_samples
-    acc_outcome = total_correct_outcome / total_samples
-    avg_acc = (acc_effect + acc_outcome) / 2
+    acc_entity = total_correct_entity / total_samples
+    avg_acc = (acc_effect + acc_entity) / 2
         
     '''
     Evaluación en el conjunto de validación
@@ -211,10 +213,10 @@ for epoch in range(EPOCHS):
             drug = batch['drug']
             genotype = batch['genotype']
             effect = batch['effect']
-            outcome = batch['outcome']
-            effect_pred, outcome_pred = model(drug, genotype)
+            entity = batch['entity']
+            effect_pred, entity_pred = model(drug, genotype)
             loss1 = criterion(effect_pred, effect)
-            loss2 = criterion(outcome_pred, outcome)
+            loss2 = criterion(entity_pred, entity)
             val_loss += (loss1 + loss2).item()
             val_samples += 1
     val_loss /= val_samples  # Promedio
@@ -232,8 +234,8 @@ for epoch in range(EPOCHS):
             break
         
     with open(str(Path('logs' + "training_log.txt")), "a", encoding="utf-8") as f: # type: ignore
-        f.write(f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Outcome accuracy: {acc_outcome:.4f} | Avg accuracy: {avg_acc:.4f}")
-        print((f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Outcome accuracy: {acc_outcome:.4f} | Avg accuracy: {avg_acc:.4f}"))    
+        f.write(f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Entity accuracy: {acc_entity:.4f} | Avg accuracy: {avg_acc:.4f}")
+        print((f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Entity accuracy: {acc_entity:.4f} | Avg accuracy: {avg_acc:.4f}"))    
 
 '''TRIAL PARA MEJORES HIPERPARÁMETROS'''
 '''
@@ -245,7 +247,7 @@ def objective(trial):
     lr = trial.suggest_loguniform('lr', 1e-5, 1e-2)
     dropout = trial.suggest_uniform('dropout', 0.1, 0.5)
 
-    model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=emb_dim, hidden_dim=hidden_dim)
+    model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_entitys, emb_dim=emb_dim, hidden_dim=hidden_dim)
     model.dropout = nn.Dropout(dropout)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
@@ -259,12 +261,12 @@ def objective(trial):
             drug = batch['drug']
             genotype = batch['genotype']
             effect = batch['effect']
-            outcome = batch['outcome']
+            entity = batch['entity']
 
             optimizer.zero_grad()
-            effect_pred, outcome_pred = model(drug, genotype)
+            effect_pred, entity_pred = model(drug, genotype)
             loss1 = criterion(effect_pred, effect)
-            loss2 = criterion(outcome_pred, outcome)
+            loss2 = criterion(entity_pred, entity)
             loss = loss1 + loss2
             loss.backward()
             optimizer.step()
@@ -278,10 +280,10 @@ def objective(trial):
                 drug = batch['drug']
                 genotype = batch['genotype']
                 effect = batch['effect']
-                outcome = batch['outcome']
-                effect_pred, outcome_pred = model(drug, genotype)
+                entity = batch['entity']
+                effect_pred, entity_pred = model(drug, genotype)
                 loss1 = criterion(effect_pred, effect)
-                loss2 = criterion(outcome_pred, outcome)
+                loss2 = criterion(entity_pred, entity)
                 val_loss += (loss1 + loss2).item()
                 val_samples += 1
         val_loss /= max(val_samples, 1)
@@ -307,7 +309,7 @@ print("\n=== PREDICCIONES ===")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 encoders = joblib.load(SAVE_ENCODERS_AS)
-model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM)
+model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_entitys, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM)
 model.load_state_dict(torch.load(SAVE_MODEL_AS, map_location=torch.device('cpu')))
 model.eval()
 
@@ -331,12 +333,12 @@ else:
     drug_tensor = torch.tensor(input_df.loc[valid_idx, 'Drug'].values, dtype=torch.long)
     genotype_tensor = torch.tensor(input_df.loc[valid_idx, 'Genotype'].values, dtype=torch.long)
     with torch.no_grad():
-        effect_pred, outcome_pred = model(drug_tensor, genotype_tensor)
+        effect_pred, entity_pred = model(drug_tensor, genotype_tensor)
         effect_labels = torch.argmax(effect_pred, dim=1).numpy()
-        outcome_labels = torch.argmax(outcome_pred, dim=1).numpy()
+        entity_labels = torch.argmax(entity_pred, dim=1).numpy()
         # Decodificar los resultados
         effect_decoded = encoders['Effect'].inverse_transform(effect_labels)
-        outcome_decoded = encoders['Outcome'].inverse_transform(outcome_labels)
+        entity_decoded = encoders['Entity'].inverse_transform(entity_labels)
 
     
     with open(str(Path(RESULTS_DIR + "predicciones.txt")), "w", encoding="utf-8") as f: # type: ignore
@@ -348,7 +350,7 @@ else:
             result_str = (
             f"Input: {{'Drug': '{drug_name}', 'Genotype': '{genotype_name}'}}\n"
             f"  Predicted Effect:  {effect_decoded[i]}\n"
-            f"  Predicted Outcome: {outcome_decoded[i]}\n"
+            f"  Predicted Entity: {entity_decoded[i]}\n"
             + "-" * 40 + "\n"
             )
             print(result_str, end="")  # Muestra también en consola
