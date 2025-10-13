@@ -1,12 +1,12 @@
 Input: {'Drug': 'OXALIPLATIN', 'Genotype': 'IFNL3, IFNL4_AA + AG'}
   Predicted Effect:  Efficacy
-  Predicted Outcome: decreased  Efficacy:Progression-free survival
+  Predicted Outcome: decreased  Efficacy:Overall survival, Efficacy:Progression-free survival
 ----------------------------------------
 Input: {'Drug': 'ISONIAZID', 'Genotype': 'APOE_C'}
   Predicted Effect:  Toxicity
-  Predicted Outcome: increased  risk of Side Effect:Drug-induced liver injury
+  Predicted Outcome: decreased severity of Disease:Drug Toxicity
 ----------------------------------------
 Input: {'Drug': 'DICLOFENAC', 'Genotype': 'CYP2D6_*4/*4 + *3/*4 + *3/*5 + *4/*4xN + *4/*6 + *5/*41 + *4/*29 + *4/*17 + *5/*10 + *3/*41 + *4/*9 + *4/*41 + *4/*10 + *5/*17'}
-  Predicted Effect:  Toxicity
-  Predicted Outcome: increased   PK:venlafaxine levels
+  Predicted Effect:  Metabolism/PK
+  Predicted Outcome: decreased  Efficacy:overall survival
 ----------------------------------------
