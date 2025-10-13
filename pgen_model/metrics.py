@@ -54,3 +54,4 @@ DATA_PATH = "train_data"
 MODEL_PATH_EXT = "models/{}.pth"
 SAVE_ENCODERS_AS = "encoders{}.pkl"
 RESULTS_DIR = "../results/"
+

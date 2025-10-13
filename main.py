@@ -1,79 +1,56 @@
 """
-#  Software: pharmagen_pmodel
-# Versión: 0.1
-# Autor: Astordna / Aderfi / Adrim Hamed Outmani
-# Fecha: 2024-06-15
-# Descripción: Este software tiene la utilidad de actuar como puente para los inputs y la interpretación
-#              de los outputs de un modelo predictivo cuya finalidad es inferir a partir de datos genómicos
-#              del paciente, la eficacia terapéutica y el posible riesgo incrementado de ciertas toxicidades.
-#              El modelo predictivo está basado en un conjunto de modelos de machine learning entrenados
-#              con datos genómicos y clínicos de pacientes reales.
+Software: pharmagen_pmodel
+Versión: 0.1
+Autor: Astordna / Aderfi / Adrim Hamed Outmani
+Fecha: 2024-06-15
+Descripción: Punto de entrada principal del software. Orquesta todas las funcionalidades,
+             incluyendo el tratamiento de datos genómicos, entrenamiento, predicción y análisis.
 """
 
-#### Import de librerías estándar ####
-import os, sys, json, logging
-import pandas as pd
-import numpy as np
-from pathlib import Path
+import sys
+import logging
 
-#### Import de librerías propias ####
-import src.config.config as cfg
-from src.scripts import *
+# Aquí puedes importar funciones generales, utilidades y, si quieres, los pipelines de pgen_model
+# Ejemplo (ajusta según tus módulos):
+# from src.data_utils import process_genomic_data
+# from src.visualization import visualize_results
+# from pgen_model import main as pgen_model_main
 
-os.getcwd()
-Pharmagen = Path(__file__).parent
-sys.path.append(str(Pharmagen))
-'''
-from src.logger_config import unit_logging
-from src.utils import mensaje_introduccion, load_config, check_config
-from deepL_model.scripts.train_model import main as train_main
-from deepL_model.scripts.predict_model import predict_single_input, predict_from_file
-'''
-
-# Configuración de logging
 logging.basicConfig(level=logging.INFO)
 
+def process_genomic_data():
+    print(">> Procesando datos genómicos (pendiente de implementar)")
+
+def advanced_analysis():
+    print(">> Análisis avanzado (pendiente de implementar)")
+
+def launch_pgen_model():
+    # Llama al menú específico del paquete pgen_model
+    import subprocess
+    subprocess.run([sys.executable, "-m", "pgen_model"])
 
 def main():
-    # 1. Inicializa logging y muestra introducción
-    unit_logging()
-    print(mensaje_introduccion())
-    config_df = load_config()
-
+    print("""
+    ================= Pharmagen: MENÚ PRINCIPAL =================
+    1. Procesar datos genómicos de entrada
+    2. Entrenar/predir modelo (menú modelo ML)
+    3. Análisis avanzado (futuro)
+    4. Salir
+    =============================================================
+    """)
     while True:
-        print("\n¿Qué deseas hacer?")
-        print("1. Entrenar modelo")
-        print("2. Realizar predicción (introducir datos manualmente)")
-        print("3. Realizar predicción (desde archivo)")
-        print("4. Salir")
-
-        choice = input("Introduce 1, 2, 3 o 4: ").strip()
-        if choice not in {'1', '2', '3', '4'}:
-            print("Opción no válida. Inténtalo de nuevo.")
-            continue
-
+        choice = input("Selecciona opción (1-4): ").strip()
         if choice == "1":
-            print("\nIniciando flujo de entrenamiento...")
-            train_main()    
+            process_genomic_data()
         elif choice == "2":
-            print("\nIntroduce los datos del paciente para predicción:")
-            mutaciones = input("Mutaciones (separadas por coma): ")
-            medicamentos = input("Medicamentos (separados por coma): ")
-            resultado = predict_single_input(mutaciones, medicamentos)
-            print("\nResultado de la predicción:")
-            for k, v in resultado.items():
-                print(f"{k}: {v}")
+            launch_pgen_model()
         elif choice == "3":
-            file_path = input("\nIntroduce la ruta del archivo CSV: ")
-            try:
-                results = predict_from_file(file_path)
-                print("\nResultados de la predicción para cada paciente:")
-                print(results)
-            except Exception as e:
-                print(f"Error al procesar el archivo: {e}")
+            advanced_analysis()
         elif choice == "4":
-            print("\n¡Gracias por usar Pharmagen!")
+            print("¡Gracias por usar Pharmagen!")
             sys.exit(0)
+        else:
+            print("Opción no válida. Intente de nuevo.")
 
 if __name__ == "__main__":
     main()
