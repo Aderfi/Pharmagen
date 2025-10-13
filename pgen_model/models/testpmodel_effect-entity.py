@@ -75,7 +75,7 @@ suficientes = counts[counts > 1].index
 df = df[df['Entity'].isin(suficientes)]
 
 
-df_train, df_val = train_test_split(df, test_size=0.2, stratify=df['Entity'])
+df_train, df_val = train_test_split(df, test_size=0.2, stratify=df['stratify_col'])
 
 # 2. Definir Dataset personalizado
 class PharmacoDataset(Dataset):
