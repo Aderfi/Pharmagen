@@ -1,0 +1,67 @@
+{
+  "model": "Variation-Effect",
+  "best_trial": {
+    "loss": 2.0156563023726144,
+    "normalized_loss": 0.4811031997824467,
+    "params": {
+      "emb_dim": 512,
+      "hidden_dim": 640,
+      "dropout_rate": 0.21743425284794957,
+      "learning_rate": 0.0003864913966418157,
+      "batch_size": 32
+    }
+  },
+  "top5": [
+    {
+      "loss": 2.0156563023726144,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 640,
+        "dropout_rate": 0.21743425284794957,
+        "learning_rate": 0.0003864913966418157,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0166431268056235,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 640,
+        "dropout_rate": 0.26535209105161506,
+        "learning_rate": 0.0004647983014436908,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0185201838612556,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 640,
+        "dropout_rate": 0.15917788784305453,
+        "learning_rate": 0.000463617836109681,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0186918477217355,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 704,
+        "dropout_rate": 0.20793796156743863,
+        "learning_rate": 0.00033921153803759263,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0193905731042228,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 640,
+        "dropout_rate": 0.20794384008852596,
+        "learning_rate": 0.0004081634357743325,
+        "batch_size": 32
+      }
+    }
+  ],
+  "n_trials": 100
+}

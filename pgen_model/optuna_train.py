@@ -4,7 +4,6 @@ import optuna
 import random
 import torch
 
-
 import numpy as np
 
 from .data import PGenInputDataset, PGenDataset, train_data_load
@@ -17,15 +16,12 @@ from src.config.config import PGEN_MODEL_DIR
 from torch.utils.data import DataLoader
 from typing import List
 
-
 def get_optuna_cfg(model_name):
     config = MODEL_CONFIGS[model_name]
     return config['cols'], config['targets']
 
-def get_num_classes_for_embeddings(data_loader):
-    n_drugs = len(data_loader.encoders['Drug'].classes_)
-    n_genotypes = len(data_loader.encoders['Genotype'].classes_)
-    return n_drugs, n_genotypes
+def get_num_drug_genos(data_loader):
+    return len(data_loader.encoders['Drug_Geno'].classes_)
 
 def optuna_objective(trial, model_name):
     cols, targets = get_optuna_cfg(model_name)
@@ -55,11 +51,11 @@ def optuna_objective(trial, model_name):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
  
-    n_drugs, n_genotypes = get_num_classes_for_embeddings(data_loader)
+    n_drug_genos = get_num_drug_genos(data_loader)
     output_dims = {col.lower(): len(data_loader.encoders[col].classes_) for col in targets}
 
     model = PGenModel(
-        n_drugs, n_genotypes, params['emb_dim'], params['hidden_dim'], params['dropout_rate'], output_dims
+        n_drug_genos, params['emb_dim'], params['hidden_dim'], params['dropout_rate'], output_dims
     ).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=params['learning_rate'])

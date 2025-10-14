@@ -20,12 +20,12 @@ def metrics_models(model_name):
     
     elif norm_name == "OUTCOME-VARIATION":
         # Modelo: OUTCOME - VARIATION
-        BATCH_SIZE = 8
+        BATCH_SIZE = 128
         EPOCHS = 100
-        LEARNING_RATE = 2.996788185777191e-05
-        EMB_DIM = 64
-        HIDDEN_DIM = 704
-        DROPOUT_RATE = 0.2893325389845274
+        LEARNING_RATE = 0.0004972585670515988
+        EMB_DIM = 512
+        HIDDEN_DIM = 640
+        DROPOUT_RATE = 0.13689551662757543
         PATIENCE = 10
         return BATCH_SIZE, EPOCHS, LEARNING_RATE, EMB_DIM, HIDDEN_DIM, DROPOUT_RATE, PATIENCE
     

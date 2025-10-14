@@ -32,6 +32,12 @@ class PGenInputDataset:
     def load_data(self, csv_files, cols):
         self.cols = cols
         df = pd.concat([pd.read_csv(f, sep=';', usecols=cols, index_col=False, dtype=str) for f in csv_files], ignore_index=True)
+        # Crear la columna combinada Drug_Geno
+        df["Drug_Geno"] = df["Drug"].astype(str) + "_" + df["Genotype"].astype(str)
+        # Reordenar columnas para que Drug_Geno esté primero
+        ordered_cols = ["Drug_Geno"] + [col for col in df.columns if col not in ["Drug_Geno"]]
+        df = df[ordered_cols]
+
         df_cache = df.copy()
         if 'Drug' in df_cache: df_cache.pop('Drug')
         if 'Genotype' in df_cache: df_cache.pop('Genotype')
@@ -71,9 +77,13 @@ class PGenDataset(Dataset):
     
 def train_data_load(targets):
     csv_path = MODEL_TRAIN_DATA
+    # Asegurarse de que Drug y Genotype estén presentes para formar Drug_Geno
+    read_cols = list(set(targets) | {"Drug", "Genotype"})
     csvfiles = glob.glob(f"{csv_path}/*.csv") 
-    df = pd.concat([pd.read_csv(f, sep=';', dtype=str, usecols=targets) for f in csvfiles], ignore_index=True)
-    cols = df.columns.tolist()
+    df = pd.concat([pd.read_csv(f, sep=';', dtype=str, usecols=read_cols) for f in csvfiles], ignore_index=True)
+    # Añadir Drug_Geno para consistencia
+    df["Drug_Geno"] = df["Drug"].astype(str) + "_" + df["Genotype"].astype(str)
+    cols = ["Drug_Geno"] + [col for col in df.columns if col not in ["Drug_Geno"]]
     
     with open(f"{csv_path}/json_dicts/geno_alleles_dict.json", "r") as f:
         equivalencias = json.load(f)
@@ -95,6 +105,8 @@ def explode_drug_genotype(df, drug_col='Drug', genotype_col='Genotype', drug_sep
     df = df.explode(genotype_col)
     df[drug_col] = df[drug_col].str.strip()
     df[genotype_col] = df[genotype_col].str.strip()
+    # Añadir columna Drug_Geno combinada para consistencia
+    df["Drug_Geno"] = df[drug_col].astype(str) + "_" + df[genotype_col].astype(str)
     return df
 
 def split_no_leakage(df, drug_col='Drug', genotype_col='Genotype', frac=0.8, seed=27):
