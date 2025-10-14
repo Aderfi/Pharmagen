@@ -2,64 +2,55 @@
 Punto de entrada para el paquete pgen_model.
 Proporciona un menú CLI para entrenar y utilizar el modelo predictivo.
 """
-
+import math
+import json
 import sys
-import torch
-from torch.utils.data import DataLoader
 
-from .data import PGenInputDataset, PGenDataset
-from .model import PGenModel
-from .train import train_model
-from .optuna_train import objective_all, objective_outcome_variation, objective_effect_entity, objective_variation_effect
-from .predict import predict_single_input, predict_from_file   # Asegúrate de implementar estas funciones
-import optuna
+from pathlib import Path
+
 from .metrics import metrics_models
 from .pipeline import train_pipeline
+from .model_configs import MODEL_CONFIGS
+from .predict import predict_single_input, predict_from_file
+from .optuna_train import run_optuna_with_progress
+from .data import PGenInputDataset, train_data_load
+
+###########################################################
+# Configuración de Optuna
+N_TRIALS = 100  # Número de pruebas para Optuna
+PGEN_MODEL_DIR = "."  # Ajusta si tu variable global es distinta
+###########################################################
+
+def select_model(model_options, prompt="Selecciona el modelo:"):
+    print("\n————————————————— Modelos Disponibles ————————————————")
+    for i, name in enumerate(model_options, 1):
+        print(f"  {i} -- {name}")
+    print("———————————————————————————————————————————————————————")
+    model_choice = ""
+    while model_choice not in [str(i+1) for i in range(len(model_options))]:
+        model_choice = input(f"{prompt} (1-{len(model_options)}): ").strip()
+        if model_choice not in [str(i+1) for i in range(len(model_options))]:
+            print("Opción no válida. Intente de nuevo.")
+    return model_options[int(model_choice)-1]
 
 def main():
-    model_choice = ""
-    model_name = ""
+    model_options = list(MODEL_CONFIGS.keys())
 
-    print("""
-        ================= Pharmagen PModel =================
-        SELECCIONA EL MODELO QUE QUIERES UTILIZAR:
-        1-- Outcome-Variation-Effect-Entity
-        2-- Outcome-Variation
-        3-- Effect-Entity
-        4-- Variation-Effect
-        ====================================================
-        """)
-    model_choice = ""
-    while model_choice not in ["1", "2", "3", "4"]:
-            model_choice = str(input("Selecciona opción (1-4): ").strip())
-            if model_choice == "1":
-                model_name = "Effect-Entity-Outcome-Variation"
-            elif model_choice == "2":
-                model_name = "Outcome-Variation"
-            elif model_choice == "3":
-                model_name = "Effect-Entity"
-            elif model_choice == "4":
-                model_name = "Variation-Effect"
-            else:
-                print("Opción no válida. Intente de nuevo.")
-            
-    
     while True:
-        print(f"""
-        ================= Pharmagen PModel =================
-        1. Entrenar modelo   ---->     {model_name}
-        2. Realizar predicción (datos manuales)
-        3. Realizar predicción (desde archivo)
-        4. Optimizacion de hiperparámetros (Optuna)
-        5. Salir
-        ====================================================
-        """)
-                
+        print("""
+ ———————————————— Pharmagen PModel ————————————————
+| 1. Entrenar modelo                               |
+| 2. Realizar predicción (datos manuales)          |
+| 3. Realizar predicción (desde archivo)           |
+| 4. Optimizacion de hiperparámetros (Optuna)      |
+| 5. Salir                                         |
+ ——————————————————————————————————————————————————
+""")
         choice = input("Selecciona opción (1-5): ").strip()
+
         if choice == "1":
-            print("Iniciando entrenamiento...")
+            model_name = select_model(model_options, "Selecciona el modelo para entrenamiento")
             batch_size, epochs, lr, emb_dim, hidden_dim, dropout_rate, patience = metrics_models(model_name) # type: ignore
-            
             params = {
                 'emb_dim': emb_dim,
                 'hidden_dim': hidden_dim,
@@ -71,10 +62,9 @@ def main():
             }
             PMODEL_DIR = "./"
             csv_files = ["train.csv"]
-            cols = ['Drug', 'Genotype', 'Outcome', 'Variation', 'Effect', 'Entity']
-            train_pipeline(PMODEL_DIR, csv_files, cols, params)
-            
-        ##########################################################
+            print(f"Iniciando entrenamiento con modelo: {model_name}")
+            train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=epochs, patience=patience, batch_size=batch_size)
+
         elif choice == "2":
             print("Introduce datos del paciente para predicción:")
             mutaciones = input("Mutaciones (separadas por coma): ")
@@ -86,7 +76,7 @@ def main():
                     print(f"{k}: {v}")
             else:
                 print("No se pudo realizar la predicción.")
-        ##########################################################
+
         elif choice == "3":
             file_path = input("Ruta del archivo CSV: ")
             try:
@@ -95,39 +85,32 @@ def main():
                 print(resultados)
             except Exception as e:
                 print(f"Error procesando archivo: {e}")
-        #########################################################        
+
         elif choice == "4":
-            print("Optimizando hiperparámetros con Optuna...")
+            import optuna
+            # Silenciar logs de Optuna salvo errores
+            optuna.logging.set_verbosity(optuna.logging.WARNING)
+            print("\nOptimizando hiperparámetros con Optuna...")
+            optuna_model_name = select_model(model_options, "Selecciona el modelo para optimización")
+            best_params, best_loss, results_file, normalized_loss = run_optuna_with_progress(
+                optuna_model_name,
+                n_trials=N_TRIALS,
+                output_dir=Path(PGEN_MODEL_DIR)
+            )
             
-            print("""
-            ================= Pharmagen PModel =================
-            SELECCIONA EL MODELO QUE QUIERES UTILIZAR:
-            1-- Outcome-Variation-Effect-Entity
-            2-- Outcome-Variation
-            3-- Effect-Entity
-            4-- Variation-Effect
-            ====================================================
-            """)
+            print(f"\nMejores hiperparámetros encontrados ({optuna_model_name}):")
+            print(best_params)
+            print("Mejor loss:", best_loss)
             
-            while model_choice not in ["1", "2", "3", "4"]:
-                    wmodel_choice = input("Selecciona el modelo para optimización (1-4): ").strip()
+            print(f"\nPérdida normalizada del mejor modelo: {normalized_loss:.4f} (Valor máximo 0, mínimo 1)")
+            print(f"Top 5 trials guardados en: {results_file}")
 
-            objective = objective_all if model_choice == "1" else \
-                        objective_outcome_variation if model_choice == "2" else \
-                        objective_effect_entity if model_choice == "3" else \
-                        objective_variation_effect if model_choice == "4" else None
-                        
-
-            study = optuna.create_study(direction="minimize")
-            study.optimize(objective_all, n_trials=100)
-            print("Mejores hiperparámetros encontrados:")
-            print(study.best_trial.params)
-            print("Mejor loss:", study.best_trial.value)
         elif choice == "5":
             print("¡Gracias por usar Pharmagen PModel!")
             sys.exit(0)
+
         else:
             print("Opción no válida. Intente de nuevo.")
-        ###########################################################
+
 if __name__ == "__main__":
     main()

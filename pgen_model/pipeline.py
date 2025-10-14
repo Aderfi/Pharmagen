@@ -4,38 +4,46 @@ Pipeline de entrenamiento del modelo PharmacoGenómico.
 Utiliza las funciones definidas en data.py, model.py y train.py.
 ------------------------------------------------------------------------------------"""
 import torch
+import numpy as np
+import random
+
 from torch.utils.data import DataLoader
-from .data import PGenInputDataset, PGenDataset, train_data_load
+from .data import PGenInputDataset, PGenDataset
 from .model import PGenModel
 from .train import train_model
 from .metrics import *
+from .model_configs import MODEL_CONFIGS
 
-
-def train_pipeline(PMODEL_DIR, csv_files, cols, params, epochs=30, patience=5, batch_size=8):
+def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patience=5, batch_size=8):
     """
     Pipeline de entrenamiento: carga datos, inicializa modelo, entrena y guarda resultados.
-    """
-    data_loader = PGenInputDataset()
-    df = data_loader.load_data(PMODEL_DIR, csv_files, cols)
+    """    
+    # seed = 27 # 00111011 00110111 01010100 01001001 01001110 
     
-    train_df = df.sample(frac=0.8, random_state=42)
+    seed = 27
+    
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    
+    config = MODEL_CONFIGS[model_name]
+    cols = config['cols']
+    targets = config['targets']
+     
+    data_loader = PGenInputDataset()
+    df = data_loader.load_data(csv_files, cols)
+    
+    print(f"Semilla utilizada: {seed}")
+    train_df = df.sample(frac=0.8, random_state=seed)
     val_df = df.drop(train_df.index)
     train_dataset = PGenDataset(train_df)
     val_dataset = PGenDataset(val_df)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
     
-    
     n_drugs = df['Drug'].nunique()
     n_genotypes = df['Genotype'].nunique()
-    n_outcomes = df['Outcome'].nunique()
-    n_variations = df['Variation'].nunique()
-    n_effects = df['Effect'].nunique()
-    n_entities = df['Entity'].nunique()
-    
-    
-    output_dims = {col.lower(): df[col].nunique() for col in targets}
-    
+    output_dims = {col.lower(): len(data_loader.encoders[col].classes_) for col in targets}    
     model = PGenModel(
         n_drugs, n_genotypes, params['emb_dim'], params['hidden_dim'], params['dropout_rate'], output_dims
     ).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
