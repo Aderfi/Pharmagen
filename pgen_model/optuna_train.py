@@ -1,7 +1,9 @@
-"""-------------FUNCION DE OPTUNA PARA EL ENTRENAMIENTO DEL MODELO.----------------
-    Esta función define el proceso de entrenamiento y evaluación del modelo
-    utilizando los hiperparámetros sugeridos por Optuna."""
+"""-----------  FUNCION DE OPTUNA PARA EL ENTRENAMIENTO DEL MODELO  ----------------
 
+        Esta función define el proceso de entrenamiento y evaluación del modelo
+        utilizando los hiperparámetros sugeridos por Optuna.
+
+------------------------------------------------------------------------------------"""
 
 import torch
 from torch.utils.data import DataLoader
@@ -17,6 +19,7 @@ def objective(trial):
         'learning_rate': trial.suggest_float('learning_rate', 1e-5, 1e-3, log=True)
     }
     batch_size = trial.suggest_categorical('batch_size', [8, 16, 32])
+    
     PMODEL_DIR = "./"
     csv_files = ["train.csv"]
     cols = ['Drug', 'Genotype', 'Outcome', 'Variation', 'Effect', 'Entity']
@@ -38,13 +41,25 @@ def objective(trial):
     n_entities = df['Entity'].nunique()
 
     model = PGenModel(
-        n_drugs, n_genotypes, n_outcomes, n_variations, n_effects, n_entities,
-        params['emb_dim'], params['hidden_dim'], params['dropout_rate']
+                        n_drugs, 
+                        n_genotypes, 
+                        n_outcomes, 
+                        n_variations, 
+                        n_effects, 
+                        n_entities,
+                        params['emb_dim'], 
+                        params['hidden_dim'], 
+                        params['dropout_rate']
+                        
     ).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    
+    
     optimizer = torch.optim.Adam(model.parameters(), lr=params['learning_rate'])
     criterion = torch.nn.CrossEntropyLoss()
     best_loss = train_model(
+
         train_loader, val_loader, model, optimizer, criterion,
         epochs=30, patience=5
     )
+    
     return best_loss
