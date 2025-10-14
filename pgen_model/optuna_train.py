@@ -41,9 +41,8 @@ def objective_all(trial):
 
     n_drugs = df['Drug'].nunique()
     n_genotypes = df['Genotype'].nunique()
-    
-    targets = [    cols = ['Drug', 'Genotype', 'Outcome', 'Variation']
-'Outcome', 'Variation', 'Effect', 'Entity']
+
+    targets = cols = ['Drug', 'Genotype', 'Outcome', 'Variation']
     output_dims = {col.lower(): df[col].nunique() for col in targets}
 
     model = PGenModel(
