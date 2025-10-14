@@ -60,7 +60,7 @@ def main():
                 'batch_size': batch_size,
                 'epochs': epochs
             }
-            PMODEL_DIR = "./"
+            PMODEL_DIR = "pgen_model/models/"
             csv_files = ["train.csv"]
             print(f"Iniciando entrenamiento con modelo: {model_name}")
             train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=epochs, patience=patience, batch_size=batch_size)

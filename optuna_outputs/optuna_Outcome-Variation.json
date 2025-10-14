@@ -1,65 +1,65 @@
 {
   "model": "Outcome-Variation",
   "best_trial": {
-    "loss": 3.4895110273935708,
-    "normalized_loss": 1.1129062237352954,
+    "loss": 1.7775043447812398,
+    "normalized_loss": 0.566897663453194,
     "params": {
       "emb_dim": 512,
-      "hidden_dim": 384,
-      "dropout_rate": 0.49008823910223076,
-      "learning_rate": 0.0009121739355059707,
-      "batch_size": 32
+      "hidden_dim": 640,
+      "dropout_rate": 0.13689551662757543,
+      "learning_rate": 0.0004972585670515988,
+      "batch_size": 128
     }
   },
   "top5": [
     {
-      "loss": 3.4895110273935708,
+      "loss": 1.7775043447812398,
       "params": {
         "emb_dim": 512,
-        "hidden_dim": 384,
-        "dropout_rate": 0.49008823910223076,
-        "learning_rate": 0.0009121739355059707,
-        "batch_size": 32
+        "hidden_dim": 640,
+        "dropout_rate": 0.13689551662757543,
+        "learning_rate": 0.0004972585670515988,
+        "batch_size": 128
       }
     },
     {
-      "loss": 3.5026539894471687,
+      "loss": 1.77805099884669,
       "params": {
         "emb_dim": 512,
-        "hidden_dim": 384,
-        "dropout_rate": 0.49449187253633153,
-        "learning_rate": 0.0009951208009455407,
-        "batch_size": 32
+        "hidden_dim": 640,
+        "dropout_rate": 0.13757466613931751,
+        "learning_rate": 0.0003546060165520228,
+        "batch_size": 128
       }
     },
     {
-      "loss": 3.5041636846151696,
+      "loss": 1.7787754535675049,
       "params": {
         "emb_dim": 512,
-        "hidden_dim": 384,
-        "dropout_rate": 0.4012255422073574,
-        "learning_rate": 0.0006075317614914221,
-        "batch_size": 32
+        "hidden_dim": 640,
+        "dropout_rate": 0.13880923579479143,
+        "learning_rate": 0.0005787973993634928,
+        "batch_size": 128
       }
     },
     {
-      "loss": 3.5046088551900474,
+      "loss": 1.7789650559425354,
       "params": {
         "emb_dim": 512,
-        "hidden_dim": 384,
-        "dropout_rate": 0.4614438065883368,
-        "learning_rate": 0.000684585167070355,
-        "batch_size": 32
+        "hidden_dim": 640,
+        "dropout_rate": 0.16192050445020853,
+        "learning_rate": 0.0004488514415509598,
+        "batch_size": 128
       }
     },
     {
-      "loss": 3.506915919752006,
+      "loss": 1.7838039795557659,
       "params": {
         "emb_dim": 512,
-        "hidden_dim": 384,
-        "dropout_rate": 0.4068479685243376,
-        "learning_rate": 0.0008867450390618491,
-        "batch_size": 32
+        "hidden_dim": 640,
+        "dropout_rate": 0.1454787150701708,
+        "learning_rate": 0.000643614415178722,
+        "batch_size": 128
       }
     }
   ],

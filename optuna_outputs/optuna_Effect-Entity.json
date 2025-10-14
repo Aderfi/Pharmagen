@@ -1,0 +1,67 @@
+{
+  "model": "Effect-Entity",
+  "best_trial": {
+    "loss": 2.066088003771646,
+    "normalized_loss": 1.061759200328276,
+    "params": {
+      "emb_dim": 512,
+      "hidden_dim": 768,
+      "dropout_rate": 0.24262660565644972,
+      "learning_rate": 0.00027220971973061775,
+      "batch_size": 32
+    }
+  },
+  "top5": [
+    {
+      "loss": 2.066088003771646,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.24262660565644972,
+        "learning_rate": 0.00027220971973061775,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0680719245047796,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.23217105224170226,
+        "learning_rate": 0.00037564803078608995,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0692570323035833,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.23403804075232826,
+        "learning_rate": 0.0003732380759354746,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.0694403619993302,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.25850563448046476,
+        "learning_rate": 0.0004834702091078833,
+        "batch_size": 32
+      }
+    },
+    {
+      "loss": 2.07087257646379,
+      "params": {
+        "emb_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.20890663336183926,
+        "learning_rate": 0.000317129095463817,
+        "batch_size": 32
+      }
+    }
+  ],
+  "n_trials": 100
+}

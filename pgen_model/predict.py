@@ -17,12 +17,7 @@ def load_trained_model(model_path, params, device=None):
         model_path (str): Ruta al archivo .pth con los pesos del modelo.
         params (dict): Diccionario con las dimensiones y parámetros para crear la arquitectura.
             Debe incluir las claves:
-                - n_drugs
-                - n_genotypes
-                - n_outcomes
-                - n_variations
-                - n_effects
-                - n_entities
+                - n_drug_genos
                 - emb_dim
                 - hidden_dim
                 - dropout_rate
@@ -36,15 +31,11 @@ def load_trained_model(model_path, params, device=None):
 
     # Instanciar el modelo con la arquitectura adecuada
     model = PGenModel(
-        params['n_drugs'],
-        params['n_genotypes'],
-        params['n_outcomes'],
-        params['n_variations'],
-        params['n_effects'],
-        params['n_entities'],
+        params['n_drug_genos'],
         params['emb_dim'],
         params['hidden_dim'],
-        params['dropout_rate']
+        params['dropout_rate'],
+        params['output_dims']
     ).to(device)
 
     # Cargar los pesos
@@ -62,10 +53,23 @@ def predict_single_input(mutaciones, medicamentos, model=None, encoders=None):
     model: instancia de PGenModel entrenada (opcional)
     encoders: diccionario de LabelEncoders (opcional)
     """
-    # TODO: Preprocesar la entrada, codificar usando los encoders, preparar tensores
-    # TODO: Ejecutar el modelo y decodificar la predicción
-    # Ejemplo de retorno: {"Outcome": "Sensitive", "Effect": "High", ...}
-    pass
+    # Preprocesar la entrada y formar la combinación
+    drug_geno = medicamentos.strip() + "_" + mutaciones.strip()
+    if encoders is None or 'Drug_Geno' not in encoders:
+        raise ValueError("Se requiere un encoder para la columna Drug_Geno")
+    idx = encoders['Drug_Geno'].transform([drug_geno])[0]
+    input_tensor = torch.tensor([idx], dtype=torch.long)
+    with torch.no_grad():
+        outputs = model(input_tensor)
+    # Decodificar predicción
+    result = {}
+    for key, logits in outputs.items():
+        pred_idx = torch.argmax(logits, dim=1).item()
+        if key.capitalize() in encoders:  # encoders de targets
+            result[key.capitalize()] = encoders[key.capitalize()].inverse_transform([pred_idx])[0]
+        else:
+            result[key.capitalize()] = pred_idx
+    return result
 
 def predict_from_file(file_path, model=None, encoders=None):
     """
@@ -75,7 +79,21 @@ def predict_from_file(file_path, model=None, encoders=None):
     model: instancia de PGenModel entrenada (opcional)
     encoders: diccionario de LabelEncoders (opcional)
     """
-    # TODO: Leer el archivo, procesar cada fila, codificar, preparar batch
-    # TODO: Ejecutar el modelo y decodificar las predicciones
-    # Ejemplo de retorno: DataFrame o lista de dicts con resultados para cada paciente
-    pass
+    import pandas as pd
+    df = pd.read_csv(file_path, sep=';', dtype=str)
+    df["Drug_Geno"] = df["Drug"].astype(str) + "_" + df["Genotype"].astype(str)
+    idxs = encoders['Drug_Geno'].transform(df["Drug_Geno"].tolist())
+    input_tensor = torch.tensor(idxs, dtype=torch.long)
+    with torch.no_grad():
+        outputs = model(input_tensor)
+    results = []
+    for i in range(len(df)):
+        row_result = {}
+        for key, logits in outputs.items():
+            pred_idx = torch.argmax(logits[i]).item()
+            if key.capitalize() in encoders:
+                row_result[key.capitalize()] = encoders[key.capitalize()].inverse_transform([pred_idx])[0]
+            else:
+                row_result[key.capitalize()] = pred_idx
+        results.append(row_result)
+    return results

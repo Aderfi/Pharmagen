@@ -28,12 +28,11 @@ def train_model(
         model.train()
         total_loss = 0
         for batch in train_loader:
-            drug = batch['drug'].to(device)
-            genotype = batch['genotype'].to(device)
+            drug_geno = batch['drug_geno'].to(device)
             # Solo usa los targets presentes en el batch y requeridos por el modelo
             batch_targets = {k: batch[k].to(device) for k in targets if k in batch}
             optimizer.zero_grad()
-            outputs = model(drug, genotype)
+            outputs = model(drug_geno)
 
             loss = sum(criterion(outputs[k], batch_targets[k]) for k in outputs)
             loss.backward()     # type: ignore
@@ -48,10 +47,9 @@ def train_model(
         val_loss = 0
         with torch.no_grad():
             for batch in val_loader:
-                drug = batch['drug'].to(device)
-                genotype = batch['genotype'].to(device)
+                drug_geno = batch['drug_geno'].to(device)
                 batch_targets = {k: batch[k].to(device) for k in targets if k in batch}
-                outputs = model(drug, genotype)
+                outputs = model(drug_geno)
 
                 loss = sum(criterion(outputs[k], batch_targets[k]) for k in outputs)
                 val_loss += loss.item()      # type: ignore

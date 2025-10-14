@@ -18,8 +18,6 @@ def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patien
     """
     Pipeline de entrenamiento: carga datos, inicializa modelo, entrena y guarda resultados.
     """    
-    # seed = 27 # 00111011 00110111 01010100 01001001 01001110 
-    
     seed = 27
     
     random.seed(seed)
@@ -41,11 +39,10 @@ def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patien
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
     
-    n_drugs = df['Drug'].nunique()
-    n_genotypes = df['Genotype'].nunique()
+    n_drug_genos = df['Drug_Geno'].nunique()
     output_dims = {col.lower(): len(data_loader.encoders[col].classes_) for col in targets}    
     model = PGenModel(
-        n_drugs, n_genotypes, params['emb_dim'], params['hidden_dim'], params['dropout_rate'], output_dims
+        n_drug_genos, params['emb_dim'], params['hidden_dim'], params['dropout_rate'], output_dims
     ).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     optimizer = torch.optim.Adam(model.parameters(), lr=params['learning_rate'])
     criterion = torch.nn.CrossEntropyLoss()
