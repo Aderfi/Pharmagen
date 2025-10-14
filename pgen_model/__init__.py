@@ -1,3 +1,3 @@
-from . import models, scripts, vocabs, docs_data
+from . import models, scripts, docs_data
 
-__all__ = ['models', 'scripts', 'vocabs', 'docs_data']
+__all__ = ['models', 'scripts', 'docs_data']
