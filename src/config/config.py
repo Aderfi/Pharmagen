@@ -46,11 +46,12 @@ MODELS_DIR = PGEN_MODEL_DIR / "models"           # Carpeta para modelos entrenad
 MODEL_LABEL_VOCABS_DIR = PGEN_MODEL_DIR / "labels_vocabs"     # Carpeta para vocabularios y tokenizadores
 MODEL_DATA_DIR = PGEN_MODEL_DIR / "docs_data"    # Carpeta para datos del modelo
 MODEL_CSV_DIR = MODEL_DATA_DIR / "csv"           # Carpeta para datos CSV del modelo
+MODEL_TRAIN_DATA = PGEN_MODEL_DIR / "train_data"  # Carpeta para datos de entrenamiento del modelo
+
 
 
 # Dentro de MODEL_DATA_DIR, subcarpetas específicas
 MODEL_JSON_DIR = MODEL_DATA_DIR / "json"         # Carpeta para datos JSON del modelo
-MODEL_TRAIN_DATA = MODEL_DATA_DIR / "train_csv"  # Carpeta para datos de entrenamiento del modelo
 MODEL_FILES_TRAINING = MODEL_TRAIN_DATA / "files" # Carpeta para archivos de entrenamiento del modelo
 
 # === RUTAS DE ARCHIVOS ESPECÍFICOS ===
