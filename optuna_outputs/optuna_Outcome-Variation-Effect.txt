@@ -1,0 +1,16 @@
+Mejores hiperparámetros para Outcome-Variation-Effect (loss: 1.7214901614607425, normalized_loss: 0.35688339100926403, accuracy: 0.5649016363302077):
+  trial_seed: 330771
+  emb_dim_drug: 128
+  emb_dim_gene: 256
+  emb_dim_allele: 128
+  emb_dim_geno: 256
+  hidden_dim: 896
+  dropout_rate: 0.29730552591754433
+  learning_rate: 0.0003516755118027661
+
+Top 5 pruebas:
+1. Loss: 1.7214901614607425, Params: {'trial_seed': 330771, 'emb_dim_drug': 128, 'emb_dim_gene': 256, 'emb_dim_allele': 128, 'emb_dim_geno': 256, 'hidden_dim': 896, 'dropout_rate': 0.29730552591754433, 'learning_rate': 0.0003516755118027661}
+2. Loss: 1.7240345749938697, Params: {'trial_seed': 986086, 'emb_dim_drug': 128, 'emb_dim_gene': 256, 'emb_dim_allele': 128, 'emb_dim_geno': 256, 'hidden_dim': 1024, 'dropout_rate': 0.2993611559767067, 'learning_rate': 0.00033058174685593364}
+3. Loss: 1.7269782120721382, Params: {'trial_seed': 901550, 'emb_dim_drug': 128, 'emb_dim_gene': 256, 'emb_dim_allele': 64, 'emb_dim_geno': 256, 'hidden_dim': 1024, 'dropout_rate': 0.2969876411385202, 'learning_rate': 0.00032002221054951776}
+4. Loss: 1.7283209039453875, Params: {'trial_seed': 279547, 'emb_dim_drug': 128, 'emb_dim_gene': 256, 'emb_dim_allele': 128, 'emb_dim_geno': 256, 'hidden_dim': 768, 'dropout_rate': 0.29580394810838945, 'learning_rate': 0.0002880204699735931}
+5. Loss: 1.731625098931162, Params: {'trial_seed': 305981, 'emb_dim_drug': 128, 'emb_dim_gene': 256, 'emb_dim_allele': 128, 'emb_dim_geno': 256, 'hidden_dim': 768, 'dropout_rate': 0.28817964028664983, 'learning_rate': 0.00033855030697581436}
