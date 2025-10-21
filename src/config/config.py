@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Pharmagen
 DATE_STAMP = datetime.now().strftime("%Y%m%d")
 
 '''
-        DIRECTORIOS DEL PROYECTO
+------ DIRECTORIOS DEL PROYECTO ------
 '''
 
 # === RUTAS DE CARPETAS PRINCIPALES PHARMAGEN ===
@@ -35,7 +35,7 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"   # Carpeta para datos procesados
 
 
 '''
-        DIRECTORIOS DEL MODELO DE DEEP LEARNING
+------ DIRECTORIOS DEL MODELO DE DEEP LEARNING ------
         
 '''
 # === RUTAS DE MODELOS DEEP LEARNING ===

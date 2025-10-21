@@ -85,6 +85,7 @@ def optuna_objective(trial, model_name, target_cols=None):
     n_genotypes = get_num_genotypes(data_loader)
     n_outcomes, n_variations, n_effects = get_output_sizes(data_loader, target_cols)
     
+    params_to_txt = params
     
     model = PGenModel(
         n_drugs,
@@ -97,19 +98,22 @@ def optuna_objective(trial, model_name, target_cols=None):
         params['emb_dim_geno'],
         params['hidden_dim'],
         params['dropout_rate'],
-        n_outcomes, n_variations, n_effects
+        n_outcomes, n_variations, n_effects,
     )
+    
+    params_to_txt = params
+    
     model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=12)
     criterions = [torch.nn.CrossEntropyLoss(label_smoothing=0.1), torch.nn.CrossEntropyLoss(label_smoothing=0.1), torch.nn.CrossEntropyLoss(label_smoothing=0.1), optimizer]
     epochs = 200
-    patience = 20
+    patience = 40
 
     best_loss, best_accuracy = train_model(
         train_loader, val_loader, model, criterions,
-        epochs=epochs, patience=patience, target_cols=target_cols, scheduler=scheduler
+        epochs=epochs, patience=patience, target_cols=target_cols, scheduler=scheduler, params_to_txt=params_to_txt
     )
 
     max_loss_targets = get_output_sizes(data_loader, target_cols)

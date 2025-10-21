@@ -1,6 +1,0 @@
-
----- Trial Modelo Outcome-Variation-Effect-Entity-----
-Mejores hiperparámetros: {'batch_size': 32, 'emb_dim': 64, 'hidden_dim': 192, 'lr': 0.0023500653939485163, 'dropout': 0.40758294226503067}
-
----- Trial Modelo Outcome-Variation-Effect-Entity-----
-Mejores hiperparámetros: {'batch_size': 32, 'emb_dim': 64, 'hidden_dim': 640, 'lr': 5.6352553900757135e-05, 'dropout': 0.46294992580382033}

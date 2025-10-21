@@ -57,10 +57,12 @@ class PGenInputDataset:
     def load_data(self, csv_files, cols, targets, equivalencias):
         self.cols = [col.lower() for col in cols]
         self.target_cols = [t.lower() for t in targets]
+        '''
         if isinstance(csv_files, (list, tuple)):
             df = pd.concat([pd.read_csv(f, sep=';', index_col=False) for f in csv_files], ignore_index=True)
-        else:
-            df = pd.read_csv(csv_files, sep=';', index_col=False)
+        else:'''
+        csv_files = Path(MODEL_TRAIN_DATA / 'train_therapeutic_outcome.csv')
+        df = pd.read_csv(str(csv_files), sep=';', index_col=False)
         df.columns = [col.lower() for col in df.columns]
         df = df[[c.lower() for c in cols]]
         targets = [t.lower() for t in targets]
@@ -69,11 +71,8 @@ class PGenInputDataset:
         for t in targets:
             df[t] = df[t].astype(str)
         
-
-        df['genotype'] = df['genotype'].map(lambda x: equivalencias.get(x, x)) 
-
         
-        '''
+        
         # stratify_col sigue combinada para splits, pero targets por separado
         df['stratify_col'] = df[targets].astype(str).agg("_".join, axis=1)
         df = df.dropna(subset=targets, axis=0, ignore_index=True)
@@ -83,7 +82,7 @@ class PGenInputDataset:
         suficientes = counts[counts > 1].index
         df = df[df['stratify_col'].isin(suficientes)]
         self.data = df.drop(columns=['stratify_col']).reset_index(drop=True)
-        '''
+        
         
         df = df.dropna(subset=targets, axis=0, ignore_index=True)
         self.fit_encoders(df, targets)
@@ -119,6 +118,6 @@ def train_data_load(targets):
     targets = [t.lower() for t in targets]
     read_cols = list(set(targets) | {"Drug", "Gene", "Allele", "Genotype"})
     read_cols = [c.lower() for c in read_cols]
-    csvfiles = glob.glob(f"{csv_path}/*.csv")
+    csvfiles = glob.glob("*.csv") #glob.glob(f"{csv_path}/*.csv")
     equivalencias = load_equivalencias(csv_path)
     return csvfiles, read_cols, equivalencias
