@@ -1,5 +1,9 @@
 import torch
+from pathlib import Path
+from src.config.config import *
 
+
+trained_encoders_path = Path(MODELS_DIR)
 
 def train_model(
     train_loader,
@@ -11,6 +15,7 @@ def train_model(
     device=None,
     target_cols=None,
     scheduler=None,
+    params_to_txt=None
 ):
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -79,13 +84,34 @@ def train_model(
         if scheduler is not None:
             scheduler.step(val_loss)
         val_accuracies = [c / t if t > 0 else 0.0 for c, t in zip(corrects, totals)]
-        if val_loss < best_loss:
+        
+        min_delta = 0.1  # Ajusta según el ruido de tu loss
+
+        if best_loss - val_loss > min_delta:
             best_loss = val_loss
             best_accuracies = val_accuracies.copy()
             trigger_times = 0
+            
+            
+            
+            torch.save(
+                model.state_dict(), 
+                f'{trained_encoders_path}/pmodel_{best_loss}.pt')
+            
+            file = f'{trained_encoders_path}/pmodel_{best_loss}.txt'
+            with open(file, 'w') as f:
+                f.write(f'Model: {target_cols}\n')
+                f.write(f'Validation Loss: {best_loss}\n')
+                for i, col in enumerate(target_cols):
+                    f.write(f'Best Accuracy {col}: {best_accuracies[i]}\n')
+                f.write(f'Best Parameters:\n \
+                        \t  {params_to_txt}\n')
+                    
+            
         else:
             trigger_times += 1
             if trigger_times >= patience:
                 break
+            
     # Devuelve la mejor loss y la mejor accuracy por cada target
     return best_loss, best_accuracies

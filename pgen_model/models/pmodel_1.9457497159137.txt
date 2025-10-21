@@ -1,0 +1,7 @@
+Model: ['outcome', 'variation', 'entity']
+Validation Loss: 1.9457497159137
+Best Accuracy outcome: 0.7893685051958433
+Best Accuracy variation: 0.5869304556354916
+Best Accuracy entity: 0.5531574740207834
+Best Parameters:
+                         	  {'emb_dim_drug': 256, 'emb_dim_gene': 512, 'emb_dim_allele': 256, 'emb_dim_geno': 256, 'hidden_dim': 768, 'dropout_rate': 0.3270908519379089, 'learning_rate': 0.00047665474832613974, 'batch_size': 64, 'weight_decay': 0.016796053762170107}
