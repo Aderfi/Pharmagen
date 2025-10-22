@@ -1,0 +1,80 @@
+{
+  "model": "Outcome-Effect-Subcat",
+  "best_trial": {
+    "loss": 0.21049587838351727,
+    "normalized_loss": 0.15019858060925168,
+    "avg_accuracy": 0.5719848242811502,
+    "params": {
+      "batch_size": 64,
+      "embedding_dim": 768,
+      "hidden_dim": 1024,
+      "dropout_rate": 0.45000000000000007,
+      "learning_rate": 0.0007826291528281889,
+      "weight_decay": 1.3184165382860255e-06
+    },
+    "all_accuracies": [
+      0.6401757188498403,
+      0.6593450479233227,
+      0.41054313099041534,
+      0.5778753993610224
+    ]
+  },
+  "top5": [
+    {
+      "loss": 0.21049587838351727,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 768,
+        "hidden_dim": 1024,
+        "dropout_rate": 0.45000000000000007,
+        "learning_rate": 0.0007826291528281889,
+        "weight_decay": 1.3184165382860255e-06
+      }
+    },
+    {
+      "loss": 0.21053517758846282,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 768,
+        "hidden_dim": 1024,
+        "dropout_rate": 0.45000000000000007,
+        "learning_rate": 0.0007813955449672186,
+        "weight_decay": 1.2080982357781753e-06
+      }
+    },
+    {
+      "loss": 0.2105490643531084,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 768,
+        "hidden_dim": 1024,
+        "dropout_rate": 0.45000000000000007,
+        "learning_rate": 0.0007667278809977535,
+        "weight_decay": 1.0049320444635662e-06
+      }
+    },
+    {
+      "loss": 0.21055867075920104,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 768,
+        "hidden_dim": 1024,
+        "dropout_rate": 0.45000000000000007,
+        "learning_rate": 0.0007862937414352384,
+        "weight_decay": 1.2677146213373016e-06
+      }
+    },
+    {
+      "loss": 0.2105586938560009,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 768,
+        "hidden_dim": 1024,
+        "dropout_rate": 0.45000000000000007,
+        "learning_rate": 0.0007664212879330316,
+        "weight_decay": 1.2176119180774963e-06
+      }
+    }
+  ],
+  "n_trials": 150
+}

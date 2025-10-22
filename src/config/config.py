@@ -47,7 +47,7 @@ MODEL_LABEL_VOCABS_DIR = PGEN_MODEL_DIR / "labels_vocabs"     # Carpeta para voc
 MODEL_DATA_DIR = PGEN_MODEL_DIR / "docs_data"    # Carpeta para datos del modelo
 MODEL_CSV_DIR = MODEL_DATA_DIR / "csv"           # Carpeta para datos CSV del modelo
 MODEL_TRAIN_DATA = PGEN_MODEL_DIR / "train_data"  # Carpeta para datos de entrenamiento del modelo
-
+MODEL_ENCODERS_DIR = PGEN_MODEL_DIR / "encoders"  # Carpeta para encoders del modelo
 
 
 # Dentro de MODEL_DATA_DIR, subcarpetas específicas
