@@ -1,154 +1,9 @@
+
+import torch
+import torch.nn as nn
+import itertools
+
 '''
-import torch
-import torch.nn as nn
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-class PGenModel(nn.Module):
-    """
-    Modelo adaptable para entradas separadas de Drug y Genotype.
-    """
-    def __init__(self, n_drugs, n_genotypes, emb_dim_drug, emb_dim_geno, hidden_dim, dropout_rate, n_outputs):
-        super().__init__()
-        self.drug_emb = nn.Embedding(n_drugs, emb_dim_drug)
-        self.geno_emb = nn.Embedding(n_genotypes, emb_dim_geno)
-        # El input total es la suma de ambas dimensiones de embedding
-        self.fc1 = nn.Linear(emb_dim_drug + emb_dim_geno, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim // 2)
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(dropout_rate)
-        self.output = nn.Linear(hidden_dim // 2, n_outputs)
-
-    def forward(self, drug, genotype):
-        drug_vec = self.drug_emb(drug)
-        geno_vec = self.geno_emb(genotype)
-        # Concatenar embeddings (dim=-1 asegura que si están en batch, se concatene a nivel de feature)
-        x = torch.cat([drug_vec, geno_vec], dim=-1)
-        x = self.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.relu(self.fc2(x))
-        out = self.output(x)
-        return out
-''''''
-import torch
-import torch.nn as nn
-
-
-import torch
-import torch.nn as nn
-
-class PGenModel(nn.Module):
-    """
-    Modelo para entradas Drug, Gene, Allele, Genotype y salidas separadas Outcome, Variation, Effect.
-    Arquitectura con 3 capas (2 ocultas) y activación GELU para mejor rendimiento en problemas complejos.
-    """
-    def __init__(
-        self, n_drugs, n_genes, n_alleles, n_genotypes,
-        emb_dim_drug, emb_dim_gene, emb_dim_allele, emb_dim_geno,
-        hidden_dim, dropout_rate,
-        n_outcomes, n_variations, n_effects
-    ):
-        super().__init__()
-        self.drug_emb = nn.Embedding(n_drugs, emb_dim_drug)
-        self.gene_emb = nn.Embedding(n_genes, emb_dim_gene)
-        self.allele_emb = nn.Embedding(n_alleles, emb_dim_allele)
-        self.geno_emb = nn.Embedding(n_genotypes, emb_dim_geno)
-        emb_total = emb_dim_drug + emb_dim_gene + emb_dim_allele + emb_dim_geno
-        
-        self.fc1 = nn.Linear(emb_total, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
-        self.fc3 = nn.Linear(hidden_dim, hidden_dim)
-        self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(dropout_rate)
-        # Salidas separadas
-        self.outcome_head = nn.Linear(hidden_dim, n_outcomes)
-        self.variation_head = nn.Linear(hidden_dim, n_variations)
-        self.effect_head = nn.Linear(hidden_dim, n_effects)
-
-    def forward(self, drug, gene, allele, genotype):
-        drug_vec = self.drug_emb(drug)
-        gene_vec = self.gene_emb(gene)
-        allele_vec = self.allele_emb(allele)
-        geno_vec = self.geno_emb(genotype)
-        x = torch.cat([drug_vec, gene_vec, allele_vec, geno_vec], dim=-1)
-        x = self.gelu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.gelu(self.fc2(x))
-        x = self.dropout(x)
-        x = self.gelu(self.fc3(x))
-        x = self.dropout(x)
-        outcome = self.outcome_head(x)
-        variation = self.variation_head(x)
-        effect = self.effect_head(x)
-        return outcome, variation, effect
-'''
-'''
-import torch
-import torch.nn as nn
-
-class PGenModel(nn.Module):
-    """
-    Modelo para entradas Drug, Gene, Allele, Genotype y salidas separadas Outcome, Variation, Effect.
-    Arquitectura optimizada para multitarea con salidas de 8, 98, y 2431 clases.
-    """
-
-    def __init__(
-        self,
-        n_drugs,
-        n_genes,
-        n_alleles,
-        n_genotypes,
-        emb_dim_drug,
-        emb_dim_gene,
-        emb_dim_allele,
-        emb_dim_geno,
-        hidden_dim,
-        dropout_rate,
-        n_outcomes,
-        n_variations,
-        n_effects,
-    ):
-        super().__init__()
-        # Embeddings para cada variable categórica
-        self.drug_emb = nn.Embedding(n_drugs, emb_dim_drug)
-        self.gene_emb = nn.Embedding(n_genes, emb_dim_gene)
-        self.allele_emb = nn.Embedding(n_alleles, emb_dim_allele)
-        self.geno_emb = nn.Embedding(n_genotypes, emb_dim_geno)
-        emb_total = emb_dim_drug + emb_dim_gene + emb_dim_allele + emb_dim_geno
-
-        # Capas ocultas profundas y anchas
-        self.fc1 = nn.Linear(emb_total, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim//2)
-        self.fc3 = nn.Linear(hidden_dim//2, hidden_dim//4)
-        self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(dropout_rate)
-
-        # Heads de salida para multitarea
-        self.outcome_head = nn.Linear(hidden_dim//4, n_outcomes)
-        self.variation_head = nn.Linear(512, n_variations)
-        self.effect_head_extra = nn.Linear(512, 1024)
-        self.effect_head = nn.Linear(1024, n_effects)
-
-    def forward(self, drug, gene, allele, genotype):
-        drug_vec = self.drug_emb(drug)
-        gene_vec = self.gene_emb(gene)
-        allele_vec = self.allele_emb(allele)
-        geno_vec = self.geno_emb(genotype)
-        x = torch.cat([drug_vec, gene_vec, allele_vec, geno_vec], dim=-1)
-        x = self.gelu(self.fc1(x)); x = self.dropout(x)
-        x = self.gelu(self.fc2(x)); x = self.dropout(x)
-        x = self.gelu(self.fc3(x)); x = self.dropout(x)
-        outcome = self.outcome_head(x)
-        variation = self.variation_head(x)
-        # Head especial para Effect
-        effect_x = self.gelu(self.effect_head_extra(x))
-        effect = self.effect_head(effect_x)
-        return outcome, variation, effect
-'''
-
-import torch
-import torch.nn as nn
-
 class PGenModel(nn.Module):
     """
     Modelo multitarea para predecir Outcome, Effect_direction, Effect_category, Entity, Entity_name, Therapeutic_Outcome
@@ -215,3 +70,109 @@ class PGenModel(nn.Module):
         therapeutic_outcome = self.therapeutic_outcome_head(x)
 
         return outcome, effect_direction, effect_category, entity, entity_name, therapeutic_outcome
+'''
+import torch
+import torch.nn as nn
+import itertools
+
+class DeepFM_PGenModel(nn.Module):
+    """
+    Versión generalizada del modelo DeepFM que crea
+    dinámicamente los "heads" de salida basados en un
+    diccionario de configuración.
+    """
+    def __init__(
+        self,
+        # --- Vocabulario (Inputs) ---
+        n_drugs,
+        n_genes,
+        n_alleles,
+        n_genotypes,
+        
+        # --- Dimensiones ---
+        embedding_dim, 
+        
+        # --- Arquitectura ---
+        hidden_dim,
+        dropout_rate, 
+
+        # --- Clases únicas Outputs (¡EL CAMBIO!) ---
+        # Un diccionario que mapea nombre_del_target -> n_clases
+        # Ejemplo: {"outcome": 10, "effect_direction": 3, ...}
+        target_dims: dict 
+    ):
+        super().__init__()
+        
+        self.n_fields = 4 # Drug, Gene, Allele, Genotype
+
+        # --- 1. Capas de Embedding (Igual) ---
+        self.drug_emb = nn.Embedding(n_drugs, embedding_dim)
+        self.gene_emb = nn.Embedding(n_genes, embedding_dim)
+        self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
+        self.geno_emb = nn.Embedding(n_genotypes, embedding_dim)
+        
+        # --- 2. Rama "Deep" (Igual) ---
+        deep_input_dim = self.n_fields * embedding_dim
+        self.fc1 = nn.Linear(deep_input_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc3 = nn.Linear(hidden_dim // 2, hidden_dim // 4)
+        self.gelu = nn.GELU()
+        self.dropout = nn.Dropout(dropout_rate)
+        deep_output_dim = hidden_dim // 4
+
+        # --- 3. Rama "FM" (Igual) ---
+        fm_output_dim = (self.n_fields * (self.n_fields - 1)) // 2
+
+        # --- 4. Capa de Salida Combinada (Igual) ---
+        combined_dim = deep_output_dim + fm_output_dim
+
+        # --- 5. Heads de Salida (Dinámicos) ---
+        # ¡AQUÍ ESTÁ LA MAGIA!
+        # Usamos un ModuleDict para almacenar las capas de salida
+        self.output_heads = nn.ModuleDict()
+        
+        # Iteramos sobre el diccionario de configuración
+        for target_name, n_classes in target_dims.items():
+            # Creamos una capa lineal para cada target y la guardamos
+            # en el ModuleDict usando su nombre como clave.
+            self.output_heads[target_name] = nn.Linear(combined_dim, n_classes)
+
+            
+    def forward(self, drug, gene, allele, genotype):
+        
+        # --- 1. Obtener Embeddings (Igual) ---
+        drug_vec = self.drug_emb(drug)
+        gene_vec = self.gene_emb(gene)
+        allele_vec = self.allele_emb(allele)
+        geno_vec = self.geno_emb(genotype)
+        
+        # --- 2. CÁLCULO RAMA "DEEP" (Igual) ---
+        deep_input = torch.cat([drug_vec, gene_vec, allele_vec, geno_vec], dim=-1)
+        deep_x = self.gelu(self.fc1(deep_input)); deep_x = self.dropout(deep_x)
+        deep_x = self.gelu(self.fc2(deep_x)); deep_x = self.dropout(deep_x)
+        deep_output = self.gelu(self.fc3(deep_x)); deep_output = self.dropout(deep_output)
+
+        # --- 3. CÁLCULO RAMA "FM" (Igual) ---
+        embeddings = [drug_vec, gene_vec, allele_vec, geno_vec]
+        fm_outputs = []
+        for emb_i, emb_j in itertools.combinations(embeddings, 2):
+            dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
+            fm_outputs.append(dot_product)
+        fm_output = torch.cat(fm_outputs, dim=-1)
+
+        # --- 4. COMBINACIÓN (Igual) ---
+        combined_vec = torch.cat([deep_output, fm_output], dim=-1)
+
+        # --- 5. PREDICCIONES (Dinámicas) ---
+        # ¡AQUÍ ESTÁ EL OTRO CAMBIO!
+        # Creamos un diccionario de predicciones
+        predictions = {}
+        
+        # Iteramos sobre nuestro ModuleDict
+        for name, head_layer in self.output_heads.items():
+            # Aplicamos la capa correspondiente y guardamos
+            # la predicción en el diccionario de salida.
+            predictions[name] = head_layer(combined_vec)
+
+        # Devolvemos el diccionario de predicciones
+        return predictions
