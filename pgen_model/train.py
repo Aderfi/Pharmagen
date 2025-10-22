@@ -1,13 +1,17 @@
 import torch
+import math
 
 from pathlib import Path
 
 from src.config.config import *
-from .model_configs import MASTER_WEIGHTS
+from .model_configs import get_model_config
 
 import warnings
 
+
 trained_encoders_path = Path(MODELS_DIR)
+
+min_delta = 0.01
 
 def train_model(
     train_loader,
@@ -20,7 +24,9 @@ def train_model(
     target_cols=None,
     scheduler=None,
     params_to_txt=None,
-    multi_label_cols: set = None  # type: ignore
+    multi_label_cols: set = None,  # type: ignore
+    weights_dict: dict = None,  # type: ignore
+    optuna_check_weights: bool = False
 ):
     
     if device is None:
@@ -29,26 +35,26 @@ def train_model(
     if target_cols is None:
         raise ValueError("Debes definir 'target_cols' como una lista de nombres de salida")
     
-    # <-- CAMBIO: Inicializa el set si es None
-    if multi_label_cols is None:
-        multi_label_cols = set()
-        
-    num_targets = len(target_cols)
-    
     # ============ WEIGHTS (DINÁMICOS) en model_configs.py ============
     weights_list = []
-    for col in target_cols:
-        if col not in MASTER_WEIGHTS:
-            warnings.warn(f"No se encontró un peso definido para el target '{col}'. Usando peso por defecto 1.0.")
-            weights_list.append(1.0)
-        else:
-            weights_list.append(MASTER_WEIGHTS[col])
+    if weights_dict:
+        for col in target_cols:
+            weight = weights_dict.get(col.lower(), 1.0) # .get() es más seguro
+            weights_list.append(weight)
+    else:
+        # Fallback si no se pasan pesos
+        warnings.warn("No se proporcionó 'weights_dict' a train_model. Usando peso 1.0 para todas las tareas.")
+        weights_list = [1.0] * num_targets  # type: ignore
+        
+    num_targets = len(target_cols)
             
     weights = torch.tensor(weights_list).to(device)
     
     best_loss = float('inf')
     best_accuracies = [0.0] * num_targets
     trigger_times = 0
+    #min_delta = 0.01
+    
     model = model.to(device)
 
     optimizer = criterions[-1]
@@ -103,6 +109,8 @@ def train_model(
         corrects = [0] * num_targets
         totals = [0] * num_targets
         
+        individual_loss_sums = [0.0] * num_targets
+        
         with torch.no_grad():
             for batch in val_loader:
                 drug = batch['drug'].to(device)
@@ -124,11 +132,14 @@ def train_model(
                     #     true = true.float()
                     individual_losses_val.append(loss_fn(pred, true)) #type: ignore
                 
-                individual_losses_val = torch.stack(individual_losses_val)
-                loss = (individual_losses_val * weights).sum() / float(num_targets)
+                individual_losses_val_tensor = torch.stack(individual_losses_val)
+                
+                for i in range(num_targets):
+                    individual_loss_sums[i] += individual_losses_val_tensor[i].item()
+                
+                loss = (individual_losses_val_tensor * weights).sum() / float(num_targets)
                 val_loss += loss.item()
 
-                # --- ¡CAMBIO GRANDE AQUÍ! ---
                 # Calcular accuracies dinámicamente
                 for i, col in enumerate(target_cols):
                     pred = outputs[col] # Logits
@@ -153,21 +164,53 @@ def train_model(
                 # --- FIN DEL CAMBIO ---
 
         val_loss /= len(val_loader)
+        
+        if optuna_check_weights == True:
+            #====================== Pérdidas individuales =====================
+            avg_individual_losses = [loss_sum / len(val_loader) for loss_sum in individual_loss_sums]
+            
+            print(f"\n--- Epoch Validation Summary ---") 
+            print(f"Total Weighted Val Loss: {val_loss:.5f}")
+            print("--- Average Individual Task Losses (Unweighted) ---")
+            for i, col in enumerate(target_cols):
+                print(f"Loss {target_cols[i]}: {avg_individual_losses[i]:.5f}")
+            print("-------------------------------------------\n")
+            
+            '''
+            '''
+            with open('comprobacion.txt', 'a') as f:
+                f.write("--- Epoch Validation Summary ---\n") 
+                f.write(f"Total Weighted Val Loss: {val_loss:.5f}\n")
+                f.write("--- Average Individual Task Losses (Unweighted) ---\n")
+                for i, col in enumerate(target_cols):
+                    f.write(f"Loss {target_cols[i]}: {avg_individual_losses[i]:.5f}\n")
+                f.write("-------------------------------------------\n")
+            # ==================================================================
+            exit(0)
+        
+        
         if scheduler is not None:
             scheduler.step(val_loss)
             
         val_accuracies = [c / t if t > 0 else 0.0 for c, t in zip(corrects, totals)]
-        min_delta = 0.5
-
-        if best_loss - val_loss > min_delta:
+        
+        if val_loss < best_loss:
+            #print(f"Epoch {epoch+1}: Validation loss improved from {best_loss:.5f} to {val_loss:.5f}. Saving model.")
             best_loss = val_loss
             best_accuracies = val_accuracies.copy()
             trigger_times = 0
 
-            path_model_file = Path(trained_encoders_path / f'pmodel_best_model.pth')
+            model_file_name = str('-'.join([target[:3] for target in target_cols]))
+            path_model_file = Path(trained_encoders_path / f'pmodel_{model_file_name}.pth')
+            
+            # Guarda el state_dict del modelo
+            torch.save(model.state_dict(), path_model_file)
+
             path_txt_file = Path(trained_encoders_path / 'txt_files')
-            filename = f'pmodel_{best_loss}.txt'
+            path_txt_file.mkdir(parents=True, exist_ok=True)   # Asegurarse de que el dir existe
+            filename = f'pmodel_{round(best_loss, 5)}.txt'
             file = Path(path_txt_file / filename)
+            
             with open(file, 'w') as f:
                 f.write(f'Model Targets: {target_cols}\n')
                 f.write(f'Validation Loss: {best_loss}\n')
@@ -177,7 +220,8 @@ def train_model(
                         \t  {params_to_txt}\n')
         else:
             trigger_times += 1
+            # print(f"Epoch {epoch+1}: Validation loss did not improve. Patience {trigger_times}/{patience}.")
             if trigger_times >= patience:
+                print(f"Early stopping triggered after {patience} epochs.")
                 break
-
     return best_loss, best_accuracies

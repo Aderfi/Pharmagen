@@ -7,26 +7,21 @@ import torch
 import numpy as np
 import warnings # Añadido
 
-from .data import PGenInputDataset, PGenDataset, train_data_load
-from .model import DeepFM_PGenModel # Asumiendo que has renombrado tu clase
-from .model_configs import MODEL_CONFIGS, MULTI_LABEL_COLUMN_NAMES
+from .data import PGenInputDataset, PGenDataset, train_data_import
+from .model import DeepFM_PGenModel
+from .model_configs import get_model_config, MULTI_LABEL_COLUMN_NAMES, MODEL_REGISTRY
 from .train import train_model
 from functools import partial
 from pathlib import Path
-from src.config.config import PGEN_MODEL_DIR
+from src.config.config import PGEN_MODEL_DIR # (Asumiendo que esta importación es correcta para tu proyecto)
 from torch.utils.data import DataLoader
 from typing import List
 import torch.nn as nn
-gelu = nn.GELU()
+# --- CORRECCIÓN 2: 'gelu' global eliminado por ser innecesario ---
 
-N_TRIALS = 100
-EPOCH = 120
-PATIENCE = 25
-
-def get_optuna_cfg(model_name):
-    config = MODEL_CONFIGS[model_name]
-    # La función ya devuelve minúsculas, no es necesario .lower() extra
-    return [t.lower() for t in config['targets']]
+N_TRIALS = 150
+EPOCH = 100
+PATIENCE = 20
 
 def get_num_drugs(data_loader):
     return len(data_loader.encoders['drug'].classes_)
@@ -50,27 +45,33 @@ def optuna_objective(trial, model_name, target_cols=None):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-
-    targets_from_config = get_optuna_cfg(model_name)
+ 
+    # Obtención de targets/columnas y pesos desde la configuración del modelo
+    config = get_model_config(model_name)
+    targets_from_config = [t.lower() for t in config['targets']]
+    weights_dict = config['weights']
+    
     if target_cols is None:
         target_cols = targets_from_config
     
     # --- 1. Definir Hiperparámetros ---
-    params = {
-    'embedding_dim': trial.suggest_categorical('embedding_dim', [256]),
-    'batch_size': trial.suggest_categorical('batch_size', [128]),
-    'hidden_dim': trial.suggest_categorical('hidden_dim', [768, 1024, 1280, 1536]),
-    'dropout_rate': trial.suggest_float('dropout_rate', 0.15, 0.35, step=0.05),
-    'learning_rate': trial.suggest_float('learning_rate', 2e-4, 9e-4, log=True),
-    'weight_decay': trial.suggest_float('weight_decay', 1e-5, 1e-4, log=True)
-}
+    # (Dejo tu bloque de 'intento modelo 2' activo)
+    params = {                  #intento modelo 2
+        'batch_size': trial.suggest_categorical('batch_size', [32, 64]),
+        'embedding_dim': trial.suggest_categorical('embedding_dim', [768, 1024, 1280, 1536]),
+        'hidden_dim': trial.suggest_categorical('hidden_dim', [1024, 1536]),
+        'dropout_rate': trial.suggest_float('dropout_rate', 0.2, 0.5, step=0.05),
+        'learning_rate': trial.suggest_float('learning_rate', 3e-5, 8e-4, log=True),    
+        'weight_decay': trial.suggest_float('weight_decay', 1e-6, 1e-5, log=True)
+    }
+    
     params_to_txt = params # Guardar para reporte
 
+    numero_de_iter = trial.number  # type: ignore
     # --- 2. Cargar Datos ---
-    csvfiles, cols_to_read, equivalencias = train_data_load(targets_from_config)
+    csvfiles, cols_to_read, equivalencias = train_data_import(targets_from_config)
     data_loader = PGenInputDataset()
     
-    # <-- CAMBIO: Pasa la lista de columnas multi-etiqueta a load_data
     df = data_loader.load_data(
         csvfiles, 
         cols_to_read, 
@@ -83,12 +84,11 @@ def optuna_objective(trial, model_name, target_cols=None):
     train_df = df.sample(frac=0.8, random_state=seed)
     val_df = df.drop(train_df.index)
     
-    # <-- CAMBIO: Pasa el conjunto de columnas multi-etiqueta a PGenDataset
     train_dataset = PGenDataset(train_df, target_cols, multi_label_cols=MULTI_LABEL_COLUMN_NAMES)
     val_dataset = PGenDataset(val_df, target_cols, multi_label_cols=MULTI_LABEL_COLUMN_NAMES)
     
     train_loader = DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=True) # shuffle=True también en val es inusual, pero lo dejo
+    val_loader = DataLoader(val_dataset, batch_size=params['batch_size'])
 
     # --- 3. Definir Modelo (Dinámicamente) ---
     n_drugs = get_num_drugs(data_loader)
@@ -102,6 +102,15 @@ def optuna_objective(trial, model_name, target_cols=None):
     target_dims = {}
     for i, col_name in enumerate(target_cols):
         target_dims[col_name] = n_targets_list[i]
+        
+    
+    if trial.number == 0:
+            if isinstance(csvfiles, list):
+                for i in csvfiles:
+                    print(f"Cargando datos de: {Path(i)}")
+            elif csvfiles:
+                print(f"Cargando datos de: {Path(csvfiles)}")
+            
     
     model = DeepFM_PGenModel(
         n_drugs, n_genes, n_alleles, n_genotypes,
@@ -116,7 +125,6 @@ def optuna_objective(trial, model_name, target_cols=None):
     # --- 4. Definir Criterio (Dinámicamente) ---
     optimizer = torch.optim.AdamW(model.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
     
-    # <-- CAMBIO: Selecciona la función de pérdida correcta para cada target
     criterions = []
     for col in target_cols:
         if col in MULTI_LABEL_COLUMN_NAMES:
@@ -130,18 +138,39 @@ def optuna_objective(trial, model_name, target_cols=None):
     patience = PATIENCE
 
     # --- 5. Entrenar ---
-    # <-- CAMBIO: Pasa el conjunto multi_label_cols a train_model
     best_loss, best_accuracies_list = train_model(
         train_loader, val_loader, model, criterions,
         epochs=epochs, patience=patience, target_cols=target_cols, 
         scheduler=None, params_to_txt=params_to_txt,
-        multi_label_cols=MULTI_LABEL_COLUMN_NAMES
+        multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
+        weights_dict=weights_dict
     )
 
     # --- 6. Calcular Métricas y Guardar en Trial ---
-    max_loss = sum([math.log(n) for n in n_targets_list]) / len(n_targets_list)
-    normalized_loss = best_loss / max_loss
-    avg_accuracy = sum(best_accuracies_list) / len(best_accuracies_list)
+    
+    # --- CORRECCIÓN 4: Cálculo dinámico de max_loss ---
+    max_loss_list = []
+    for i, col in enumerate(target_cols):
+        if col in MULTI_LABEL_COLUMN_NAMES:
+            # Para BCE, el loss de una predicción aleatoria (p=0.5) es log(2)
+            max_loss_list.append(math.log(2))
+        else:
+            # Para CE, el loss de una predicción aleatoria es log(n_classes)
+            n_classes = n_targets_list[i]
+            # Evitar log(1) o log(0) si algo está mal
+            if n_classes > 1:
+                max_loss_list.append(math.log(n_classes))
+            else:
+                max_loss_list.append(0.0) # Un target con 1 clase no tiene loss
+            
+    if not max_loss_list: # Evitar división por cero si no hay targets
+        max_loss = 1.0
+    else:
+        max_loss = sum(max_loss_list) / len(max_loss_list)
+    # --- FIN DE CORRECCIÓN ---
+
+    normalized_loss = best_loss / max_loss if max_loss > 0 else best_loss
+    avg_accuracy = sum(best_accuracies_list) / len(best_accuracies_list) if best_accuracies_list else 0.0
 
     trial.set_user_attr('avg_accuracy', avg_accuracy)
     trial.set_user_attr('normalized_loss', normalized_loss)
@@ -170,7 +199,11 @@ def _save_optuna_report(
 ):
     """Función auxiliar para guardar los reportes JSON y TXT."""
     
-    best_trial = study.best_trial
+    if not top_5_trials:
+        print("Advertencia: No se encontraron trials válidos para guardar en el reporte.", file=sys.stderr)
+        return
+
+    best_trial = top_5_trials[0] # El mejor es el primero de la lista ordenada
     
     # Extraer métricas guardadas del mejor trial
     normalized_loss = best_trial.user_attrs.get('normalized_loss', 0.0)
@@ -210,34 +243,34 @@ def _save_optuna_report(
 def run_optuna_with_progress(model_name, n_trials=N_TRIALS, output_dir=PGEN_MODEL_DIR, target_cols=None):
     """
     Ejecuta un estudio de Optuna y guarda los reportes.
-    
-    Versión limpia:
-    1. No recarga los datos; confía en 'optuna_objective' para los cálculos.
-    2. Delega la escritura de archivos a '_save_optuna_report'.
     """
     output_dir = Path(output_dir)
     results_dir = output_dir / 'optuna_outputs'
     results_dir.mkdir(parents=True, exist_ok=True)
-    results_file_json = results_dir / f'optuna_{model_name}.json'
-    results_file_txt = results_dir / f'optuna_{model_name}.txt'
+    results_file_json = Path(results_dir / f'optuna_{model_name}.json')
+    results_file_txt = Path(results_dir / f'optuna_{model_name}.txt')
 
     # --- 1. Definir Targets ---
-    # Asumiendo que get_optuna_cfg solo devuelve targets
-    targets_from_config = get_optuna_cfg(model_name)
+    config = get_model_config(model_name)
+    targets_from_config = [t.lower() for t in config['targets']]
+    
     if target_cols is None:
         target_cols = targets_from_config
-    # (Ahora 'target_cols' es la lista de nombres de targets a usar)
 
     # --- 2. Ejecutar Estudio ---
     study = optuna.create_study(direction="minimize")
     study.optimize(
         partial(optuna_objective, model_name=model_name, target_cols=target_cols),
-        n_trials=n_trials,
+        n_trials=N_TRIALS,
         show_progress_bar=True
     )
 
     # --- 3. Obtener y Guardar Resultados ---
     best_5 = get_best_trials(study, 5)
+
+    if not best_5:
+        print("Optimización de Optuna completada, pero no se encontraron trials exitosos.", file=sys.stderr)
+        return {}, None, None, None
 
     _save_optuna_report(
         study,
@@ -248,7 +281,7 @@ def run_optuna_with_progress(model_name, n_trials=N_TRIALS, output_dir=PGEN_MODE
     )
     
     # Extraer métricas del mejor trial para el return
-    best_trial = study.best_trial
+    best_trial = best_5[0]
     best_loss = best_trial.value
     best_params = best_trial.params
     normalized_loss = best_trial.user_attrs.get('normalized_loss', 0.0)

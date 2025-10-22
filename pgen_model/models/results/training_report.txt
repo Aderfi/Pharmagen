@@ -1,0 +1,10 @@
+Mejor loss en validación: 0.19228526796488202
+Hiperparámetros:
+batch_size: 64
+epochs: 100
+learning_rate: 0.000944
+embedding_dim: 512
+hidden_dim: 1536
+dropout_rate: 0.25
+patience: 10
+weight_decay: 7.24e-05

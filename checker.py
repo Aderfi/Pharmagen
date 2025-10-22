@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-df = pd.read_csv("train_base_therapeutic_limpio.csv", sep=';')
+df = pd.read_csv("train_therapeutic_outcome.csv", sep=';')
 
 for col in df.columns:
     field_have_multi_values = False
@@ -10,4 +10,5 @@ for col in df.columns:
             field_have_multi_values = True
             print(f"Columna: {col} Tiene múltiples valores")
             break
-    
+
+print(df['Effect'].unique())

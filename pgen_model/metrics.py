@@ -3,7 +3,7 @@
 # Se definen aquí para facilitar su modificación y uso en los scripts de entrenamiento.
 # Han sido encontrados mediante Optuna y validación cruzada.
 # ========================================
-
+'''
 def metrics_models(model_name):
     norm_name = model_name.replace(" ", "").upper()
     if norm_name == "OUTCOME-VARIATION-EFFECT-ENTITY":
@@ -62,4 +62,4 @@ DATA_PATH = "train_data"
 MODEL_PATH_EXT = "models/{}.pth"
 SAVE_ENCODERS_AS = "encoders{}.pkl"
 RESULTS_DIR = "../results/"
- 
+'''

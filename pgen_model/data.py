@@ -1,17 +1,18 @@
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer # <-- AÑADIDO
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 import json
 import glob
 from pathlib import Path
 import numpy as np
 import src.config.config as cfg
 from src.config.config import *
-from .metrics import *
 import sys
 import re
 import random
+
+iteracion_print_dato = int(0)
 
 def load_equivalencias(csv_path):
     with open(f"{csv_path}/json_dicts/geno_alleles_dict.json", "r") as f:
@@ -37,7 +38,7 @@ class PGenInputDataset:
         self.encoders = {}
         self.cols = []
         self.target_cols = []
-        self.multi_label_cols = set() # <-- AÑADIDO: para rastrear columnas multi-etiqueta
+        self.multi_label_cols = set()
 
     def fit_encoders(self, df):
         """
@@ -77,7 +78,7 @@ class PGenInputDataset:
                 df[col] = encoder.transform(df[col].astype(str))
         return df
 
-    def load_data(self, csv_files, cols, targets, equivalencias, multi_label_targets: list):
+    def load_data(self, csv_files, cols, targets, equivalencias=None, multi_label_targets=None):
         """
         Carga y preprocesa los datos.
         'multi_label_targets' es una lista de nombres de columnas (ej. ['outcome_category'])
@@ -129,12 +130,6 @@ class PGenInputDataset:
         
         self.data = df.drop(columns=['stratify_col']).reset_index(drop=True)
         
-        # Esta parte parece redundante en tu original, la he eliminado.
-        # df = df.dropna(subset=targets, axis=0, ignore_index=True)
-        # self.fit_encoders(df, targets)
-        # df = self.transform(df, targets)
-        # self.data = df.reset_index(drop=True)
-        
         return self.data
     
     def get_tensors(self, cols):
@@ -159,7 +154,7 @@ class PGenInputDataset:
         return tensors
 
 class PGenDataset(Dataset):
-    def __init__(self, df, target_cols, multi_label_cols: set): 
+    def __init__(self, df, target_cols, multi_label_cols=None): 
         """
         Crea tensores para el DataLoader.
         'multi_label_cols' es un set de nombres de columnas que deben ser
@@ -200,13 +195,12 @@ class PGenDataset(Dataset):
         # Devuelve un diccionario de tensores para este índice
         return {k: v[idx] for k, v in self.tensors.items()}
 
-def train_data_load(targets):
+def train_data_import(targets):
     csv_path = MODEL_TRAIN_DATA
     targets = [t.lower() for t in targets]
     # 'read_cols' debe incluir todas las columnas de input Y target
     read_cols_set = set(targets) | {"Drug", "Gene", "Allele", "Genotype"}
     read_cols = [c.lower() for c in read_cols_set]
-    
-    csvfiles = glob.glob("*.csv") #glob.glob(f"{csv_path}/*.csv")
+    csvfiles = glob.glob(f"{csv_path}/*.csv") if glob.glob(f"{csv_path}/*.csv") else f"{csv_path}/train_therapeutic_outcome.csv"
     equivalencias = load_equivalencias(csv_path)
-    return csvfiles, read_cols, equivalencias
+    return csvfiles, read_cols, None
