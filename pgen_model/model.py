@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import itertools
@@ -71,9 +70,6 @@ class PGenModel(nn.Module):
 
         return outcome, effect_direction, effect_category, entity, entity_name, therapeutic_outcome
 '''
-import torch
-import torch.nn as nn
-import itertools
 
 class DeepFM_PGenModel(nn.Module):
     """

@@ -1,0 +1,11 @@
+Model Targets: ['outcome', 'effect_direction', 'effect', 'effect_subcat', 'population_affected', 'entity_affected', 'therapeutic_outcome']
+Validation Loss: 0.6890333014376023
+Best Accuracy outcome: 0.5310868533459896
+Best Accuracy effect_direction: 0.6715709539629805
+Best Accuracy effect: 0.43046986236355006
+Best Accuracy effect_subcat: 0.5823445657332701
+Best Accuracy population_affected: 0.6302800189843379
+Best Accuracy entity_affected: 0.33080208827717134
+Best Accuracy therapeutic_outcome: 0.5253915519696251
+Best Parameters:
+                         	  {'embedding_dim': 256, 'batch_size': 128, 'hidden_dim': 1536, 'dropout_rate': 0.15, 'learning_rate': 0.0008981875609523986, 'weight_decay': 2.0491554682589733e-05}
