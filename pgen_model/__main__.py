@@ -52,13 +52,10 @@ def main():
             model_name = select_model(model_options, "Selecciona el modelo para entrenamiento")
             targets = MODEL_CONFIGS[model_name]['targets']
             target_cols = [t.lower() for t in targets]
-            batch_size, epochs, lr, emb_dim, hidden_dim, dropout_rate, patience = metrics_models(model_name) # type: ignore
+            # CAMBIADO: 'emb_dim' ahora es 'embedding_dim'
+            batch_size, epochs, lr, embedding_dim, hidden_dim, dropout_rate, patience = metrics_models(model_name) # type: ignore
             params = {
-                # Debes ajustar emb_dim* si usas Optuna, aquí es solo ejemplo simple:
-                'emb_dim_drug': emb_dim,
-                'emb_dim_gene': emb_dim,
-                'emb_dim_allele': emb_dim,
-                'emb_dim_geno': emb_dim,
+                'embedding_dim': embedding_dim, # CAMBIADO: Parámetro único
                 'hidden_dim': hidden_dim,
                 'dropout_rate': dropout_rate,
                 'learning_rate': lr,
@@ -67,7 +64,7 @@ def main():
                 'epochs': epochs
             }
             PMODEL_DIR = "pgen_model/models/"
-            csv_files = ["train.csv"]
+            csv_files = Path(PMODEL_DIR) / 'train_data' / 'train_therapeutic_outcome.csv'
             print(f"Iniciando entrenamiento con modelo: {model_name}")
             train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=epochs, patience=patience, batch_size=batch_size, target_cols=target_cols)
 

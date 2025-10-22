@@ -1,0 +1,10 @@
+Model: ['outcome_category', 'effect_direction', 'effect_category', 'entity', 'entity_name', 'therapeutic_outcome']
+Validation Loss: 2.86792476493192
+Best Accuracy outcome_category: 0.7368121442125237
+Best Accuracy effect_direction: 0.7339658444022771
+Best Accuracy effect_category: 0.5705882352941176
+Best Accuracy entity: 0.5559772296015181
+Best Accuracy entity_name: 0.38311195445920304
+Best Accuracy therapeutic_outcome: 0.628842504743833
+Best Parameters:
+                         	  {'embedding_dim': 256, 'hidden_dim': 1024, 'dropout_rate': 0.1, 'learning_rate': 0.00023061622359814548, 'batch_size': 64, 'weight_decay': 3.45592888267853e-05}

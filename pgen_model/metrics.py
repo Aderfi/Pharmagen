@@ -35,6 +35,17 @@ def metrics_models(model_name):
         DROPOUT_RATE = 0.2893325389845274
         PATIENCE = 10
         return BATCH_SIZE, EPOCHS, LEARNING_RATE, EMB_DIM, HIDDEN_DIM, DROPOUT_RATE, PATIENCE
+    
+    # AÑADIDO: Configuración para el modelo que estás usando
+    elif norm_name == "OUTCOME-EFFECT-ENTITY-->THERAPEUTIC_OUTCOME":
+        BATCH_SIZE = 8
+        EPOCHS = 100
+        LEARNING_RATE = 2.996788185777191e-05
+        EMBEDDING_DIM = 128  # CAMBIADO: De EMB_DIM a un EMBEDDING_DIM único
+        HIDDEN_DIM = 704
+        DROPOUT_RATE = 0.2893325389845274
+        PATIENCE = 10
+        return BATCH_SIZE, EPOCHS, LEARNING_RATE, EMBEDDING_DIM, HIDDEN_DIM, DROPOUT_RATE, PATIENCE
 
     else:
         raise ValueError(f"Modelo '{model_name}' no reconocido")
@@ -51,5 +62,4 @@ DATA_PATH = "train_data"
 MODEL_PATH_EXT = "models/{}.pth"
 SAVE_ENCODERS_AS = "encoders{}.pkl"
 RESULTS_DIR = "../results/"
-
  

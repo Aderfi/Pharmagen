@@ -1,116 +1,14 @@
-import json
-import pandas as pd
-import glob
-import re
-import itertools
-import csv
-'''
-csv_files = glob.glob("*.csv")
-cols = ['Drug', 'Gene', 'Genotype', 'Alleles', 'Outcome', 'Variation', 'Effect', 'Entity']
-
-df = pd.concat([pd.read_csv(f, sep=';', index_col=False, usecols=cols) for f in csv_files], ignore_index=True)
-
-df.insert(8, 'Merged', '')
-
-pattern = r"^[A-Z0-9]+ (poor|slow|ultrarapid|rapid|intermediate) (metabolizer|acetylator)$"
-list_fix = []
-
-for idx in df[df['Genotype'].str.match(pattern).tolist()].index:
-    list_fix.append((idx, df.loc[idx, 'Genotype']))
-    
-for idx, geno in list_fix:
-    df.loc[idx, 'Genotype'] = geno.split(' ')[0]
-    df.loc[idx, 'Alleles'] = geno.split(' ')[1] + '_' + geno.split(' ')[2]
-
-df['Variation'] = df['Variation'].str.replace('-', '_', regex=False)
-df['Outcome'] = df['Outcome'].str.upper().str.replace('-', '_', regex=False)
-df['Entity'] = df['Entity'].str.strip().str.replace(r'\s', '_', regex=False)
-
-
-# Merge Effect and Entity into Merged, separated by a ':' if both exist
-df['Merged'] = df.apply(lambda row: f"{row['Effect']}:{row['Entity']}" if pd.notna(row['Effect']) and pd.notna(row['Entity']) else (row['Effect'] if pd.notna(row['Effect']) else (row['Entity'] if pd.notna(row['Entity']) else None)), axis=1)
-df.drop(columns=['Entity'], inplace=True)
-df.drop(columns=['Effect'], inplace=True)
-
-df['Merged'] = df['Merged'].str.strip()
-df['Merged'] = df['Merged'].str.replace(r'\s', '_', regex=True)
-df['Merged'] = df['Merged'].str.replace(r'__+', '_', regex=True)
-
-df.rename(columns={'Merged': 'Effect'}, inplace=True)
-
-df.to_csv('pre_concat.csv', sep=';', index=False)
-
-
-# Leer el archivo de entrada
-df = pd.read_csv("pre_concat.csv", sep=';', usecols=['Drug', 'Gene', 'Alleles', 'Genotype', 'Outcome', 'Variation', 'Effect'])
-
-def expand_row(row):
-    drugs = [d.strip() for d in re.split('[,/]', str(row['Drug']))]
-    genes = [g.strip() for g in str(row['Gene']).split(',')]
-    outcomes = [o.strip() for o in str(row['Outcome']).split(',')]
-    # Estas columnas no se expanden, se copian igual en cada combinación
-    alleles = row['Alleles']
-    genotype = row['Genotype']
-    effect = row['Effect']
-    # Variations: solo reemplazar - por _
-    variation = str(row['Variation']).rstrip('_') if re.search(r'[_]$', str(row['Variation'])) else str(row['Variation'])
-    # Producto cartesiano de Drug, Gene, Outcome
-    for drug, gene, outcome in itertools.product(drugs, genes, outcomes):
-        yield {
-            'Drug': drug,
-            'Gene': gene,
-            'Allele': alleles,
-            'Genotype': genotype,
-            'Outcome': outcome,
-            'Variation': variation,
-            'Effect': effect
-        }
-
-output_file = "expanded_output.csv"
-final_columns = ['Drug', 'Gene', 'Allele', 'Genotype', 'Outcome', 'Variation', 'Effect']
-
-with open(output_file, "w", newline='', encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=final_columns, delimiter=';')
-    writer.writeheader()
-    for _, row in df.iterrows():
-        for expanded in expand_row(row):
-            writer.writerow(expanded)
-
-print(f"Expansión completada y guardada en {output_file}")
-'''
-
 import pandas as pd
 
-df = pd.read_csv("final_output.csv", sep=';')
+df = pd.read_csv('train_therapeutic_outcome.csv', sep=';')
 
-cat_increase_dict = {}
-cat_decrease_dict = {}
-cat_list_dict = {}
-target = 'Variation'
+# Obtener el número de clases únicas para cada variable categórica
+n_drugs = df['Drug'].nunique()
+n_genes = df['Gene'].nunique()
+n_alleles = df['Allele'].nunique()
+n_genotypes = df['Genotype'].nunique()
 
-
-
-
-for field in df[target]:
-    if 'INCREASED' in field:
-        category = field
-        cat_increase_dict[category] = cat_increase_dict.get(category, 0) + 1
-    elif 'DECREASED' in field:
-        category = field
-        cat_decrease_dict[category] = cat_decrease_dict.get(category, 0) + 1
-    else:
-        category = field
-        cat_list_dict[category] = cat_list_dict.get(category, 0) + 1
- 
-
-# print(df[df['Effect'] == 'CYP2C9protein'])
-
-cat_final_dict = pd.concat([pd.Series(cat_increase_dict), pd.Series(cat_decrease_dict), pd.Series(cat_list_dict)], axis=0).to_dict()
-
-with open('variation_categories_ahora.txt', 'w') as f:
-    for k, v in cat_final_dict.items():
-        f.write(f"{v} - {k}\n")
-        
+print(f"Número de clases únicas: {n_drugs}, {n_genes}, {n_alleles}, {n_genotypes}")
 
 
        
