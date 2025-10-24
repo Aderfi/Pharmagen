@@ -1,3 +1,12 @@
 .env/*
 .env_pgen/*
 .vscode/*
+*__pycache__/
+
+--------------------------------------
+
+# Ignorar modelos guardados (Pesan demasiado)
+pgen_model/models/*.pt
+pgen_model/models/*.pth
+pgen_model/models/*.pk2l
+pgen_model/models/*.pkl
