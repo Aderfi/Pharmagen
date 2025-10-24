@@ -1,11 +1,12 @@
 import json
 import math
-import optuna
 import random
-import sys
+import sys, logging
 import torch
+from tqdm import tqdm
 import numpy as np
 import warnings # Añadido
+import datetime
 
 from .data import PGenInputDataset, PGenDataset, train_data_import
 from .model import DeepFM_PGenModel
@@ -13,15 +14,80 @@ from .model_configs import get_model_config, MULTI_LABEL_COLUMN_NAMES, MODEL_REG
 from .train import train_model
 from functools import partial
 from pathlib import Path
-from src.config.config import PGEN_MODEL_DIR # (Asumiendo que esta importación es correcta para tu proyecto)
+from src.config.config import PGEN_MODEL_DIR
+from optuna.storages import JournalStorage
+import optuna
+from src.scripts.custom_callback import TqdmCallback # type: ignore
+
+from optuna import create_study
 from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
 from typing import List
 import torch.nn as nn
 # --- CORRECCIÓN 2: 'gelu' global eliminado por ser innecesario ---
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-N_TRIALS = 150
-EPOCH = 100
-PATIENCE = 20
+N_TRIALS = 200
+EPOCH = 175
+PATIENCE = 15
+
+class TqdmCallback:
+    def __init__(self, tqdm_object, metric_name="value"):
+        self._tqdm = tqdm_object
+        self._metric_name = metric_name
+        
+    def __call__(self, study, trial):
+        self._tqdm.update(1)
+        self._tqdm.set_postfix({self._metric_name: trial.value})
+
+def get_optuna_params(trial: optuna.Trial, model_name: str) -> dict:
+    """
+    Sugiere hiperparámetros para un trial de Optuna basándose
+    en la configuración dinámica de MODEL_REGISTRY.
+    """
+    model_conf = MODEL_REGISTRY.get(model_name)
+
+    if not model_conf:
+        raise ValueError(f"No se encontró la configuración para el modelo: {model_name}")
+
+    # 1. Usar 'params' fijos si 'params_optuna' no existe
+    if "params_optuna" not in model_conf:
+        print(f"Advertencia: No se encontró 'params_optuna' para '{model_name}'. "
+              f"Usando 'params' fijos del registro.")
+        return model_conf.get("params", {}).copy() 
+
+    search_space = model_conf["params_optuna"]
+    suggested_params = {}
+
+    # 2. Iterar dinámicamente sobre los parámetros definidos
+    #    Esta es la parte clave que tu estructura original no puede hacer.
+    for param_name, space_definition in search_space.items():
+
+        # --- Caso A: El espacio es una LISTA -> Usar suggest_categorical ---
+        if isinstance(space_definition, list):
+            suggested_params[param_name] = trial.suggest_categorical(
+                param_name,  # Argumento 1: El nombre (string)
+                space_definition  # Argumento 2: La lista de opciones
+            )
+
+        # --- Caso B: El espacio es una TUPLA -> Usar suggest_float ---
+        elif isinstance(space_definition, tuple):
+            low, high = space_definition
+            
+            # Aplicar escala logarítmica si el nombre lo sugiere
+            is_log_scale = param_name in ['learning_rate', 'weight_decay']
+            
+            suggested_params[param_name] = trial.suggest_float(
+                param_name,  # Argumento 1: El nombre (string)
+                low,  # Argumento 2: Valor bajo
+                high,  # Argumento 3: Valor alto
+                log=is_log_scale
+            )
+
+        else:
+            print(f"Advertencia: Tipo de espacio de búsqueda desconocido para "
+                  f"'{param_name}': {type(space_definition)}. Omitiendo.")
+    return suggested_params
 
 def get_num_drugs(data_loader):
     return len(data_loader.encoders['drug'].classes_)
@@ -40,11 +106,13 @@ def get_output_sizes(data_loader, target_cols):
     # devuelve el número de clases (el ancho del vector binario).
     return [len(data_loader.encoders[t].classes_) for t in target_cols]
 
-def optuna_objective(trial, model_name, target_cols=None):
+def optuna_objective(trial, model_name, pbar, target_cols=None):
+    
     seed = 711
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+    
  
     # Obtención de targets/columnas y pesos desde la configuración del modelo
     config = get_model_config(model_name)
@@ -56,15 +124,19 @@ def optuna_objective(trial, model_name, target_cols=None):
     
     # --- 1. Definir Hiperparámetros ---
     # (Dejo tu bloque de 'intento modelo 2' activo)
-    params = {                  #intento modelo 2
-        'batch_size': trial.suggest_categorical('batch_size', [32, 64]),
-        'embedding_dim': trial.suggest_categorical('embedding_dim', [768, 1024, 1280, 1536]),
-        'hidden_dim': trial.suggest_categorical('hidden_dim', [1024, 1536]),
-        'dropout_rate': trial.suggest_float('dropout_rate', 0.2, 0.5, step=0.05),
-        'learning_rate': trial.suggest_float('learning_rate', 3e-5, 8e-4, log=True),    
-        'weight_decay': trial.suggest_float('weight_decay', 1e-6, 1e-5, log=True)
-    }
     
+    params = get_optuna_params(trial, model_name)
+    
+    '''
+    params = {                  #intento modelo 2
+        'batch_size': trial.suggest_categorical('batch_size', [64, 128, 256, 512]),
+        'embedding_dim': trial.suggest_categorical('embedding_dim', [32, 64, 128]),
+        'hidden_dim': trial.suggest_categorical('hidden_dim', [128, 256, 512]),
+        'dropout_rate': trial.suggest_float('dropout_rate', 0.1, 0.5, step=0.05),
+        'learning_rate': trial.suggest_float('learning_rate', 1e-5, 1e-3, log=True),    
+        'weight_decay': trial.suggest_float('weight_decay', 1e-6, 1e-2, log=True)
+    }
+    '''
     params_to_txt = params # Guardar para reporte
 
     numero_de_iter = trial.number  # type: ignore
@@ -93,7 +165,7 @@ def optuna_objective(trial, model_name, target_cols=None):
     # --- 3. Definir Modelo (Dinámicamente) ---
     n_drugs = get_num_drugs(data_loader)
     n_genes = get_num_genes(data_loader)
-    n_alleles = get_num_alleles(data_loader)
+    #n_alleles = get_num_alleles(data_loader)
     n_genotypes = get_num_genotypes(data_loader)
     
     n_targets_list = get_output_sizes(data_loader, target_cols)
@@ -103,17 +175,17 @@ def optuna_objective(trial, model_name, target_cols=None):
     for i, col_name in enumerate(target_cols):
         target_dims[col_name] = n_targets_list[i]
         
-    
+    '''
     if trial.number == 0:
             if isinstance(csvfiles, list):
                 for i in csvfiles:
-                    print(f"Cargando datos de: {Path(i)}")
+                    print(f" Cargando datos de: {Path(i)}")
             elif csvfiles:
-                print(f"Cargando datos de: {Path(csvfiles)}")
-            
+                print(f" Cargando datos de: {Path(csvfiles)}")
+    '''        
     
     model = DeepFM_PGenModel(
-        n_drugs, n_genes, n_alleles, n_genotypes,
+        n_drugs, n_genes, n_genotypes, #n_alleles,
         params['embedding_dim'],
         params['hidden_dim'],
         params['dropout_rate'],
@@ -177,10 +249,17 @@ def optuna_objective(trial, model_name, target_cols=None):
     trial.set_user_attr('all_accuracies', best_accuracies_list)
     trial.set_user_attr('seed', seed)
 
-    print(
-        f" Trial {trial.number}. BS: {params['batch_size']}, LR: {params['learning_rate']:.6f} "
-        f"=> Val Loss: {best_loss:.4f} // Norm Loss: {normalized_loss:.4f}, Avg Acc: {avg_accuracy:.4f}, SEED: {seed}",
-        file=sys.stderr)
+    info_dict = {
+        'Best_Loss': f"{best_loss:.4f}",
+        'Trial': trial.number,      
+        'ValLoss': f"{best_loss:.4f}",
+        'NormLoss': f"{normalized_loss:.4f}",
+        'AvgAcc': f"{avg_accuracy:.4f}",
+        'BS': params['batch_size'],
+        'LR': f"{params['learning_rate']:.6f}"
+    }
+    pbar.set_postfix(info_dict, '\b')
+    pbar.update(1)
 
     return best_loss
 
@@ -244,6 +323,9 @@ def run_optuna_with_progress(model_name, n_trials=N_TRIALS, output_dir=PGEN_MODE
     """
     Ejecuta un estudio de Optuna y guarda los reportes.
     """
+    datestudy = datetime.date.today()
+    timestudy = datetime.datetime.now().strftime("%H:%M")
+
     output_dir = Path(output_dir)
     results_dir = output_dir / 'optuna_outputs'
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -253,18 +335,36 @@ def run_optuna_with_progress(model_name, n_trials=N_TRIALS, output_dir=PGEN_MODE
     # --- 1. Definir Targets ---
     config = get_model_config(model_name)
     targets_from_config = [t.lower() for t in config['targets']]
-    
+
     if target_cols is None:
         target_cols = targets_from_config
 
     # --- 2. Ejecutar Estudio ---
-    study = optuna.create_study(direction="minimize")
-    study.optimize(
-        partial(optuna_objective, model_name=model_name, target_cols=target_cols),
-        n_trials=N_TRIALS,
-        show_progress_bar=True
+    pbar = tqdm(total=n_trials, file=sys.stderr , desc=f"Optuna ({model_name})", colour="green", nrows=3) # type: ignore
+
+    '''
+    tqdm_optuna_callback = TqdmCallback(
+        tqdm_object=pbar,
+        metric_name="value" # Muestra el 'loss' principal en la barra
+    )
+    '''
+    optuna_func = partial(
+        optuna_objective, 
+        model_name=model_name,
+        target_cols=target_cols,
+        pbar=pbar
     )
 
+    study = optuna.create_study(direction="minimize",
+        study_name=f"optuna_{model_name}_{datestudy}_{timestudy}")
+
+    study.optimize(
+        optuna_func,
+        n_trials=N_TRIALS,
+        #callbacks=[tqdm_optuna_callback] # type: ignore
+    )
+    
+    pbar.close()
     # --- 3. Obtener y Guardar Resultados ---
     best_5 = get_best_trials(study, 5)
 

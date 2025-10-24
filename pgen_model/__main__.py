@@ -12,6 +12,7 @@ from .model import DeepFM_PGenModel
 from .model_configs import MODEL_REGISTRY, get_model_config
 from .pipeline import train_pipeline
 from .predict import load_encoders, predict_single_input, predict_from_file
+from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR
 
 
 
@@ -96,7 +97,7 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
         
         # Crear una instancia del modelo con la arquitectura correcta
         model = DeepFM_PGenModel(
-            n_drugs, n_genes, n_alleles, n_genotypes,
+            n_drugs, n_genes, n_genotypes, #n_alleles,
             embedding_dim, hidden_dim, dropout_rate,
             target_dims=target_dims
         )
@@ -217,7 +218,6 @@ def main():
         elif choice == "4":
             import optuna
             from .optuna_train import run_optuna_with_progress
-            optuna.logging.set_verbosity(optuna.logging.WARNING)
             print("\nOptimizando hiperparámetros con Optuna...")
             optuna_model_name = select_model(model_options, "Selecciona el modelo para optimización")
             
@@ -250,7 +250,11 @@ def main():
             model_name = select_model(model_options, "Selecciona el modelo para diagnóstico de pesos")
 
             config = get_model_config(model_name)
-            params = config['hyperparams'] # Diccionario con HPs (LR, HD, etc.)
+            try:
+                params = dict(config['params']) # Diccionario con HPs (LR, HD, etc.)
+            except KeyError:
+                print(f"Error: No se encontraron los parámetros para el modelo {model_name}")
+                continue
             target_cols = [t.lower() for t in config['targets']]
 
             # --- CAMBIO: Ejecutar SOLO 1 época para el diagnóstico ---
@@ -267,15 +271,14 @@ def main():
             # La forma más limpia es ponerlos a 1.0 en model_configs.py temporalmente.
             print("ADVERTENCIA: Asegúrate de que los MASTER_WEIGHTS en model_configs.py están en 1.0 para este diagnóstico.")
 
-            PMODEL_DIR = "pgen_model/models/"
-            csv_files = Path(Path(PMODEL_DIR) / 'train_data' / 'train_therapeutic_outcome.csv')
+            csv_files = Path(MODEL_TRAIN_DATA / 'train_therapeutic_outcome.csv')
 
             print(f"Iniciando run de diagnóstico (1 época) con modelo: {model_name}")
             print(f"Parámetros: {json.dumps(params, indent=2)}")
 
             
             train_pipeline(
-                PMODEL_DIR,
+                PGEN_MODEL_DIR,
                 csv_files,
                 model_name,
                 params,

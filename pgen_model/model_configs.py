@@ -1,10 +1,29 @@
 """ 
 Archivo de configuraciones del modelo: define los modelos disponibles, sus targets, etc.
 """
+
+def select_model(model_options, prompt="Selecciona el modelo:"):
+    """
+    Muestra una lista numerada de modelos y pide al usuario que seleccione uno.
+    Devuelve el nombre (string) del modelo seleccionado. {model_name}
+    """
+    
+    print("\n————————————————— Modelos Disponibles ————————————————")
+    for i, name in enumerate(model_options, 1):
+        print(f"  {i} -- {name}")
+    print("———————————————————————————————————————————————————————")
+    model_choice = ""
+    while model_choice not in [str(i+1) for i in range(len(model_options))]:
+        model_choice = input(f"{prompt} (1-{len(model_options)}): ").strip()
+        if model_choice not in [str(i+1) for i in range(len(model_options))]:
+            print("Opción no válida. Intente de nuevo.")
+    return model_options[int(model_choice)-1]
+
+
 def get_model_config(model_name: str) -> dict:
     """
     Obtiene la configuración completa (targets, cols e hiperparámetros)
-    para un modelo dado, fusionando defaults y específicos.
+    para el {model_name} especificado.
     """
     # 1. Normaliza el nombre (o busca por el nombre exacto)
     if model_name not in MODEL_REGISTRY:
@@ -24,24 +43,14 @@ def get_model_config(model_name: str) -> dict:
     final_config = {
         "targets": model_conf["targets"],
         "cols": model_conf["cols"],
-        "hyperparams": final_hyperparams,
+        "params": final_hyperparams,
         "weights": model_conf.get("weights")
         # Un diccionario anidado para HPs
     }
     
     return final_config
 
-def select_model(model_options, prompt="Selecciona el modelo:"):
-    print("\n————————————————— Modelos Disponibles ————————————————")
-    for i, name in enumerate(model_options, 1):
-        print(f"  {i} -- {name}")
-    print("———————————————————————————————————————————————————————")
-    model_choice = ""
-    while model_choice not in [str(i+1) for i in range(len(model_options))]:
-        model_choice = input(f"{prompt} (1-{len(model_options)}): ").strip()
-        if model_choice not in [str(i+1) for i in range(len(model_options))]:
-            print("Opción no válida. Intente de nuevo.")
-    return model_options[int(model_choice)-1]
+
 
 DEFAULT_HYPERPARAMS = {
     "batch_size": 64,
@@ -66,16 +75,18 @@ MASTER_WEIGHTS = {
 
 MULTI_LABEL_COLUMN_NAMES = {    # Columnas que son MULTI-LABEL
                                 'outcome', 
-                                #'effect',
-                                'effect_direction',
-                                'effect_subcat' 
-                                #'entity_affected'
+                                'effect',
+                                #'effect_direction',
+                                'effect_subcat',
+                                'entity_affected'
 }    # Columnas que son MULTI-LABEL
 
 MODEL_REGISTRY = {
     "Outcome-Effect... --> Therapeutic_Outcome": {
         "targets": ["Outcome", "Effect_direction", "Effect", "Effect_subcat", "Entity_Affected", "Population_Affected", "Therapeutic_Outcome"],
+        
         "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
+        
         "params": { # <-- Hiperparámetros específicos
             "batch_size": 64,
             "embedding_dim": 512,
@@ -86,23 +97,111 @@ MODEL_REGISTRY = {
         }
     },
 
-    "Outcome-Effect-Subcat-Entity": {"targets": ["Outcome", "Effect_direction", "Effect", "Effect_subcat", "Entity_Affected"],
-                                     
-                                     "cols":    ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
-                                     
-                                     "params":  {"batch_size": 64, "embedding_dim": 512,"hidden_dim": 1536,
-                                                 "dropout_rate": 0.25, "learning_rate": 0.000944, 
-                                                 "weight_decay": 7.24e-05}
-                                    },
+    "Outcome-Effect-Subcat-Entity": {
+        "targets": ["Outcome", "Effect_direction", "Effect", "Effect_subcat", "Entity_Affected"],
+        
+        "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
+        
+        "params": {
+            "batch_size": 64,
+            "embedding_dim": 512,
+            "hidden_dim": 1536,
+            "dropout_rate": 0.25,
+            "learning_rate": 0.000944,
+            "weight_decay": 7.24e-05
+        }
+    },
 
-    "Outcome-Effect-Subcat":   {"targets": ["Outcome", "Effect_direction", "Effect", "Effect_subcat"],
-                              
-                                "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
-                                
-                                "params": {"batch_size": 64, "embedding_dim": 768, "hidden_dim": 1024,
-                                             "dropout_rate": 0.4, "learning_rate": 0.000782,
-                                             "weight_decay": 1.31e-06},
+    "Outcome-Effect-Subcat": {
+        "targets": ["Outcome", "Effect_direction", "Effect", "Effect_subcat"],
+        
+        "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
+        
+        "params": {
+            "batch_size": 64,
+            "embedding_dim": 768,
+            "hidden_dim": 1024,
+            "dropout_rate": 0.4,
+            "learning_rate": 0.000782,
+            "weight_decay": 1.31e-06
+        },
 
-                                "weights": {"outcome": 1.0, "effect_direction": 0.45, "effect": 10.0, "effect_subcat": 40.0}
+        "params_optuna": {
+            "batch_size": [64],
+            "embedding_dim": [2048, 4096, 8192],
+            "hidden_dim": [1024, 2048, 4096],
+            "dropout_rate": (0.2, 0.3),
+            "learning_rate": (1e-4, 8e-4),
+            "weight_decay": (1e-7, 1e-6)
+        },
+
+        "weights": {
+            "outcome": 1.0,
+            "effect_direction": 1.0,
+            "effect": 1.0,
+            "effect_subcat": 1.0
+        }
+    },
+    
+    "Outcome-Effect": {
+        "targets": ["Outcome", "Effect_direction", "Effect"],
+        
+        "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
+        
+        "params": {
+            "batch_size": 64,
+            "embedding_dim": 512,
+            "hidden_dim": 768,
+            "dropout_rate": 0.24667,
+            "learning_rate": 0.000728,
+            "weight_decay": 7.51e-06
+        },
+    
+        #"params_optuna": {
+        #    "batch_size": 64,
+        #    "embedding_dim": [128, 256, 512],
+        #    "hidden_dim": [256, 512, 768],
+        #    "dropout_rate": (0.15, 0.35),
+        #    "learning_rate": (5e-4, 1.2e-3),
+        #    "weight_decay": (7.51e-06)
+        #},
+    
+        "weights": {
+            "outcome": 1.0,
+            "effect_direction": 1.0,
+            "effect": 1.0,
+            "effect_subcat": 1.0
+        }
+    },
+    
+    "Subcat-Entity": {
+        "targets": ["Effect_subcat", "Population_Affected", "Entity_Affected"],
+        
+        "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
+        
+        "params": {
+            "batch_size": 64,
+            "embedding_dim": 768,
+            "hidden_dim": 1024,
+            "dropout_rate": 0.4,
+            "learning_rate": 0.000782,
+            "weight_decay": 1.31e-06
+        },
+        
+        "params_optuna": {
+            "batch_size": [64, 128, 256],
+            "embedding_dim": [128, 256, 512],
+            "hidden_dim": [256, 512, 1024],
+            "dropout_rate": [0.1, 0.2, 0.3],
+            "learning_rate": [1e-5, 1e-4, 1e-3],
+            "weight_decay": [1e-6, 1e-5, 1e-4]
+        },
+
+        "weights": {
+            "outcome": 1.0,
+            "effect_direction": 1.0,
+            "effect": 1.0,
+            "effect_subcat": 1.0
+        }
     },
 }

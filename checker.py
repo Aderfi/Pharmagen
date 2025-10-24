@@ -1,14 +1,19 @@
 import pandas as pd
 import re
+import json
 
 df = pd.read_csv("train_therapeutic_outcome.csv", sep=';')
 
-for col in df.columns:
-    field_have_multi_values = False
-    for idx, value in df[col].items():
-        if isinstance(value, str) and ',' in value:
-            field_have_multi_values = True
-            print(f"Columna: {col} Tiene múltiples valores")
-            break
+with open('geno_alleles_dict.json') as f:
+    equivalencias = json.load(f)
+    
+equivalencias_cleaned = {}
+for k, v in equivalencias.items():
+    if re.match(r'rs[0-9]+', k):
+        equivalencias_cleaned[k] = v
+    else:
+        continue
 
-print(df['Effect'].unique())
+df['Genotype'] = df['Genotype'].map(equivalencias_cleaned, na_action='ignore')
+
+df.to_csv("train_therapeutic_outcome_cleaned.csv", sep=';', index=False)

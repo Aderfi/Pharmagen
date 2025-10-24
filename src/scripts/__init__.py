@@ -18,9 +18,9 @@ __all__ = ['config',
 if __name__ == '__dirPaths__':
     __dirPaths__()
 '''
-from config.config import *
 from .funciones import *
 from .logger_config import *
 from .project_config import *
 from .utils import *
 from .setup_project import *
+from .custom_callback import TqdmCallback
