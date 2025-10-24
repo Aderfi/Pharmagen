@@ -14,7 +14,7 @@ from .train import train_model
 from .model_configs import get_model_config, MULTI_LABEL_COLUMN_NAMES
 from src.config.config import MODEL_ENCODERS_DIR
 
-def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patience=5, batch_size=8, target_cols=None):
+def train_pipeline(PGEN_MODEL_DIR, csv_files, model_name, params, epochs=100, patience=5, batch_size=8, target_cols=None):
     """
     Función principal para entrenar un modelo PGen.
 
@@ -98,11 +98,11 @@ def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patien
     # --- Instanciar el Modelo ---
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DeepFM_PGenModel(
-        n_drugs, n_genes, n_alleles, n_genotypes,
+        n_drugs, n_genes, n_genotypes, # n_alleles,
         params['embedding_dim'],
         params['hidden_dim'],
         params['dropout_rate'],
-        target_dims=target_dims
+        target_dims=target_dims # Dinámico #type: ignore
     )
     model = model.to(device)
 
@@ -133,9 +133,9 @@ def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patien
     # --- Guardar Resultados ---
     print(f"Entrenamiento completado. Mejor loss en validación: {best_loss:.5f}")
 
-    results_dir = Path(PMODEL_DIR) / 'results' # Usar Path para consistencia
+    results_dir = Path(PGEN_MODEL_DIR, 'results') # Usar Path para consistencia
     results_dir.mkdir(parents=True, exist_ok=True)
-    report_file = results_dir / f'training_report_{model_name}.txt' # Nombre de archivo específico
+    report_file = results_dir / f'training_report_{model_name}_{round(best_loss, 4)}.txt' # Nombre de archivo específico
 
     with open(report_file, 'w') as f:
         f.write(f"Modelo: {model_name}\n")
@@ -169,10 +169,8 @@ def train_pipeline(PMODEL_DIR, csv_files, model_name, params, epochs=100, patien
         encoders_dir.mkdir(parents=True, exist_ok=True)
         
     encoders_file = encoders_dir / f'encoders_{model_name}.pkl'
-    joblib.dump(data_loader_obj.encoders, encoders_file)
-    print(f"Encoders guardados en: {encoders_file}")
+    #joblib.dump(data_loader_obj.encoders, encoders_file)
+    #print(f"Encoders guardados en: {encoders_file}")
     
     return model
     # joblib.dump(data_loader_obj.encoders, results_dir / f'encoders_{model_name}.pkl')
-
-    return model # Devuelve el modelo con los mejores pesos encontrados por train_model

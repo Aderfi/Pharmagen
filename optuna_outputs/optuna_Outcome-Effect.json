@@ -1,0 +1,79 @@
+{
+  "model": "Outcome-Effect",
+  "best_trial": {
+    "loss": 0.3110351370440589,
+    "normalized_loss": 0.4487288497556829,
+    "avg_accuracy": 0.47985476692433826,
+    "params": {
+      "batch_size": 64,
+      "embedding_dim": 512,
+      "hidden_dim": 768,
+      "dropout_rate": 0.246674918675664,
+      "learning_rate": 0.0007288890014630811,
+      "weight_decay": 7.5133215298273566e-06
+    },
+    "all_accuracies": [
+      0.5762473647224174,
+      0.623682361208714,
+      0.23963457484188336
+    ]
+  },
+  "top5": [
+    {
+      "loss": 0.3110351370440589,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.246674918675664,
+        "learning_rate": 0.0007288890014630811,
+        "weight_decay": 7.5133215298273566e-06
+      }
+    },
+    {
+      "loss": 0.31128578186035155,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.24640699385788312,
+        "learning_rate": 0.0008024594094439715,
+        "weight_decay": 1.727990617864021e-05
+      }
+    },
+    {
+      "loss": 0.31156399051348366,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.26165503356204856,
+        "learning_rate": 0.0007864684410111097,
+        "weight_decay": 1.784997092430325e-06
+      }
+    },
+    {
+      "loss": 0.31182562907536826,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.26189763272947886,
+        "learning_rate": 0.0007530049244409494,
+        "weight_decay": 1.0404153319385617e-05
+      }
+    },
+    {
+      "loss": 0.3119306484858195,
+      "params": {
+        "batch_size": 64,
+        "embedding_dim": 512,
+        "hidden_dim": 768,
+        "dropout_rate": 0.28838122685370104,
+        "learning_rate": 0.0008357340787064633,
+        "weight_decay": 1.3144192299546353e-05
+      }
+    }
+  ],
+  "n_trials": 50
+}

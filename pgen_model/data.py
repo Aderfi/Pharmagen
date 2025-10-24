@@ -104,7 +104,7 @@ class PGenInputDataset:
         
         # 2. Crear 'stratify_col' A PARTIR DE LOS STRINGS
         df['stratify_col'] = df[targets].astype(str).agg("_".join, axis=1)
-        df = df.dropna(subset=targets, axis=0, ignore_index=True)
+        #df = df.dropna(subset=targets, axis=0, ignore_index=True)
         
         # 3. Filtrar datos insuficientes (como antes)
         counts = df['stratify_col'].value_counts()
