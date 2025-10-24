@@ -1,14 +1,14 @@
-Mejores hiperparámetros para Outcome-Effect-Subcat (loss: 0.21049587838351727, normalized_loss: 0.1502, avg_accuracy: 0.5720):
+Mejores hiperparámetros para Outcome-Effect-Subcat (loss: 0.26959402561187745, normalized_loss: 0.3393, avg_accuracy: 0.5552):
   batch_size: 64
-  embedding_dim: 768
-  hidden_dim: 1024
-  dropout_rate: 0.45000000000000007
-  learning_rate: 0.0007826291528281889
-  weight_decay: 1.3184165382860255e-06
+  embedding_dim: 4096
+  hidden_dim: 2048
+  dropout_rate: 0.2569917136155372
+  learning_rate: 0.00048738218091129296
+  weight_decay: 6.325158630055341e-07
 
 Top 5 pruebas:
-1. Loss: 0.21049587838351727, Params: {'batch_size': 64, 'embedding_dim': 768, 'hidden_dim': 1024, 'dropout_rate': 0.45000000000000007, 'learning_rate': 0.0007826291528281889, 'weight_decay': 1.3184165382860255e-06}
-2. Loss: 0.21053517758846282, Params: {'batch_size': 64, 'embedding_dim': 768, 'hidden_dim': 1024, 'dropout_rate': 0.45000000000000007, 'learning_rate': 0.0007813955449672186, 'weight_decay': 1.2080982357781753e-06}
-3. Loss: 0.2105490643531084, Params: {'batch_size': 64, 'embedding_dim': 768, 'hidden_dim': 1024, 'dropout_rate': 0.45000000000000007, 'learning_rate': 0.0007667278809977535, 'weight_decay': 1.0049320444635662e-06}
-4. Loss: 0.21055867075920104, Params: {'batch_size': 64, 'embedding_dim': 768, 'hidden_dim': 1024, 'dropout_rate': 0.45000000000000007, 'learning_rate': 0.0007862937414352384, 'weight_decay': 1.2677146213373016e-06}
-5. Loss: 0.2105586938560009, Params: {'batch_size': 64, 'embedding_dim': 768, 'hidden_dim': 1024, 'dropout_rate': 0.45000000000000007, 'learning_rate': 0.0007664212879330316, 'weight_decay': 1.2176119180774963e-06}
+1. Loss: 0.26959402561187745, Params: {'batch_size': 64, 'embedding_dim': 4096, 'hidden_dim': 2048, 'dropout_rate': 0.2569917136155372, 'learning_rate': 0.00048738218091129296, 'weight_decay': 6.325158630055341e-07}
+2. Loss: 0.26962885931134223, Params: {'batch_size': 64, 'embedding_dim': 4096, 'hidden_dim': 2048, 'dropout_rate': 0.24648615559442685, 'learning_rate': 0.0005674130113223789, 'weight_decay': 4.563047096134877e-07}
+3. Loss: 0.2700476113706827, Params: {'batch_size': 64, 'embedding_dim': 4096, 'hidden_dim': 2048, 'dropout_rate': 0.23909417719875156, 'learning_rate': 0.0005680123959835809, 'weight_decay': 5.55505663280388e-07}
+4. Loss: 0.27017456851899624, Params: {'batch_size': 64, 'embedding_dim': 4096, 'hidden_dim': 2048, 'dropout_rate': 0.25963187617659444, 'learning_rate': 0.0005248575620352987, 'weight_decay': 8.947901736751815e-07}
+5. Loss: 0.2703692242503166, Params: {'batch_size': 64, 'embedding_dim': 4096, 'hidden_dim': 2048, 'dropout_rate': 0.2607975069735302, 'learning_rate': 0.00048583511905748224, 'weight_decay': 5.692218828704671e-07}

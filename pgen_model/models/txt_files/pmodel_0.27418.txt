@@ -1,9 +1,8 @@
-Model Targets: ['outcome', 'effect_direction', 'effect', 'effect_subcat', 'entity_affected']
-Validation Loss: 0.27417600856107827
-Best Accuracy outcome: 0.5899814471243042
-Best Accuracy effect_direction: 0.6646567717996289
-Best Accuracy effect: 0.27087198515769945
-Best Accuracy effect_subcat: 0.5839517625231911
-Best Accuracy entity_affected: 0.3325602968460111
+Model Targets: ['outcome', 'effect_direction', 'effect', 'effect_subcat']
+Validation Loss: 0.274181704595685
+Best Accuracy outcome: 0.646964856230032
+Best Accuracy effect_direction: 0.6705271565495208
+Best Accuracy effect: 0.2731629392971246
+Best Accuracy effect_subcat: 0.5762779552715654
 Best Parameters:
-                         	  {'batch_size': 128, 'embedding_dim': 256, 'hidden_dim': 768, 'dropout_rate': 0.30000000000000004, 'learning_rate': 5.0461187732535975e-05, 'weight_decay': 4.695679625204385e-06}
+                         	  {'batch_size': 64, 'embedding_dim': 4096, 'hidden_dim': 2048, 'dropout_rate': 0.24640499110278594, 'learning_rate': 0.0006768541061374363, 'weight_decay': 2.83729909873761e-07}

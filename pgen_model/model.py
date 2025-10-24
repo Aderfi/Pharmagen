@@ -82,7 +82,7 @@ class DeepFM_PGenModel(nn.Module):
         # --- Vocabulario (Inputs) ---
         n_drugs,
         n_genes,
-        n_alleles,
+        #n_alleles,
         n_genotypes,
         
         # --- Dimensiones ---
@@ -99,12 +99,12 @@ class DeepFM_PGenModel(nn.Module):
     ):
         super().__init__()
         
-        self.n_fields = 4 # Drug, Gene, Allele, Genotype
+        self.n_fields = 3 # Drug, Gene, Allele, Genotype
 
         # --- 1. Capas de Embedding (Igual) ---
         self.drug_emb = nn.Embedding(n_drugs, embedding_dim)
         self.gene_emb = nn.Embedding(n_genes, embedding_dim)
-        self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
+        #self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
         self.geno_emb = nn.Embedding(n_genotypes, embedding_dim)
         
         # --- 2. Rama "Deep" (Igual) ---
@@ -139,17 +139,17 @@ class DeepFM_PGenModel(nn.Module):
         # --- 1. Obtener Embeddings (Igual) ---
         drug_vec = self.drug_emb(drug)
         gene_vec = self.gene_emb(gene)
-        allele_vec = self.allele_emb(allele)
+        #allele_vec = self.allele_emb(allele)
         geno_vec = self.geno_emb(genotype)
         
         # --- 2. CÁLCULO RAMA "DEEP" (Igual) ---
-        deep_input = torch.cat([drug_vec, gene_vec, allele_vec, geno_vec], dim=-1)
+        deep_input = torch.cat([drug_vec, gene_vec, geno_vec], dim=-1) #, allele_vec
         deep_x = self.gelu(self.fc1(deep_input)); deep_x = self.dropout(deep_x)
         deep_x = self.gelu(self.fc2(deep_x)); deep_x = self.dropout(deep_x)
         deep_output = self.gelu(self.fc3(deep_x)); deep_output = self.dropout(deep_output)
 
         # --- 3. CÁLCULO RAMA "FM" (Igual) ---
-        embeddings = [drug_vec, gene_vec, allele_vec, geno_vec]
+        embeddings = [drug_vec, gene_vec, geno_vec] #, allele_vec
         fm_outputs = []
         for emb_i, emb_j in itertools.combinations(embeddings, 2):
             dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
