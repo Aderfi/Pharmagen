@@ -1,6 +1,8 @@
+import itertools
+
 import torch
 import torch.nn as nn
-import itertools
+import torch.nn.functional as F
 
 '''
 class PGenModel(nn.Module):
@@ -94,12 +96,16 @@ class DeepFM_PGenModel(nn.Module):
 
         # --- Clases únicas Outputs (¡EL CAMBIO!) ---
         # Un diccionario que mapea nombre_del_target -> n_clases
-        # Ejemplo: {"outcome": 10, "effect_direction": 3, ...}
         target_dims: dict 
     ):
         super().__init__()
+
+        self.n_fields = 3  # Drug, Gene, Allele, Genotype
         
-        self.n_fields = 3 # Drug, Gene, Allele, Genotype
+        """Testeos Cambio de Ponderaciones"""
+        self.log_sigmas = nn.ParameterDict()
+        for target_name in target_dims.keys():
+            self.log_sigmas[target_name] = nn.Parameter(torch.tensor(0.0, requires_grad=True))
 
         # --- 1. Capas de Embedding (Igual) ---
         self.drug_emb = nn.Embedding(n_drugs, embedding_dim)
@@ -172,3 +178,38 @@ class DeepFM_PGenModel(nn.Module):
 
         # Devolvemos el diccionario de predicciones
         return predictions
+    
+    def calculate_weighted_loss(self, unweighted_losses: dict, target_labels: dict, multipliers: dict = None) -> torch.Tensor: # type: ignore
+        """
+        Calcula la pérdida total ponderada por Incertidumbre.
+        
+        Args:
+            unweighted_losses: Diccionario de pérdidas no ponderadas calculadas (Losses L_t).
+            target_labels: Diccionario de etiquetas reales (y_t). Se usa para verificar si la tarea es de clasificación/regresión.
+            
+        Returns:
+            La pérdida total (torch.Tensor escalar) lista para .backward().
+        """
+        weighted_loss_total = 0.0
+        
+        for task_name, loss_value in unweighted_losses.items():
+            # Obtener el log(sigma^2) aprendido (nuestro parámetro s_t)
+            s_t = self.log_sigmas[task_name]
+            
+            # Asumimos que todas tus tareas son de CLASIFICACIÓN (Cross-Entropy), 
+            # ya que las pérdidas que mostraste son típicas de clasificación.
+            # Fórmula para Clasificación (L_t * exp(-s_t) + s_t):
+            
+            # 1. El peso es exp(-s_t) -> (1 / sigma^2)
+            weight = torch.exp(-s_t)
+            
+            
+            factor = multipliers.get(task_name, 1.0) if multipliers else 1.0
+            weighted_task_loss = factor * ((weight * loss_value) + s_t)
+            
+            # 2. La pérdida ponderada + término de regularización
+            weighted_task_loss = (weight * loss_value) + s_t
+            
+            weighted_loss_total += weighted_task_loss
+
+        return weighted_loss_total  # type: ignore

@@ -1,11 +1,11 @@
+from pathlib import Path
+
 import joblib
 import pandas as pd
 import torch
-
-from pathlib import Path
+from src.config.config import MODEL_ENCODERS_DIR
 
 from .model_configs import MULTI_LABEL_COLUMN_NAMES
-from src.config.config import MODEL_ENCODERS_DIR
 
 
 def load_encoders(model_name, encoders_dir=None):

@@ -113,33 +113,33 @@ MODEL_REGISTRY = {
     },
 
     "Outcome-Effect-Subcat": {
-        "targets": ["Outcome", "Effect_direction", "Effect", "Effect_subcat"],
+        "targets": ["Outcome", "Effect", "Effect_subcat"],
         
-        "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect_direction", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
+        "cols": ["Drug", "Gene", "Allele", "Genotype", "Outcome", "Effect", "Effect_subcat", "Population_Affected", "Entity_Affected", "Therapeutic_Outcome"],
         
         "params": {
             "batch_size": 64,
-            "embedding_dim": 768,
-            "hidden_dim": 1024,
-            "dropout_rate": 0.4,
-            "learning_rate": 0.000782,
-            "weight_decay": 1.31e-06
+            "embedding_dim": 4096,
+            "hidden_dim": 2048,
+            "dropout_rate": 0.2569917136155372,
+            "learning_rate": 0.00048738218091129296,
+            "weight_decay": 6.325158630055341e-07
         },
 
         "params_optuna": {
-            "batch_size": [64],
-            "embedding_dim": [2048, 4096, 8192],
+            "batch_size": [32, 64, 128],
+            "embedding_dim": [1024, 2048, 4096],
             "hidden_dim": [1024, 2048, 4096],
-            "dropout_rate": (0.2, 0.3),
-            "learning_rate": (1e-4, 8e-4),
-            "weight_decay": (1e-7, 1e-6)
+            "dropout_rate": (0.1, 0.5),
+            "learning_rate": (1e-5, 1e-3),
+            "weight_decay": (1e-7, 1e-5)
         },
 
         "weights": {
-            "outcome": 1.0,
-            "effect_direction": 1.0,
-            "effect": 1.0,
-            "effect_subcat": 1.0
+            "outcome": 1.0, #0.142,
+            #"effect_direction": 1.0, #0.072,
+            "effect": 1.0, #0.018,
+            "effect_subcat": 1.0 #0.767
         }
     },
     
