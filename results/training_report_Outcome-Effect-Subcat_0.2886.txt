@@ -1,0 +1,24 @@
+Modelo: Outcome-Effect-Subcat
+Mejor loss en validación: 0.28856
+Precisión Promedio (Avg Acc) en mejor época: 0.5105
+Precisión por Tarea:
+  - outcome: 0.5899
+  - effect_direction: 0.6701
+  - effect: 0.2113
+  - effect_subcat: 0.5707
+
+Hiperparámetros Utilizados:
+  batch_size: 64
+  epochs: 100
+  learning_rate: 0.00048738218091129296
+  embedding_dim: 4096
+  hidden_dim: 2048
+  dropout_rate: 0.2569917136155372
+  patience: 10
+  weight_decay: 6.325158630055341e-07
+
+Pesos de Loss Utilizados:
+  outcome: 1.0
+  effect_direction: 1.0
+  effect: 1.0
+  effect_subcat: 1.0

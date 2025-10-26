@@ -37,15 +37,19 @@ def loading_animation():
 
 def main():
     print("""
-    ================= \033[1mPharmagen: MENÚ PRINCIPAL\033[0m =================
-    1. Procesar datos genómicos de entrada
-    
-    2. Entrenar/Predecir (menú modelo ML)
-    
-    3. Análisis avanzado (En progreso...)
-    
-    4. Salir
-    =============================================================""")
+                                                                ================= \033[1mPharmagen: MENÚ PRINCIPAL\033[0m =================
+                                                                
+                                                                    1. Procesar datos genómicos de entrada
+                                                                                    
+                                                                    2. Entrenar/Predecir (menú modelo ML)
+                                                                                    
+                                                                    3. Análisis avanzado (En progreso...)
+                                                                                    
+                                                                            4. Salir
+                                                                                    
+                                                                ==============================================================
+                                                                
+    """)
     while True:
         choice = input("Selecciona opción (1-4): ").strip()
         if choice == "1":
