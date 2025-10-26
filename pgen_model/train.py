@@ -1,22 +1,24 @@
-import torch
 import math
-
+import warnings
 from pathlib import Path
 
+import torch
 from src.config.config import *
+from tqdm import tqdm
+
+from .model import DeepFM_PGenModel
 from .model_configs import get_model_config
-
-import warnings
-
 
 trained_encoders_path = Path(MODELS_DIR)
 
 min_delta = 0.01
 
+pbartch = None
+
 def train_model(
     train_loader,
     val_loader,
-    model,
+    model: DeepFM_PGenModel,
     criterions,  # lista: [criterions... , optimizer]
     epochs,
     patience,
@@ -35,6 +37,7 @@ def train_model(
     if target_cols is None:
         raise ValueError("Debes definir 'target_cols' como una lista de nombres de salida")
     
+    """
     # ============ WEIGHTS (DINÁMICOS) en model_configs.py ============
     weights_list = []
     if weights_dict:
@@ -45,10 +48,14 @@ def train_model(
         # Fallback si no se pasan pesos
         warnings.warn("No se proporcionó 'weights_dict' a train_model. Usando peso 1.0 para todas las tareas.")
         weights_list = [1.0] * num_targets  # type: ignore
-        
+    """ 
     num_targets = len(target_cols)
+    
+    
+    # NUEVO!!!!! PESOS CALCULABLES EN CADA ÉPOCA
+
             
-    weights = torch.tensor(weights_list).to(device)
+    #weights = torch.tensor(weights_list).to(device)
     
     best_loss = float('inf')
     best_accuracies = [0.0] * num_targets
@@ -64,10 +71,13 @@ def train_model(
         raise ValueError(f"Desajuste: Se recibieron {len(criterions_)} funciones de pérdida, pero se esperaban {num_targets} (basado en 'target_cols').")
 
     
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs), desc="Progress", unit="epoch"):
         model.train()
         total_loss = 0
-        for batch in train_loader:
+
+        train_bar = tqdm(train_loader, desc="Progreso de Época", unit="batch",  colour='blue', leave=True, nrows=2 )
+        
+        for batch in train_bar:
             drug = batch['drug'].to(device)
             gene = batch['gene'].to(device)
             allele = batch['allele'].to(device)
@@ -80,6 +90,8 @@ def train_model(
             
             outputs = model(drug, gene, allele, genotype)
             
+            multipliers = {'effect_subcat': 3.0}
+            
             # El bucle de pérdida ya funciona, ya que BCEWithLogitsLoss
             # acepta (float, float) y CrossEntropyLoss acepta (float, long).
             individual_losses = []
@@ -88,20 +100,23 @@ def train_model(
                 pred = outputs[col]
                 true = targets[col]
                 
-                # Comprobación de tipo por si acaso (útil para debug)
-                # if col in multi_label_cols and true.dtype != torch.float32:
-                #     true = true.float()
                 
                 individual_losses.append(loss_fn(pred, true))
 
             individual_losses = torch.stack(individual_losses)
+            unweighted_losses_dict = {col: individual_losses[i] for i, col in enumerate(target_cols)}
+            loss = model.calculate_weighted_loss(unweighted_losses_dict, targets, multipliers)
             
-            loss = (individual_losses * weights).sum() / float(num_targets)
+            #loss = (individual_losses * weights).sum() / float(num_targets)
 
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
+            
+            train_bar.set_postfix({'Loss': f'{loss.item():.4f}'})
+            
         # avg_loss = total_loss / len(train_loader) # No se usa
+        
         
         ##### Validación #####
         model.eval()
@@ -137,7 +152,11 @@ def train_model(
                 for i in range(num_targets):
                     individual_loss_sums[i] += individual_losses_val_tensor[i].item()
                 
-                loss = (individual_losses_val_tensor * weights).sum() / float(num_targets)
+                individual_losses_val_dict = {col: individual_losses_val[i] for i, col in enumerate(target_cols)}
+                
+                loss = model.calculate_weighted_loss(individual_losses_val_dict, targets) 
+                
+                #loss = (individual_losses_val_tensor * weights).sum() / float(num_targets)
                 val_loss += loss.item()
 
                 # Calcular accuracies dinámicamente

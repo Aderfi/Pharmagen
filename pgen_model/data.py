@@ -1,16 +1,17 @@
-import pandas as pd
-import torch
-from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
-import json
 import glob
-from pathlib import Path
-import numpy as np
-import src.config.config as cfg
-from src.config.config import *
-import sys
-import re
+import json
 import random
+import re
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import src.config.config as cfg
+import torch
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+from src.config.config import *
+from torch.utils.data import Dataset
 
 iteracion_print_dato = int(0)
 
@@ -92,7 +93,7 @@ class PGenInputDataset:
         if isinstance(csv_files, (list, tuple)):
             df = pd.concat([pd.read_csv(f, sep=';', index_col=False) for f in csv_files], ignore_index=True)
         else:'''
-        csv_files = Path(MODEL_TRAIN_DATA / 'train_therapeutic_outcome.csv')
+        csv_files = Path(MODEL_TRAIN_DATA / 'Reorden_train_therapeutic_outcome_cleaned_effect_direction.csv')
         df = pd.read_csv(str(csv_files), sep=';', index_col=False)
         df.columns = [col.lower() for col in df.columns]
         df = df[[c.lower() for c in cols]]

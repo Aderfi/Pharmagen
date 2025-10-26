@@ -2,19 +2,18 @@
 Punto de entrada para el paquete pgen_model.
 Proporciona un menú CLI para entrenar y utilizar el modelo predictivo.
 """
-import math
 import json
+import math
 import sys
 from pathlib import Path
+
+from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR
 
 from .data import PGenInputDataset, train_data_import
 from .model import DeepFM_PGenModel
 from .model_configs import MODEL_REGISTRY, get_model_config
 from .pipeline import train_pipeline
-from .predict import load_encoders, predict_single_input, predict_from_file
-from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR
-
-
+from .predict import load_encoders, predict_from_file, predict_single_input
 
 ###########################################################
 # Configuración de Optuna
@@ -50,8 +49,10 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
     Returns:
         torch.nn.Module: El modelo cargado y listo para usar
     """
-    import torch
     from pathlib import Path
+
+    import torch
+
     from .model import DeepFM_PGenModel
     from .model_configs import MODEL_REGISTRY
     
@@ -123,13 +124,18 @@ def main():
 
     while True:
         print("""
- ———————————————— Pharmagen PModel ————————————————
-| 1. Entrenar modelo                               |
-| 2. Realizar predicción (datos manuales)          |
-| 3. Realizar predicción (desde archivo)           |
-| 4. Optimizacion de hiperparámetros (Optuna)      |
-| 5. Salir                                         |
- ——————————————————————————————————————————————————
+                                                                ———————————————— Pharmagen PModel ————————————————
+                                                                |                                                 |
+                                                                |  1. Entrenar modelo                             |    
+                                                                |                                                 |
+                                                                |  2. Realizar predicción (datos manuales)        |
+                                                                |                                                 |
+                                                                |  3. Realizar predicción (desde archivo)         |
+                                                                |                                                 |
+                                                                |  4. Optimizacion de hiperparámetros (Optuna)    |
+                                                                |                                                 |
+                                                                |           5. Salir                              |
+                                                                ——————————————————————————————————————————————————
 """)
         choice = input("Selecciona opción (1-5): ").strip()
 
@@ -140,10 +146,10 @@ def main():
             model_name = select_model(model_options, "Selecciona el modelo para entrenamiento")
             
             config = get_model_config(model_name) 
-            params = config['hyperparams'] # Diccionario con HPs (LR, HD, etc.) 
+            params = config['params'] # Diccionario con HPs (LR, HD, etc.) 
             target_cols = [t.lower() for t in config['targets']] 
             
-            epochs = 30 #params.get('epochs', 100)
+            epochs = params.get('epochs', 100)
             patience = params.get('patience', 15)
             batch_size = params.get('batch_size', 64)
 
@@ -217,6 +223,7 @@ def main():
 
         elif choice == "4":
             import optuna
+
             from .optuna_train import run_optuna_with_progress
             print("\nOptimizando hiperparámetros con Optuna...")
             optuna_model_name = select_model(model_options, "Selecciona el modelo para optimización")
@@ -273,8 +280,9 @@ def main():
 
             csv_files = Path(MODEL_TRAIN_DATA / 'train_therapeutic_outcome.csv')
 
+            
             print(f"Iniciando run de diagnóstico (1 época) con modelo: {model_name}")
-            print(f"Parámetros: {json.dumps(params, indent=2)}")
+            print(f"Parámetros: {', '.join(f'{k}: {v}' for k, v in params.items())} ")  # No imprimir weights aquí
 
             
             train_pipeline(

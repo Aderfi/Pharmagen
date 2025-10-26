@@ -1,18 +1,20 @@
 # coding=utf-8
 import os
-import torch
-import numpy as np
 import random
-import torch.nn as nn
 from pathlib import Path
-import joblib
 
-from torch.utils.data import DataLoader
-from .data import PGenInputDataset, PGenDataset, train_data_import
-from .model import DeepFM_PGenModel
-from .train import train_model
-from .model_configs import get_model_config, MULTI_LABEL_COLUMN_NAMES
+import joblib
+import numpy as np
+import torch
+import torch.nn as nn
 from src.config.config import MODEL_ENCODERS_DIR
+from torch.utils.data import DataLoader
+
+from .data import PGenDataset, PGenInputDataset, train_data_import
+from .model import DeepFM_PGenModel
+from .model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
+from .train import train_model
+
 
 def train_pipeline(PGEN_MODEL_DIR, csv_files, model_name, params, epochs=100, patience=5, batch_size=8, target_cols=None):
     """
@@ -123,14 +125,14 @@ def train_pipeline(PGEN_MODEL_DIR, csv_files, model_name, params, epochs=100, pa
     print(f"Iniciando entrenamiento para {model_name}...")
     best_loss, best_accuracy_list = train_model(
         train_loader, val_loader, model, criterions,
-        epochs=epochs, patience=patience, target_cols=target_cols, device=device,
+        epochs=500, patience=20, target_cols=target_cols, device=device,
         multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
-        weights_dict=weights, # type: ignore
+        #weights_dict=weights, # type: ignore
         params_to_txt=params
         # scheduler se puede añadir aquí si se desea para el run final
     )
 
-    # --- Guardar Resultados ---
+    # --- Guardar Resultados ---""""
     print(f"Entrenamiento completado. Mejor loss en validación: {best_loss:.5f}")
 
     results_dir = Path(PGEN_MODEL_DIR, 'results') # Usar Path para consistencia
@@ -138,6 +140,7 @@ def train_pipeline(PGEN_MODEL_DIR, csv_files, model_name, params, epochs=100, pa
     report_file = results_dir / f'training_report_{model_name}_{round(best_loss, 4)}.txt' # Nombre de archivo específico
 
     with open(report_file, 'w') as f:
+        """
         f.write(f"Modelo: {model_name}\n")
         f.write(f"Mejor loss en validación: {best_loss:.5f}\n")
         # Calcular y escribir Avg Accuracy si best_accuracy_list no está vacío
@@ -159,7 +162,16 @@ def train_pipeline(PGEN_MODEL_DIR, csv_files, model_name, params, epochs=100, pa
                      f.write(f"  {key}: {value}\n")
         else:
             f.write("  (No se usaron pesos específicos, default 1.0)\n")
-
+        """
+        f.write("\nEstrategia de Ponderación:\n")
+        # Asumiendo que ahora SIEMPRE usas UW
+        f.write("  Uncertainty Weighting (Pesos dinámicos aprendibles)\n")
+        
+        # 💡 Opcional: Escribir los pesos finales aprendidos por UW
+        f.write("  Pesos Efectivos Finales (exp(-log_sigma^2)):\n")
+        for name, log_sigma in model.log_sigmas.items():
+            final_weight = torch.exp(-log_sigma).item()
+            f.write(f"  - {name}: {final_weight:.4f}\n")
     print(f"Reporte de entrenamiento guardado en: {report_file}")
 
     # Guardar los encoders usados
