@@ -1,8 +1,0 @@
-Model Targets: ['outcome', 'effect_direction', 'effect', 'effect_subcat']
-Validation Loss: 0.27077167071402075
-Best Accuracy outcome: 0.6265974440894568
-Best Accuracy effect_direction: 0.6753194888178914
-Best Accuracy effect: 0.2543929712460064
-Best Accuracy effect_subcat: 0.5774760383386581
-Best Parameters:
-                         	  {'batch_size': 64, 'embedding_dim': 1024, 'hidden_dim': 1024, 'dropout_rate': 0.3662799591023527, 'learning_rate': 0.0005816419169792392, 'weight_decay': 5.716023821738528e-06}

@@ -1,35 +1,43 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Librerías estándar
+import datetime
 import json
 import math
 import random
-import sys, logging
-import torch
-from tqdm import tqdm
-import numpy as np
-import warnings # Añadido
-import datetime
-
-from .data import PGenInputDataset, PGenDataset, train_data_import
-from .model import DeepFM_PGenModel
-from .model_configs import get_model_config, MULTI_LABEL_COLUMN_NAMES, MODEL_REGISTRY
-from .train import train_model
+import sys
+import warnings
 from functools import partial
 from pathlib import Path
-from src.config.config import PGEN_MODEL_DIR
-from optuna.storages import JournalStorage
-import optuna
-from src.scripts.custom_callback import TqdmCallback # type: ignore
-
-from optuna import create_study
-from torch.utils.data import DataLoader
-from tqdm.auto import tqdm
 from typing import List
+
+import numpy as np
+import optuna
+import pandas as pd
+# Librerias de terceros
+import torch
 import torch.nn as nn
+from optuna import create_study
+from optuna.storages import JournalStorage
+from src.config.config import PGEN_MODEL_DIR
+from src.scripts.custom_callback import TqdmCallback  # type: ignore
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from tqdm.auto import tqdm
+
+from .data import PGenDataset, PGenInputDataset, train_data_import
+from .model import DeepFM_PGenModel
+from .model_configs import (MODEL_REGISTRY, MULTI_LABEL_COLUMN_NAMES,
+                            get_model_config)
+from .train import train_model
+
 # --- CORRECCIÓN 2: 'gelu' global eliminado por ser innecesario ---
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 N_TRIALS = 200
-EPOCH = 175
-PATIENCE = 15
+EPOCH = 100
+PATIENCE = 20
 
 class TqdmCallback:
     def __init__(self, tqdm_object, metric_name="value"):
