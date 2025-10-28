@@ -1,8 +1,0 @@
-
-Estrategia de Ponderación:
-  Uncertainty Weighting (Pesos dinámicos aprendibles)
-  Pesos Efectivos Finales (exp(-log_sigma^2)):
-  - outcome: 9.5609
-  - effect_direction: 1.9247
-  - effect: 17.0233
-  - effect_subcat: 21.0709

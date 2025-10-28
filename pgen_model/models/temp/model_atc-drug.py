@@ -22,19 +22,18 @@ random.seed(SEED)
 JSON_DICT_PATH = "."
 
 
-
-
-
-json_files = [f for f in os.listdir(JSON_DICT_PATH) if f.endswith('.json')]
+json_files = [f for f in os.listdir(JSON_DICT_PATH) if f.endswith(".json")]
 
 # === CARGA DE DATOS DESDE JSON ===
-'''
+"""
 for f in json_files:
     with open(os.path.join(JSON_DICT_PATH, f), 'r', encoding='utf-8') as file:
         name_data = str(f).split('.')[0]
         globals()[name_data] = json.load(file)
-'''   
-with open('train_data/ATC_farmaco(ENG_dict).json', 'r', encoding='utf-8') as f, open('train_data/drug_gene_output.json', 'r', encoding='utf-8') as f2:
+"""
+with open("train_data/ATC_farmaco(ENG_dict).json", "r", encoding="utf-8") as f, open(
+    "train_data/drug_gene_output.json", "r", encoding="utf-8"
+) as f2:
     atc_to_farmaco = dict(json.load(f))
     drug_to_genotype = dict(json.load(f2))
 
@@ -77,7 +76,15 @@ for col in ["Outcome", "Variation", "Variation_1", "Effect"]:
     if col not in df_full.columns:
         raise ValueError(f"Columna {col} no encontrada en los datos combinados.")
 
-df_full["target"] = df_full["Outcome"].astype(str) + "|" + df_full["Variation"].astype(str) + "|" + df_full["Variation_1"].astype(str) + "|" + df_full["Effect"].astype(str)
+df_full["target"] = (
+    df_full["Outcome"].astype(str)
+    + "|"
+    + df_full["Variation"].astype(str)
+    + "|"
+    + df_full["Variation_1"].astype(str)
+    + "|"
+    + df_full["Effect"].astype(str)
+)
 
 # === PREPROCESADO DE INPUTS ===
 input_cols = ["Drug", "Genotype"]  # Cambia según tus variables de entrada
@@ -127,69 +134,76 @@ embeddings = []
 for i, col in enumerate(input_cols):
     input_i = Input(shape=(1,), name=col)
     embedding_i = Embedding(
-        input_dim=input_cardinalities[i],
-        output_dim=embedding_dims,
-        name=f"emb_{col}"
+        input_dim=input_cardinalities[i], output_dim=embedding_dims, name=f"emb_{col}"
     )(input_i)
     embedding_i = Flatten()(embedding_i)
     inputs.append(input_i)
     embeddings.append(embedding_i)
 
 x = Concatenate()(embeddings)
-x = Dense(64, activation='relu')(x)
+x = Dense(64, activation="relu")(x)
 x = Dropout(0.4)(x)  # Más regularización para evitar overfitting
-x = Dense(32, activation='relu')(x)
+x = Dense(32, activation="relu")(x)
 x = Dropout(0.3)(x)
-output = Dense(len(np.unique(y_encoded)), activation='softmax')(x)
+output = Dense(len(np.unique(y_encoded)), activation="softmax")(x)
 
 model = Model(inputs=inputs, outputs=output)
 
 model.compile(
-    optimizer='adam',
-    loss='sparse_categorical_crossentropy',
-    metrics=['accuracy', SparseTopKCategoricalAccuracy(k=3)]
+    optimizer="adam",
+    loss="sparse_categorical_crossentropy",
+    metrics=["accuracy", SparseTopKCategoricalAccuracy(k=3)],
 )
 
-es = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+es = EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
+
 
 # Prepara los datos para el modelo funcional (list of arrays)
 def df_to_input_list(df_):
     return [df_[col].values for col in input_cols]
 
+
 X_train_list = df_to_input_list(X_train)
 X_test_list = df_to_input_list(X_test)
 
 history = model.fit(
-    X_train_list, y_train, 
-    validation_split=0.15, 
-    epochs=200, 
-    batch_size=32, 
+    X_train_list,
+    y_train,
+    validation_split=0.15,
+    epochs=200,
+    batch_size=32,
     callbacks=[es],
-    verbose=1 # type: ignore
+    verbose=1,  # type: ignore
 )
 
 # === EVALUACIÓN ===
-loss, accuracy, top3 = model.evaluate(X_test_list, y_test, verbose=0) # type: ignore
-print(f"Test loss: {loss:.4f}, Test accuracy: {accuracy:.4f}, Test top-3 acc: {top3:.4f}")
-print("Nº de clases únicas:", len(set(y_encoded))) # type: ignore
+loss, accuracy, top3 = model.evaluate(X_test_list, y_test, verbose=0)  # type: ignore
+print(
+    f"Test loss: {loss:.4f}, Test accuracy: {accuracy:.4f}, Test top-3 acc: {top3:.4f}"
+)
+print("Nº de clases únicas:", len(set(y_encoded)))  # type: ignore
 
 # === GUARDADO DE MODELO Y LOGS ===
 os.makedirs(os.path.dirname(LOGS_PATH), exist_ok=True)
 model.save(OUTPUT_MODEL_PATH)
 with open(LOGS_PATH, "w") as f:
-    json.dump({
-        "test_loss": float(loss),
-        "test_accuracy": float(accuracy),
-        "test_top3_accuracy": float(top3),
-        "input_cols": input_cols,
-        "target_classes": list(target_le.classes_),
-        "num_classes": len(target_le.classes_),
-        "training_size": int(len(X_train)),
-        "test_size": int(len(X_test)),
-        "input_cardinalities": input_cardinalities
-    }, f, indent=2)
+    json.dump(
+        {
+            "test_loss": float(loss),
+            "test_accuracy": float(accuracy),
+            "test_top3_accuracy": float(top3),
+            "input_cols": input_cols,
+            "target_classes": list(target_le.classes_),
+            "num_classes": len(target_le.classes_),
+            "training_size": int(len(X_train)),
+            "test_size": int(len(X_test)),
+            "input_cardinalities": input_cardinalities,
+        },
+        f,
+        indent=2,
+    )
 
-'''
+"""
 # === BLOQUE DE PREDICCIÓN Y LÓGICA DE "FRACASO TERAPÉUTICO" ===
 def predict_fracaso_terapeutico(input_farmaco, input_mutacion, risk_classes=RISK_CLASSES):
     # Cargar modelo y encoders
@@ -222,4 +236,4 @@ if __name__ == "__main__":
     ejemplo_mutacion = df.iloc[0][input_cols[1]]
     resultado = predict_fracaso_terapeutico(ejemplo_farmaco, ejemplo_mutacion)
     print("Predicción ejemplo:", resultado)
-'''
+"""
