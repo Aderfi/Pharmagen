@@ -1,6 +1,6 @@
 # drugs.csv: "PharmGKB Accession Id","Name","Generic Names","Trade Names","Brand Mixtures","Type","Cross-references","SMILES","InChI","Dosing Guideline","External Vocabulary","Clinical Annotation Count","Variant Annotation Count","Pathway Count","VIP Count","Dosing Guideline Sources","Top Clinical Annotation Level","Top FDA Label Testing Level","Top Any Drug Label Testing Level","Label Has Dosing Info","RxNorm Identifiers","ATC Identifiers","PubChem Compound Identifiers","Top CPIC Pairs Level","FDA Label has Prescribing Info","In FDA PGx Association Sections"
 # relationships.csv: "Entity1_id","Entity1_name","Entity1_type","Entity2_id","Entity2_name","Entity2_type","Evidence","Association","PK","PD","PMIDs"
-#study_parameters.csv:"Study Parameters ID","Variant Annotation ID","Study Type","Study Cases","Study Controls","Characteristics","Characteristics Type","Frequency In Cases","Allele Of Frequency In Cases","Frequency In Controls","Allele Of Frequency In Controls","P Value","Ratio Stat Type","Ratio Stat","Confidence Interval Start","Confidence Interval Stop","Biogeographical Groups"
+# study_parameters.csv:"Study Parameters ID","Variant Annotation ID","Study Type","Study Cases","Study Controls","Characteristics","Characteristics Type","Frequency In Cases","Allele Of Frequency In Cases","Frequency In Controls","Allele Of Frequency In Controls","P Value","Ratio Stat Type","Ratio Stat","Confidence Interval Start","Confidence Interval Stop","Biogeographical Groups"
 
 
 # var_drug_ann.csv: "Variant Annotation ID","Variant/Haplotypes","Gene","Drug(s)","PMID","Phenotype Category","Significance","Notes","Sentence","Alleles","Specialty Population","Metabolizer types","isPlural","Is/Is Not associated","Direction of effect","PD/PK terms","Multiple drugs And/or","Population types","Population Phenotypes or diseases","Multiple phenotypes or diseases And/or","Comparison Allele(s) or Genotype(s)","Comparison Metabolizer types"
@@ -33,7 +33,7 @@ COLUMNAS = [
     "Metabolizer_types",
     "Population_diseases",
     "Sentence",
-    "Notes"
+    "Notes",
 ]
 
 col_map = {
@@ -51,15 +51,17 @@ col_map = {
     "Enzyme/Protein": "Enzyme/Protein",
     "Metabolizer_types": "Metabolizer_types",
     "Sentence": "Sentence",
-    "Notes": "Notes"
+    "Notes": "Notes",
 }
 
 df_list = []
 
 for file in csv_files:
-    temp_df = pd.read_csv(file, sep=';', dtype=str)
+    temp_df = pd.read_csv(file, sep=";", dtype=str)
     # Renombra las columnas según el diccionario de mapeo si existen en el archivo
-    temp_df = temp_df.rename(columns={c: col_map[c] for c in temp_df.columns if c in col_map})
+    temp_df = temp_df.rename(
+        columns={c: col_map[c] for c in temp_df.columns if c in col_map}
+    )
     # Agrega las columnas que falten y ordena según COLUMNAS
     for col in COLUMNAS:
         if col not in temp_df.columns:
@@ -70,6 +72,6 @@ for file in csv_files:
 # Concatena todos los dataframes
 df = pd.concat(df_list, ignore_index=True)
 
-df.to_csv('var_full.csv', sep=';', index=False)
+df.to_csv("var_full.csv", sep=";", index=False)
 
 print(df.head())

@@ -27,10 +27,10 @@ HIDDEN_DIM = 704
 DROPOUT_RATE = 0.2893325389845274
 PATIENCE = 10
 
-#EMB_DIM = OPORTUNA: 64
-#HIDDEN_DIM = OPORTUNA: 704
-#LEARNING_RATE = OPORTUNA: 2.996788185777191e-05
-#DROPOUT_RATE = OPORTUNA: 0.2893325389845274
+# EMB_DIM = OPORTUNA: 64
+# HIDDEN_DIM = OPORTUNA: 704
+# LEARNING_RATE = OPORTUNA: 2.996788185777191e-05
+# DROPOUT_RATE = OPORTUNA: 0.2893325389845274
 
 DATA_PATH = "var_pheno_ann_long.csv"
 SAVE_MODEL_AS = "modelo_farmaco.pth"
@@ -42,7 +42,19 @@ csv_files = glob.glob("../docs_data/csv/*_long.csv")
 
 print(csv_files)
 
-df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Effect', 'Outcome'], index_col=False, dtype=str) for f in csv_files], ignore_index=True)
+df = pd.concat(
+    [
+        pd.read_csv(
+            f,
+            sep=";",
+            usecols=["Drug", "Genotype", "Effect", "Outcome"],
+            index_col=False,
+            dtype=str,
+        )
+        for f in csv_files
+    ],
+    ignore_index=True,
+)
 
 
 # ------------- PREDICTION INPUT -------------
@@ -50,7 +62,7 @@ df = pd.concat([pd.read_csv(f, sep=';', usecols=['Drug', 'Genotype', 'Effect', '
 
 predict_json = pd.read_json("drug_genes_random_list.json")
 
-predict_json.columns = ['Drug', 'Genotype']
+predict_json.columns = ["Drug", "Genotype"]
 
 PREDICTION_INPUT = pd.DataFrame(predict_json)
 # --------------------------------------------
@@ -58,12 +70,12 @@ PREDICTION_INPUT = pd.DataFrame(predict_json)
 # Cargar equivalencias de genotipos
 with open("geno_alleles_dict.json", "r") as f:
     equivalencias = json.load(f)
-'''
+"""
 # 1. Cargar y preprocesar los datos
 df = pd.read_csv(DATA_PATH, sep=';')
 df = df[['Drug', 'Genotype', 'Effect', 'Outcome']]  # Selecciona solo las columnas relevantes
-'''
-df['Genotype'] = df['Genotype'].map(lambda x: equivalencias.get(x, x))
+"""
+df["Genotype"] = df["Genotype"].map(lambda x: equivalencias.get(x, x))
 
 # Codifica las variables categóricas a índices numéricos
 encoders = {}
@@ -72,31 +84,33 @@ for col in df.columns:
     df[col] = encoders[col].fit_transform(df[col].astype(str))
 
 
-counts = df['Outcome'].value_counts()
+counts = df["Outcome"].value_counts()
 suficientes = counts[counts > 1].index
-df = df[df['Outcome'].isin(suficientes)]
+df = df[df["Outcome"].isin(suficientes)]
 
 
-df_train, df_val = train_test_split(df, test_size=0.2, stratify=df['Outcome'])
+df_train, df_val = train_test_split(df, test_size=0.2, stratify=df["Outcome"])
+
 
 # 2. Definir Dataset personalizado
 class PharmacoDataset(Dataset):
     def __init__(self, df):
-        self.drug = torch.tensor(df['Drug'].values, dtype=torch.long)
-        self.genotype = torch.tensor(df['Genotype'].values, dtype=torch.long)
-        self.effect = torch.tensor(df['Effect'].values, dtype=torch.long)
-        self.outcome = torch.tensor(df['Outcome'].values, dtype=torch.long)
-    
+        self.drug = torch.tensor(df["Drug"].values, dtype=torch.long)
+        self.genotype = torch.tensor(df["Genotype"].values, dtype=torch.long)
+        self.effect = torch.tensor(df["Effect"].values, dtype=torch.long)
+        self.outcome = torch.tensor(df["Outcome"].values, dtype=torch.long)
+
     def __len__(self):
         return len(self.drug)
-    
+
     def __getitem__(self, idx):
         return {
-            'drug': self.drug[idx],
-            'genotype': self.genotype[idx],
-            'effect': self.effect[idx],
-            'outcome': self.outcome[idx]
+            "drug": self.drug[idx],
+            "genotype": self.genotype[idx],
+            "effect": self.effect[idx],
+            "outcome": self.outcome[idx],
         }
+
 
 dataset = PharmacoDataset(df)
 loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -106,19 +120,22 @@ val_dataset = PharmacoDataset(df_val)
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
+
 # 3. Definir el modelo
 class PharmacoModel(nn.Module):
-    def __init__(self, n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=8, hidden_dim=64):
+    def __init__(
+        self, n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=8, hidden_dim=64
+    ):
         super().__init__()
         self.drug_emb = nn.Embedding(n_drugs, emb_dim)
         self.geno_emb = nn.Embedding(n_genotypes, emb_dim)
         self.fc1 = nn.Linear(emb_dim * 2, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim//2)
-        self.effect_out = nn.Linear(hidden_dim//2, n_effects)
-        self.outcome_out = nn.Linear(hidden_dim//2, n_outcomes)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim // 2)
+        self.effect_out = nn.Linear(hidden_dim // 2, n_effects)
+        self.outcome_out = nn.Linear(hidden_dim // 2, n_outcomes)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(DROPOUT_RATE)
-    
+
     def forward(self, drug, genotype):
         drug_e = self.drug_emb(drug)
         geno_e = self.geno_emb(genotype)
@@ -130,13 +147,11 @@ class PharmacoModel(nn.Module):
         outcome = self.outcome_out(x)
         return effect, outcome
 
-n_drugs = len(encoders['Drug'].classes_)
-n_genotypes = len(encoders['Genotype'].classes_)
-n_effects = len(encoders['Effect'].classes_)
-n_outcomes = len(encoders['Outcome'].classes_)
 
-
-
+n_drugs = len(encoders["Drug"].classes_)
+n_genotypes = len(encoders["Genotype"].classes_)
+n_effects = len(encoders["Effect"].classes_)
+n_outcomes = len(encoders["Outcome"].classes_)
 
 
 # ...arma y entrena tu modelo usando estos valores...
@@ -148,22 +163,24 @@ LEARNING_RATE = lr
 DROPOUT_RATE = dropout
 
 
-model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM)
+model = PharmacoModel(
+    n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=EMB_DIM, hidden_dim=HIDDEN_DIM
+)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
 # 4. Entrenamiento con barra de progreso y verbose, mostrando average loss y accuracy
 
-best_loss = float('inf')       # Puedes ajustar cuántas épocas esperar sin mejora
+best_loss = float("inf")  # Puedes ajustar cuántas épocas esperar sin mejora
 trigger_times = 0
-'''
+"""
 for epoch in range(EPOCHS):
 
-    '''
-    # Entrenamiento del modelo con barra de progreso y verbose
-    # Muestra average loss, accuracy por tarea y accuracy promedio
-    # Guarda los resultados en logs/training_log.txt
-'''
+    """
+# Entrenamiento del modelo con barra de progreso y verbose
+# Muestra average loss, accuracy por tarea y accuracy promedio
+# Guarda los resultados en logs/training_log.txt
+"""
 
     model.train()
     total_loss = 0
@@ -204,10 +221,10 @@ for epoch in range(EPOCHS):
     acc_outcome = total_correct_outcome / total_samples
     avg_acc = (acc_effect + acc_outcome) / 2
         
-'''
-    # Evaluación en el conjunto de validación
-    # Muestra la pérdida de validación al final de cada época
-'''
+"""
+# Evaluación en el conjunto de validación
+# Muestra la pérdida de validación al final de cada época
+"""
         
     model.eval()
     val_loss = 0
@@ -241,30 +258,38 @@ for epoch in range(EPOCHS):
         f.write(f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Outcome accuracy: {acc_outcome:.4f} | Avg accuracy: {avg_acc:.4f}")
         print((f"\nAverage loss: {avg_loss:.4f} | Effect accuracy: {acc_effect:.4f} | Outcome accuracy: {acc_outcome:.4f} | Avg accuracy: {avg_acc:.4f}"))    
 
-'''#TRIAL PARA MEJORES HIPERPARÁMETROS'''
-''''''
+"""  # TRIAL PARA MEJORES HIPERPARÁMETROS'''
+""""""
+
 
 def objective(trial):
-    emb_dim = trial.suggest_categorical('emb_dim', [8, 16, 32, 64])
-    hidden_dim = trial.suggest_int('hidden_dim', 64, 1024, step=64)
-    lr = trial.suggest_loguniform('lr', 1e-5, 1e-2)
-    dropout = trial.suggest_uniform('dropout', 0.1, 0.5)
+    emb_dim = trial.suggest_categorical("emb_dim", [8, 16, 32, 64])
+    hidden_dim = trial.suggest_int("hidden_dim", 64, 1024, step=64)
+    lr = trial.suggest_loguniform("lr", 1e-5, 1e-2)
+    dropout = trial.suggest_uniform("dropout", 0.1, 0.5)
 
-    model = PharmacoModel(n_drugs, n_genotypes, n_effects, n_outcomes, emb_dim=emb_dim, hidden_dim=hidden_dim)
+    model = PharmacoModel(
+        n_drugs,
+        n_genotypes,
+        n_effects,
+        n_outcomes,
+        emb_dim=emb_dim,
+        hidden_dim=hidden_dim,
+    )
     model.dropout = nn.Dropout(dropout)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
 
-    best_loss = float('inf')
+    best_loss = float("inf")
     trigger_times = 0
 
     for epoch in range(EPOCHS):
         model.train()
         for batch in train_loader:
-            drug = batch['drug']
-            genotype = batch['genotype']
-            effect = batch['effect']
-            outcome = batch['outcome']
+            drug = batch["drug"]
+            genotype = batch["genotype"]
+            effect = batch["effect"]
+            outcome = batch["outcome"]
 
             optimizer.zero_grad()
             effect_pred, outcome_pred = model(drug, genotype)
@@ -280,10 +305,10 @@ def objective(trial):
         val_samples = 0
         with torch.no_grad():
             for batch in val_loader:
-                drug = batch['drug']
-                genotype = batch['genotype']
-                effect = batch['effect']
-                outcome = batch['outcome']
+                drug = batch["drug"]
+                genotype = batch["genotype"]
+                effect = batch["effect"]
+                outcome = batch["outcome"]
                 effect_pred, outcome_pred = model(drug, genotype)
                 loss1 = criterion(effect_pred, effect)
                 loss2 = criterion(outcome_pred, outcome)
@@ -300,7 +325,9 @@ def objective(trial):
                 break
 
     return best_loss
-'''
+
+
+"""
 # Guarda los encoders y el modelo
 joblib.dump(encoders, SAVE_ENCODERS_AS)
 torch.save(model.state_dict(), SAVE_MODEL_AS)
@@ -361,8 +388,8 @@ else:
 
     print(f"\nPredicciones guardadas en {RESULTS_DIR}/predicciones.txt")
     
-'''
+"""
 # 6. OPTIMIZACIÓN DE HIPERPARÁMETROS CON OPTUNA
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction="minimize")
 study.optimize(objective, n_trials=50)
 print("Mejores hiperparámetros:", study.best_params)

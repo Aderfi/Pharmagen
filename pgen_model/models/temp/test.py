@@ -6,7 +6,7 @@ import sys
 import csv
 import re
 
-'''
+"""
 with open("drug_gene_output.json", "r", encoding="utf-8") as f:
     drug_gene_list = json.load(f)
     drug_gene_dict = {list(d.keys())[0]: list(d.values())[0] for d in drug_gene_list}
@@ -18,15 +18,14 @@ for i in range(len(drug_gene_dict)):
     i += 1
     if i > 5:
         break   
-'''
+"""
 
 
-
-'''
+"""
     Convierte los archivos JSON que contienen listas de diccionarios en un solo diccionario.
-'''
+"""
 
-''''
+"""'
 import json
 
 # Leer el archivo con la lista de diccionarios
@@ -47,8 +46,8 @@ with open('resultado.json', 'w', encoding='utf-8') as f:
 
 # Imprimir el resultado en pantalla
 
-'''
-'''
+"""
+"""
 with open('ATC_farmaco(ENG_dict).json', 'r', encoding='utf-8') as f:
     data1 = json.load(f)
 print("Claves de ATC_farmaco(ENG_dict).json:", data1.keys())
@@ -56,12 +55,14 @@ print("Claves de ATC_farmaco(ENG_dict).json:", data1.keys())
 with open('drug_gene_output.json', 'r', encoding='utf-8') as f:
     data2 = json.load(f)
 print("Claves de drug_gene_output.json:", data2.keys())
-'''
+"""
 
-with open('train_data/jeso_ATC-drugs.json', 'r', encoding='utf-8') as f:
+with open("train_data/jeso_ATC-drugs.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 
-for k,v in data.items():
-    match = re.match(r'(.*?)\s*\+\s*(.*?)', v) # Busca los values que tengan una estructura concreta de [String][spaces](+)[spaces][String]
+for k, v in data.items():
+    match = re.match(
+        r"(.*?)\s*\+\s*(.*?)", v
+    )  # Busca los values que tengan una estructura concreta de [String][spaces](+)[spaces][String]
     if match:
-        print (f"Clave: '{k}' ----  {v} --- [{', '.join(match.groups())}]")
+        print(f"Clave: '{k}' ----  {v} --- [{', '.join(match.groups())}]")

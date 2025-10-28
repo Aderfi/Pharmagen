@@ -3,7 +3,7 @@
 # Se definen aquí para facilitar su modificación y uso en los scripts de entrenamiento.
 # Han sido encontrados mediante Optuna y validación cruzada.
 # ========================================
-'''
+"""
 def metrics_models(model_name):
     norm_name = model_name.replace(" ", "").upper()
     if norm_name == "OUTCOME-VARIATION-EFFECT-ENTITY":
@@ -35,7 +35,7 @@ def metrics_models(model_name):
         DROPOUT_RATE = 0.2893325389845274
         PATIENCE = 10
         return BATCH_SIZE, EPOCHS, LEARNING_RATE, EMB_DIM, HIDDEN_DIM, DROPOUT_RATE, PATIENCE
-    
+
     # AÑADIDO: Configuración para el modelo que estás usando
     elif norm_name == "OUTCOME-EFFECT-ENTITY-->THERAPEUTIC_OUTCOME":
         BATCH_SIZE = 8
@@ -50,16 +50,16 @@ def metrics_models(model_name):
     else:
         raise ValueError(f"Modelo '{model_name}' no reconocido")
 
- 
-'''
+
+"""
 # ======== Rutas y archivos ===========
 # Rutas y archivos para el modelo.
 # Se definen aquí para facilitar su modificación y uso.
 # ========================================
-'''
+"""
 
 DATA_PATH = "train_data"
 MODEL_PATH_EXT = "models/{}.pth"
 SAVE_ENCODERS_AS = "encoders{}.pkl"
 RESULTS_DIR = "../results/"
-'''
+"""

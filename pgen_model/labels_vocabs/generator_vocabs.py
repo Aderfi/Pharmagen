@@ -12,18 +12,85 @@ CSV_FILES = [
     "var_pheno_ann_with_ATC.csv",
 ]
 CSV_COLUMNS = [
-    ["ATC","Drug","Gene","Genotype","Alleles","Outcome","Variation","Variation_1","Sentence","Notes","Population","Ref_Genotype"],
-    ["ATC","Drug","Gene","Genotype","Alleles","Outcome","Variation","Variation_1","Entity","Sentence","Notes"],
-    ["ATC","Drug","Gene","Genotype","Alleles","Outcome","Variation","Variation_1","Effect","RAM","Sentence","Notes","Population","Ref_Genotype"],
+    [
+        "ATC",
+        "Drug",
+        "Gene",
+        "Genotype",
+        "Alleles",
+        "Outcome",
+        "Variation",
+        "Variation_1",
+        "Sentence",
+        "Notes",
+        "Population",
+        "Ref_Genotype",
+    ],
+    [
+        "ATC",
+        "Drug",
+        "Gene",
+        "Genotype",
+        "Alleles",
+        "Outcome",
+        "Variation",
+        "Variation_1",
+        "Entity",
+        "Sentence",
+        "Notes",
+    ],
+    [
+        "ATC",
+        "Drug",
+        "Gene",
+        "Genotype",
+        "Alleles",
+        "Outcome",
+        "Variation",
+        "Variation_1",
+        "Effect",
+        "RAM",
+        "Sentence",
+        "Notes",
+        "Population",
+        "Ref_Genotype",
+    ],
 ]
 VOCAB_COLUMNS = {
-    "var_drug_ann_with_ATC.csv": ["Drug","Gene","Genotype","Alleles","Outcome","Variation","Variation_1"],
-    "var_fa_ann_with_ATC.csv": ["Drug","Gene","Genotype","Alleles","Outcome","Variation","Variation_1","Entity"],
-    "var_pheno_ann_with_ATC.csv": ["Drug","Gene","Genotype","Alleles","Outcome","Variation","Variation_1","Effect","RAM"],
+    "var_drug_ann_with_ATC.csv": [
+        "Drug",
+        "Gene",
+        "Genotype",
+        "Alleles",
+        "Outcome",
+        "Variation",
+        "Variation_1",
+    ],
+    "var_fa_ann_with_ATC.csv": [
+        "Drug",
+        "Gene",
+        "Genotype",
+        "Alleles",
+        "Outcome",
+        "Variation",
+        "Variation_1",
+        "Entity",
+    ],
+    "var_pheno_ann_with_ATC.csv": [
+        "Drug",
+        "Gene",
+        "Genotype",
+        "Alleles",
+        "Outcome",
+        "Variation",
+        "Variation_1",
+        "Effect",
+        "RAM",
+    ],
 }
 JSON_FILES = [
-    'ATC_drug_dict_ENG.json',
-    'drug_gene_output.json',
+    "ATC_drug_dict_ENG.json",
+    "drug_gene_output.json",
 ]
 
 BIOBERT_MODEL = "dmis-lab/biobert-base-cased-v1.1"
@@ -35,13 +102,16 @@ tokenizer = AutoTokenizer.from_pretrained(BIOBERT_MODEL)
 model = AutoModel.from_pretrained(BIOBERT_MODEL).to(device)
 model.eval()
 
+
 def get_vocab_from_column(col_values):
     return sorted(set([str(val) for val in col_values if pd.notnull(val)]))
 
+
 def save_vocab(vocab, name):
-    with open(f'vocab_{name}.txt', 'w', encoding='utf-8') as f:
+    with open(f"vocab_{name}.txt", "w", encoding="utf-8") as f:
         for token in vocab:
             f.write(f"{token}\n")
+
 
 @torch.no_grad()
 def get_biobert_embedding(text):
@@ -53,6 +123,7 @@ def get_biobert_embedding(text):
     cls_embedding = outputs.last_hidden_state[:, 0, :].squeeze().cpu()
     return cls_embedding
 
+
 def save_embeddings(vocab, name):
     embeddings = {}
     all_embs = []
@@ -63,6 +134,7 @@ def save_embeddings(vocab, name):
     all_embs = torch.cat(all_embs, dim=0)
     torch.save({"tokens": vocab, "embeddings": all_embs}, f"embedding_{name}.pt")
 
+
 def process_csv_file(csv_file, columns, vocab_columns):
     print(f"Leyendo {csv_file} ...")
     df = pd.read_csv(csv_file, sep=";", usecols=columns)
@@ -72,6 +144,7 @@ def process_csv_file(csv_file, columns, vocab_columns):
             print(f"Columna: {col}, Tokens únicos: {len(vocab)}")
             save_vocab(vocab, f"{os.path.splitext(csv_file)[0]}_{col}")
             save_embeddings(vocab, f"{os.path.splitext(csv_file)[0]}_{col}")
+
 
 def process_json_file(json_file):
     print(f"Leyendo {json_file} ...")
@@ -92,6 +165,7 @@ def process_json_file(json_file):
     save_vocab(values_vocab, f"{os.path.splitext(json_file)[0]}_values")
     save_embeddings(values_vocab, f"{os.path.splitext(json_file)[0]}_values")
 
+
 if __name__ == "__main__":
     for i, csv_file in enumerate(CSV_FILES):
         columns = CSV_COLUMNS[i]
@@ -99,4 +173,6 @@ if __name__ == "__main__":
         process_csv_file(csv_file, columns, vocab_columns)
     for json_file in JSON_FILES:
         process_json_file(json_file)
-    print("Listo. Se han generado los vocabs y embeddings de cada columna seleccionada usando BioBERT.")
+    print(
+        "Listo. Se han generado los vocabs y embeddings de cada columna seleccionada usando BioBERT."
+    )

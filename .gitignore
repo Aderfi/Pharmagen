@@ -10,3 +10,8 @@ pgen_model/models/*.pt
 pgen_model/models/*.pth
 pgen_model/models/*.pk2l
 pgen_model/models/*.pkl
+
+pgen_model_test/models/*.pt
+pgen_model_test/models/*.pth
+pgen_model_test/models/*.pk2l
+pgen_model_test/models/*.pkl
