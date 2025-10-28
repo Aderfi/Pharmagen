@@ -1,12 +1,12 @@
 import json
 import pandas as pd
-import numpy as np 
+import numpy as np
 import os
 import sys
 import csv
 import re
 
-'''
+"""
 with open("drug_gene_output.json", "r", encoding="utf-8") as f:
     drug_gene_list = json.load(f)
     drug_gene_dict = {list(d.keys())[0]: list(d.values())[0] for d in drug_gene_list}
@@ -18,15 +18,14 @@ for i in range(len(drug_gene_dict)):
     i += 1
     if i > 5:
         break   
-'''
+"""
 
 
-
-'''
+"""
     Convierte los archivos JSON que contienen listas de diccionarios en un solo diccionario.
-'''
+"""
 
-''''
+"""'
 import json
 
 # Leer el archivo con la lista de diccionarios
@@ -47,8 +46,8 @@ with open('resultado.json', 'w', encoding='utf-8') as f:
 
 # Imprimir el resultado en pantalla
 
-'''
-'''
+"""
+"""
 with open('ATC_farmaco(ENG_dict).json', 'r', encoding='utf-8') as f:
     data1 = json.load(f)
 print("Claves de ATC_farmaco(ENG_dict).json:", data1.keys())
@@ -65,16 +64,16 @@ for k,v in data.items():
     match = re.match(r'(.*?)\s*\+\s*(.*?)', v) # Busca los values que tengan una estructura concreta de [String][spaces](+)[spaces][String]
     if match:
         print (f"Clave: '{k}' ----  {v} --- [{', '.join(match.groups())}]")
-'''
+"""
 
-	#Nivel ATC;COD_ATC;Descripcion;;;;;;
-	#1;A;APARATO DIGESTIVO Y METABOLISMO;;;;;;
-	#2;A01;PREPARADOS ESTOMATOLOGICOS;;;;;;
-	#3;A01A;PREPARADOS ESTOMATOLOGICOS;;;;;;
-	#4;A01AA;PREPARADOS PREVENTIVOS DE LA CARIES;;;;;;
-	#5;A01AA01;FLUORURO SODICO;;;;;;
+# Nivel ATC;COD_ATC;Descripcion;;;;;;
+# 1;A;APARATO DIGESTIVO Y METABOLISMO;;;;;;
+# 2;A01;PREPARADOS ESTOMATOLOGICOS;;;;;;
+# 3;A01A;PREPARADOS ESTOMATOLOGICOS;;;;;;
+# 4;A01AA;PREPARADOS PREVENTIVOS DE LA CARIES;;;;;;
+# 5;A01AA01;FLUORURO SODICO;;;;;;
 
-'''atc_df_dict = {}
+"""atc_df_dict = {}
 jerarquia_dict = {}
 
 
@@ -97,10 +96,10 @@ with open('Jerarquia_ATC.csv', 'w', newline='', encoding='utf-8') as f:
     writer = csv.writer(f, delimiter=';')
     writer.writerow(['ATC', 'Medicamento', 'Anatomico', 'Terapeutico', 'Farmacologico', 'Quimico', 'Medicamento'])
     for cod_atc, descripcion in atc_df_dict.items():
-        writer.writerow([cod_atc, descripcion])'''
-''''''
+        writer.writerow([cod_atc, descripcion])"""
+""""""
 
-'''
+"""
 import pandas as pd
 
 # --- Paso 1: Cargar los datos ---
@@ -190,12 +189,13 @@ print(df.head(10))
 
 # --- Paso 3: Reordenar las columnas para que coincidan con tu DataFrame original ---
 # Creamos una copia para evitar 'SettingWithCopyWarning' y aseguramos el orden.
-'''
+"""
 
 import json
 import pandas as pd
 import csv
-'''
+
+"""
 # --- Paso 4: Guardar el resultado en un nuevo archivo CSV ---
 #df.to_csv('Jerarquia_ATC_Pandas.csv', columns=['ATC', 'Medicamento', 'Anatomico', 'Terapeutico', 'Farmacologico', 'Quimico'], sep=';', encoding='utf-8', index=False)
 
@@ -214,8 +214,8 @@ print("¡Proceso completado! El archivo 'ATC_completo_ESP.json' ha sido creado."
 with open('list_drugs.txt', 'w', encoding='utf-8') as f:
     drugs_list = [list(v for k,v in entry.items())[1] for entry in json_dict]
     f.write('\n'.join(str(drug).upper() for drug in drugs_list))
-'''
-'''
+"""
+"""
 atc_df_dict_list = []
 
 atc_df_dict = dict(atc_df_dict)
@@ -229,31 +229,52 @@ for index in atc_df_dict_list:
     atc_df_dict.pop(index[0], index[1])
 
 print(atc_df_dict)
-'''
+"""
 
-with open ('ATC_completo_ES-EN.csv', 'r', encoding='utf-8') as f, open('ATC_drug_dict_ESP.json', 'w', encoding='utf-8') as f2, open('ATC_drug_dict_ENG.json', 'w', encoding='utf-8') as f3:
-    df = pd.read_csv(f, delimiter=';', dtype='string', usecols=['ATC', 'Medicamento', 'Drug', 'Anatomico', 'Terapeutico', 'Farmacologico', 'Quimico'])
-    
-    columnas = ['ATC', 'Medicamento', 'Drug',  'Anatomico', 'Terapeutico', 'Farmacologico', 'Quimico']
-    
-    json_out_cols_ES = ['ATC', 'Medicamento']
-    json_out_cols_EN = ['ATC', 'Drug']
+with open("ATC_completo_ES-EN.csv", "r", encoding="utf-8") as f, open(
+    "ATC_drug_dict_ESP.json", "w", encoding="utf-8"
+) as f2, open("ATC_drug_dict_ENG.json", "w", encoding="utf-8") as f3:
+    df = pd.read_csv(
+        f,
+        delimiter=";",
+        dtype="string",
+        usecols=[
+            "ATC",
+            "Medicamento",
+            "Drug",
+            "Anatomico",
+            "Terapeutico",
+            "Farmacologico",
+            "Quimico",
+        ],
+    )
+
+    columnas = [
+        "ATC",
+        "Medicamento",
+        "Drug",
+        "Anatomico",
+        "Terapeutico",
+        "Farmacologico",
+        "Quimico",
+    ]
+
+    json_out_cols_ES = ["ATC", "Medicamento"]
+    json_out_cols_EN = ["ATC", "Drug"]
 
     dict_es = {}
     dict_en = {}
 
-    
     for index, row in df.iterrows():
         row = pd.Series(row)
         row = row.astype(str)
 
-        cod_atc = row['ATC'].strip().upper()
-        medicamento_esp = row['Medicamento'].strip().upper()
-        medicamento_eng = row['Drug'].strip().upper()
+        cod_atc = row["ATC"].strip().upper()
+        medicamento_esp = row["Medicamento"].strip().upper()
+        medicamento_eng = row["Drug"].strip().upper()
 
         dict_es[cod_atc] = medicamento_esp
         dict_en[cod_atc] = medicamento_eng
-    
-    json.dump(dict_es, f2, ensure_ascii=False, indent=2)
-    json.dump(dict_en, f3, ensure_ascii=False, indent=2)    
 
+    json.dump(dict_es, f2, ensure_ascii=False, indent=2)
+    json.dump(dict_en, f3, ensure_ascii=False, indent=2)

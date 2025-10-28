@@ -16,27 +16,32 @@ import itertools, logging, sys, subprocess, threading, time
 
 logging.basicConfig(level=logging.INFO)
 
+
 def process_genomic_data():
     print(">> Procesando datos genómicos (pendiente de implementar)")
+
 
 def advanced_analysis():
     print(">> Análisis avanzado (pendiente de implementar)")
 
+
 def launch_pgen_model():
     # Llama al menú específico del paquete pgen_model():
-        subprocess.run([sys.executable, "-m", "pgen_model"])
-    
+    subprocess.run([sys.executable, "-m", "pgen_model"])
+
 
 def loading_animation():
-    spinner = itertools.cycle(['|', '/', '-', '\\'])
+    spinner = itertools.cycle(["|", "/", "-", "\\"])
     for _ in range(20):
         sys.stdout.write(next(spinner))  # write the next character
-        sys.stdout.flush()                # flush stdout buffer (actual character display)
+        sys.stdout.flush()  # flush stdout buffer (actual character display)
         time.sleep(0.1)
-        sys.stdout.write('\b')            # erase the last written char
+        sys.stdout.write("\b")  # erase the last written char
+
 
 def main():
-    print("""
+    print(
+        """
                                                                 ================= \033[1mPharmagen: MENÚ PRINCIPAL\033[0m =================
                                                                 
                                                                     1. Procesar datos genómicos de entrada
@@ -49,7 +54,8 @@ def main():
                                                                                     
                                                                 ==============================================================
                                                                 
-    """)
+    """
+    )
     while True:
         choice = input("Selecciona opción (1-4): ").strip()
         if choice == "1":
@@ -65,8 +71,7 @@ def main():
             sys.exit(0)
         else:
             print("Opción no válida. Intente de nuevo.")
-            
-            
+
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,7 @@
+Model Targets: ['outcome', 'effect', 'effect_subcat']
+Validation Loss: 0.5610736327224903
+Best Accuracy outcome: 0.5808383233532934
+Best Accuracy effect: 0.19584360690383937
+Best Accuracy effect_subcat: 0.5945755547728073
+Best Parameters:
+                         	  None

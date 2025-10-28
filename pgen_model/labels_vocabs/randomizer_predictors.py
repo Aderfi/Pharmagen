@@ -1,4 +1,4 @@
-'''
+"""
 import pandas as pd
 import os
 import numpy as np
@@ -20,12 +20,12 @@ for index, row in df.iterrows():
         genotype = [i.strip() for i in str(row['Genotype']).split(",") if i.strip()]
     else:
         genotype = [str(row['Genotype']).strip()]
-    
+
     gene_allele = row['Gene'] + ["_" + row['Alleles'] if str(row['Alleles']) != 'nan' else ''][0]
-    
+
     for geno in genotype:
         geno = geno.strip()
-        
+
         geno_alleles_dict[geno] = ''
         geno_alleles_dict[geno] += gene_allele
 
@@ -40,7 +40,7 @@ for i in geno_alleles_dict.items():
 
 with open("geno_alleles.json", "w") as f:
     json.dump(geno_alleles_out, f, indent=2)
-'''
+"""
 
 import pandas as pd
 import numpy as np
@@ -49,23 +49,22 @@ import json
 with open("genes_list.txt", "r") as f:
     genes = f.readlines()
     genes = [gene.strip() for gene in genes]
-    
+
 with open("drug_list.txt", "r") as f:
     drugs = f.readlines()
     drugs = [drug.strip() for drug in drugs]
-    
+
 drug_genes_random_list = []
 
 for i in range(50):
-    random_number_drug = np.random.randint(1, len(drugs)+1)
-    random_number_gene = np.random.randint(1, len(genes)+1)
-    
-    random_drug = drugs[random_number_drug-1]
-    random_gene = genes[random_number_gene-1]
-    
+    random_number_drug = np.random.randint(1, len(drugs) + 1)
+    random_number_gene = np.random.randint(1, len(genes) + 1)
+
+    random_drug = drugs[random_number_drug - 1]
+    random_gene = genes[random_number_gene - 1]
+
     drug_genes_random_list.append((random_drug, random_gene))
-    
-    
+
+
 with open("drug_genes_random_list.json", "w") as f:
     json.dump(drug_genes_random_list, f, indent=2)
-

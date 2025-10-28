@@ -1,0 +1,8 @@
+Model Targets: ['outcome', 'variation', 'var_type', 'name']
+Validation Loss: 1.2528663087974896
+Best Accuracy outcome: 0.07998565279770445
+Best Accuracy variation: 0.001793400286944046
+Best Accuracy var_type: 0.22955523672883787
+Best Accuracy name: 0.05416068866571019
+Best Parameters:
+                         	  None

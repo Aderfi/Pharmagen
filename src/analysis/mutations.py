@@ -13,6 +13,7 @@ import namex
 ### Importación de configuraciones y rutas desde el archivo config.py ###
 from src.config.config import *
 
+
 def increase_csv_field_limit():
     """Aumenta el límite de tamaño de campo para el lector CSV de Python."""
     max_int = sys.maxsize
@@ -22,10 +23,10 @@ def increase_csv_field_limit():
             break
         except OverflowError:
             max_int = int(max_int / 2)
-            
+
 
 # Definicion del proceso principal para el analisis de una genoteca
-'''
+"""
 --------------------------------------------------------------
 Fase 1: Procesamiento de Lecturas Crudas (Color Púrpura)
 --------------------------------------------------------------
@@ -109,7 +110,7 @@ Fase 3: Identificación y Análisis de Variantes (Color Naranja)
 Fase 4: Conclusión (Color Rojo)
 --------------------------------------------------------------
     Interpretación de los resultados
-'''
+"""
 
 
 class ProcessRawGenome:
@@ -129,6 +130,7 @@ class ProcessRawGenome:
     def run_postprocess_fastqc(self):
         # Implementar revisión de calidad posprocesado usando FastQC
         pass
+
 
 class MappingAlignmentAnalysis:
     def __init__(self, raw_fastq_dir, reference_genome, processed_bam_dir, cache_dir):
@@ -152,7 +154,8 @@ class MappingAlignmentAnalysis:
     def preprocess_identify_duplicates(self):
         # Implementar identificación de duplicados usando PicardTools
         pass
-    
+
+
 class VariantIdentificationAnalysis:
     def __init__(self, processed_bam_dir, processed_vcf_dir, cache_dir):
         self.processed_bam_dir = processed_bam_dir
@@ -174,7 +177,8 @@ class VariantIdentificationAnalysis:
     def annotate_variants(self):
         # Implementar anotación de variantes usando VEP/Annovar
         pass
-    
-'''
+
+
+"""
 ESTABLECER FLUJO DE TRABAJO PRINCIPAL Y GUARDAR EN DATA/PROCESSED
-'''
+"""

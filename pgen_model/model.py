@@ -73,46 +73,48 @@ class PGenModel(nn.Module):
         return outcome, effect_direction, effect_category, entity, entity_name, therapeutic_outcome
 '''
 
+
 class DeepFM_PGenModel(nn.Module):
     """
     Versión generalizada del modelo DeepFM que crea
     dinámicamente los "heads" de salida basados en un
     diccionario de configuración.
     """
+
     def __init__(
         self,
         # --- Vocabulario (Inputs) ---
         n_drugs,
         n_genes,
-        #n_alleles,
+        # n_alleles,
         n_genotypes,
-        
         # --- Dimensiones ---
-        embedding_dim, 
-        
+        embedding_dim,
         # --- Arquitectura ---
         hidden_dim,
-        dropout_rate, 
-
+        dropout_rate,
         # --- Clases únicas Outputs (¡EL CAMBIO!) ---
         # Un diccionario que mapea nombre_del_target -> n_clases
-        target_dims: dict 
+        target_dims: dict,
     ):
         super().__init__()
 
         self.n_fields = 3  # Drug, Gene, Allele, Genotype
-        
+
         """Testeos Cambio de Ponderaciones"""
+        '''
         self.log_sigmas = nn.ParameterDict()
         for target_name in target_dims.keys():
-            self.log_sigmas[target_name] = nn.Parameter(torch.tensor(0.0, requires_grad=True))
-
+            self.log_sigmas[target_name] = nn.Parameter(
+                torch.tensor(0.0, requires_grad=True)
+            )
+        '''
         # --- 1. Capas de Embedding (Igual) ---
         self.drug_emb = nn.Embedding(n_drugs, embedding_dim)
         self.gene_emb = nn.Embedding(n_genes, embedding_dim)
-        #self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
+        # self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
         self.geno_emb = nn.Embedding(n_genotypes, embedding_dim)
-        
+
         # --- 2. Rama "Deep" (Igual) ---
         deep_input_dim = self.n_fields * embedding_dim
         self.fc1 = nn.Linear(deep_input_dim, hidden_dim)
@@ -132,30 +134,32 @@ class DeepFM_PGenModel(nn.Module):
         # ¡AQUÍ ESTÁ LA MAGIA!
         # Usamos un ModuleDict para almacenar las capas de salida
         self.output_heads = nn.ModuleDict()
-        
+
         # Iteramos sobre el diccionario de configuración
         for target_name, n_classes in target_dims.items():
             # Creamos una capa lineal para cada target y la guardamos
             # en el ModuleDict usando su nombre como clave.
             self.output_heads[target_name] = nn.Linear(combined_dim, n_classes)
 
-            
-    def forward(self, drug, gene, allele, genotype):
-        
+    def forward(self, drug, gene, genotype):
+
         # --- 1. Obtener Embeddings (Igual) ---
         drug_vec = self.drug_emb(drug)
         gene_vec = self.gene_emb(gene)
-        #allele_vec = self.allele_emb(allele)
+        # allele_vec = self.allele_emb(allele)
         geno_vec = self.geno_emb(genotype)
-        
+
         # --- 2. CÁLCULO RAMA "DEEP" (Igual) ---
-        deep_input = torch.cat([drug_vec, gene_vec, geno_vec], dim=-1) #, allele_vec
-        deep_x = self.gelu(self.fc1(deep_input)); deep_x = self.dropout(deep_x)
-        deep_x = self.gelu(self.fc2(deep_x)); deep_x = self.dropout(deep_x)
-        deep_output = self.gelu(self.fc3(deep_x)); deep_output = self.dropout(deep_output)
+        deep_input = torch.cat([drug_vec, gene_vec, geno_vec], dim=-1)  # , allele_vec
+        deep_x = self.gelu(self.fc1(deep_input))
+        deep_x = self.dropout(deep_x)
+        deep_x = self.gelu(self.fc2(deep_x))
+        deep_x = self.dropout(deep_x)
+        deep_output = self.gelu(self.fc3(deep_x))
+        deep_output = self.dropout(deep_output)
 
         # --- 3. CÁLCULO RAMA "FM" (Igual) ---
-        embeddings = [drug_vec, gene_vec, geno_vec] #, allele_vec
+        embeddings = [drug_vec, gene_vec, geno_vec]  # , allele_vec
         fm_outputs = []
         for emb_i, emb_j in itertools.combinations(embeddings, 2):
             dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
@@ -169,7 +173,7 @@ class DeepFM_PGenModel(nn.Module):
         # ¡AQUÍ ESTÁ EL OTRO CAMBIO!
         # Creamos un diccionario de predicciones
         predictions = {}
-        
+
         # Iteramos sobre nuestro ModuleDict
         for name, head_layer in self.output_heads.items():
             # Aplicamos la capa correspondiente y guardamos
@@ -178,38 +182,35 @@ class DeepFM_PGenModel(nn.Module):
 
         # Devolvemos el diccionario de predicciones
         return predictions
-    
-    def calculate_weighted_loss(self, unweighted_losses: dict, target_labels: dict, multipliers: dict = None) -> torch.Tensor: # type: ignore
+    '''
+    def calculate_weighted_loss(self, unweighted_losses: dict) -> torch.Tensor:
         """
-        Calcula la pérdida total ponderada por Incertidumbre.
-        
+        Calcula la pérdida total ponderada por Incertidumbre (Uncertainty Weighting).
+        Fórmula para clasificación: L_total = Σ [ L_i * exp(-s_i) + s_i ]
+        donde s_i = log(σ_i²) es el parámetro aprendible.
+
         Args:
-            unweighted_losses: Diccionario de pérdidas no ponderadas calculadas (Losses L_t).
-            target_labels: Diccionario de etiquetas reales (y_t). Se usa para verificar si la tarea es de clasificación/regresión.
-            
+            unweighted_losses: Diccionario de pérdidas no ponderadas (L_i).
+                               Ej: {"outcome": tensor(0.5), "effect": tensor(0.2)}
+
         Returns:
             La pérdida total (torch.Tensor escalar) lista para .backward().
         """
         weighted_loss_total = 0.0
-        
+
         for task_name, loss_value in unweighted_losses.items():
-            # Obtener el log(sigma^2) aprendido (nuestro parámetro s_t)
+            # 1. Obtener el parámetro aprendible 's_i' (log(sigma^2))
             s_t = self.log_sigmas[task_name]
-            
-            # Asumimos que todas tus tareas son de CLASIFICACIÓN (Cross-Entropy), 
-            # ya que las pérdidas que mostraste son típicas de clasificación.
-            # Fórmula para Clasificación (L_t * exp(-s_t) + s_t):
-            
-            # 1. El peso es exp(-s_t) -> (1 / sigma^2)
+
+            # 2. Calcular el peso dinámico (precision = 1/sigma^2 = exp(-s_t))
             weight = torch.exp(-s_t)
-            
-            
-            factor = multipliers.get(task_name, 1.0) if multipliers else 1.0
-            weighted_task_loss = factor * ((weight * loss_value) + s_t)
-            
-            # 2. La pérdida ponderada + término de regularización
+
+            # 3. Aplicar la fórmula de UW para clasificación
+            #    (Pérdida_ponderada * peso) + término_de_regularización
             weighted_task_loss = (weight * loss_value) + s_t
-            
+
             weighted_loss_total += weighted_task_loss
 
-        return weighted_loss_total  # type: ignore
+        # Devuelve la suma de todas las pérdidas de tareas ponderadas
+        return weighted_loss_total  #type: ignore
+    '''

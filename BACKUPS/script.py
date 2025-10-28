@@ -1,4 +1,4 @@
-'''
+"""
 import asyncio
 import json
 from googletrans impor
@@ -28,24 +28,23 @@ with open('ATC_drugs_en.json', 'w', encoding='utf-8') as f:
     json.dump(translated_ATC_drugs, f, ensure_ascii=False, indent=2)
 
 print("Translation complete. Output saved to ATC_drugs_en.json.")
-'''
-
+"""
 
 import json
 import csv
 
-with open('ATC_completo_ESP.csv', 'r', encoding='utf-8') as f:
-    ATC_farmaco = csv.reader(f, delimiter=';')
+with open("ATC_completo_ESP.csv", "r", encoding="utf-8") as f:
+    ATC_farmaco = csv.reader(f, delimiter=";")
     ATC_farmaco = f.readlines()
-    
-with open('list_drugs.txt', 'w', encoding='utf-8') as f:
+
+with open("list_drugs.txt", "w", encoding="utf-8") as f:
     drugs_list = [list(row for row in ATC_farmaco)[2]]
-    f.write('\n'.join(str(drug[0]) for drug in drugs_list))
+    f.write("\n".join(str(drug[0]) for drug in drugs_list))
 
 import csv
 import json
 
-'''
+"""
 # Build translation dict from ESP_ENG_Drugs.csv
 translation = {}
 with open('ESP_ENG_Drugs.csv', 'r', encoding='utf-8') as infile:
@@ -69,4 +68,4 @@ for entry in json_drug:
 # Optionally, to save the translated list:
 with open('ATC_farmaco_ENG_corregido.json', 'w', encoding='utf-8') as outfile:
     json.dump(atc_drug_eng_list, outfile, indent=2)
-'''
+"""
