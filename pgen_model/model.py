@@ -85,9 +85,11 @@ class DeepFM_PGenModel(nn.Module):
         self,
         # --- Vocabulario (Inputs) ---
         n_drugs,
-        n_genes,
-        # n_alleles,
         n_genotypes,
+        n_genes,
+        n_alleles,
+        
+        
         # --- Dimensiones ---
         embedding_dim,
         # --- Arquitectura ---
@@ -99,21 +101,21 @@ class DeepFM_PGenModel(nn.Module):
     ):
         super().__init__()
 
-        self.n_fields = 3  # Drug, Gene, Allele, Genotype
+        self.n_fields = 4  # Drug, Gene, Allele, Genotype
 
         """Testeos Cambio de Ponderaciones"""
-        '''
+        
         self.log_sigmas = nn.ParameterDict()
         for target_name in target_dims.keys():
             self.log_sigmas[target_name] = nn.Parameter(
                 torch.tensor(0.0, requires_grad=True)
             )
-        '''
+        
         # --- 1. Capas de Embedding (Igual) ---
         self.drug_emb = nn.Embedding(n_drugs, embedding_dim)
-        self.gene_emb = nn.Embedding(n_genes, embedding_dim)
-        # self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
         self.geno_emb = nn.Embedding(n_genotypes, embedding_dim)
+        self.gene_emb = nn.Embedding(n_genes, embedding_dim)
+        self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
 
         # --- 2. Rama "Deep" (Igual) ---
         deep_input_dim = self.n_fields * embedding_dim
@@ -141,16 +143,16 @@ class DeepFM_PGenModel(nn.Module):
             # en el ModuleDict usando su nombre como clave.
             self.output_heads[target_name] = nn.Linear(combined_dim, n_classes)
 
-    def forward(self, drug, gene, genotype):
+    def forward(self, drug, genotype, gene, allele):
 
         # --- 1. Obtener Embeddings (Igual) ---
         drug_vec = self.drug_emb(drug)
-        gene_vec = self.gene_emb(gene)
-        # allele_vec = self.allele_emb(allele)
         geno_vec = self.geno_emb(genotype)
+        gene_vec = self.gene_emb(gene)
+        allele_vec = self.allele_emb(allele)
 
         # --- 2. CÁLCULO RAMA "DEEP" (Igual) ---
-        deep_input = torch.cat([drug_vec, gene_vec, geno_vec], dim=-1)  # , allele_vec
+        deep_input = torch.cat([drug_vec, geno_vec, gene_vec, allele_vec], dim=-1)
         deep_x = self.gelu(self.fc1(deep_input))
         deep_x = self.dropout(deep_x)
         deep_x = self.gelu(self.fc2(deep_x))
@@ -159,7 +161,7 @@ class DeepFM_PGenModel(nn.Module):
         deep_output = self.dropout(deep_output)
 
         # --- 3. CÁLCULO RAMA "FM" (Igual) ---
-        embeddings = [drug_vec, gene_vec, geno_vec]  # , allele_vec
+        embeddings = [drug_vec, geno_vec, gene_vec, allele_vec]
         fm_outputs = []
         for emb_i, emb_j in itertools.combinations(embeddings, 2):
             dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
@@ -182,8 +184,8 @@ class DeepFM_PGenModel(nn.Module):
 
         # Devolvemos el diccionario de predicciones
         return predictions
-    '''
-    def calculate_weighted_loss(self, unweighted_losses: dict) -> torch.Tensor:
+
+    def calculate_weighted_loss(self, unweighted_losses: dict, task_priorities: dict) -> torch.Tensor:
         """
         Calcula la pérdida total ponderada por Incertidumbre (Uncertainty Weighting).
         Fórmula para clasificación: L_total = Σ [ L_i * exp(-s_i) + s_i ]
@@ -205,12 +207,22 @@ class DeepFM_PGenModel(nn.Module):
             # 2. Calcular el peso dinámico (precision = 1/sigma^2 = exp(-s_t))
             weight = torch.exp(-s_t)
 
-            # 3. Aplicar la fórmula de UW para clasificación
-            #    (Pérdida_ponderada * peso) + término_de_regularización
-            weighted_task_loss = (weight * loss_value) + s_t
-
+            # Establecimiento de prioridades para los pesos.
+            '''
+            if task_priorities is not None:
+                priority = task_priorities.get(task_name, 1.0)
+                prioritized_loss = loss_value * priority
+                weighted_task_loss = (weight * prioritized_loss) + s_t
+            
+            else:
+                weighted_task_loss = (weight * loss_value) + s_t
+            '''
+            
+            priority = task_priorities.get(task_name, 1.0)
+            prioritized_loss = loss_value * priority
+            weighted_task_loss = (weight * prioritized_loss) + s_t
+            
             weighted_loss_total += weighted_task_loss
 
         # Devuelve la suma de todas las pérdidas de tareas ponderadas
-        return weighted_loss_total  #type: ignore
-    '''
+        return weighted_loss_total  #type: ignore 

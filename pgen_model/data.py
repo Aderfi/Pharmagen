@@ -17,20 +17,22 @@ from .model_configs import MULTI_LABEL_COLUMN_NAMES
 
 def train_data_import(targets):
     csv_path = MODEL_TRAIN_DATA
-    csv_files = Path(csv_path, "train_merged.csv")
-    '''
-    (
-        glob.glob(f"{csv_path}/*.csv")
-        if glob.glob(f"{csv_path}/*.csv")
-        else f"{csv_path}/Reorden_train_therapeutic_outcome_cleaned_effect_direction.csv"
-    )
-    '''
-    targets = [t.lower() for t in targets]
     
-    read_cols_set = set(targets) | {"Drug", "Gene", "Genotype"}
+    
+    csv_files = glob.glob(f"{csv_path}/*.tsv")
+
+    if not csv_files:
+        raise FileNotFoundError(f"No se encontraron archivos TSV en: {csv_path}")
+    elif len(csv_files) == 1:
+        print(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
+        csv_files = csv_files[0]
+            
+    targets = [t.lower() for t in targets]
+
+    read_cols_set = set(targets) | {"Drug", "Variant/Haplotypes", "Gene", "Allele"}
     read_cols = [c.lower() for c in read_cols_set]
 
-    equivalencias = load_equivalencias(csv_path)
+    # equivalencias = load_equivalencias(csv_path)
     return csv_files, read_cols
 
 def load_equivalencias(csv_path):
@@ -71,123 +73,131 @@ def get_tensors(self, cols):
         return tensors
 
 
-class PGenInputDataset:
+class PGenDataProcess:
     """
-    Clase para estructurar los datos de entrada para multisalida.
-    Maneja tanto encoders single-label (LabelEncoder) como multi-label (MultiLabelBinarizer).
+    Clase refactorizada para preprocesar datos de farmacogenética.
+    
+    Esta clase ahora sigue el flujo de trabajo fit/transform de Scikit-learn
+    para prevenir la fuga de datos (data leakage).
+    
+    1. Llama a `load_and_clean_data` para cargar y limpiar el CSV.
+    2. Divide los datos (train/val/test) FUERA de esta clase.
+    3. Llama a `fit` SÓLO con los datos de entrenamiento (train_df).
+    4. Llama a `transform` para aplicar el preprocesamiento a 
+       train_df, val_df, y test_df.
     """
 
     def __init__(self):
-        self.data = pd.DataFrame()
         self.encoders = {}
-        self.cols = []
+        self.cols_to_process = []
         self.target_cols = []
         self.multi_label_cols = set()
 
-    def fit_encoders(self, df):
-        """
-        Ajusta el encoder apropiado (LabelEncoder o MultiLabelBinarizer)
-        para cada columna de input y target.
-        """
-        for col in df.columns:
-            if col == "stratify_col":
-                continue
+        self.unknown_token = "__UNKNOWN__" 
 
+    def _split_labels(self, label_str):
+        """Helper: Divide un string 'A, B' en una lista ['A', 'B'] y maneja nulos."""
+        if not isinstance(label_str, str) or pd.isna(label_str) or label_str.lower() in ["nan", "", "null"]:
+            return []  # MultiLabelBinarizer necesita un iterable
+        return [s.strip() for s in label_str.split(",")]
+
+    def load_data(self, csv_path, all_cols, target_cols, 
+                            multi_label_targets, stratify_cols):
+        """
+        Carga, limpia y prepara los datos para la división (splitting).
+        NO ajusta ningún encoder.
+        """
+        self.cols_to_process = [c.lower() for c in all_cols]
+        self.target_cols = [t.lower() for t in target_cols]
+        self.multi_label_cols = set(t.lower() for t in multi_label_targets or [])
+        
+        df = pd.read_csv(str(csv_path), sep="\t", index_col=False)
+        df.columns = [col.lower() for col in df.columns]
+        
+        # Asegurarse de que solo nos quedamos con las columnas necesarias
+        df = df[self.cols_to_process]
+
+        # 1. Normaliza columnas target (y de estratificación) a string
+        for t in self.target_cols:
+            df[t] = df[t].astype(str)
+            
+        for s_col in stratify_cols:
+             df[s_col] = df[s_col].astype(str)
+
+        # 2. Crear 'stratify_col'
+        # Usamos las columnas de estratificación proporcionadas
+        df["stratify_col"] = df[stratify_cols].agg("_".join, axis=1)
+
+        # 3. Filtrar datos insuficientes (opcional, pero buena práctica)
+        counts = df["stratify_col"].value_counts()
+        suficientes = counts[counts > 1].index
+        df = df[df["stratify_col"].isin(suficientes)].reset_index(drop=True)
+
+        # 4. Procesar las columnas multi-etiqueta (convertir string a lista)
+        for col in self.multi_label_cols:
+            if col in df.columns:
+                df[col] = df[col].apply(self._split_labels)
+        
+        print(f"Datos cargados y limpios. Total de filas: {len(df)}")
+        return df
+
+    def fit(self, df_train):
+        """
+        <--- NUEVO: Ajusta los encoders SÓLO con los datos de entrenamiento.
+        """
+        print("Ajustando encoders con datos de entrenamiento...")
+        for col in self.cols_to_process:
             if col in self.multi_label_cols:
-                # Usar MultiLabelBinarizer para columnas multi-etiqueta
+                # MultiLabelBinarizer: se ajusta a las listas de etiquetas
                 encoder = MultiLabelBinarizer()
-                encoder.fit(df[col])
+                encoder.fit(df_train[col])
                 self.encoders[col] = encoder
-            elif col in self.cols:  # self.cols tiene todos los inputs + targets
-                # Usar LabelEncoder para inputs y targets de etiqueta única
+            else:
+                # LabelEncoder: se ajusta a etiquetas únicas
                 encoder = LabelEncoder()
-                encoder.fit(df[col].astype(str))
+                
+                # <--- LÓGICA MEJORADA ---
+                # Añadir un token "UNKNOWN" al vocabulario del encoder
+                # para manejar valores en 'val' o 'test' que no estaban en 'train'.
+                all_labels = list(df_train[col].astype(str).unique())
+                if self.unknown_token not in all_labels:
+                    all_labels.append(self.unknown_token)
+                
+                encoder.fit(all_labels)
                 self.encoders[col] = encoder
+        print("Encoders ajustados.")
 
     def transform(self, df):
         """
-        Transforma el DataFrame usando los encoders ajustados.
-        - LabelEncoder -> Columna de enteros
-        - MultiLabelBinarizer -> Columna de listas de arrays (vectores binarios)
+        <--- NUEVO: Transforma un DataFrame (train, val, o test)
+        usando los encoders ya ajustados.
         """
+        df_transformed = df.copy()
+        
         for col, encoder in self.encoders.items():
-            if col not in df.columns:
+            if col not in df_transformed.columns:
                 continue
 
             if isinstance(encoder, MultiLabelBinarizer):
-                # Transformar y almacenar el resultado (una lista de arrays)
-                df[col] = list(encoder.transform(df[col]))
-            else:  # LabelEncoder
-                # Transformar como antes
-                df[col] = encoder.transform(df[col].astype(str))
-        return df
+                # MLB transforma las listas en vectores binarios
+                # (Ignora etiquetas que no vio en 'fit', lo cual es correcto)
+                df_transformed[col] = list(encoder.transform(df_transformed[col]))
+            
+            elif isinstance(encoder, LabelEncoder):
+                # <--- LÓGICA MEJORADA ---
+                # 1. Obtener las etiquetas que el encoder conoce (de 'fit')
+                known_labels = set(encoder.classes_)
+                
+                # 2. Reemplazar cualquier etiqueta no conocida por el token UNKNOWN
+                original_col = df_transformed[col].astype(str)
+                transformed_col = original_col.apply(
+                    lambda x: x if x in known_labels else self.unknown_token
+                )
+                
+                # 3. Ahora, transformar de forma segura
+                df_transformed[col] = encoder.transform(transformed_col)
 
-    def load_data(
-        self, csv_files, cols, targets, equivalencias=None, multi_label_targets=MULTI_LABEL_COLUMN_NAMES
-    ):
-        """
-        Carga y preprocesa los datos.
-        'multi_label_targets' es una lista de nombres de columnas (ej. ['outcome_category'])
-        que deben ser tratadas como multi-etiqueta.
-        """
-        self.cols = [col.lower() for col in cols]
-        self.target_cols = [t.lower() for t in targets]
-        self.multi_label_cols = set(t.lower() for t in multi_label_targets or [])
-
-        """
-        if isinstance(csv_files, (list, tuple)):
-            df = pd.concat([pd.read_csv(f, sep=';', index_col=False) for f in csv_files], ignore_index=True)
-        else:"""
-        csv_files = Path(
-            MODEL_TRAIN_DATA
-            / "train_merged.csv"
-        )
-        df = pd.read_csv(str(csv_files), sep=";", index_col=False)
-        df.columns = [col.lower() for col in df.columns]
-        df = df[[c.lower() for c in cols]]
-        targets = [
-            t.lower() for t in targets
-        ]  # Asegurarse de que targets está en minúscula
-
-        # 1. Normaliza todas las columnas target a string (para stratify y LabelEncoder)
-        for t in targets:
-            df[t] = df[t].astype(str)
-
-        # 2. Crear 'stratify_col' A PARTIR DE LOS STRINGS
-
-        # df["stratify_col"] = df[targets].astype(str).agg("_".join, axis=1)
-        df["stratify_col"] = df[['outcome', 'variation', 'var_type']].astype(str).agg("_".join, axis=1)
-        # df = df.dropna(subset=targets, axis=0, ignore_index=True)
-
-        # 3. Filtrar datos insuficientes (como antes)
-        counts = df["stratify_col"].value_counts()
-        suficientes = counts[counts > 1].index
-        df = df[df["stratify_col"].isin(suficientes)]
-
-        # 4. AHORA, procesar las columnas multi-etiqueta
-        def split_labels(label_str):
-            """Divide un string como 'A, B' en una lista ['A', 'B'] y maneja nulos."""
-            if not isinstance(label_str, str) or label_str.lower() in [
-                "nan",
-                "",
-                "null",
-            ]:
-                return []  # MultiLabelBinarizer necesita una lista (iterable)
-            return [s.strip() for s in label_str.split(",")]
-
-        for col in self.multi_label_cols:
-            if col in df.columns:
-                df[col] = df[col].apply(split_labels)
-
-        # 5. Ajustar los encoders (LabelEncoder y MultiLabelBinarizer)
-        self.fit_encoders(df)
-
-        # 6. Transformar los datos
-        df = self.transform(df)
-
-        self.data = df.drop(columns=["stratify_col"]).reset_index(drop=True)
-
-        return self.data
+        return df_transformed
 
 
 
