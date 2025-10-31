@@ -5,12 +5,15 @@ Proporciona un menú CLI para entrenar y utilizar el modelo predictivo.
 
 import json
 import math
+import pandas as pd
 import sys
 from pathlib import Path
+from tabulate import tabulate
+from fuzzywuzzy import process
 
-from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR
+from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
 
-from .data import PGenInputDataset, train_data_import
+from .data import PGenDataProcess, train_data_import
 from .model import DeepFM_PGenModel
 from .model_configs import MODEL_REGISTRY, get_model_config
 from .pipeline import train_pipeline
@@ -21,6 +24,13 @@ from .predict import load_encoders, predict_from_file, predict_single_input
 PGEN_MODEL_DIR = "."  # Ajusta si tu variable global es distinta
 ###########################################################
 
+translate_output = {
+    "phenotype_outcome": "Consecuencia clínica esperable",
+    "effect_direction": "Variación del efecto farmacogenético",
+    "effect_type": "Tipo de efecto farmacogenético",
+    "effect_phenotype": "Tipo de efecto - Extensión",
+    "Fenotipo_No_Especificado": ""
+}
 
 def select_model(model_options, prompt="Selecciona el modelo:"):
     print("\n————————————————— Modelos Disponibles ————————————————")
@@ -38,18 +48,6 @@ def select_model(model_options, prompt="Selecciona el modelo:"):
 def load_model(model_name, target_cols=None, base_dir=None, device=None):
     """
     Carga un modelo PyTorch guardado para un conjunto específico de targets.
-
-    Args:
-        model_name (str): Nombre del modelo a cargar
-        target_cols (list, optional): Lista de columnas target. Si es None,
-                                     se obtienen del MODEL_REGISTRY
-        base_dir (str, optional): Directorio base donde buscar. Si es None,
-                                 usa el directorio de modelos por defecto
-        device (torch.device, optional): Dispositivo donde cargar el modelo
-                                        (CPU o GPU)
-
-    Returns:
-        torch.nn.Module: El modelo cargado y listo para usar
     """
     from pathlib import Path
 
@@ -59,62 +57,57 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
     from .model_configs import MODEL_REGISTRY
 
     if base_dir is None:
-        # Usar el mismo directorio que en pipeline.py
-        from src.config.config import PGEN_MODEL_DIR as MODELS_DIR
-
+        from src.config.config import MODELS_DIR
         base_dir = MODELS_DIR
 
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Si no se proporcionan target_cols, obtenerlos del registro de modelos
     if target_cols is None:
         target_cols = [t.lower() for t in MODEL_REGISTRY[model_name]["targets"]]
 
-    # Crear el nombre del archivo del modelo siguiendo el formato en train.py
-    model_file_name = str("-".join([target[:3] for target in target_cols]))
+    model_file_name = model_name
     model_file = Path(base_dir) / f"pmodel_{model_file_name}.pth"
 
     if not model_file.exists():
         raise FileNotFoundError(f"No se encontró el archivo del modelo en {model_file}")
 
     try:
-        # Cargar los encoders para obtener las dimensiones necesarias
-        encoders = load_encoders(model_name, base_dir)
+        encoders = load_encoders(model_name)
 
-        # Obtener las dimensiones necesarias para reconstruir el modelo
+        # <--- CORRECCIÓN 1: Clave de genotipo ---
+        # Asegurarse de que coincide con el nombre de la columna en train.py
         n_drugs = len(encoders["drug"].classes_)
+        n_genotypes = len(encoders["variant/haplotypes"].classes_) # <--- Clave corregida
         n_genes = len(encoders["gene"].classes_)
         n_alleles = len(encoders["allele"].classes_)
-        n_genotypes = len(encoders["genotype"].classes_)
-
-        # Determinar las dimensiones de salida para cada target
+        
         target_dims = {}
         for col in target_cols:
             target_dims[col] = len(encoders[col].classes_)
 
-        # Obtener los hiperparámetros del modelo desde el registro
-        params = MODEL_REGISTRY[model_name].get("params", {})
+        # Obtener los hiperparámetros (no es necesario aquí si se usa get_model_config)
+        config = get_model_config(model_name)
+        params = config["params"]
         embedding_dim = params.get("embedding_dim", 256)
         hidden_dim = params.get("hidden_dim", 512)
         dropout_rate = params.get("dropout_rate", 0.3)
 
         # Crear una instancia del modelo con la arquitectura correcta
+        # El orden DEBE coincidir con __init__ en model.py
         model = DeepFM_PGenModel(
             n_drugs,
+            n_genotypes,
             n_genes,
-            n_genotypes,  # n_alleles,
+            n_alleles,
             embedding_dim,
             hidden_dim,
             dropout_rate,
             target_dims=target_dims,
         )
 
-        # Cargar el state_dict y asignarlo al modelo
         state_dict = torch.load(model_file, map_location=device)
         model.load_state_dict(state_dict)
-
-        # Mover el modelo al dispositivo especificado y ponerlo en modo evaluación
         model = model.to(device)
         model.eval()
 
@@ -126,7 +119,6 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
 
 
 def main():
-    # --- CAMBIO: Usar MODEL_REGISTRY ---
     model_options = list(MODEL_REGISTRY.keys())
 
     while True:
@@ -148,45 +140,43 @@ def main():
         )
         choice = input("Selecciona opción (1-5): ").strip()
 
-        # =====================  1: ENTRENAMIENTO DEL MODELO --> train.py  =======================================
+        # =====================  1: ENTRENAMIENTO DEL MODELO =======================================
 
         if choice == "1":
-
             model_name = select_model(
                 model_options, "Selecciona el modelo para entrenamiento"
             )
-
             config = get_model_config(model_name)
-            params = config["params"]  # Diccionario con HPs (LR, HD, etc.)
-            target_cols = [t.lower() for t in config["targets"]]
-
+            params = config["params"]  # Diccionario con HPs
+            
+            # Extraer args para pipeline desde los params
             epochs = params.get("epochs", 100)
-            patience = params.get("patience", 15)
+            patience = params.get("patience", 20)
             batch_size = params.get("batch_size", 64)
-
-            PMODEL_DIR = "pgen_model/models/"
-            csv_files = Path(
-                Path(PMODEL_DIR) / "train_data" / "Reorden_train_therapeutic_outcome_cleaned_effect_direction.csv"
-            )
+            target_cols = [t.lower() for t in config["targets"]]
+            
+            csv_files = Path(MODEL_TRAIN_DATA, "var_nofa_mapped_filled.tsv")
+            PMODEL_DIR = PROJECT_ROOT # PGEN_MODEL_DIR se define arriba como "."
 
             print(f"Iniciando entrenamiento con modelo: {model_name}")
             print(f"Parámetros: {json.dumps(params, indent=2)}")
 
-            # 3. Llamar a pipeline
+            # <--- CORRECCIÓN 2: Llamada a train_pipeline ---
+            # La llamada debe coincidir con la definición de la función en pipeline.py
+            # Se pasan los argumentos que SÍ acepta (epochs, patience, batch_size, target_cols)
+            # No se pasa 'params' porque pipeline.py lo carga internamente.
             train_pipeline(
                 PMODEL_DIR,
                 csv_files,
                 model_name,
-                params,
-                epochs=epochs,
-                patience=patience,
-                batch_size=batch_size,
                 target_cols=target_cols,
             )
 
         # =====================================  2: PREDICCIÓN MANUAL ============================================
 
         elif choice == "2":
+            csv_files = Path(MODEL_TRAIN_DATA, "var_nofa_mapped_filled.tsv")
+            
             model_name = select_model(
                 model_options, "Selecciona el modelo para predicción manual"
             )
@@ -195,29 +185,67 @@ def main():
 
             print("Introduce datos del paciente para predicción:")
             drug = input("Drug: ")
+            # <--- CORRECCIÓN 3.1: Prompt de input ---
+            genotype = input("Variant/Haplotypes: ") # <--- Coincidir con la columna
             gene = input("Gene: ")
             allele = input("Allele: ")
-            genotype = input("Genotype: ")
 
             try:
-                encoders = load_encoders(model_name)
+                # Asumimos que PGEN_MODEL_DIR es el dir base correcto
+                encoders = load_encoders(model_name) # type: ignore
+                model = load_model(model_name, target_cols=target_cols, base_dir=MODELS_DIR)
 
-                model = load_model(model_name, target_cols=target_cols)
-
+                # <--- CORRECCIÓN 3.2: Orden de argumentos ---
+                # El orden DEBE coincidir con model.forward(drug, genotype, gene, allele)
                 resultado = predict_single_input(
                     drug,
-                    gene,
-                    allele,
-                    genotype,
+                    genotype, # <--- Argumento 2
+                    gene,     # <--- Argumento 3
+                    allele,   # <--- Argumento 4
                     model=model,
                     encoders=encoders,
                     target_cols=target_cols,
                 )
+                
+                resultado_df = pd.DataFrame({"Medicamento": [drug], "Variant/Haplotypes": [genotype], "Gene": [gene], "Allele": [allele]})
+                resultado_df = pd.concat([resultado_df, pd.DataFrame(resultado)], axis=1)
+                try:
+                    # MAPEO THERAPEUTIC_OUTCOME
+                    json_path = Path(MODEL_TRAIN_DATA, "json_dicts", "dict_therapeutic_outcome.json")
+                    
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        ther_out_dict = json.load(f)
+                        ther_out_dict = {k.lower(): v for k, v in ther_out_dict.items()}
+                    
+                    # Tomar solo los primeros 3 valores del diccionario resultado
+                    primeros_valores = list(resultado.values())[:3]  # type: ignore
+                    
+                    # Crear la línea formateada
+                    linea = ';'.join(
+                        ','.join(map(str, v)) if isinstance(v, list) else str(v) 
+                        for v in primeros_valores
+                    )
+                    
+                    # Buscar el valor correspondiente (case-insensitive)
+                    therapeutic_outcome = ther_out_dict.get(linea.lower(), "nan")
+                    resultado_df['Therapeutic_Outcome'] = therapeutic_outcome
+                    
+                    print(f"Línea de búsqueda: {linea}")
+                    print(f"Resultado encontrado: {therapeutic_outcome}")
+
+                except Exception as e:
+                    print(f"Error al mapear Therapeutic_Outcome: {e}")
+                    resultado_df['Therapeutic_Outcome'] = "nan"
+
+
 
                 print("\nResultado de la predicción:")
                 if resultado is not None:
-                    for k, v in resultado.items():
-                        print(f"{k}: {v}")
+                    print(tabulate(resultado_df, headers='keys', tablefmt='psql', showindex=False)) # type: ignore
+
+                    print("Pulse cualquier tecla para continuar...")
+                    input()
+
                 else:
                     print("No se pudo realizar la predicción.")
             except Exception as e:
@@ -226,10 +254,10 @@ def main():
         # =====================================  3: PREDICCIÓN DESDE ARCHIVO ============================================
 
         elif choice == "3":
+            # ... (Sin cambios) ...
             model_name = select_model(
                 model_options, "Selecciona el modelo para predicción desde archivo"
             )
-            # --- CAMBIO: Usar MODEL_REGISTRY ---
             targets = MODEL_REGISTRY[model_name]["targets"]
             target_cols = [t.lower() for t in targets]
             file_path = input("Ruta del archivo CSV: ")
@@ -250,7 +278,6 @@ def main():
 
         elif choice == "4":
             import optuna
-
             from .optuna_train import run_optuna_with_progress
 
             print("\nOptimizando hiperparámetros con Optuna...")
@@ -258,7 +285,6 @@ def main():
                 model_options, "Selecciona el modelo para optimización"
             )
 
-            # --- CAMBIO: Usar MODEL_REGISTRY ---
             targets = MODEL_REGISTRY[optuna_model_name]["targets"]
             target_cols = [t.lower() for t in targets]
 
@@ -284,54 +310,38 @@ def main():
             sys.exit(0)
 
         # ===================   Opción oculta   ==============================
-        # Obtener estimación inicial de weights (diagnóstico tras 1 epoch)
         elif choice == "777":
-
             model_name = select_model(
                 model_options, "Selecciona el modelo para diagnóstico de pesos"
             )
-
             config = get_model_config(model_name)
             try:
-                params = dict(config["params"])  # Diccionario con HPs (LR, HD, etc.)
+                params = dict(config["params"])
             except KeyError:
-                print(
-                    f"Error: No se encontraron los parámetros para el modelo {model_name}"
-                )
+                print(f"Error: No se encontraron los parámetros para el modelo {model_name}")
                 continue
+            
             target_cols = [t.lower() for t in config["targets"]]
-
-            # --- CAMBIO: Ejecutar SOLO 1 época para el diagnóstico ---
             epochs = 1
-            patience = 1  # No necesitamos early stopping para 1 época
+            patience = 1
             batch_size = params.get("batch_size", 64)
 
-            # --- CAMBIO: Asegurarse de que los pesos son 1.0 para el diagnóstico ---
-            # (Esto asume que tu get_model_config ya devuelve los pesos correctos)
-            # Si quieres forzar pesos=1.0 *aquí*, necesitarías modificar cómo
-            # train_pipeline obtiene los pesos, o pasar un flag diferente.
-            # Por ahora, asumimos que los pesos en model_configs.py son 1.0
-            # o que train_pipeline los ignora si es un run de diagnóstico.
-            # La forma más limpia es ponerlos a 1.0 en model_configs.py temporalmente.
             print(
                 "ADVERTENCIA: Asegúrate de que los MASTER_WEIGHTS en model_configs.py están en 1.0 para este diagnóstico."
             )
 
-            csv_files = Path(MODEL_TRAIN_DATA / "Reorden_train_therapeutic_outcome_cleaned_effect_direction.csv")
+            csv_files = Path(MODEL_TRAIN_DATA / "var_nofa_mapped_filled.tsv") # <--- Ruta corregida
 
             print(f"Iniciando run de diagnóstico (1 época) con modelo: {model_name}")
-            print(
-                f"Parámetros: {', '.join(f'{k}: {v}' for k, v in params.items())} "
-            )  # No imprimir weights aquí
+            print(f"Parámetros: {', '.join(f'{k}: {v}' for k, v in params.items())} ")
 
+            # <--- CORRECCIÓN 4: Llamada a train_pipeline (Choice 777) ---
+            # La llamada debe coincidir con la definición de la función en pipeline.py
             train_pipeline(
                 PGEN_MODEL_DIR,
                 csv_files,
                 model_name,
-                params,
-                epochs=1,
-                patience=1,
-                batch_size=batch_size,
+                target_cols=target_cols
             )
             print(
                 "\nRun de diagnóstico completado. Revisa 'comprobacion.txt' o los logs para ver los losses individuales."

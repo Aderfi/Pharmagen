@@ -1,0 +1,26 @@
+Modelo: Phenotype_Effect_Outcome
+Mejor loss en validación: 10.27485
+Precisión Promedio (Avg Acc) en mejor época: 0.6210
+Precisión por Tarea:
+  - phenotype_outcome: 0.8914
+  - effect_direction: 0.6651
+  - effect_type: 0.4444
+  - effect_phenotype: 0.4831
+
+Hiperparámetros Utilizados:
+  batch_size: 512
+  epochs: 100
+  learning_rate: 0.0005893232367500335
+  embedding_dim: 128
+  hidden_dim: 4096
+  dropout_rate: 0.493740315869821
+  patience: 20
+  weight_decay: 3.308304117490965e-05
+
+Estrategia de Ponderación:
+  Uncertainty Weighting (Pesos dinámicos aprendibles)
+  Pesos Efectivos Finales (exp(-log_sigma^2)):
+  - phenotype_outcome: 1.7147
+  - effect_direction: 1.6839
+  - effect_type: 0.7353
+  - effect_phenotype: 0.7879
