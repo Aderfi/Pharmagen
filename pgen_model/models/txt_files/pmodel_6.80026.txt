@@ -1,8 +1,0 @@
-Model Targets: ['outcome', 'variation', 'var_type', 'therapeutic_outcome']
-Validation Loss: 6.8002573089166125
-Best Accuracy outcome: 0.07711621233859398
-Best Accuracy variation: 0.12769010043041606
-Best Accuracy var_type: 0.25071736011477763
-Best Accuracy therapeutic_outcome: 0.33070301291248205
-Best Parameters:
-                         	  None
