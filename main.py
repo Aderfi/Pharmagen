@@ -17,18 +17,23 @@ import itertools, logging, sys, subprocess, threading, time
 logging.basicConfig(level=logging.INFO)
 
 
-def process_genomic_data():
+def process_genomic_data(): #1
     print(">> Procesando datos genómicos (pendiente de implementar)")
 
 
-def advanced_analysis():
+def advanced_analysis(): #3
     print(">> Análisis avanzado (pendiente de implementar)")
 
 
-def launch_pgen_model():
+def launch_pgen_model(): # 2   
     # Llama al menú específico del paquete pgen_model():
     subprocess.run([sys.executable, "-m", "pgen_model"])
+    time.sleep(3)  # Pausa para asegurar que el subproceso se inicie correctamente
+    main()
 
+def help_menu():
+    print(">> Menú de ayuda (pendiente de implementar)")
+    main()
 
 def loading_animation():
     spinner = itertools.cycle(["|", "/", "-", "\\"])
@@ -44,13 +49,15 @@ def main():
         """
                                                                 ================= \033[1mPharmagen: MENÚ PRINCIPAL\033[0m =================
                                                                 
-                                                                    1. Procesar datos genómicos de entrada
+                                                                    1. Procesar datos genómicos
                                                                                     
                                                                     2. Entrenar/Predecir (menú modelo ML)
                                                                                     
                                                                     3. Análisis avanzado (En progreso...)
+                                                                    
+                                                                    4. Instrucciones y ayuda (En progreso...)
                                                                                     
-                                                                            4. Salir
+                                                                            5. Salir
                                                                                     
                                                                 ==============================================================
                                                                 
@@ -67,6 +74,8 @@ def main():
         elif choice == "3":
             advanced_analysis()
         elif choice == "4":
+            help_menu()
+        elif choice == "5":
             print("¡Gracias por usar Pharmagen!")
             sys.exit(0)
         else:
