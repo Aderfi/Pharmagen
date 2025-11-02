@@ -70,7 +70,7 @@ LOG_FILE = LOGS_DIR / f"pharmagen_{DATE_STAMP}.log"
 
 # === METADATOS DEL SOFTWARE ===
 AUTOR = "Astordna/Aderfi/Adrim Hamed Outmani"
-VERSION = "0.1"
+VERSION = "0.667"
 FECHA_CREACION = "2024-06-15"
 
 

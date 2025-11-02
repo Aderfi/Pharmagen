@@ -133,8 +133,7 @@ class DeepFM_PGenModel(nn.Module):
         combined_dim = deep_output_dim + fm_output_dim
 
         # --- 5. Heads de Salida (Dinámicos) ---
-        # ¡AQUÍ ESTÁ LA MAGIA!
-        # Usamos un ModuleDict para almacenar las capas de salida
+        # ModuleDict para almacenar las capas de salida
         self.output_heads = nn.ModuleDict()
 
         # Iteramos sobre el diccionario de configuración
@@ -145,13 +144,13 @@ class DeepFM_PGenModel(nn.Module):
 
     def forward(self, drug, genotype, gene, allele):
 
-        # --- 1. Obtener Embeddings (Igual) ---
+        # --- 1. Obtener Embeddings  ---
         drug_vec = self.drug_emb(drug)
         geno_vec = self.geno_emb(genotype)
         gene_vec = self.gene_emb(gene)
         allele_vec = self.allele_emb(allele)
 
-        # --- 2. CÁLCULO RAMA "DEEP" (Igual) ---
+        # --- 2. CÁLCULO RAMA "DEEP"  ---
         deep_input = torch.cat([drug_vec, geno_vec, gene_vec, allele_vec], dim=-1)
         deep_x = self.gelu(self.fc1(deep_input))
         deep_x = self.dropout(deep_x)
@@ -160,7 +159,7 @@ class DeepFM_PGenModel(nn.Module):
         deep_output = self.gelu(self.fc3(deep_x))
         deep_output = self.dropout(deep_output)
 
-        # --- 3. CÁLCULO RAMA "FM" (Igual) ---
+        # --- 3. CÁLCULO RAMA "FM"  ---
         embeddings = [drug_vec, geno_vec, gene_vec, allele_vec]
         fm_outputs = []
         for emb_i, emb_j in itertools.combinations(embeddings, 2):
@@ -168,12 +167,11 @@ class DeepFM_PGenModel(nn.Module):
             fm_outputs.append(dot_product)
         fm_output = torch.cat(fm_outputs, dim=-1)
 
-        # --- 4. COMBINACIÓN (Igual) ---
+        # --- 4. COMBINACIÓN  ---
         combined_vec = torch.cat([deep_output, fm_output], dim=-1)
 
         # --- 5. PREDICCIONES (Dinámicas) ---
-        # ¡AQUÍ ESTÁ EL OTRO CAMBIO!
-        # Creamos un diccionario de predicciones
+        # Diccionario de predicciones
         predictions = {}
 
         # Iteramos sobre nuestro ModuleDict

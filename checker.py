@@ -7,12 +7,12 @@ import sys
 
 file="test_var_nofa_mapped_filled_with_effect_phenotype_ids.tsv"
 
-df = pd.read_csv(file, sep="\t", index_col=0)
-df.drop(index='Unnamed: 0', inplace=True, errors='ignore')
+
+df = pd.read_csv(file, sep="\t", dtype=str, )
 
 '''
 Col: ATC, NaN Count: 1217, NaN Percent: 9.17%
-Col: Drugs, NaN Count: 345, NaN Percent: 2.60%
+Col: Drugs, NaN Count: 345, NaN Percent: 2.60%n    
 Col: Variant/Haplotypes, NaN Count: 0, NaN Percent: 0.00%
 Col: Gene, NaN Count: 371, NaN Percent: 2.80%
 Col: Alleles, NaN Count: 406, NaN Percent: 3.06%
@@ -66,31 +66,21 @@ df.rename(columns={
     'Sentence': 'Sentence',
     'Variant Annotation ID': 'Variant Annotation ID'
 }, inplace=True)
-
-df.to_csv(file, sep="\t", index=False)
 '''
 
+print(df)
 
-df = df.reindex(columns=[
-    'ATC',
-    'Drug',
-    'Variant/Haplotypes',
-    'Gene',
-    'Alleles',
-    'Phenotype_outcome',
-    'Effect_direction',
-    'Effect_type',
-    'Effect_phenotype',
-    'Effect_phenotype_id',
-    'Metabolizer types',
-    'Population types',
-    'Pop_Phenotypes/Diseases',
-    'Comparison Allele(s) or Genotype(s)',
-    'Comparison Metabolizer types',
-    'Notes',
-    'Sentence',
-    'Variant Annotation ID'
-    
-])
-df.to_csv(file, sep="\t", index=False)
+lista_rs = []
 
+pattern = r'^rs[0-9]+'
+
+for row in df['Variant/Haplotypes'].values:
+    if re.match(pattern, str(row)):
+        lista_rs.append(row)
+    else:
+        continue
+
+print("Total rsIDs found:", len(lista_rs))
+with open("rsIDs_extracted.txt", "w") as f:
+    for rsid in lista_rs:
+        f.write(rsid + "\n")
