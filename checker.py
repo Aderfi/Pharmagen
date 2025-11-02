@@ -5,9 +5,10 @@ import numpy as np
 import itertools
 import sys
 
-file="var_nofa_mapped_filled.tsv"
+file="test_var_nofa_mapped_filled_with_effect_phenotype_ids.tsv"
 
-df = pd.read_csv(file, sep="\t")
+df = pd.read_csv(file, sep="\t", index_col=0)
+df.drop(index='Unnamed: 0', inplace=True, errors='ignore')
 
 '''
 Col: ATC, NaN Count: 1217, NaN Percent: 9.17%
@@ -44,7 +45,7 @@ df['Effect_type'] = df['Effect_type'].fillna('No_Effect_type')
 df['Effect_phenotype'] = df['Effect_phenotype'].fillna('Fenotipo_No_Especificado')
 
 df.to_csv("var_nofa_mapped_filled.tsv", sep="\t", index=False)
-'''
+
 
 df.rename(columns={
     'ATC': 'ATC',
@@ -67,3 +68,29 @@ df.rename(columns={
 }, inplace=True)
 
 df.to_csv(file, sep="\t", index=False)
+'''
+
+
+df = df.reindex(columns=[
+    'ATC',
+    'Drug',
+    'Variant/Haplotypes',
+    'Gene',
+    'Alleles',
+    'Phenotype_outcome',
+    'Effect_direction',
+    'Effect_type',
+    'Effect_phenotype',
+    'Effect_phenotype_id',
+    'Metabolizer types',
+    'Population types',
+    'Pop_Phenotypes/Diseases',
+    'Comparison Allele(s) or Genotype(s)',
+    'Comparison Metabolizer types',
+    'Notes',
+    'Sentence',
+    'Variant Annotation ID'
+    
+])
+df.to_csv(file, sep="\t", index=False)
+
