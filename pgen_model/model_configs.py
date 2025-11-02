@@ -80,7 +80,8 @@ MASTER_WEIGHTS = {
 }
 
 MULTI_LABEL_COLUMN_NAMES = {  # Columnas que son MULTI-LABEL
-    "phenotype_outcome"
+    "phenotype_outcome",
+    "effect_phenotype",
 } 
 
 MODEL_REGISTRY = {
