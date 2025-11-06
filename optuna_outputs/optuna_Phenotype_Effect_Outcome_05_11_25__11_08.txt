@@ -1,0 +1,15 @@
+Mejores hiperparámetros para Phenotype_Effect_Outcome (loss: 3.477998971939087, normalized_loss: 0.6853, avg_accuracy: 0.6737):
+  batch_size: 64
+  embedding_dim: 512
+  n_layers: 3
+  hidden_dim: 1024
+  dropout_rate: 0.3842721873799374
+  learning_rate: 0.00031333102701112047
+  weight_decay: 0.0001309388702651152
+
+Top 5 pruebas:
+1. Loss: 3.477998971939087, Params: {'batch_size': 64, 'embedding_dim': 512, 'n_layers': 3, 'hidden_dim': 1024, 'dropout_rate': 0.3842721873799374, 'learning_rate': 0.00031333102701112047, 'weight_decay': 0.0001309388702651152}
+2. Loss: 3.4797363451548984, Params: {'batch_size': 64, 'embedding_dim': 128, 'n_layers': 2, 'hidden_dim': 512, 'dropout_rate': 0.444112036283952, 'learning_rate': 0.0009827099297147303, 'weight_decay': 0.0007361165021980172}
+3. Loss: 3.48074057556334, Params: {'batch_size': 64, 'embedding_dim': 128, 'n_layers': 2, 'hidden_dim': 1024, 'dropout_rate': 0.49270256766397014, 'learning_rate': 0.0007362952288080764, 'weight_decay': 9.745257200197647e-05}
+4. Loss: 3.4815929106303622, Params: {'batch_size': 64, 'embedding_dim': 128, 'n_layers': 2, 'hidden_dim': 512, 'dropout_rate': 0.4494559785632835, 'learning_rate': 0.0007557788636265043, 'weight_decay': 0.0002869547858609081}
+5. Loss: 3.4825359809966314, Params: {'batch_size': 64, 'embedding_dim': 128, 'n_layers': 2, 'hidden_dim': 512, 'dropout_rate': 0.3924985320421345, 'learning_rate': 0.0008353559239677125, 'weight_decay': 0.00010672999237712644}

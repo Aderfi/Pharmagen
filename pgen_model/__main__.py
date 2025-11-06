@@ -9,7 +9,6 @@ import pandas as pd
 import sys
 from pathlib import Path
 from tabulate import tabulate
-from fuzzywuzzy import process
 
 from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
 
@@ -92,6 +91,7 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
         embedding_dim = params.get("embedding_dim", 256)
         hidden_dim = params.get("hidden_dim", 512)
         dropout_rate = params.get("dropout_rate", 0.3)
+        n_layers = params.get("n_layers", 2)  # AÑADIDO TESTEO
 
         # Crear una instancia del modelo con la arquitectura correcta
         # El orden DEBE coincidir con __init__ en model.py
@@ -101,6 +101,7 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
             n_genes,
             n_alleles,
             embedding_dim,
+            n_layers, # AÑADIDO TESTEO
             hidden_dim,
             dropout_rate,
             target_dims=target_dims,
@@ -155,7 +156,7 @@ def main():
             batch_size = params.get("batch_size", 64)
             target_cols = [t.lower() for t in config["targets"]]
             
-            csv_files = Path(MODEL_TRAIN_DATA, "var_nofa_mapped_filled.tsv")
+            csv_files = Path(MODEL_TRAIN_DATA, "final_test_filled.tsv")
             PMODEL_DIR = PROJECT_ROOT # PGEN_MODEL_DIR se define arriba como "."
 
             print(f"Iniciando entrenamiento con modelo: {model_name}")
@@ -175,7 +176,7 @@ def main():
         # =====================================  2: PREDICCIÓN MANUAL ============================================
 
         elif choice == "2":
-            csv_files = Path(MODEL_TRAIN_DATA, "var_nofa_mapped_filled.tsv")
+            csv_files = Path(MODEL_TRAIN_DATA, "final_test_filled.tsv")
             
             model_name = select_model(
                 model_options, "Selecciona el modelo para predicción manual"
@@ -185,7 +186,6 @@ def main():
 
             print("Introduce datos del paciente para predicción:")
             drug = input("Drug: ")
-            # <--- CORRECCIÓN 3.1: Prompt de input ---
             genotype = input("Variant/Haplotypes: ") # <--- Coincidir con la columna
             gene = input("Gene: ")
             allele = input("Allele: ")
@@ -330,7 +330,7 @@ def main():
                 "ADVERTENCIA: Asegúrate de que los MASTER_WEIGHTS en model_configs.py están en 1.0 para este diagnóstico."
             )
 
-            csv_files = Path(MODEL_TRAIN_DATA / "var_nofa_mapped_filled.tsv") # <--- Ruta corregida
+            csv_files = Path(MODEL_TRAIN_DATA / "final_test_filled.tsv") # <--- Ruta corregida
 
             print(f"Iniciando run de diagnóstico (1 época) con modelo: {model_name}")
             print(f"Parámetros: {', '.join(f'{k}: {v}' for k, v in params.items())} ")

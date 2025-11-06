@@ -1,0 +1,14 @@
+Model Targets: ['phenotype_outcome', 'effect_direction', 'effect_type']
+Validation Loss: 3.661021037535234
+Best Accuracy phenotype_outcome: 0.8837
+Best Accuracy effect_direction: 0.6615
+Best Accuracy effect_type: 0.3921
+
+Best Parameters:
+  batch_size: 256
+  embedding_dim: 128
+  n_layers: 2
+  hidden_dim: 512
+  dropout_rate: 0.5581615544643636
+  learning_rate: 0.0009839534205644176
+  weight_decay: 0.0006240637269521249

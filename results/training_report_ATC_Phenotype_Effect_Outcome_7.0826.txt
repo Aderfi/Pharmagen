@@ -1,0 +1,33 @@
+Modelo: ATC_Phenotype_Effect_Outcome
+Mejor loss en validación: 7.08262
+Precisión Promedio (Avg Acc) en mejor época: 0.5945
+Precisión por Tarea:
+  - phenotype_outcome: 0.6517
+  - effect_direction: 0.5506
+  - effect_type: 0.1612
+  - effect_phenotype: 0.6978
+  - effect_phenotype_id: 0.7024
+  - pop_phenotypes/diseases: 0.6994
+  - pop_phenotype_id: 0.6986
+
+Hiperparámetros Utilizados:
+  batch_size: 512
+  epochs: 100
+  learning_rate: 0.0001271487593514609
+  embedding_dim: 192
+  hidden_dim: 1024
+  dropout_rate: 0.6996731804616522
+  patience: 20
+  weight_decay: 0.001761363247217078
+  n_layers: 1
+
+Estrategia de Ponderación:
+  Uncertainty Weighting (Pesos dinámicos aprendibles)
+  Pesos Efectivos Finales (exp(-log_sigma^2)):
+  - phenotype_outcome: 1.0028
+  - effect_direction: 0.9976
+  - effect_type: 0.9974
+  - effect_phenotype: 1.0028
+  - effect_phenotype_id: 1.0028
+  - pop_phenotypes/diseases: 1.0028
+  - pop_phenotype_id: 1.0028

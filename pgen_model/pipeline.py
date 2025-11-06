@@ -17,7 +17,7 @@ from .model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
 from .train import train_model, save_model
 
 EPOCHS = 100
-PATIENCE = 20
+PATIENCE = 15
 
 # <--- CORRECCIÓN 1: Firma de la función ---
 # La firma ahora acepta 'params' (un dict) como lo pasa __main__.py.
@@ -28,6 +28,8 @@ def train_pipeline(
     csv_files, # Este argumento parece no usarse, pero lo mantenemos
     model_name,
     target_cols=None,
+    patience=PATIENCE,
+    epochs=EPOCHS,
 ):
     """
     Función principal para entrenar un modelo PGen.
@@ -47,7 +49,8 @@ def train_pipeline(
     # <--- CORRECCIÓN 2: Estratificación ---
     # 'phenotype_outcome' es multi-label y fallará.
     # Usamos 'effect_type' que es single-label y tiene pocos NaNs (que limpiamos después).
-    stratify_cols = ['phenotype_outcome']
+    #stratify_cols = ['phenotype_outcome']
+    stratify_cols = ['effect_type']
     
     params = config["params"]  # <--- ELIMINADO: 'params' ahora se pasa como argumento.
     # -----------------------------------------------
@@ -103,6 +106,31 @@ def train_pipeline(
     train_processed_df = data_loader_obj.transform(train_df)
     val_processed_df = data_loader_obj.transform(val_df)
     
+    """    aqui camios"""
+    
+    class_weights_task3 = None
+    task3_name = 'effect_type'
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    if task3_name in target_cols:
+        print(f"Calculando pesos de clase SUAVES para '{task3_name}'...")
+        try:
+            encoder_task3 = data_loader_obj.encoders[task3_name]
+            counts = train_processed_df[task3_name].value_counts().sort_index()
+            all_counts = torch.zeros(len(encoder_task3.classes_))
+            for class_id, count in counts.items():
+                all_counts[int(class_id)] = count
+            
+            # Usar la fórmula de Log Smoothing que funcionó
+            weights = 1.0 / torch.log(all_counts + 2) # +2 para evitar log(1)=0
+            weights = weights / weights.mean() # Normalizar
+            class_weights_task3 = weights.to(device)
+            print("Pesos de clase listos para el entrenamiento final.")
+        except Exception as e:
+            print(f"Error calculando pesos de clase en pipeline: {e}")
+    
+    """fin cambios"""
+    
     # --- FIN DE LA CORRECCIÓN DE DATOS ---
 
     # Crear Datasets y DataLoaders
@@ -146,6 +174,7 @@ def train_pipeline(
         n_genes, 
         n_alleles,
         params["embedding_dim"],
+        params["n_layers"],
         params["hidden_dim"],
         params["dropout_rate"],
         target_dims=target_dims,  # Dinámico #type: ignore
@@ -162,6 +191,25 @@ def train_pipeline(
         optimizer, mode="min", factor=0.2, patience=5)
 
     criterions_list = []
+    task3_name = 'effect_type'
+    
+    for col in target_cols:
+        if col in MULTI_LABEL_COLUMN_NAMES:
+            criterions_list.append(nn.BCEWithLogitsLoss())
+        
+        # Aplicar los pesos de clase a la Tarea 3
+        elif col == task3_name and class_weights_task3 is not None:
+            criterions_list.append(nn.CrossEntropyLoss(
+                label_smoothing=0.1,
+                weight=class_weights_task3
+            ))
+            print(f"Aplicando WeightedCrossEntropyLoss (Class Weighting) a '{task3_name}'.")
+
+        else: # Tareas 1 y 2 (single-label sin pesos de clase)
+            criterions_list.append(nn.CrossEntropyLoss(label_smoothing=0.1))
+
+    criterions = criterions_list + [optimizer]
+    """
     for col in target_cols:
         if col in MULTI_LABEL_COLUMN_NAMES:
             criterions_list.append(nn.BCEWithLogitsLoss())
@@ -169,12 +217,8 @@ def train_pipeline(
             criterions_list.append(nn.CrossEntropyLoss(label_smoothing=0.1))
 
     criterions = criterions_list + [optimizer]  # Combinar criterios y optimizador
+    """
     # ---------------------------------------------------------
-
-
-    priorities = {
-        'effect_type': 3.0 
-    }
 
 
     # --- Ejecutar Entrenamiento ---
@@ -194,7 +238,6 @@ def train_pipeline(
         scheduler=scheduler,
         progress_bar=True,
         use_weighted_loss=True,
-        task_priorities=priorities
     )
 
     # --- Guardar Resultados ---
@@ -214,7 +257,7 @@ def train_pipeline(
         results_dir / f"training_report_{model_name}_{round(best_loss, 4)}.txt"
     )
 
-    with open(report_file, "w") as f:
+    with open(report_file, "w", encoding="utf-8") as f:
         f.write(f"Modelo: {model_name}\n")
         f.write(f"Mejor loss en validación: {best_loss:.5f}\n")
         if best_accuracy_list:
