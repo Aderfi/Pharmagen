@@ -28,7 +28,7 @@ def advanced_analysis(): #3
 def launch_pgen_model(): # 2   
     # Llama al menú específico del paquete pgen_model():
     subprocess.run([sys.executable, "-m", "pgen_model"])
-    time.sleep(3)  # Pausa para asegurar que el subproceso se inicie correctamente
+    time.sleep(2)  # Pausa para asegurar que el subproceso se inicie correctamente
     main()
 
 def help_menu():
