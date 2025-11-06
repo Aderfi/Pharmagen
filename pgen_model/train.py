@@ -237,6 +237,7 @@ def save_model(model, target_cols, best_loss, best_accuracies, model_name, param
     model_save_dir.mkdir(parents=True, exist_ok=True)
     model_file_name = str("-".join([target[:3] for target in target_cols]))
     model_file_name = model_name
+    
     path_model_file = model_save_dir / f"pmodel_{model_file_name}.pth"
 
     # Definir archivo de reporte.

@@ -38,9 +38,9 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 optuna_results = Path(PROJECT_ROOT, "optuna_outputs", "figures")
 optuna_results.mkdir(parents=True, exist_ok=True)
 
-N_TRIALS = 50
+N_TRIALS = 100
 EPOCH = 100
-PATIENCE = 20
+PATIENCE = 15
 
 
 def get_optuna_params(trial: optuna.Trial, model_name: str) -> dict:
@@ -132,17 +132,21 @@ def optuna_objective(
     fitted_data_loader: PGenDataProcess,
     train_processed_df: pd.DataFrame,
     val_processed_df: pd.DataFrame,
-    csvfiles: Path | str # Solo para el print
+    csvfiles: Path | str, # Solo para el print
+    class_weights_task3: torch.Tensor = None #type: ignore
 ):
     """
     Función objetivo de Optuna.
     Recibe datos pre-procesados y se encarga del modelado y entrenamiento.
     """
+    
     seed = 711
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-
+    
+    
+    
     # --- 1. Definir Hiperparámetros ---
     params = get_optuna_params(trial, model_name)
     print(params)
@@ -177,6 +181,7 @@ def optuna_objective(
         n_genes=input_dims["gene"],
         n_alleles=input_dims["allele"],
         embedding_dim=params["embedding_dim"],
+        n_layers=params["n_layers"], # AÑADIDO TESTEO
         hidden_dim=params["hidden_dim"],
         dropout_rate=params["dropout_rate"],
         target_dims=target_dims,
@@ -191,12 +196,34 @@ def optuna_objective(
     )
 
     criterions = []
+    '''
     for col in target_cols:
         if col in MULTI_LABEL_COLUMN_NAMES:
             criterions.append(nn.BCEWithLogitsLoss())
         else:
             criterions.append(nn.CrossEntropyLoss(label_smoothing=0.1))
+    '''
+    
+    task3_name = 'effect_type' # El mismo nombre
+    
+    for col in target_cols:
+        if col in MULTI_LABEL_COLUMN_NAMES:
+            criterions.append(nn.BCEWithLogitsLoss())
+        
+        # Aplicar los pesos SUAVES si existen
+        elif col == task3_name and class_weights_task3 is not None:
+            criterions.append(nn.CrossEntropyLoss(
+                label_smoothing=0.1, 
+                weight=class_weights_task3 # <-- Aplicar pesos
+            ))
+            if trial.number == 0:
+                print(f"Optuna: Aplicando WeightedCrossEntropyLoss SUAVE para '{task3_name}'.")
+        
+        else:
+            criterions.append(nn.CrossEntropyLoss(label_smoothing=0.1))
+    
     criterions.append(optimizer)
+
     
     # --- 5. Entrenar ---
     best_loss, best_accuracies_list = train_model(
@@ -349,7 +376,7 @@ def run_optuna_with_progress(
         cols_from_config,
         targets_from_config,
         multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
-        stratify_cols=['phenotype_outcome'],
+        stratify_cols=['effect_type'],
     )
     
     # Limpiar NaNs triviales
@@ -366,7 +393,38 @@ def run_optuna_with_progress(
     train_processed_df = data_loader.transform(train_df)
     val_processed_df = data_loader.transform(val_df)
     print("Datos listos para la optimización.")
-    # --- FIN DE LA CARGA DE DATOS ---
+    
+    '''TESTEO DE NUEVO'''
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    class_weights_task3 = None
+    task3_name = 'effect_type'
+
+    if task3_name in target_cols:
+        try:
+            encoder_task3 = data_loader.encoders[task3_name]
+            counts = train_processed_df[task3_name].value_counts().sort_index()
+            all_counts = torch.zeros(len(encoder_task3.classes_))
+            for class_id, count in counts.items():
+                all_counts[int(class_id)] = count
+            
+            # --- ¡LA FÓRMULA SUAVE! ---
+            # Opción A: Log Smoothing (Recomendada)
+            weights = 1.0 / torch.log(all_counts + 2) # +2 para evitar log(1)=0
+            
+            # Opción B: Sqrt Smoothing (Más fuerte pero segura)
+            # weights = 1.0 / torch.sqrt(all_counts + 1)
+            
+            # Normalizar para que la media sea 1
+            weights = weights / weights.mean() 
+            class_weights_task3 = weights.to(device)
+            print(f"Pesos de clase SUAVES para '{task3_name}' calculados.")
+
+        except Exception as e:
+            print(f"Error calculando pesos suaves de clase: {e}")
+    
+    '''FIN DE TESTEO'''
+    
 
     # --- 3. Ejecutar Estudio ---
     pbar = tqdm(total=n_trials, file=sys.stderr, desc=f"Optuna ({model_name})", colour="green", nrows=3)
@@ -380,7 +438,8 @@ def run_optuna_with_progress(
         fitted_data_loader=data_loader,
         train_processed_df=train_processed_df,
         val_processed_df=val_processed_df,
-        csvfiles=csvfiles # type: ignore
+        csvfiles=csvfiles, # type: ignore
+        class_weights_task3=class_weights_task3 # type: ignore
     )
 
     study = optuna.create_study(
@@ -394,12 +453,14 @@ def run_optuna_with_progress(
     pbar.close()
     
     # --- 4. Guardar Gráfico de Historial (Plotly) ---
+    '''
     if study.trials:
         fig = plot_optimization_history(study)
         graph_filename = Path(optuna_results, f"history_{model_name}_{datetime_study}.html")
         fig.write_html(str(graph_filename))
         fig.write_image(str(graph_filename.with_suffix(".png")))
         print(f"Gráfico de historial de optimización guardado en: {graph_filename}")
+    '''
     
     # --- 5. Obtener y Guardar Reporte ---
     best_5 = get_best_trials(study, 5)

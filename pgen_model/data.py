@@ -29,7 +29,7 @@ def train_data_import(targets):
             
     targets = [t.lower() for t in targets]
 
-    read_cols_set = set(targets) | {"Drug", "Variant/Haplotypes", "Gene", "Allele"}
+    read_cols_set = set(targets) | {"ATC", "Drug", "Variant/Haplotypes", "Gene", "Allele"}
     read_cols = [c.lower() for c in read_cols_set]
 
     # equivalencias = load_equivalencias(csv_path)
@@ -99,7 +99,7 @@ class PGenDataProcess:
         """Helper: Divide un string 'A, B' en una lista ['A', 'B'] y maneja nulos."""
         if not isinstance(label_str, str) or pd.isna(label_str) or label_str.lower() in ["nan", "", "null"]:
             return []  # MultiLabelBinarizer necesita un iterable
-        return [s.strip() for s in label_str.split(",")]
+        return [s.strip() for s in re.split(r",|;", label_str) if s.strip()]
 
     def load_data(self, csv_path, all_cols, target_cols, 
                             multi_label_targets, stratify_cols):
@@ -114,9 +114,40 @@ class PGenDataProcess:
         df = pd.read_csv(str(csv_path), sep="\t", index_col=False)
         df.columns = [col.lower() for col in df.columns]
         
-        # Asegurarse de que solo nos quedamos con las columnas necesarias
         df = df[self.cols_to_process]
-
+        
+        print("Limpiando nombres de entidades (reemplazando espacios con '_')...")
+        for col in self.cols_to_process:
+            if col in df.columns and col not in self.multi_label_cols:
+                # Reemplazar espacios en columnas single-label
+                df[col] = df[col].astype(str).str.replace(' ', '_')
+            elif col in df.columns and col in self.multi_label_cols:
+                # Reemplazar espacios en columnas multi-label
+                # (Asumiendo que _split_labels ya las convirtió a listas de strings)
+                 df[col] = df[col].apply(
+                     lambda lst: [s.replace(' ', '_') for s in lst]
+                 )
+        
+        task3_name = "effect_type"
+        if task3_name in df.columns:
+            print(f"Agrupando clases raras para '{task3_name}'...")
+            MIN_SAMPLES = 20 # Umbral: agrupar cualquier clase con < 20 muestras
+            
+            # 1. Obtener los conteos de clase
+            counts = df[task3_name].value_counts()
+            
+            # 2. Identificar las clases a agrupar
+            to_group = counts[counts < MIN_SAMPLES].index
+            
+            if len(to_group) > 0:
+                print(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
+                # 3. Reemplazarlas en el DataFrame
+                df[task3_name] = df[task3_name].apply(
+                    lambda x: "Other_Grouped" if x in to_group else x
+                )
+            else:
+                print("No se encontraron clases raras para agrupar.")
+                
         # 1. Normaliza columnas target (y de estratificación) a string
         for t in self.target_cols:
             df[t] = df[t].astype(str)

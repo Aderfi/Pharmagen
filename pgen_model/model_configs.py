@@ -81,12 +81,13 @@ MASTER_WEIGHTS = {
 
 MULTI_LABEL_COLUMN_NAMES = {  # Columnas que son MULTI-LABEL
     "phenotype_outcome",
-    "effect_phenotype",
+    #"effect_phenotype",
+    #"pop_phenotypes/diseases",
 } 
 
 MODEL_REGISTRY = {
     "Phenotype_Effect_Outcome": {   # choice 1
-        "targets": ["Phenotype_outcome", "Effect_direction", "Effect_type", "Effect_phenotype"],
+        "targets": ["Phenotype_outcome", "Effect_direction", "Effect_type"],
         "cols": [
             "ATC",
             "Drug",
@@ -106,24 +107,78 @@ MODEL_REGISTRY = {
             "Sentence",
             "Variant Annotation ID"
         ],
-        
+        #"params": {
+        #    "batch_size": 512,
+        #    "embedding_dim": 128,
+        #    "n_layers": 2,
+        #    "hidden_dim": 4096,
+        #    "dropout_rate": 0.493740315869821,
+        #    "learning_rate": 0.0005893232367500335,
+        #    "weight_decay": 3.308304117490965e-05
+        #},
         "params": {
-            "batch_size": 512,
-            "embedding_dim": 128,
-            "hidden_dim": 4096,
-            "dropout_rate": 0.493740315869821,
-            "learning_rate": 0.0005893232367500335,
-            "weight_decay": 3.308304117490965e-05
+            "batch_size": 64,
+            "embedding_dim": 768,
+            "n_layers": 2,
+            "hidden_dim": 1024,
+            "dropout_rate": 0.5998793565539667,
+            "learning_rate": 7.617107933779652e-05,
+            "weight_decay": 1.0022489098738561e-06
         },
         "params_optuna": {
-            "batch_size": [512],
-            "embedding_dim": [128],
-            "hidden_dim": [4096],
-            "dropout_rate": (0.4, 0.5),
-            "learning_rate": (5e-4, 8e-4),
-            "weight_decay": (2e-5, 4e-5),
+            "batch_size": [64, 128, 256],
+            "embedding_dim": [128, 256, 512],
+            "n_layers": [1, 2, 3],
+            "hidden_dim": [512, 1024, 2048],
+            "dropout_rate": (0.1, 0.6),
+            "learning_rate": (1e-5, 1e-3),
+            "weight_decay": (1e-7, 1e-3),
         },
+    },
+    "ATC_Phenotype_Effect_Outcome": {   # choice 2
+        "targets": ["Phenotype_outcome", "Effect_direction", "Effect_type", "Effect_phenotype", "Effect_phenotype_id", "Pop_Phenotypes/Diseases", "Pop_phenotype_id"],
+        "cols": [
+            "ATC",
+            "Drug",
+            "Variant/Haplotypes",
+            "Gene",
+            "Allele",
+            "Phenotype_outcome",
+            "Effect_direction",
+            "Effect_type",
+            "Effect_phenotype",
+            "Effect_phenotype_id",
+            "Pop_Phenotypes/Diseases",
+            "Pop_phenotype_id",
+            "Metabolizer types",
+            "Population types",
+            "Comparison Allele(s) or Genotype(s)",
+            "Comparison Metabolizer types",
+            "Notes",
+            "Sentence",
+            "Variant Annotation ID"
+        ],
+
+        "params": {
+            "batch_size": 512,
+            "embedding_dim": 192,
+            "n_layers": 1,
+            "hidden_dim": 1024,
+            "dropout_rate": 0.6996731804616522,
+            "learning_rate": 0.0001271487593514609,
+            "weight_decay": 0.001761363247217078
+            },
         
+        "params_optuna": {
+            "batch_size": [512],
+            "embedding_dim": [192],
+            "n_layers": [1],
+            "hidden_dim": ["int", 512, 1024, 256],
+            "dropout_rate": (0.4, 0.7),
+            "learning_rate": (1e-4, 6e-4),
+            "weight_decay": (1e-3, 1e-2)
+        },
+
         "weights": {
             "phenotype_outcome": 1.0,
             "effect_direction": 1.0,
@@ -132,3 +187,26 @@ MODEL_REGISTRY = {
         },
     },
 }
+
+#+----+-------------------------------------+---------+
+#|    | Column Names                        |   Index |
+#|----+-------------------------------------+---------|
+#|  0 | ATC                                 |       0 |
+#|  1 | Drug                                |       1 |
+#|  2 | Variant/Haplotypes                  |       2 |
+#|  3 | Gene                                |       3 |
+#|  4 | Alleles                             |       4 |
+#|  5 | Phenotype_outcome                   |       5 |
+#|  6 | Effect_direction                    |       6 |
+#|  7 | Effect_type                         |       7 |
+#|  8 | Effect_phenotype                    |       8 |
+#|  9 | Effect_phenotype_id                 |       9 |
+#| 10 | Metabolizer types                   |      10 |
+#| 11 | Population types                    |      11 |
+#| 12 | Pop_Phenotypes/Diseases             |      12 |
+#| 13 | Comparison Allele(s) or Genotype(s) |      13 |
+#| 14 | Comparison Metabolizer types        |      14 |
+#| 15 | Notes                               |      15 |
+#| 16 | Sentence                            |      16 |
+#| 17 | Variant Annotation ID               |      17 |
+#+----+-------------------------------------+---------+
