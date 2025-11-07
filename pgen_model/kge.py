@@ -7,7 +7,7 @@ import sys
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-FILE_PATH = 'train_data/relationships_associated.tsv'
+FILE_PATH = 'train_data/relationships_associated_corrected.tsv'
 
 ENTITY_COLUMNS = ['Entity1_name', 'Entity2_name']
 
@@ -19,7 +19,7 @@ NUM_WALKS = 200  # Número de paseos aleatorios por nodo
 # --- Parámetros de Gensim (Word2Vec) ---
 WINDOW_SIZE = 10    # Tamaño de la ventana de contexto
 MIN_COUNT = 1       # Contar todas las entidades (incluso las raras)
-WORKERS = 4         # Usar 4 cores de CPU para entrenar (ajusta a tu PC)
+WORKERS = 16         # Usar 4 cores de CPU para entrenar (ajusta a tu PC)
 
 EMBEDDING_FILE = 'encoders/kge_embeddings.kv' # .kv es el formato de KeyedVectors
 
@@ -34,6 +34,9 @@ try:
     
     # Filtrar filas donde falte un nombre de entidad
     df = df.dropna(subset=ENTITY_COLUMNS)
+    
+    for col in ENTITY_COLUMNS:
+        df[col] = df[col].astype(str).str.replace(' ', '_')
     
     print("Construyendo el grafo con NetworkX...")
     # Crear un grafo no dirigido a partir de las dos columnas

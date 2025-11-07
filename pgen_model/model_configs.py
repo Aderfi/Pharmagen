@@ -57,6 +57,11 @@ def get_model_config(model_name: str) -> dict:
     
     return final_config  # --> dict
 
+CLINICAL_PRIORITIES = {
+    'effect_type': 0.5,           # 50% - Crítico (toxicidad/eficacia)
+    'phenotype_outcome': 0.3,     # 30% - Importante (resultado clínico)
+    'effect_direction': 0.2,      # 20% - Útil (dirección del efecto)
+}
 
 DEFAULT_HYPERPARAMS = {
     "batch_size": 64,
@@ -91,21 +96,14 @@ MODEL_REGISTRY = {
         "cols": [
             "ATC",
             "Drug",
-            "Variant/Haplotypes",
+            "Genalle",
+            #"Variant/Haplotypes",
             "Gene",
             "Allele",
             "Phenotype_outcome",
             "Effect_direction",
             "Effect_type",
             "Effect_phenotype",
-            "Metabolizer types",
-            "Population types",
-            "Pop_Phenotypes/Diseases",
-            "Comparison Allele(s) or Genotype(s)",
-            "Comparison Metabolizer types",
-            "Notes",   
-            "Sentence",
-            "Variant Annotation ID"
         ],
         #"params": {
         #    "batch_size": 512,

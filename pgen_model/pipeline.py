@@ -13,11 +13,11 @@ from sklearn.model_selection import train_test_split
 
 from .data import PGenDataset, PGenDataProcess, train_data_import
 from .model import DeepFM_PGenModel
-from .model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
+from .model_configs import CLINICAL_PRIORITIES, MULTI_LABEL_COLUMN_NAMES, get_model_config
 from .train import train_model, save_model
 
-EPOCHS = 100
-PATIENCE = 15
+EPOCHS = 1
+PATIENCE = 1
 
 # <--- CORRECCIÓN 1: Firma de la función ---
 # La firma ahora acepta 'params' (un dict) como lo pasa __main__.py.
@@ -162,7 +162,7 @@ def train_pipeline(
 
     # Obtener número de clases para los inputs
     n_drugs = len(data_loader_obj.encoders["drug"].classes_)
-    n_genotypes = len(data_loader_obj.encoders["variant/haplotypes"].classes_)
+    n_genotypes = len(data_loader_obj.encoders["genalle"].classes_) # cambiado a Genalle
     n_genes = len(data_loader_obj.encoders["gene"].classes_)
     n_alleles = len(data_loader_obj.encoders["allele"].classes_)
 
@@ -223,7 +223,7 @@ def train_pipeline(
 
     # --- Ejecutar Entrenamiento ---
     print(f"Iniciando entrenamiento final para {model_name} con Ponderación de Incertidumbre...")
-    best_loss, best_accuracy_list = train_model(
+    best_loss, best_accuracy_list = train_model( #type: ignore
         train_loader,
         val_loader,
         model,
@@ -238,6 +238,8 @@ def train_pipeline(
         scheduler=scheduler,
         progress_bar=True,
         use_weighted_loss=True,
+        task_priorities=CLINICAL_PRIORITIES,
+        return_per_task_losses=True, 
     )
 
     # --- Guardar Resultados ---

@@ -1,5 +1,0 @@
-__main__.py: Menu para la CLI. Seleccion de acciones (Entrenamiento, predicción etc.)
-
-data.py:    Funciones relativas al manejo de los csv de partida y tratamiento de los DataFrames.
-            DataLoaders y Datasets.
-

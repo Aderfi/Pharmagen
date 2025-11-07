@@ -287,12 +287,20 @@ def main():
 
             targets = MODEL_REGISTRY[optuna_model_name]["targets"]
             target_cols = [t.lower() for t in targets]
+            
+            print("\n¿Qué tipo de optimización deseas usar?")
+            print("  1. Multi-Objetivo (Loss + F1) [RECOMENDADO para Pharmacogenomics]")
+            print("  2. Single-Objetivo (Solo Loss)")
+            opt_mode = input("Selecciona (1-2): ").strip()
 
+            use_multi_obj = (opt_mode == "1")
+            
             best_params, best_loss, results_file, normalized_loss = (
                 run_optuna_with_progress(
                     optuna_model_name,
                     output_dir=Path(PGEN_MODEL_DIR),
                     target_cols=target_cols,
+                    use_multi_objective=use_multi_obj,
                 )
             )
 
