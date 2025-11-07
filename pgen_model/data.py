@@ -26,10 +26,11 @@ def train_data_import(targets):
     elif len(csv_files) == 1:
         print(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
         csv_files = csv_files[0]
+    csv_files = Path(csv_path, "final_test_genalle.tsv")
             
     targets = [t.lower() for t in targets]
 
-    read_cols_set = set(targets) | {"ATC", "Drug", "Variant/Haplotypes", "Gene", "Allele"}
+    read_cols_set = set(targets) | {"Drug", "Genalle", "Gene", "Allele"} #Variant/Haplotypes cambiado a Genalle
     read_cols = [c.lower() for c in read_cols_set]
 
     # equivalencias = load_equivalencias(csv_path)

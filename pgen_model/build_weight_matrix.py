@@ -15,10 +15,9 @@ OUTPUT_FILE = 'models/pretrained_weights.pth'
 # deben coincidir con las claves de tu dict de encoders.
 EMBEDDING_LAYERS = [
     'drug',
-    'variant/haplotypes'
+    'variant/haplotypes',
     'gene', 
     'allele', 
-    'variant/haplotypes'
 ]
 
 try:
