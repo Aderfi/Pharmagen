@@ -5,12 +5,55 @@ from pathlib import Path
 import torch
 from src.config.config import *
 from tqdm import tqdm
+from typing import overload, Literal
 
 from .model import DeepFM_PGenModel
 from .model_configs import get_model_config
 
 trained_encoders_path = Path(MODELS_DIR)
 
+@overload
+def train_model(
+    train_loader,
+    val_loader,
+    model,
+    criterions,
+    epochs,
+    patience,
+    model_name,
+    device=None,
+    target_cols=None,
+    scheduler=None,
+    params_to_txt=None,
+    multi_label_cols: set = None,
+    progress_bar: bool = False,
+    optuna_check_weights: bool = False,
+    use_weighted_loss: bool = False,
+    task_priorities: dict = None,
+    return_per_task_losses: Literal[True] = ...,  # <-- Literal[True]
+) -> tuple[float, list[float], list[float]]: ...  # <-- Retorna 3
+
+# Overload 2: Si return_per_task_losses=False → Retorna 2 valores
+@overload
+def train_model(
+    train_loader,
+    val_loader,
+    model,
+    criterions,
+    epochs,
+    patience,
+    model_name,
+    device=None,
+    target_cols=None,
+    scheduler=None,
+    params_to_txt=None,
+    multi_label_cols: set = None,
+    progress_bar: bool = False,
+    optuna_check_weights: bool = False,
+    use_weighted_loss: bool = False,
+    task_priorities: dict = None,
+    return_per_task_losses: Literal[False] = ...,  # <-- Literal[False]
+) -> tuple[float, list[float]]: ...  # <-- Retorna 2
 
 def train_model(
     train_loader,
@@ -28,7 +71,8 @@ def train_model(
     progress_bar: bool = False,
     optuna_check_weights: bool = False,
     use_weighted_loss: bool = False,
-    task_priorities: dict = None    # type: ignore
+    task_priorities: dict = None,  # type: ignore
+    return_per_task_losses: bool = False
 ):
 
     if device is None:
@@ -55,11 +99,11 @@ def train_model(
             f"Desajuste: Se recibieron {len(criterions_)} funciones de pérdida, pero se esperaban {num_targets} (basado en 'target_cols')."
         )
 
-    for epoch in (tqdm(range(epochs), desc="Progress", unit="epoch") if progress_bar==True else range(epochs)):
+    for epoch in (tqdm(range(epochs), desc="Progress", unit="epoch") if progress_bar else range(epochs)):
         model.train()
         total_loss = 0
 
-        if progress_bar==True:
+        if progress_bar:
             train_bar = tqdm(
                 train_loader,
                 desc="Progreso de Época",
@@ -74,7 +118,7 @@ def train_model(
         
         for batch in iterator:
             drug = batch["drug"].to(device)
-            genotype = batch["variant/haplotypes"].to(device)
+            genalle = batch["genalle"].to(device) 
             gene = batch["gene"].to(device)
             allele = batch["allele"].to(device)
 
@@ -82,7 +126,7 @@ def train_model(
 
             optimizer.zero_grad()
 
-            outputs = model(drug, genotype, gene, allele)
+            outputs = model(drug, genalle, gene, allele)
             
             individual_losses = []
             for i, col in enumerate(target_cols):
@@ -123,14 +167,14 @@ def train_model(
         with torch.no_grad():
             for batch in val_loader:
                 drug = batch["drug"].to(device)
-                genotype = batch["variant/haplotypes"].to(device)
+                genalle = batch["genalle"].to(device)
                 gene = batch["gene"].to(device)
                 allele = batch["allele"].to(device)
                 
 
                 targets = {col: batch[col].to(device) for col in target_cols}
 
-                outputs = model(drug, genotype, gene, allele)
+                outputs = model(drug, genalle, gene, allele)
 
                 # Bucle de pérdida de validación
                 individual_losses_val = []
@@ -222,10 +266,14 @@ def train_model(
         else:
             trigger_times += 1
             if trigger_times >= patience:
-                print(f"Early stopping triggered after {patience} epochs.")
+                print(f"Early stopping triggered after {patience} epochs. \b\r")
                 break
                 
-    return best_loss, best_accuracies
+    if return_per_task_losses:
+        avg_per_task_losses = [loss_sum / len(val_loader) for loss_sum in individual_loss_sums] # type: ignore
+        return best_loss, best_accuracies, avg_per_task_losses  # <--- Nuevo return
+    else:
+        return best_loss, best_accuracies  # <--- Return original
 
 def save_model(model, target_cols, best_loss, best_accuracies, model_name, params_to_txt=None):
     try:
