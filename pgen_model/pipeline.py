@@ -145,13 +145,17 @@ def train_pipeline(
         train_dataset,
         batch_size=params["batch_size"],
         shuffle=True,
-        num_workers=4,
+        num_workers=0,  # Use 0 for GPU training to avoid CPU bottleneck
+        pin_memory=True,  # Faster data transfer to GPU
+        persistent_workers=False,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=params["batch_size"],
         shuffle=False,
-        num_workers=4,
+        num_workers=0,
+        pin_memory=True,
+        persistent_workers=False,
     )
 
     # --- Preparar Información para el Modelo ---

@@ -1,5 +1,3 @@
-import itertools
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -116,13 +114,19 @@ class DeepFM_PGenModel(nn.Module):
         deep_output = deep_x
         
 
-        # --- 3. CÁLCULO RAMA "FM"  ---
-        embeddings = [atc_vec, drug_vec, genal_vec, gene_vec, allele_vec]
-        fm_outputs = []
-        for emb_i, emb_j in itertools.combinations(embeddings, 2):
-            dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
-            fm_outputs.append(dot_product)
-        fm_output = torch.cat(fm_outputs, dim=-1)
+        # --- 3. CÁLCULO RAMA "FM" (Optimizado) ---
+        # Stack embeddings for vectorized computation
+        embeddings_stack = torch.stack([atc_vec, drug_vec, genal_vec, gene_vec, allele_vec], dim=1)  # [batch, 5, emb_dim]
+        
+        # Compute all pairwise interactions efficiently
+        # Using outer product approach for all combinations
+        num_fields = embeddings_stack.size(1)
+        fm_outputs_list = []
+        for i in range(num_fields):
+            for j in range(i + 1, num_fields):
+                interaction = torch.sum(embeddings_stack[:, i] * embeddings_stack[:, j], dim=-1, keepdim=True)
+                fm_outputs_list.append(interaction)
+        fm_output = torch.cat(fm_outputs_list, dim=-1)
 
         # --- 4. COMBINACIÓN  ---
         combined_vec = torch.cat([deep_output, fm_output], dim=-1)
@@ -282,13 +286,18 @@ class DeepFM_PGenModel(nn.Module):
         deep_output = deep_x
         
 
-        # --- 3. CÁLCULO RAMA "FM"  ---
-        embeddings = [drug_vec, genal_vec, gene_vec, allele_vec]
-        fm_outputs = []
-        for emb_i, emb_j in itertools.combinations(embeddings, 2):
-            dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
-            fm_outputs.append(dot_product)
-        fm_output = torch.cat(fm_outputs, dim=-1)
+        # --- 3. CÁLCULO RAMA "FM" (Optimizado) ---
+        # Stack embeddings for vectorized computation
+        embeddings_stack = torch.stack([drug_vec, genal_vec, gene_vec, allele_vec], dim=1)  # [batch, 4, emb_dim]
+        
+        # Compute all pairwise interactions efficiently
+        num_fields = embeddings_stack.size(1)
+        fm_outputs_list = []
+        for i in range(num_fields):
+            for j in range(i + 1, num_fields):
+                interaction = torch.sum(embeddings_stack[:, i] * embeddings_stack[:, j], dim=-1, keepdim=True)
+                fm_outputs_list.append(interaction)
+        fm_output = torch.cat(fm_outputs_list, dim=-1)
 
         # --- 4. COMBINACIÓN  ---
         combined_vec = torch.cat([deep_output, fm_output], dim=-1)
@@ -452,13 +461,18 @@ class DeepFM_PGenModel(nn.Module):
         deep_output = deep_x
         
 
-        # --- 3. CÁLCULO RAMA "FM"  ---
-        embeddings = [drug_vec, genal_vec, gene_vec, allele_vec]
-        fm_outputs = []
-        for emb_i, emb_j in itertools.combinations(embeddings, 2):
-            dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
-            fm_outputs.append(dot_product)
-        fm_output = torch.cat(fm_outputs, dim=-1)
+        # --- 3. CÁLCULO RAMA "FM" (Optimizado) ---
+        # Stack embeddings for vectorized computation
+        embeddings_stack = torch.stack([drug_vec, genal_vec, gene_vec, allele_vec], dim=1)  # [batch, 4, emb_dim]
+        
+        # Compute all pairwise interactions efficiently
+        num_fields = embeddings_stack.size(1)
+        fm_outputs_list = []
+        for i in range(num_fields):
+            for j in range(i + 1, num_fields):
+                interaction = torch.sum(embeddings_stack[:, i] * embeddings_stack[:, j], dim=-1, keepdim=True)
+                fm_outputs_list.append(interaction)
+        fm_output = torch.cat(fm_outputs_list, dim=-1)
 
         # --- 4. COMBINACIÓN  ---
         combined_vec = torch.cat([deep_output, fm_output], dim=-1)

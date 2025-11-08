@@ -31,6 +31,7 @@ def train_model(
     use_weighted_loss: bool = False,
     task_priorities: dict = None,
     return_per_task_losses: Literal[True] = ...,  # <-- Literal[True]
+    use_amp: bool = True,
 ) -> tuple[float, list[float], list[float]]: ...  # <-- Retorna 3
 
 # Overload 2: Si return_per_task_losses=False → Retorna 2 valores
@@ -53,6 +54,7 @@ def train_model(
     use_weighted_loss: bool = False,
     task_priorities: dict = None,
     return_per_task_losses: Literal[False] = ...,  # <-- Literal[False]
+    use_amp: bool = True,
 ) -> tuple[float, list[float]]: ...  # <-- Retorna 2
 
 def train_model(
@@ -72,7 +74,8 @@ def train_model(
     optuna_check_weights: bool = False,
     use_weighted_loss: bool = False,
     task_priorities: dict = None,  # type: ignore
-    return_per_task_losses: bool = False
+    return_per_task_losses: bool = False,
+    use_amp: bool = True,  # Enable automatic mixed precision by default
 ):
 
     if device is None:
@@ -93,6 +96,9 @@ def train_model(
 
     optimizer = criterions[-1]
     criterions_ = criterions[:-1]
+    
+    # Initialize gradient scaler for mixed precision training
+    scaler = torch.cuda.amp.GradScaler() if (use_amp and torch.cuda.is_available()) else None
 
     if len(criterions_) != num_targets:
         raise ValueError(
@@ -117,39 +123,70 @@ def train_model(
             iterator = train_loader
         
         for batch in iterator:
-            drug = batch["drug"].to(device)
-            genalle = batch["genalle"].to(device) 
-            gene = batch["gene"].to(device)
-            allele = batch["allele"].to(device)
-
-            targets = {col: batch[col].to(device) for col in target_cols}
+            # Batch transfer to device - more efficient than individual transfers
+            batch_device = {k: v.to(device, non_blocking=True) for k, v in batch.items()}
+            
+            drug = batch_device["drug"]
+            genalle = batch_device["genalle"]
+            gene = batch_device["gene"]
+            allele = batch_device["allele"]
+            targets = {col: batch_device[col] for col in target_cols}
 
             optimizer.zero_grad()
 
-            outputs = model(drug, genalle, gene, allele)
-            
-            individual_losses = []
-            for i, col in enumerate(target_cols):
-                loss_fn = criterions_[i]
-                pred = outputs[col]
-                true = targets[col]
-                individual_losses.append(loss_fn(pred, true))
-            
-            
-            unweighted_losses_dict = {
-                col: individual_losses[i] for i, col in enumerate(target_cols)
+            # Mixed precision training context
+            if scaler is not None:
+                with torch.cuda.amp.autocast():
+                    outputs = model(drug, genalle, gene, allele)
+                    
+                    # Pre-allocate tensor for losses instead of using list
+                    individual_losses = torch.zeros(num_targets, device=device)
+                    for i, col in enumerate(target_cols):
+                        loss_fn = criterions_[i]
+                        pred = outputs[col]
+                        true = targets[col]
+                        individual_losses[i] = loss_fn(pred, true)
+                    
+                    # Create dictionary for weighted loss
+                    unweighted_losses_dict = {
+                        col: individual_losses[i] for i, col in enumerate(target_cols)
+                    }
+
+                    # Si use_weighted_loss es True, usamos la función de pérdida ponderada.
+                    if use_weighted_loss:
+                        loss = model.calculate_weighted_loss(unweighted_losses_dict, task_priorities)
+                    else:
+                        loss = individual_losses.sum()
+                
+                # Scaled backward pass
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                # Standard training without AMP
+                outputs = model(drug, genalle, gene, allele)
+                
+                # Pre-allocate tensor for losses instead of using list
+                individual_losses = torch.zeros(num_targets, device=device)
+                for i, col in enumerate(target_cols):
+                    loss_fn = criterions_[i]
+                    pred = outputs[col]
+                    true = targets[col]
+                    individual_losses[i] = loss_fn(pred, true)
+                
+                # Create dictionary for weighted loss
+                unweighted_losses_dict = {
+                    col: individual_losses[i] for i, col in enumerate(target_cols)
                 }
 
-            # Si use_weighted_loss es True, usamos la función de pérdida ponderada.     (Invocación desde pipeline.py)
-            if use_weighted_loss:
-                #loss = model.calculate_weighted_loss(unweighted_losses_dict)
-                loss = model.calculate_weighted_loss(unweighted_losses_dict, task_priorities)
-            # Si es False, usamos la suma simple                                        (Invocación desde optuna_train.py)
-            else:
-                loss = torch.stack(individual_losses).sum()
-            
-            loss.backward()
-            optimizer.step()
+                # Si use_weighted_loss es True, usamos la función de pérdida ponderada.
+                if use_weighted_loss:
+                    loss = model.calculate_weighted_loss(unweighted_losses_dict, task_priorities)
+                else:
+                    loss = individual_losses.sum()
+                
+                loss.backward()
+                optimizer.step()
 
             total_loss += loss.item()
 
@@ -166,40 +203,67 @@ def train_model(
 
         with torch.no_grad():
             for batch in val_loader:
-                drug = batch["drug"].to(device)
-                genalle = batch["genalle"].to(device)
-                gene = batch["gene"].to(device)
-                allele = batch["allele"].to(device)
+                # Batch transfer to device - more efficient
+                batch_device = {k: v.to(device, non_blocking=True) for k, v in batch.items()}
                 
+                drug = batch_device["drug"]
+                genalle = batch_device["genalle"]
+                gene = batch_device["gene"]
+                allele = batch_device["allele"]
+                targets = {col: batch_device[col] for col in target_cols}
 
-                targets = {col: batch[col].to(device) for col in target_cols}
+                # Use AMP for validation as well (inference only, no gradient computation)
+                if scaler is not None:
+                    with torch.cuda.amp.autocast():
+                        outputs = model(drug, genalle, gene, allele)
 
-                outputs = model(drug, genalle, gene, allele)
+                        # Pre-allocate tensor for losses instead of using list
+                        individual_losses_val = torch.zeros(num_targets, device=device)
+                        for i, col in enumerate(target_cols):
+                            loss_fn = criterions_[i]
+                            pred = outputs[col]
+                            true = targets[col]
+                            individual_losses_val[i] = loss_fn(pred, true)
+                        
+                        # Update individual loss sums
+                        for i in range(num_targets):
+                            individual_loss_sums[i] += individual_losses_val[i].item()
 
-                # Bucle de pérdida de validación
-                individual_losses_val = []
-                for i, col in enumerate(target_cols):
-                    loss_fn = criterions_[i]
-                    pred = outputs[col]
-                    true = targets[col]
-                    individual_losses_val.append(loss_fn(pred, true))  # type: ignore
+                        individual_losses_val_dict = {
+                            col: individual_losses_val[i] for i, col in enumerate(target_cols)
+                        }
 
-                
-                individual_losses_val_tensor = torch.stack(individual_losses_val)
-                
-                for i in range(num_targets):
-                    individual_loss_sums[i] += individual_losses_val_tensor[i].item()
-
-                individual_losses_val_dict = {
-                    col: individual_losses_val[i] for i, col in enumerate(target_cols)
-                }
-
-                if use_weighted_loss:
-                    # Modo "Entrenamiento Final": usa la ponderación de incertidumbre
-                    loss = model.calculate_weighted_loss(individual_losses_val_dict, task_priorities)
+                        if use_weighted_loss:
+                            # Modo "Entrenamiento Final": usa la ponderación de incertidumbre
+                            loss = model.calculate_weighted_loss(individual_losses_val_dict, task_priorities)
+                        else:
+                            # Modo "Optuna": usa la suma simple
+                            loss = individual_losses_val.sum()
                 else:
-                    # Modo "Optuna": usa la suma simple
-                    loss = torch.stack(individual_losses_val).sum()
+                    outputs = model(drug, genalle, gene, allele)
+
+                    # Pre-allocate tensor for losses instead of using list
+                    individual_losses_val = torch.zeros(num_targets, device=device)
+                    for i, col in enumerate(target_cols):
+                        loss_fn = criterions_[i]
+                        pred = outputs[col]
+                        true = targets[col]
+                        individual_losses_val[i] = loss_fn(pred, true)
+                    
+                    # Update individual loss sums
+                    for i in range(num_targets):
+                        individual_loss_sums[i] += individual_losses_val[i].item()
+
+                    individual_losses_val_dict = {
+                        col: individual_losses_val[i] for i, col in enumerate(target_cols)
+                    }
+
+                    if use_weighted_loss:
+                        # Modo "Entrenamiento Final": usa la ponderación de incertidumbre
+                        loss = model.calculate_weighted_loss(individual_losses_val_dict, task_priorities)
+                    else:
+                        # Modo "Optuna": usa la suma simple
+                        loss = individual_losses_val.sum()
                 # --- FIN DE LA MODIFICACIÓN ---
                 
                 val_loss += loss.item()
