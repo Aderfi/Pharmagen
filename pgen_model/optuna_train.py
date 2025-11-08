@@ -158,15 +158,18 @@ def calculate_task_metrics(
     
     with torch.no_grad():
         for batch in data_loader:
-            drug = batch["drug"].to(device)
-            genalle = batch["genalle"].to(device)
-            gene = batch["gene"].to(device)
-            allele = batch["allele"].to(device)
+            # Batch transfer to device - more efficient
+            batch_device = {k: v.to(device, non_blocking=True) for k, v in batch.items()}
+            
+            drug = batch_device["drug"]
+            genalle = batch_device["genalle"]
+            gene = batch_device["gene"]
+            allele = batch_device["allele"]
             
             outputs = model(drug, genalle, gene, allele)
             
             for col in target_cols:
-                true = batch[col].to(device)
+                true = batch_device[col]
                 pred = outputs[col]
                 
                 if col in multi_label_cols:

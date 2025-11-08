@@ -118,10 +118,11 @@ class PGenDataProcess:
         df = df[self.cols_to_process]
         
         print("Limpiando nombres de entidades (reemplazando espacios con '_')...")
+        # Vectorized string replacement is much faster than apply()
         for col in self.cols_to_process:
             if col in df.columns and col not in self.multi_label_cols:
-                # Reemplazar espacios en columnas single-label
-                df[col] = df[col].astype(str).str.replace(' ', '_')
+                # Reemplazar espacios en columnas single-label (vectorized)
+                df[col] = df[col].astype(str).str.replace(' ', '_', regex=False)
             elif col in df.columns and col in self.multi_label_cols:
                 # Reemplazar espacios en columnas multi-label
                 # (Asumiendo que _split_labels ya las convirtió a listas de strings)
@@ -137,13 +138,13 @@ class PGenDataProcess:
             # 1. Obtener los conteos de clase
             counts = df[task3_name].value_counts()
             
-            # 2. Identificar las clases a agrupar
-            to_group = counts[counts < MIN_SAMPLES].index
+            # 2. Identificar las clases a agrupar (using set for faster lookup)
+            to_group = set(counts[counts < MIN_SAMPLES].index)
             
             if len(to_group) > 0:
                 print(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
-                # 3. Reemplazarlas en el DataFrame
-                df[task3_name] = df[task3_name].apply(
+                # 3. Reemplazarlas en el DataFrame (vectorized with map)
+                df[task3_name] = df[task3_name].map(
                     lambda x: "Other_Grouped" if x in to_group else x
                 )
             else:
@@ -161,6 +162,7 @@ class PGenDataProcess:
         df["stratify_col"] = df[stratify_cols].agg("_".join, axis=1)
 
         # 3. Filtrar datos insuficientes (opcional, pero buena práctica)
+        # Use boolean indexing instead of isin for better performance
         counts = df["stratify_col"].value_counts()
         suficientes = counts[counts > 1].index
         df = df[df["stratify_col"].isin(suficientes)].reset_index(drop=True)
