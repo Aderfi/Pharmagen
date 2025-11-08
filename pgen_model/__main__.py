@@ -12,11 +12,11 @@ from tabulate import tabulate
 
 from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
 
-from .data import PGenDataProcess, train_data_import
-from .model import DeepFM_PGenModel
-from .model_configs import MODEL_REGISTRY, get_model_config
-from .pipeline import train_pipeline
-from .predict import load_encoders, predict_from_file, predict_single_input
+from src.data import PGenDataProcess, train_data_import
+from src.model import DeepFM_PGenModel
+from src.model_configs import MODEL_REGISTRY, get_model_config
+from src.pipeline import train_pipeline
+from src.predict import load_encoders, predict_from_file, predict_single_input
 
 ###########################################################
 # Configuración
@@ -49,11 +49,7 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
     Carga un modelo PyTorch guardado para un conjunto específico de targets.
     """
     from pathlib import Path
-
     import torch
-
-    from .model import DeepFM_PGenModel
-    from .model_configs import MODEL_REGISTRY
 
     if base_dir is None:
         from src.config.config import MODELS_DIR
@@ -156,7 +152,7 @@ def main():
             batch_size = params.get("batch_size", 64)
             target_cols = [t.lower() for t in config["targets"]]
             
-            csv_files = Path(MODEL_TRAIN_DATA, "final_test_filled.tsv")
+            csv_files = Path(MODEL_TRAIN_DATA, "final_test_genalle.tsv")
             PMODEL_DIR = PROJECT_ROOT # PGEN_MODEL_DIR se define arriba como "."
 
             print(f"Iniciando entrenamiento con modelo: {model_name}")
@@ -278,7 +274,7 @@ def main():
 
         elif choice == "4":
             import optuna
-            from .optuna_train import run_optuna_with_progress
+            from src.optuna_train import run_optuna_with_progress
 
             print("\nOptimizando hiperparámetros con Optuna...")
             optuna_model_name = select_model(
