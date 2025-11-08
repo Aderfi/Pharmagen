@@ -2,6 +2,7 @@ import math
 import warnings
 from pathlib import Path
 
+import optuna
 import torch
 from src.config.config import *
 from tqdm import tqdm
@@ -11,7 +12,7 @@ from .model import DeepFM_PGenModel
 from .model_configs import get_model_config
 
 trained_encoders_path = Path(MODELS_DIR)
-
+'''
 @overload
 def train_model(
     train_loader,
@@ -25,11 +26,11 @@ def train_model(
     target_cols=None,
     scheduler=None,
     params_to_txt=None,
-    multi_label_cols: set = None,
+    multi_label_cols=None,
     progress_bar: bool = False,
     optuna_check_weights: bool = False,
     use_weighted_loss: bool = False,
-    task_priorities: dict = None,
+    task_priorities=None,
     return_per_task_losses: Literal[True] = ...,  # <-- Literal[True]
 ) -> tuple[float, list[float], list[float]]: ...  # <-- Retorna 3
 
@@ -47,14 +48,14 @@ def train_model(
     target_cols=None,
     scheduler=None,
     params_to_txt=None,
-    multi_label_cols: set = None,
+    multi_label_cols=None,
     progress_bar: bool = False,
     optuna_check_weights: bool = False,
     use_weighted_loss: bool = False,
-    task_priorities: dict = None,
+    task_priorities=None,
     return_per_task_losses: Literal[False] = ...,  # <-- Literal[False]
 ) -> tuple[float, list[float]]: ...  # <-- Retorna 2
-
+'''
 def train_model(
     train_loader,
     val_loader,
@@ -72,7 +73,8 @@ def train_model(
     optuna_check_weights: bool = False,
     use_weighted_loss: bool = False,
     task_priorities: dict = None,  # type: ignore
-    return_per_task_losses: bool = False
+    return_per_task_losses: bool = False,
+    trial: optuna.Trial = None, # type: ignore
 ):
 
     if device is None:
@@ -116,7 +118,7 @@ def train_model(
         else:
             iterator = train_loader
         
-        for batch in iterator:
+        for batch in train_loader:
             drug = batch["drug"].to(device)
             genalle = batch["genalle"].to(device) 
             gene = batch["gene"].to(device)
@@ -228,6 +230,19 @@ def train_model(
                         totals[i] += true.size(0) # Total de muestras
 
         val_loss /= len(val_loader)
+        
+        if trial is not None:  # Solo si se llama desde Optuna
+        # ✅ FIX: Verificar si es multi-objetivo
+            try:
+                trial.report(val_loss, epoch)
+                
+                # Si el trial es peor que la mediana, detenerlo
+                if trial.should_prune():
+                    print(f"🔪 Trial podado en epoch {epoch} (val_loss={val_loss:.4f})")
+                    raise optuna.TrialPruned()
+            except NotImplementedError:
+                # Multi-objetivo no soporta pruning, ignorar silenciosamente
+                pass
 
         if optuna_check_weights == True:
             # ====================== Pérdidas individuales =====================
@@ -253,7 +268,7 @@ def train_model(
             best_loss = val_loss
             best_accuracies = val_accuracies.copy()
             trigger_times = 0
-
+            '''
             save_model(
                 model, 
                 target_cols, 
@@ -262,11 +277,11 @@ def train_model(
                 model_name=model_name,
                 params_to_txt=params_to_txt
             )
-
+            '''
         else:
             trigger_times += 1
             if trigger_times >= patience:
-                print(f"Early stopping triggered after {patience} epochs. \b\r")
+                #print(f"Early stopping triggered after {patience} epochs. \b\r")
                 break
                 
     if return_per_task_losses:
@@ -275,7 +290,7 @@ def train_model(
     else:
         return best_loss, best_accuracies  # <--- Return original
 
-def save_model(model, target_cols, best_loss, best_accuracies, model_name, params_to_txt=None):
+def save_model(model, target_cols, best_loss, best_accuracies, model_name, avg_per_task_losses:list, params_to_txt=None):
     try:
         model_save_dir = Path(MODELS_DIR)
     except Exception:
@@ -300,6 +315,10 @@ def save_model(model, target_cols, best_loss, best_accuracies, model_name, param
         with open(file_report, "w") as f:
             f.write(f"Model Targets: {target_cols}\n")
             f.write(f"Validation Loss: {best_loss}\n")
+
+            for i, col in enumerate(avg_per_task_losses):
+                f.write(f"Average Loss {col}: {avg_per_task_losses[i]:.4f}\n")
+
             for i, col in enumerate(target_cols):
                 f.write(f"Best Accuracy {col}: {best_accuracies[i]:.4f}\n")
             
