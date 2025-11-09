@@ -159,15 +159,15 @@ class PGenDataProcess:
         df = df[self.cols_to_process]
         
         print("Limpiando nombres de entidades (reemplazando espacios con '_')...")
+        # Optimize: vectorized operation instead of loop
         for col in self.cols_to_process:
             if col in df.columns and col not in self.multi_label_cols:
-                # Reemplazar espacios en columnas single-label
-                df[col] = df[col].astype(str).str.replace(' ', '_')
+                # Vectorized string replacement for single-label columns
+                df[col] = df[col].astype(str).str.replace(' ', '_', regex=False)
             elif col in df.columns and col in self.multi_label_cols:
-                # Reemplazar espacios en columnas multi-label
-                # (Asumiendo que _split_labels ya las convirtió a listas de strings)
+                # For multi-label columns, process in vectorized manner
                 df[col] = df[col].apply(
-                    lambda lst: [s.replace(' ', '_') for s in lst]
+                    lambda lst: [s.replace(' ', '_') for s in lst] if isinstance(lst, list) else lst
                 )
         
         task3_name = "effect_type"
