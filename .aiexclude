@@ -1,0 +1,7 @@
+.env_pgen/
+*__pycache__/
+.*
+BACKUPS/
+TEST/
+tests/
+venv_utils/

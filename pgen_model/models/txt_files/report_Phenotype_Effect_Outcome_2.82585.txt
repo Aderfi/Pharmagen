@@ -1,0 +1,33 @@
+======================================================================
+MODEL TRAINING REPORT
+======================================================================
+
+Model Configuration:
+  Model Name: Phenotype_Effect_Outcome
+  Target Columns: phenotype_outcome, effect_direction, effect_type
+
+Training Results:
+  Best Validation Loss: 2.82585
+
+Per-Task Average Losses:
+  phenotype_outcome: 0.37414
+  effect_direction: 0.95227
+  effect_type: 1.49944
+
+Per-Task Best Accuracies:
+  phenotype_outcome: 0.7465
+  effect_direction: 0.6493
+  effect_type: 0.2310
+
+Hyperparameters:
+  batch_size: 64
+  epochs: 100
+  learning_rate: 6.32e-05
+  embedding_dim: 384
+  hidden_dim: 1280
+  dropout_rate: 0.391
+  patience: 20
+  weight_decay: 4.3e-05
+  n_layers: 4
+
+======================================================================

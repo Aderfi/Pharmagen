@@ -445,7 +445,7 @@ def optuna_objective(
     criterions.append(optimizer)
 
     # 5. Train model
-    best_loss, best_accuracies_list = train_model(
+    best_loss, best_accuracies_list = train_model( #type: ignore
         train_loader,
         val_loader,
         model,
@@ -458,7 +458,6 @@ def optuna_objective(
         multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
         progress_bar=False,
         model_name=model_name,
-        use_weighted_loss=False,
         task_priorities=None, # type: ignore
         return_per_task_losses=False,
         trial=trial,
@@ -828,7 +827,6 @@ def run_optuna_with_progress(
             interval_steps=PRUNER_INTERVAL_STEPS,
         )
         logger.info("Pruning enabled (single-objective)")
-
         study = optuna.create_study(
             direction="minimize",
             study_name=f"optuna_{model_name}_{datetime_study}",

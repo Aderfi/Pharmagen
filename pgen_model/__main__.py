@@ -12,15 +12,15 @@ from tabulate import tabulate
 
 from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
 
-from src.data import PGenDataProcess, train_data_import
-from src.model import DeepFM_PGenModel
-from src.model_configs import MODEL_REGISTRY, get_model_config
-from src.pipeline import train_pipeline
-from src.predict import load_encoders, predict_from_file, predict_single_input
+from pgen_model.src.data import PGenDataProcess, train_data_import
+from pgen_model.src.model import DeepFM_PGenModel
+from pgen_model.src.model_configs import MODEL_REGISTRY, get_model_config
+from pgen_model.src.pipeline import train_pipeline
+from pgen_model.src.predict import load_encoders, predict_from_file, predict_single_input
 
 ###########################################################
 # Configuración
-PGEN_MODEL_DIR = "."  # Ajusta si tu variable global es distinta
+PGEN_MODEL_DIR = "." 
 ###########################################################
 
 translate_output = {
@@ -250,7 +250,6 @@ def main():
         # =====================================  3: PREDICCIÓN DESDE ARCHIVO ============================================
 
         elif choice == "3":
-            # ... (Sin cambios) ...
             model_name = select_model(
                 model_options, "Selecciona el modelo para predicción desde archivo"
             )
