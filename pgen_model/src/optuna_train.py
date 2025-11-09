@@ -27,6 +27,7 @@ import warnings
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import multiprocessing
 
 import numpy as np
 import optuna
@@ -388,10 +389,25 @@ def optuna_objective(
         val_processed_df, target_cols, multi_label_cols=MULTI_LABEL_COLUMN_NAMES
     )
 
+    # Optimize DataLoader configuration
+    num_workers = min(multiprocessing.cpu_count(), 8)
+    pin_memory = torch.cuda.is_available()
+    
     train_loader = DataLoader(
-        train_dataset, batch_size=params["batch_size"], shuffle=True
+        train_dataset,
+        batch_size=params["batch_size"],
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
     )
-    val_loader = DataLoader(val_dataset, batch_size=params["batch_size"])
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=params["batch_size"],
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
+    )
 
     # 3. Create model
     input_dims = get_input_dims(fitted_data_loader)
@@ -759,6 +775,14 @@ def run_optuna_with_progress(
 
     # 3. Calculate class weights
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Enable GPU optimizations if available
+    if torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = True
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        logger.info("GPU optimizations enabled (cuDNN benchmark, TF32)")
+    
     class_weights_task3 = None
     task3_name = "effect_type"
 
