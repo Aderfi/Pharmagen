@@ -173,7 +173,7 @@ class PGenDataProcess:
         task3_name = "effect_type"
         if task3_name in df.columns:
             print(f"Agrupando clases raras para '{task3_name}'...")
-            MIN_SAMPLES = 50 # Umbral: agrupar cualquier clase con < 50 muestras
+            MIN_SAMPLES = 20 # Umbral: agrupar cualquier clase con < 50 muestras
             
             # 1. Obtener los conteos de clase
             counts = df[task3_name].value_counts()
