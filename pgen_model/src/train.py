@@ -23,6 +23,7 @@ import optuna
 import torch
 import torch.nn as nn
 from tqdm import tqdm
+from torch.cuda.amp import autocast, GradScaler
 
 from src.config.config import MODELS_DIR
 from .model import DeepFM_PGenModel
@@ -195,6 +196,12 @@ def train_model(
 
     model = model.to(device)
     logger.info(f"Model moved to device: {device}")
+    
+    # Initialize mixed precision training (AMP) for faster training on GPU
+    use_amp = torch.cuda.is_available()
+    scaler = GradScaler() if use_amp else None
+    if use_amp:
+        logger.info("Mixed precision training (AMP) enabled for faster GPU computation")
 
     # Training loop
     epoch_iterator = (
@@ -223,33 +230,54 @@ def train_model(
         )
 
         for batch in train_iterator:
-            # Move inputs to device
-            drug = batch["drug"].to(device)
-            genalle = batch["genalle"].to(device)
-            gene = batch["gene"].to(device)
-            allele = batch["allele"].to(device)
+            # Move inputs to device (non_blocking for faster transfer)
+            drug = batch["drug"].to(device, non_blocking=True)
+            genalle = batch["genalle"].to(device, non_blocking=True)
+            gene = batch["gene"].to(device, non_blocking=True)
+            allele = batch["allele"].to(device, non_blocking=True)
 
             # Move targets to device
-            targets = {col: batch[col].to(device) for col in target_cols}
+            targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
 
-            # Forward pass
+            # Forward pass with mixed precision
             optimizer.zero_grad()
-            outputs = model(drug, genalle, gene, allele)
-
-            # Calculate per-task losses
-            individual_losses = []
-            for i, col in enumerate(target_cols):
-                loss_fn = criterions_list[i]
-                pred = outputs[col]
-                true = targets[col]
-                individual_losses.append(loss_fn(pred, true)) # type: ignore
-
-            # Combine losses
-            loss = torch.stack(individual_losses).sum()
-
-            # Backward pass
-            loss.backward()
-            optimizer.step() # type: ignore
+            
+            if use_amp:
+                with autocast():
+                    outputs = model(drug, genalle, gene, allele)
+                    
+                    # Calculate per-task losses
+                    individual_losses = []
+                    for i, col in enumerate(target_cols):
+                        loss_fn = criterions_list[i]
+                        pred = outputs[col]
+                        true = targets[col]
+                        individual_losses.append(loss_fn(pred, true)) # type: ignore
+                    
+                    # Combine losses
+                    loss = torch.stack(individual_losses).sum()
+                
+                # Backward pass with gradient scaling
+                scaler.scale(loss).backward() # type: ignore
+                scaler.step(optimizer) # type: ignore
+                scaler.update() # type: ignore
+            else:
+                outputs = model(drug, genalle, gene, allele)
+                
+                # Calculate per-task losses
+                individual_losses = []
+                for i, col in enumerate(target_cols):
+                    loss_fn = criterions_list[i]
+                    pred = outputs[col]
+                    true = targets[col]
+                    individual_losses.append(loss_fn(pred, true)) # type: ignore
+                
+                # Combine losses
+                loss = torch.stack(individual_losses).sum()
+                
+                # Backward pass
+                loss.backward()
+                optimizer.step() # type: ignore
 
             total_loss += loss.item()
 
@@ -267,14 +295,14 @@ def train_model(
 
         with torch.no_grad():
             for batch in val_loader:
-                # Move inputs to device
-                drug = batch["drug"].to(device)
-                genalle = batch["genalle"].to(device)
-                gene = batch["gene"].to(device)
-                allele = batch["allele"].to(device)
+                # Move inputs to device (non_blocking for faster transfer)
+                drug = batch["drug"].to(device, non_blocking=True)
+                genalle = batch["genalle"].to(device, non_blocking=True)
+                gene = batch["gene"].to(device, non_blocking=True)
+                allele = batch["allele"].to(device, non_blocking=True)
 
                 # Move targets to device
-                targets = {col: batch[col].to(device) for col in target_cols}
+                targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
 
                 # Forward pass
                 outputs = model(drug, genalle, gene, allele)

@@ -9,7 +9,8 @@ import torch
 import torch.nn as nn
 from src.config.config import MODEL_ENCODERS_DIR
 from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split 
+from sklearn.model_selection import train_test_split
+import multiprocessing 
 
 from .data import PGenDataset, PGenDataProcess, train_data_import
 from .model import DeepFM_PGenModel
@@ -41,6 +42,11 @@ def train_pipeline(
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)  # Para GPU
+        # Enable cuDNN benchmarking for improved performance with fixed input sizes
+        torch.backends.cudnn.benchmark = True
+        # Enable TF32 on Ampere GPUs for faster matrix operations
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
 
     # --- Obtener Configuración Completa del Modelo ---
     config = get_model_config(model_name)
@@ -154,17 +160,27 @@ def train_pipeline(
         val_processed_df, target_cols, multi_label_cols=MULTI_LABEL_COLUMN_NAMES
     )
 
+    # Optimize num_workers based on available CPU cores
+    num_workers = min(multiprocessing.cpu_count(), 8)
+    
+    # Enable pin_memory for faster GPU transfer when CUDA is available
+    pin_memory = torch.cuda.is_available()
+    
     train_loader = DataLoader(
         train_dataset,
         batch_size=params["batch_size"],
         shuffle=True,
-        num_workers=4,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=params["batch_size"],
         shuffle=False,
-        num_workers=4,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
     )
 
     # --- Preparar Información para el Modelo ---
