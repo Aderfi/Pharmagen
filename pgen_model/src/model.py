@@ -591,6 +591,7 @@ class DeepFM_PGenModel(nn.Module):
 
         return predictions
 
+    '''
     def calculate_weighted_loss(
         self,
         unweighted_losses: Dict[str, torch.Tensor],
@@ -644,7 +645,7 @@ class DeepFM_PGenModel(nn.Module):
             weighted_loss_total += weighted_task_loss
 
         return weighted_loss_total # type: ignore
-    
+    '''
     def __repr__(self) -> str:
         """String representation for debugging and logging."""
         return (

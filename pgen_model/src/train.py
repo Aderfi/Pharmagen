@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 
 # Multi-label classification threshold
-MULTILABEL_THRESHOLD = 0.5
+MULTILABEL_THRESHOLD = 0.2
 
 # Model saving directory
 TRAINED_ENCODERS_PATH = Path(MODELS_DIR)
@@ -50,7 +50,7 @@ EPSILON = 1e-8
 
 
 @overload
-def train_model(
+def train_model( # type: ignore
     train_loader: Any,
     val_loader: Any,
     model: DeepFM_PGenModel,
@@ -75,7 +75,7 @@ def train_model(
 
 
 @overload
-def train_model(
+def train_model( # type:ignore
     train_loader: Any,
     val_loader: Any,
     model: DeepFM_PGenModel,
@@ -245,18 +245,7 @@ def train_model(
                 individual_losses.append(loss_fn(pred, true)) # type: ignore
 
             # Combine losses
-            unweighted_losses_dict = {
-                col: individual_losses[i] for i, col in enumerate(target_cols)
-            }
-
-            if use_weighted_loss:
-                # Use uncertainty weighting for automatic task balancing
-                loss = model.calculate_weighted_loss(
-                    unweighted_losses_dict, task_priorities # type: ignore
-                )
-            else:
-                # Simple sum of losses (used in Optuna)
-                loss = torch.stack(individual_losses).sum()
+            loss = torch.stack(individual_losses).sum()
 
             # Backward pass
             loss.backward()
@@ -308,15 +297,8 @@ def train_model(
                     col: individual_losses_val[i] for i, col in enumerate(target_cols)
                 }
 
-                if use_weighted_loss:
-                    # Use uncertainty weighting
-                    loss = model.calculate_weighted_loss(
-                        individual_losses_val_dict, task_priorities # type: ignore
-                    )
-                else:
-                    # Simple sum of losses
-                    loss = torch.stack(individual_losses_val).sum()
-
+                loss = torch.stack(individual_losses_val).sum()
+                
                 val_loss += loss.item()
 
                 # Calculate per-task accuracies

@@ -17,8 +17,8 @@ from .model_configs import CLINICAL_PRIORITIES, MULTI_LABEL_COLUMN_NAMES, get_mo
 from .train import train_model, save_model
 from .focal_loss import FocalLoss
 
-EPOCHS = 150
-PATIENCE = 30
+EPOCHS = 1
+PATIENCE = 1
 
 # <--- CORRECCIÓN 1: Firma de la función ---
 # La firma ahora acepta 'params' (un dict) como lo pasa __main__.py.
@@ -116,19 +116,31 @@ def train_pipeline(
     if task3_name in target_cols:
         print(f"Calculando pesos de clase SUAVES para '{task3_name}'...")
         try:
+            # Debug: Verificar qué encoders están disponibles
+            print(f"DEBUG: Encoders disponibles: {list(data_loader_obj.encoders.keys())}")
+            print(f"DEBUG: target_cols = {target_cols}")
+            
             encoder_task3 = data_loader_obj.encoders[task3_name]
+            print(f"DEBUG: Número de clases en encoder '{task3_name}': {len(encoder_task3.classes_)}")
+            print(f"DEBUG: Clases: {encoder_task3.classes_}")
+            
             counts = train_processed_df[task3_name].value_counts().sort_index()
+            print(f"DEBUG: Distribución de clases en datos: {counts}")
+            
             all_counts = torch.zeros(len(encoder_task3.classes_))
             for class_id, count in counts.items():
-                all_counts[int(class_id)] = count
+                all_counts[int(class_id)] = count # type: ignore
             
             # Usar la fórmula de Log Smoothing que funcionó
             weights = 1.0 / torch.log(all_counts + 2) # +2 para evitar log(1)=0
             weights = weights / weights.mean() # Normalizar
             class_weights_task3 = weights.to(device)
+            print(f"DEBUG: Shape de class_weights_task3: {class_weights_task3.shape}")
             print("Pesos de clase listos para el entrenamiento final.")
         except Exception as e:
             print(f"Error calculando pesos de clase en pipeline: {e}")
+            import traceback
+            traceback.print_exc()
     
     """fin cambios"""
     
@@ -195,53 +207,31 @@ def train_pipeline(
     task3_name = 'effect_type'
     
     for col in target_cols:
+        print(f"DEBUG: Configurando loss para columna '{col}'")
         if col in MULTI_LABEL_COLUMN_NAMES:
             criterions_list.append(nn.BCEWithLogitsLoss())
+            print(f"  -> BCEWithLogitsLoss (multi-label)")
         
         elif col == task3_name and class_weights_task3 is not None:
             # ✅ FOCAL LOSS CON GAMMA AJUSTADO
             # Dado que la loss es MUY alta (2.81), usar gamma alto
             criterions_list.append(FocalLoss(
                 alpha=class_weights_task3,
-                gamma=2.5,  # ✅ Más agresivo que el estándar (2.0)
+                gamma=2.0,  # ✅ Más agresivo que el estándar (2.0)
                 label_smoothing=0.15,  # ✅ Más smoothing para regularizar
             ))
-            print(f"🔥 Aplicando Focal Loss (γ=2.5) + Class Weighting a '{task3_name}'")
+            print(f"🔥 Aplicando Focal Loss (γ=2.0) + Class Weighting a '{task3_name}'")
             print(f"   Baseline Loss: 2.8147 → Target: <2.0")
-
-    else:
-        criterions_list.append(nn.CrossEntropyLoss(label_smoothing=0.1))
-
-    criterions = criterions_list + [optimizer]
-    
-    """
-    for col in target_cols:
-        if col in MULTI_LABEL_COLUMN_NAMES:
-            criterions_list.append(nn.BCEWithLogitsLoss())
         
-        # Aplicar los pesos de clase a la Tarea 3
-        elif col == task3_name and class_weights_task3 is not None:
-            criterions_list.append(nn.CrossEntropyLoss(
-                label_smoothing=0.1,
-                weight=class_weights_task3
-            ))
-            print(f"Aplicando WeightedCrossEntropyLoss (Class Weighting) a '{task3_name}'.")
-
-        else: # Tareas 1 y 2 (single-label sin pesos de clase)
+        else:
+            # Tareas sin pesos de clase especiales
             criterions_list.append(nn.CrossEntropyLoss(label_smoothing=0.1))
+            print(f"  -> CrossEntropyLoss (label_smoothing=0.1)")
 
+    print(f"DEBUG: Total de criterions creados: {len(criterions_list)} para {len(target_cols)} targets")
     criterions = criterions_list + [optimizer]
     
-    for col in target_cols:
-        if col in MULTI_LABEL_COLUMN_NAMES:
-            criterions_list.append(nn.BCEWithLogitsLoss())
-        else:
-            criterions_list.append(nn.CrossEntropyLoss(label_smoothing=0.1))
-
-    criterions = criterions_list + [optimizer]  # Combinar criterios y optimizador
-    """
     # ---------------------------------------------------------
-
 
     # --- Ejecutar Entrenamiento ---
     print(f"Iniciando entrenamiento final para {model_name} con Ponderación de Incertidumbre...")
@@ -259,8 +249,6 @@ def train_pipeline(
         params_to_txt=params,
         scheduler=scheduler,
         progress_bar=True,
-        use_weighted_loss=True,
-        task_priorities=CLINICAL_PRIORITIES,
         return_per_task_losses=True, 
     )
 
@@ -300,17 +288,6 @@ def train_pipeline(
         for key, value in params.items():
             f.write(f"  {key}: {value}\n")
 
-        f.write("\nEstrategia de Ponderación:\n")
-        f.write("  Uncertainty Weighting (Pesos dinámicos aprendibles)\n")
-
-        if hasattr(model, 'log_sigmas'):
-            f.write("  Pesos Efectivos Finales (exp(-log_sigma^2)):\n")
-            for name, log_sigma in model.log_sigmas.items():
-                if name in target_dims:
-                    final_weight = torch.exp(-log_sigma).item()
-                    f.write(f"  - {name}: {final_weight:.4f}\n")
-        else:
-            f.write("  Ponderación de Incertidumbre no activada (log_sigmas no encontrado).\n")
 
     print(f"Reporte de entrenamiento guardado en: {report_file}")
 
