@@ -4,10 +4,12 @@ Proporciona un menú CLI para entrenar y utilizar el modelo predictivo.
 """
 
 import json
-import math
-import pandas as pd
 import sys
 from pathlib import Path
+from typing import Dict, List, Optional
+
+import pandas as pd
+import torch
 from tabulate import tabulate
 
 from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
@@ -23,7 +25,7 @@ from pgen_model.src.predict import load_encoders, predict_from_file, predict_sin
 PGEN_MODEL_DIR = "." 
 ###########################################################
 
-translate_output = {
+translate_output: Dict[str, str] = {
     "phenotype_outcome": "Consecuencia clínica esperable",
     "effect_direction": "Variación del efecto farmacogenético",
     "effect_type": "Tipo de efecto farmacogenético",
@@ -31,28 +33,54 @@ translate_output = {
     "Fenotipo_No_Especificado": ""
 }
 
-def select_model(model_options, prompt="Selecciona el modelo:"):
+
+def select_model(model_options: List[str], prompt: str = "Selecciona el modelo:") -> str:
+    """
+    Presenta un menú interactivo para seleccionar un modelo.
+    
+    Args:
+        model_options: Lista de nombres de modelos disponibles
+        prompt: Mensaje a mostrar al usuario
+        
+    Returns:
+        Nombre del modelo seleccionado
+    """
     print("\n————————————————— Modelos Disponibles ————————————————")
     for i, name in enumerate(model_options, 1):
         print(f"  {i} -- {name}")
     print("———————————————————————————————————————————————————————")
     model_choice = ""
-    while model_choice not in [str(i + 1) for i in range(len(model_options))]:
+    valid_choices = [str(i) for i in range(1, len(model_options) + 1)]
+    while model_choice not in valid_choices:
         model_choice = input(f"{prompt} (1-{len(model_options)}): ").strip()
-        if model_choice not in [str(i + 1) for i in range(len(model_options))]:
+        if model_choice not in valid_choices:
             print("Opción no válida. Intente de nuevo.")
     return model_options[int(model_choice) - 1]
 
 
-def load_model(model_name, target_cols=None, base_dir=None, device=None):
+def load_model(
+    model_name: str,
+    target_cols: Optional[List[str]] = None,
+    base_dir: Optional[Path] = None,
+    device: Optional[torch.device] = None
+) -> DeepFM_PGenModel:
     """
     Carga un modelo PyTorch guardado para un conjunto específico de targets.
+    
+    Args:
+        model_name: Nombre del modelo a cargar
+        target_cols: Lista de columnas objetivo (se obtiene de config si es None)
+        base_dir: Directorio base donde están los modelos (usa MODELS_DIR si es None)
+        device: Dispositivo PyTorch (auto-detecta si es None)
+        
+    Returns:
+        Modelo cargado y listo para inferencia
+        
+    Raises:
+        FileNotFoundError: Si el archivo del modelo no existe
+        Exception: Si hay error al cargar el modelo
     """
-    from pathlib import Path
-    import torch
-
     if base_dir is None:
-        from src.config.config import MODELS_DIR
         base_dir = MODELS_DIR
 
     if device is None:
@@ -61,8 +89,7 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
     if target_cols is None:
         target_cols = [t.lower() for t in MODEL_REGISTRY[model_name]["targets"]]
 
-    model_file_name = model_name
-    model_file = Path(base_dir) / f"pmodel_{model_file_name}.pth"
+    model_file = Path(base_dir) / f"pmodel_{model_name}.pth"
 
     if not model_file.exists():
         raise FileNotFoundError(f"No se encontró el archivo del modelo en {model_file}")
@@ -70,24 +97,21 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
     try:
         encoders = load_encoders(model_name)
 
-        # <--- CORRECCIÓN 1: Clave de genotipo ---
-        # Asegurarse de que coincide con el nombre de la columna en train.py
+        # Obtener dimensiones de los encoders
         n_drugs = len(encoders["drug"].classes_)
-        n_genalles = len(encoders["genalle"].classes_) # <--- Clave corregida
+        n_genalles = len(encoders["genalle"].classes_)
         n_genes = len(encoders["gene"].classes_)
         n_alleles = len(encoders["allele"].classes_)
         
-        target_dims = {}
-        for col in target_cols:
-            target_dims[col] = len(encoders[col].classes_)
+        target_dims = {col: len(encoders[col].classes_) for col in target_cols}
 
-        # Obtener los hiperparámetros (no es necesario aquí si se usa get_model_config)
+        # Obtener los hiperparámetros del modelo
         config = get_model_config(model_name)
         params = config["params"]
         embedding_dim = params.get("embedding_dim", 256)
         hidden_dim = params.get("hidden_dim", 512)
         dropout_rate = params.get("dropout_rate", 0.3)
-        n_layers = params.get("n_layers", 2)  # AÑADIDO TESTEO
+        n_layers = params.get("n_layers", 2)
 
         # Crear una instancia del modelo con la arquitectura correcta
         # El orden DEBE coincidir con __init__ en model.py
