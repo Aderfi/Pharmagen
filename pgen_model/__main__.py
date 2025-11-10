@@ -73,7 +73,7 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
         # <--- CORRECCIÓN 1: Clave de genotipo ---
         # Asegurarse de que coincide con el nombre de la columna en train.py
         n_drugs = len(encoders["drug"].classes_)
-        n_genotypes = len(encoders["variant/haplotypes"].classes_) # <--- Clave corregida
+        n_genalles = len(encoders["genalle"].classes_) # <--- Clave corregida
         n_genes = len(encoders["gene"].classes_)
         n_alleles = len(encoders["allele"].classes_)
         
@@ -93,14 +93,24 @@ def load_model(model_name, target_cols=None, base_dir=None, device=None):
         # El orden DEBE coincidir con __init__ en model.py
         model = DeepFM_PGenModel(
             n_drugs,
-            n_genotypes,
+            n_genalles,
             n_genes,
             n_alleles,
             embedding_dim,
-            n_layers, # AÑADIDO TESTEO
+            n_layers, 
             hidden_dim,
             dropout_rate,
             target_dims=target_dims,
+            attention_dim_feedforward=params.get("attention_dim_feedforward"),
+            attention_dropout=params.get("attention_dropout", 0.1),
+            num_attention_layers=params.get("num_attention_layers", 1),
+            use_batch_norm=params.get("use_batch_norm", False),
+            use_layer_norm=params.get("use_layer_norm", False),
+            activation_function=params.get("activation_function", "gelu"),
+            fm_dropout=params.get("fm_dropout", 0.0),
+            fm_hidden_layers=params.get("fm_hidden_layers", 0),
+            fm_hidden_dim=params.get("fm_hidden_dim", 256),
+            embedding_dropout=params.get("embedding_dropout", 0.1),
         )
 
         state_dict = torch.load(model_file, map_location=device)

@@ -55,7 +55,8 @@ class DeepFM_PGenModel(nn.Module):
         fm_hidden_layers: int = 0,
         fm_hidden_dim: int = 256,
         embedding_dropout: float = 0.1,
-        separate_embedding_dims: Dict[str, int] | None = None,
+        separate_embedding_dims: bool = False,
+        separate_emb_dims_dict = None,
     ) -> None:
         """
         Initialize DeepFM_PGenModel.
@@ -98,15 +99,27 @@ class DeepFM_PGenModel(nn.Module):
                 torch.tensor(0.0, requires_grad=True)
             )
         
+        '''
         # 1. Embedding layers
-        if separate_embedding_dims is not None:
-            drug_dim = separate_embedding_dims.get("drug", embedding_dim)
-            genalle_dim = separate_embedding_dims.get("genalle", embedding_dim)
-            gene_dim = separate_embedding_dims.get("gene", embedding_dim)
-            allele_dim = separate_embedding_dims.get("allele", embedding_dim)
+        if separate_embedding_dims == True:
+            drug_dim = int(separate_embedding_dims.get("drug", embedding_dim))
+            genalle_dim = int(separate_embedding_dims.get("genalle", embedding_dim))
+            gene_dim = int(separate_embedding_dims.get("gene", embedding_dim))
+            allele_dim = int(separate_embedding_dims.get("allele", embedding_dim))
         else:
-            drug_dim = genalle_dim = gene_dim = allele_dim = embedding_dim
-            
+            # Asegurarse de que el embedding_dim base es un entero
+            drug_dim = embedding_dim
+            genalle_dim = embedding_dim
+            gene_dim = embedding_dim
+            allele_dim = embedding_dim
+        '''
+        
+        drug_dim = embedding_dim
+        genalle_dim = embedding_dim
+        gene_dim = embedding_dim
+        allele_dim = embedding_dim
+        
+        # 1. Embedding layers
         self.drug_emb = nn.Embedding(n_drugs, drug_dim)
         self.genal_emb = nn.Embedding(n_genalles, genalle_dim)
         self.gene_emb = nn.Embedding(n_genes, gene_dim)

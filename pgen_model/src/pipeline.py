@@ -19,8 +19,8 @@ from .train import train_model, save_model
 from .train_utils import create_optimizer, create_scheduler, create_criterions
 from .focal_loss import FocalLoss
 
-EPOCHS = 1
-PATIENCE = 1
+EPOCHS = 100
+PATIENCE = 25
 
 # <--- CORRECCIÓN 1: Firma de la función ---
 # La firma ahora acepta 'params' (un dict) como lo pasa __main__.py.
@@ -51,6 +51,7 @@ def train_pipeline(
 
     # --- Obtener Configuración Completa del Modelo ---
     config = get_model_config(model_name)
+    inputs_from_config = config["inputs"]  # Columnas de entrada definidas para el modelo
     cols_from_config = config["cols"]  # Columnas a leer del CSV
     targets_from_config = config["targets"]  # Targets definidos para el modelo
     
@@ -84,6 +85,7 @@ def train_pipeline(
         df = data_loader_obj.load_data(
             actual_csv_files,
             cols_from_config,
+            inputs_from_config,
             targets_from_config,
             multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
             stratify_cols=stratify_cols,
