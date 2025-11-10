@@ -38,7 +38,6 @@ from optuna import create_study
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
 from optuna.visualization import plot_optimization_history, plot_pareto_front
-from sklearn.metrics import classification_report, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
@@ -200,7 +199,17 @@ def optuna_objective(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 1. Get suggested hyperparameters
-    params = get_optuna_params(trial, model_name)
+    full_base_config = get_model_config(model_name)
+    base_params = full_base_config.get("params", {})
+    
+    # Get the parameters suggested by Optuna for this specific trial
+    optuna_suggested_params = get_optuna_params(trial, model_name)
+    
+    # Merge them: Optuna's suggestions will overwrite the base parameters
+    params = {**base_params, **optuna_suggested_params}
+    
+    # Save the complete and correct set of parameters to the trial for reporting
+    trial.set_user_attr("full_params", params)
     
 
     # 2. Create datasets and dataloaders
@@ -250,7 +259,7 @@ def optuna_objective(
         logger.info(f"Loading data from: {Path(csvfiles)}")
         logger.info(f"Tasks: {', '.join(target_cols)}")
         logger.info(f"Clinical priorities: {CLINICAL_PRIORITIES}")
-
+        
     model = DeepFM_PGenModel(
         n_drugs=input_dims["drug"],
         n_genalles=input_dims["genalle"],
@@ -271,8 +280,7 @@ def optuna_objective(
         fm_hidden_layers=params.get("fm_hidden_layers", 0),
         fm_hidden_dim=params.get("fm_hidden_dim", 256),
         embedding_dropout=params.get("embedding_dropout", 0.1),
-        separate_embedding_dims=separate_embedding_dims,
-        
+        separate_emb_dims_dict=separate_embedding_dims if separate_embedding_dims != None else None,    
     ).to(device)
     
     # 4. Define optimizer and loss functions
@@ -447,7 +455,7 @@ def _save_optuna_report(
         "best_trial": {
             "number": best_trial.number,
             "values": list(best_trial.values) if best_trial.values else [],
-            "params": best_trial.params,
+            "params": best_trial.user_attrs.get("full_params", best_trial.params),
             "user_attrs": dict(best_trial.user_attrs),
         },
         "clinical_priorities": CLINICAL_PRIORITIES,
@@ -459,7 +467,7 @@ def _save_optuna_report(
             {
                 "number": t.number,
                 "values": list(t.values) if t.values else [],
-                "params": t.params,
+                "params": t.user_attrs.get("full_params", t.params),
                 "critical_f1": t.user_attrs.get("critical_task_f1", 0.0),
             }
             for t in top_5_trials
@@ -521,7 +529,9 @@ def _save_optuna_report(
 
             # Hyperparameters
             f.write("Hyperparameters:\n")
-            for key, value in best_trial.params.items():
+            # Use full_params from user_attrs if available, otherwise fallback to trial.params
+            report_params = best_trial.user_attrs.get("full_params", best_trial.params)
+            for key, value in sorted(report_params.items()):
                 f.write(f"   {key:25s}: {value}\n")
             f.write("\n")
 
@@ -534,7 +544,9 @@ def _save_optuna_report(
                     if t.values:
                         f.write(f"   Loss: {t.values[0]:.5f}, F1: {-t.values[1]:.5f}\n")
                     f.write(f"   Critical F1: {t.user_attrs.get('critical_task_f1', 0.0):.4f}\n")
-                    f.write(f"   Key params: batch_size={t.params.get('batch_size')}, lr={t.params.get('learning_rate'):.2e}\n\n")
+                    all_trial_params = t.user_attrs.get("full_params", t.params)
+                    f.write(f"   Key params: batch_size={all_trial_params.get('batch_size')}, lr={all_trial_params.get('learning_rate'):.2e}\n\n")
+                                        
             else:
                 f.write("Top 5 Trials by Loss\n")
                 f.write("-" * 60 + "\n\n")
@@ -543,8 +555,10 @@ def _save_optuna_report(
                     if t.values:
                         f.write(f"   Loss: {t.values[0]:.5f}\n")
                     f.write(f"   Critical F1: {t.user_attrs.get('critical_task_f1', 0.0):.4f}\n")
-                    f.write(f"   Key params: batch_size={t.params.get('batch_size')}, lr={t.params.get('learning_rate'):.2e}\n\n")
-
+                    all_trial_params = t.user_attrs.get("full_params", t.params)
+                    f.write(f"   Key params: batch_size={all_trial_params.get('batch_size')}, lr={all_trial_params.get('learning_rate'):.2e}\n\n")
+                    
+                    
         logger.info(f"TXT report saved: {results_file_txt}")
     except IOError as e:
         logger.error(f"Failed to save TXT report: {e}")
@@ -588,6 +602,7 @@ def run_optuna_with_progress(
 
     # 1. Define targets
     config = get_model_config(model_name)
+    inputs_from_config = [i.lower() for i in config["inputs"]]
     targets_from_config = [t.lower() for t in config["targets"]]
     cols_from_config = config["cols"]
 
@@ -608,15 +623,32 @@ def run_optuna_with_progress(
     logger.info("Loading and preprocessing data...")
     csvfiles, _ = train_data_import(targets_from_config)
 
+    ###################################
+    
+    ####################################
+    '''
+    data_loader = PGenDataProcess(
+        all_cols=cols_from_config,
+        input_cols=inputs_from_config,
+        target_cols=targets_from_config,
+        multi_label_cols=MULTI_LABEL_COLUMN_NAMES
+    )
+    
+    df = data_loader.load_and_clean_data(
+    csv_path=str(csvfiles),
+    stratify_cols=["effect_type"]
+    )
+    '''
     data_loader = PGenDataProcess()
     df = data_loader.load_data(
-        csvfiles,   # type: ignore
-        cols_from_config,
-        targets_from_config,
+        csv_path=str(csvfiles),
+        all_cols=cols_from_config,
+        input_cols=inputs_from_config,
+        target_cols=targets_from_config,
         multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
-        stratify_cols=["effect_type"],
+        stratify_cols=["effect_type"]
     )
-
+    
     train_df, val_df = train_test_split(
         df,
         test_size=VALIDATION_SPLIT,
@@ -641,24 +673,39 @@ def run_optuna_with_progress(
     
     class_weights_task3 = None
     task3_name = "effect_type"
+    # La variable 'targets_from_config' viene de tu archivo de configuración
+    # La variable 'device' ya debería estar definida (ej: torch.device("cuda"))
+    # La constante CLASS_WEIGHT_LOG_SMOOTHING también debe estar definida (ej: 1.01)
 
-    if task3_name in target_cols:
+    # Comprueba si la tarea está activa en la configuración actual
+    if task3_name in targets_from_config:
+        logger.info(f"Calculando pesos de clase para la tarea '{task3_name}'...")
         try:
             encoder_task3 = data_loader.encoders[task3_name]
-            counts = train_processed_df[task3_name].value_counts().sort_index()
-            all_counts = torch.zeros(len(encoder_task3.classes_))
-            for class_id, count in counts.items():
-                all_counts[int(class_id)] = count    # type: ignore
-
+            class_counts = train_processed_df[task3_name].value_counts()
+            num_classes = len(encoder_task3.classes_)
+            all_counts = torch.zeros(num_classes)
+            
+            all_counts[class_counts.index] = torch.tensor(class_counts.values, dtype=torch.float32) # type: ignore
             weights = 1.0 / torch.log(all_counts + CLASS_WEIGHT_LOG_SMOOTHING)
+            
+            weights[torch.isinf(weights)] = 1.0 # Asigna un peso neutral a clases no vistas en train
+            weights[torch.isnan(weights)] = 1.0 # Por si acaso
+
             weights = weights / weights.mean()
             class_weights_task3 = weights.to(device)
+
             logger.info(
-                f"Class weights calculated for '{task3_name}': "
+                f"Pesos de clase calculados para '{task3_name}' ({num_classes} clases): "
                 f"Min={weights.min():.3f}, Max={weights.max():.3f}, Mean={weights.mean():.3f}"
             )
+        except KeyError:
+            logger.warning(
+                f"No se pudo calcular los pesos: el encoder para '{task3_name}' no fue encontrado. "
+                "Asegúrate de que esté en 'target_cols' y presente en los datos de entrenamiento."
+            )
         except Exception as e:
-            logger.warning(f"Error calculating class weights: {e}")
+            logger.error(f"Ocurrió un error inesperado al calcular los pesos de clase: {e}")
 
     # 4. Configure sampler
     sampler = TPESampler(
