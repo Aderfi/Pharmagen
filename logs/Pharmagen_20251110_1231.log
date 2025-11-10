@@ -1,0 +1,12 @@
+2025-11-10 12:31:29,866 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-10 12:31:32,104 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-10 12:31:40,206 - __main__ - INFO - Lanzando pgen_model
+2025-11-10 12:31:50,507 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-10 12:31:50,507 - __main__ - INFO - Usuario seleccionó opción: 
+2025-11-10 12:31:50,507 - __main__ - WARNING - Opción no válida seleccionada: 
+2025-11-10 12:32:09,757 - __main__ - INFO - Usuario seleccionó opción: 
+2025-11-10 12:32:09,757 - __main__ - WARNING - Opción no válida seleccionada: 
+2025-11-10 12:32:12,388 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-10 12:32:20,488 - __main__ - INFO - Lanzando pgen_model
+2025-11-10 12:32:24,947 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-10 12:34:41,260 - __main__ - INFO - Programa interrumpido por el usuario (Ctrl+C)

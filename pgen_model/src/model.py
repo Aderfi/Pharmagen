@@ -51,10 +51,10 @@ class DeepFM_PGenModel(nn.Module):
         use_batch_norm: bool = False,
         use_layer_norm: bool = False,
         activation_function: str = "gelu",
-        fm_dropout: float = 0.0,
+        fm_dropout: float = 0.1,
         fm_hidden_layers: int = 0,
         fm_hidden_dim: int = 256,
-        embedding_dropout: float = 0.0,
+        embedding_dropout: float = 0.1,
         separate_embedding_dims: Dict[str, int] | None = None,
     ) -> None:
         """

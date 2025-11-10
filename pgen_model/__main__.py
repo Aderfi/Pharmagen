@@ -12,7 +12,7 @@ from tabulate import tabulate
 
 from src.config.config import MODEL_TRAIN_DATA, PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
 
-from pgen_model.src.data import PGenDataProcess, train_data_import
+from .src.data import PGenDataProcess, train_data_import
 from pgen_model.src.model import DeepFM_PGenModel
 from pgen_model.src.model_configs import MODEL_REGISTRY, get_model_config
 from pgen_model.src.pipeline import train_pipeline
