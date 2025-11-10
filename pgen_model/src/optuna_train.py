@@ -43,7 +43,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from src.config.config import PGEN_MODEL_DIR, PROJECT_ROOT
+from src.config.config import PGEN_MODEL_DIR, PROJECT_ROOT, MODELS_DIR
 from .data import PGenDataProcess, PGenDataset, train_data_import
 from .model import DeepFM_PGenModel
 from .model_configs import (
@@ -72,8 +72,8 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 # ============================================================================
 
 # Optuna optimization settings
-N_TRIALS = 250
-EPOCH = 120
+N_TRIALS = 300
+EPOCH = 150
 PATIENCE = 20
 
 # Random seed for reproducibility
@@ -201,6 +201,7 @@ def optuna_objective(
 
     # 1. Get suggested hyperparameters
     params = get_optuna_params(trial, model_name)
+    
 
     # 2. Create datasets and dataloaders
     train_dataset = PGenDataset(
@@ -284,6 +285,9 @@ def optuna_objective(
     epochs = params.get("epochs", EPOCH)
     patience = params.get("patience", PATIENCE)
     
+    if "gradient_clip_norm" in params:
+        torch.nn.utils.clip_grad_norm_(model.parameters(), params["gradient_clip_norm"])
+        
     # 5. Train model
     best_loss, best_accuracies_list, _ = train_model(
         train_loader, 
@@ -686,13 +690,17 @@ def run_optuna_with_progress(
         use_multi_objective=use_multi_objective,
     )
 
+    
+    study_name=f"optuna_{model_name}_{datetime_study}"
+    
     # Create study based on mode
     if use_multi_objective:
         pruner = None
         logger.info("Pruning disabled (incompatible with multi-objective)")
         study = optuna.create_study(
             directions=["minimize", "minimize"],
-            study_name=f"optuna_{model_name}_{datetime_study}",
+            study_name=study_name,
+            storage = f"sqlite:///{MODELS_DIR}/{study_name}.db",
             sampler=sampler,
             pruner=pruner,
         )
@@ -710,7 +718,9 @@ def run_optuna_with_progress(
             pruner=pruner,
         )
 
-    study.optimize(optuna_func, n_trials=n_trials)
+    study.optimize(optuna_func, n_trials=n_trials, gc_after_trial=True)
+    
+    
     pbar.close()
 
     # 6. Save visualizations

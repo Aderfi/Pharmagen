@@ -177,15 +177,6 @@ MODEL_REGISTRY = {
             "Effect_type",
             "Effect_phenotype",
         ],
-        #"params": {
-        #    "batch_size": 512,
-        #    "embedding_dim": 128,
-        #    "n_layers": 2,
-        #    "hidden_dim": 4096,
-        #    "dropout_rate": 0.493740315869821,
-        #    "learning_rate": 0.0005893232367500335,
-        #    "weight_decay": 3.308304117490965e-05
-        #},
         "params": {
             "batch_size": 64,
             "embedding_dim": 384,
@@ -196,68 +187,54 @@ MODEL_REGISTRY = {
             "weight_decay": 4.30e-05
         },
         "params_optuna": {
-            "embedding_dim": [128, 256, 384, 512, 640, 768, 1024],
-            "n_layers": [2, 3, 4, 5, 6, 7],
-            "hidden_dim": ["int", 512, 4096, 256],
-            
-            "dropout_rate": (0.15, 0.6),
+            # === CORE ARCHITECTURE ===
+            "embedding_dim": [128, 256, 384, 512, 640, 768],
+            "n_layers": ["int", 2, 8, 1],
+            "hidden_dim": ["int", 512, 4096, 128],
+            "activation_function": ["gelu", "relu", "swish", "mish"],
+
+            # === REGULARIZATION ===
+            "dropout_rate": (0.1, 0.7),
             "weight_decay": (1e-6, 1e-2),
-            
-            "learning_rate": (1e-5, 1e-3),
-            "batch_size": [64, 128, 256, 512],
-            
-            # === TRANSFORMER ATTENTION (based on your attention_layer) ===
-            "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
-            "attention_dropout": (0.0, 0.5),
-            "num_attention_layers": [1, 2, 3, 4],  # Stack multiple transformer layers
-            
-            # === FOCAL LOSS (you're using it for effect_type) ===
-            "focal_gamma": (1.0, 5.0),  # Currently hardcoded to 2.0
-            "focal_alpha_weight": (0.5, 3.0),  # Multiplier for class weights
-            "label_smoothing": (0.05, 0.3),  # Currently hardcoded to 0.15
-            
-            # === OPTIMIZER VARIANTS ===
-            "optimizer_type": ["adamw", "adam", "sgd", "rmsprop"],
-            "adam_beta1": (0.8, 0.95),
-            "adam_beta2": (0.95, 0.999),
-            "sgd_momentum": (0.85, 0.99),
-            
-            # === SCHEDULER ===
-            "scheduler_type": ["plateau", "cosine", "step", "exponential", "none"],
-            "scheduler_factor": (0.1, 0.8),  # For ReduceLROnPlateau
-            "scheduler_patience": ["int", 3, 15, 1],
-            
-            # === TASK WEIGHTING ===
-            "uncertainty_weighting": [True, False],  # Toggle your uncertainty weighting
-            "manual_task_weights": [True, False],  # Use CLINICAL_PRIORITIES vs learned weights
-            
-            # === ADVANCED ARCHITECTURE ===
-            "use_batch_norm": [True, False],
-            "use_layer_norm": [True, False], 
-            "activation_function": ["gelu", "relu", "swish", "mish"],  # You're using GELU
+            "label_smoothing": (0.0, 0.3),
+            "embedding_dropout": (0.0, 0.4),
             "gradient_clip_norm": (0.5, 5.0),
             
-            # === FM BRANCH ENHANCEMENTS ===
-            "fm_dropout": (0.0, 0.5),  # Separate dropout for FM interactions
-            "fm_hidden_layers": [0, 1, 2],  # Add layers after FM interactions
-            "fm_hidden_dim": ["int", 64, 512, 32],
+            # === BATCH & LAYER NORMALIZATION ===
+            "use_batch_norm": [True, False],
+            "use_layer_norm": [True, False], 
             
-            # === EMBEDDING VARIATIONS ===
-            "embedding_dropout": (0.0, 0.3),
-            "drug_embedding_dim": ["int", 64, 1024, 32],  # Separate embedding dims
-            "gene_embedding_dim": ["int", 64, 1024, 32],
-            "allele_embedding_dim": ["int", 32, 512, 16],
-            "genalle_embedding_dim": ["int", 64, 1024, 32],
+            # === OPTIMIZER & LEARNING RATE ===
+            "learning_rate": (1e-5, 1e-3),
+            "batch_size": [64, 128, 256],
+            "optimizer_type": ["adamw", "adam", "rmsprop"], # SGD can be slow to converge
+            "adam_beta1": (0.85, 0.95),
+            "adam_beta2": (0.95, 0.999),
             
-            # === TRAINING DYNAMICS ===
-            "warmup_epochs": ["int", 0, 20, 1],
-            "early_stopping_patience": ["int", 15, 50, 5],
-            "validation_frequency": ["int", 1, 5, 1],  # Validate every N epochs
+            # === SCHEDULER ===
+            "scheduler_type": ["plateau", "cosine", "exponential", "none"],
+            "scheduler_factor": (0.1, 0.7),
+            "scheduler_patience": ["int", 3, 10, 1],
+            "early_stopping_patience": ["int", 15, 40, 5], # Optuna will test values from 15 to 40
+
+            # === ATTENTION MECHANISM ===
+            "num_attention_layers": [1, 2, 3, 4],
+            "attention_dim_feedforward": ["int", 512, 4096, 256],
+            "attention_dropout": (0.0, 0.5),
             
+            # === FOCAL LOSS (for effect_type task) ===
+            "focal_gamma": (1.0, 5.0),
+            "focal_alpha_weight": (0.25, 4.0),
+
+            # === FM (FACTORIZATION MACHINE) BRANCH ===
+            "fm_dropout": (0.0, 0.5),
+            "fm_hidden_layers": [0, 1, 2],
+            "fm_hidden_dim": ["int", 64, 512, 64],
+            
+            # === TASK WEIGHTING STRATEGY ===
+            # Let Optuna decide between fixed priorities or learned weights
+            "manual_task_weights": [True, False],
         },
-        
-        
-        
     },
     "ATC_Phenotype_Effect_Outcome": {   # choice 2
         "targets": ["Phenotype_outcome", "Effect_direction", "Effect_type", "Effect_phenotype", "Effect_phenotype_id", "Pop_Phenotypes/Diseases", "Pop_phenotype_id"],
