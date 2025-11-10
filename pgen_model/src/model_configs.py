@@ -99,7 +99,7 @@ DEFAULT_HYPERPARAMS = {
             
             # === TRANSFORMER ATTENTION (based on your attention_layer) ===
             "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
-            "attention_dropout": (0.0, 0.5),
+            "attention_dropout": (0.1, 0.5),
             "num_attention_layers": [1, 2, 3, 4],  # Stack multiple transformer layers
             
             # === FOCAL LOSS (you're using it for effect_type) ===
@@ -129,12 +129,12 @@ DEFAULT_HYPERPARAMS = {
             "gradient_clip_norm": (0.5, 5.0),
             
             # === FM BRANCH ENHANCEMENTS ===
-            "fm_dropout": (0.0, 0.5),  # Separate dropout for FM interactions
+            "fm_dropout": (0.1, 0.5),  # Separate dropout for FM interactions
             "fm_hidden_layers": [0, 1, 2],  # Add layers after FM interactions
             "fm_hidden_dim": ["int", 64, 512, 32],
             
             # === EMBEDDING VARIATIONS ===
-            "embedding_dropout": (0.0, 0.3),
+            "embedding_dropout": (0.1, 0.3),
             "drug_embedding_dim": ["int", 64, 1024, 32],  # Separate embedding dims
             "gene_embedding_dim": ["int", 64, 1024, 32],
             "allele_embedding_dim": ["int", 32, 512, 16],
@@ -197,7 +197,7 @@ MODEL_REGISTRY = {
             "dropout_rate": (0.1, 0.7),
             "weight_decay": (1e-6, 1e-2),
             "label_smoothing": (0.0, 0.3),
-            "embedding_dropout": (0.0, 0.4),
+            "embedding_dropout": (0.1, 0.4),
             "gradient_clip_norm": (0.5, 5.0),
             
             # === BATCH & LAYER NORMALIZATION ===
@@ -220,14 +220,14 @@ MODEL_REGISTRY = {
             # === ATTENTION MECHANISM ===
             "num_attention_layers": [1, 2, 3, 4],
             "attention_dim_feedforward": ["int", 512, 4096, 256],
-            "attention_dropout": (0.0, 0.5),
+            "attention_dropout": (0.1, 0.5),
             
             # === FOCAL LOSS (for effect_type task) ===
             "focal_gamma": (1.0, 5.0),
             "focal_alpha_weight": (0.25, 4.0),
 
             # === FM (FACTORIZATION MACHINE) BRANCH ===
-            "fm_dropout": (0.0, 0.5),
+            "fm_dropout": (0.1, 0.5),
             "fm_hidden_layers": [0, 1, 2],
             "fm_hidden_dim": ["int", 64, 512, 64],
             

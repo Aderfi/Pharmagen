@@ -218,7 +218,7 @@ def train_pipeline(
         fm_dropout=params.get("fm_dropout", 0.0),
         fm_hidden_layers=params.get("fm_hidden_layers", 0),
         fm_hidden_dim=params.get("fm_hidden_dim", 256),
-        embedding_dropout=params.get("embedding_dropout", 0.0),
+        embedding_dropout=params.get("embedding_dropout", 0.1),
     )
     model = model.to(device)
 

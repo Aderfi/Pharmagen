@@ -15,7 +15,6 @@ References:
 """
 
 import logging
-import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, overload
 
@@ -24,17 +23,12 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-import torch.amp.autocast_mode
 from torch.amp.autocast_mode import autocast
-
-import torch.amp.grad_scaler
 from torch.amp.grad_scaler import GradScaler
-
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from src.config.config import MODELS_DIR
 from .model import DeepFM_PGenModel
-from .model_configs import get_model_config
-from .train_utils import get_input_dims, get_output_sizes
 
 logger = logging.getLogger(__name__)
 
@@ -384,7 +378,10 @@ def train_model(
 
         # Learning rate scheduling
         if scheduler is not None:
-            scheduler.step(val_loss)
+            if isinstance(scheduler, ReduceLROnPlateau):
+                scheduler.step(val_loss)
+            else:
+                scheduler.step()
 
         # Calculate accuracies
         val_accuracies = [
