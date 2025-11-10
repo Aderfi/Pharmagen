@@ -267,10 +267,10 @@ def optuna_objective(
         use_batch_norm=params.get("use_batch_norm", False),
         use_layer_norm=params.get("use_layer_norm", False),
         activation_function=params.get("activation_function", "gelu"),
-        fm_dropout=params.get("fm_dropout", 0.0),
+        fm_dropout=params.get("fm_dropout", 0.1),
         fm_hidden_layers=params.get("fm_hidden_layers", 0),
         fm_hidden_dim=params.get("fm_hidden_dim", 256),
-        embedding_dropout=params.get("embedding_dropout", 0.0),
+        embedding_dropout=params.get("embedding_dropout", 0.1),
         separate_embedding_dims=separate_embedding_dims,
         
     ).to(device)
