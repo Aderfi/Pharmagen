@@ -23,11 +23,18 @@ import optuna
 import torch
 import torch.nn as nn
 from tqdm import tqdm
-from torch.cuda.amp import autocast, GradScaler
+
+import torch.amp.autocast_mode
+from torch.amp.autocast_mode import autocast
+
+import torch.amp.grad_scaler
+from torch.amp.grad_scaler import GradScaler
+
 
 from src.config.config import MODELS_DIR
 from .model import DeepFM_PGenModel
 from .model_configs import get_model_config
+from .train_utils import get_input_dims, get_output_sizes
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +250,7 @@ def train_model(
             optimizer.zero_grad()
             
             if use_amp:
-                with autocast():
+                with autocast(device_type=str(device)):
                     outputs = model(drug, genalle, gene, allele)
                     
                     # Calculate per-task losses

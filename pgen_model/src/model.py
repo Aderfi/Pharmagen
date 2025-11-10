@@ -45,6 +45,17 @@ class DeepFM_PGenModel(nn.Module):
         hidden_dim: int,
         dropout_rate: float,
         target_dims: Dict[str, int],
+        attention_dim_feedforward: int | None = None,
+        attention_dropout: float = 0.1,
+        num_attention_layers: int = 1,
+        use_batch_norm: bool = False,
+        use_layer_norm: bool = False,
+        activation_function: str = "gelu",
+        fm_dropout: float = 0.0,
+        fm_hidden_layers: int = 0,
+        fm_hidden_dim: int = 256,
+        embedding_dropout: float = 0.0,
+        separate_embedding_dims: Dict[str, int] | None = None,
     ) -> None:
         """
         Initialize DeepFM_PGenModel.
@@ -88,41 +99,85 @@ class DeepFM_PGenModel(nn.Module):
             )
         
         # 1. Embedding layers
-        self.drug_emb = nn.Embedding(n_drugs, embedding_dim)
-        self.genal_emb = nn.Embedding(n_genalles, embedding_dim)
-        self.gene_emb = nn.Embedding(n_genes, embedding_dim)
-        self.allele_emb = nn.Embedding(n_alleles, embedding_dim)
+        if separate_embedding_dims is not None:
+            drug_dim = separate_embedding_dims.get("drug", embedding_dim)
+            genalle_dim = separate_embedding_dims.get("genalle", embedding_dim)
+            gene_dim = separate_embedding_dims.get("gene", embedding_dim)
+            allele_dim = separate_embedding_dims.get("allele", embedding_dim)
+        else:
+            drug_dim = genalle_dim = gene_dim = allele_dim = embedding_dim
+            
+        self.drug_emb = nn.Embedding(n_drugs, drug_dim)
+        self.genal_emb = nn.Embedding(n_genalles, genalle_dim)
+        self.gene_emb = nn.Embedding(n_genes, gene_dim)
+        self.allele_emb = nn.Embedding(n_alleles, allele_dim)
+            
+
+        # 2. Activation function
+        self.embedding_dropout = nn.Dropout(embedding_dropout)
+        self.activation_function = activation_function.lower()
+        if self.activation_function == "gelu":
+            self.activation = nn.GELU()
+        elif self.activation_function == "relu":
+            self.activation = nn.ReLU()
+        elif self.activation_function == "swish":
+            self.activation = nn.SiLU()  # Swish = SiLU in PyTorch
+        elif self.activation_function == "mish":
+            self.activation = nn.Mish()
+        else:
+            self.activation = nn.GELU()  # Default fallback
+        
+        
+        # 3. Normalization layers
+        self.use_batch_norm = use_batch_norm
+        self.use_layer_norm = use_layer_norm
+        if use_batch_norm:
+            self.batch_norms = nn.ModuleList([nn.BatchNorm1d(hidden_dim) for _ in range(n_layers)])
+        if use_layer_norm:
+            self.layer_norms = nn.ModuleList([nn.LayerNorm(hidden_dim) for _ in range(n_layers)])
+
 
         # 2. Deep branch with attention
-        deep_input_dim = self.n_fields * embedding_dim
-        self.gelu = nn.GELU()
+        deep_input_dim = drug_dim + genalle_dim + gene_dim + allele_dim
         self.dropout = nn.Dropout(dropout_rate)
         
         # Configure attention heads
         nhead = self._get_valid_nhead(embedding_dim)
         logger.debug(f"Using {nhead} attention heads for embedding_dim={embedding_dim}")
         
-        self.attention_layer = nn.TransformerEncoderLayer(
-            d_model=embedding_dim,
-            nhead=nhead,
-            dim_feedforward=hidden_dim,
-            dropout=dropout_rate,
-            batch_first=True,
-        )
+        self.attention_layers = nn.ModuleList([
+            nn.TransformerEncoderLayer(
+                d_model=embedding_dim,
+                nhead=nhead,
+                dim_feedforward=attention_dim_feedforward if attention_dim_feedforward else hidden_dim,
+                dropout=attention_dropout,
+                batch_first=True,
+            ) for _ in range(num_attention_layers)
+        ])
         
         # Deep layers
         self.deep_layers = nn.ModuleList()
         self.deep_layers.append(nn.Linear(deep_input_dim, hidden_dim))
         for _ in range(n_layers - 1):
             self.deep_layers.append(nn.Linear(hidden_dim, hidden_dim))
-        deep_output_dim = hidden_dim
 
         # 3. FM branch
-        fm_output_dim = (self.n_fields * (self.n_fields - 1)) // 2
+        self.fm_dropout = nn.Dropout(fm_dropout)
+        fm_interaction_dim = (self.n_fields * (self.n_fields - 1)) // 2
+        
+        if fm_hidden_layers > 0:
+            self.fm_layers = nn.ModuleList()
+            self.fm_layers.append(nn.Linear(fm_interaction_dim, fm_hidden_dim))
+            for _ in range(fm_hidden_layers - 1):
+                self.fm_layers.append(nn.Linear(fm_hidden_dim, fm_hidden_dim))
+            fm_output_dim = fm_hidden_dim
+        else:
+            self.fm_layers = None
+            fm_output_dim = fm_interaction_dim
 
         # 4. Combined output dimension
-        combined_dim = deep_output_dim + fm_output_dim
-
+        combined_dim = hidden_dim + fm_output_dim
+        
         # 5. Multi-task output heads
         self.output_heads = nn.ModuleDict()
         for target_name, n_classes in target_dims.items():
@@ -210,10 +265,10 @@ class DeepFM_PGenModel(nn.Module):
             raise RuntimeError("All input tensors must have the same batch size")
 
         # 1. Get embeddings
-        drug_vec = self.drug_emb(drug)
-        genal_vec = self.genal_emb(genalle)
-        gene_vec = self.gene_emb(gene)
-        allele_vec = self.allele_emb(allele)
+        drug_vec = self.embedding_dropout(self.drug_emb(drug))
+        genal_vec = self.embedding_dropout(self.genal_emb(genalle))
+        gene_vec = self.embedding_dropout(self.gene_emb(gene))
+        allele_vec = self.embedding_dropout(self.allele_emb(allele))
 
         # 2. Deep branch with attention
         emb_stack = torch.stack(
@@ -222,17 +277,28 @@ class DeepFM_PGenModel(nn.Module):
         )
         
         # Apply attention
-        output_attn = self.attention_layer(emb_stack)
-        deep_input = output_attn.flatten(start_dim=1)
+        attention_output = emb_stack
+        for attention_layer in self.attention_layers:
+            attention_output = attention_layer(attention_output)
+        
+        deep_input = attention_output.flatten(start_dim=1)
         
         # Pass through deep layers
         deep_x = deep_input
-        for layer in self.deep_layers:
+        for i, layer in enumerate(self.deep_layers):
             deep_x = layer(deep_x)
-            deep_x = self.gelu(deep_x)
+            
+            # Apply normalization if specified
+            if self.use_batch_norm and i < len(self.batch_norms):
+                deep_x = self.batch_norms[i](deep_x)
+            if self.use_layer_norm and i < len(self.layer_norms):
+                deep_x = self.layer_norms[i](deep_x)
+            
+            deep_x = self.activation(deep_x)
             deep_x = self.dropout(deep_x)
         
         deep_output = deep_x
+        
 
         # 3. FM branch
         embeddings = [drug_vec, genal_vec, gene_vec, allele_vec]
@@ -240,16 +306,26 @@ class DeepFM_PGenModel(nn.Module):
         for emb_i, emb_j in itertools.combinations(embeddings, 2):
             dot_product = torch.sum(emb_i * emb_j, dim=-1, keepdim=True)
             fm_outputs.append(dot_product)
+        
         fm_output = torch.cat(fm_outputs, dim=-1)
+        fm_output = self.fm_dropout(fm_output)
+        
+        if self.fm_layers is not None:
+            for fm_layer in self.fm_layers:
+                fm_output = fm_layer(fm_output)
+                fm_output = self.activation(fm_output)
+                fm_output = self.fm_dropout(fm_output)
+                
+                
 
         # 4. Combine branches
-        combined_vec = torch.cat([deep_output, fm_output], dim=-1)
+        combined_vec = torch.cat([deep_x, fm_output], dim=-1)
 
         # 5. Multi-task predictions
         predictions = {}
         for name, head_layer in self.output_heads.items():
             predictions[name] = head_layer(combined_vec)
-
+        
         return predictions
 
     def calculate_weighted_loss(

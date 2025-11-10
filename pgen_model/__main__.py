@@ -273,7 +273,7 @@ def main():
 
         elif choice == "4":
             import optuna
-            from src.optuna_train import run_optuna_with_progress
+            from pgen_model.src.optuna_train import run_optuna_with_progress
 
             print("\nOptimizando hiperparámetros con Optuna...")
             optuna_model_name = select_model(
