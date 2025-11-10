@@ -27,7 +27,7 @@ def train_data_import(targets):
     if not csv_files:
         raise FileNotFoundError(f"No se encontraron archivos TSV en: {csv_path}")
     elif len(csv_files) == 1:
-        print(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
+        logging.info(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
         csv_files = csv_files[0]
     csv_files = Path(csv_path, "final_test_genalle.tsv")
             
@@ -161,7 +161,7 @@ class PGenDataProcess:
         
         df = df[self.cols_to_process]
         
-        print("Limpiando nombres de entidades (reemplazando espacios con '_')...")
+        logging.info("Limpiando nombres de entidades (reemplazando espacios con '_')...")
         # Optimized: process single-label and multi-label columns separately
         single_label_cols = [col for col in self.cols_to_process if col in df.columns and col not in self.multi_label_cols]
         multi_label_cols_present = [col for col in self.multi_label_cols if col in df.columns]
@@ -180,8 +180,8 @@ class PGenDataProcess:
         
         task3_name = "effect_type"
         if task3_name in df.columns:
-            print(f"Agrupando clases raras para '{task3_name}'...")
-            MIN_SAMPLES = 20 # Umbral: agrupar cualquier clase con < 50 muestras
+            logging.info(f"Agrupando clases raras para '{task3_name}'...")
+            MIN_SAMPLES = 20  # Umbral: agrupar cualquier clase con < 20 muestras
             
             # 1. Obtener los conteos de clase
             counts = df[task3_name].value_counts()
@@ -190,13 +190,13 @@ class PGenDataProcess:
             to_group = counts[counts < MIN_SAMPLES].index
             
             if len(to_group) > 0:
-                print(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
+                logging.info(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
                 # 3. Reemplazarlas en el DataFrame
                 df[task3_name] = df[task3_name].apply(
                     lambda x: "Other_Grouped" if x in to_group else x
                 )
             else:
-                print("No se encontraron clases raras para agrupar.")
+                logging.info("No se encontraron clases raras para agrupar.")
                 
         # 1. Normaliza columnas target (y de estratificación) a string
         for t in self.target_cols:
@@ -219,7 +219,7 @@ class PGenDataProcess:
             if col in df.columns:
                 df[col] = df[col].apply(self._split_labels)
         
-        print(f"Datos cargados y limpios. Total de filas: {len(df)}")
+        logging.info(f"Datos cargados y limpios. Total de filas: {len(df)}")
         return df
 
     def fit(self, df_train: pd.DataFrame) -> None:
@@ -384,47 +384,64 @@ class PGenDataProcess:
 
 
 class PGenDataset(Dataset):
+    """
+    Dataset de PyTorch optimizado para datos farmacogenéticos.
+    
+    Convierte datos pre-procesados a tensores para entrenamiento eficiente.
+    Soporta columnas multi-etiqueta y single-etiqueta.
+    
+    Args:
+        df: DataFrame con datos procesados (post-transform)
+        target_cols: Lista de nombres de columnas objetivo
+        multi_label_cols: Set de columnas multi-etiqueta (opcional)
+    """
+    
     def __init__(self, df, target_cols, multi_label_cols=None):
-        """
-        Crea tensores para el DataLoader.
-        'multi_label_cols' es un set de nombres de columnas que deben ser
-        convertidas a tensores Float32 (para BCEWithLogitsLoss).
-        """
         self.tensors = {}
         self.target_cols = [t.lower() for t in target_cols]
         self.multi_label_cols = multi_label_cols or set()
 
-        for col in df.columns:
-            if col == "stratify_col" or col not in df:
-                continue
-
+        # Optimización: procesar solo columnas relevantes
+        relevant_cols = [col for col in df.columns if col != "stratify_col"]
+        
+        for col in relevant_cols:
             if col in self.multi_label_cols:
                 # Para columnas multi-etiqueta (que contienen arrays)
-                # Apilarlas en un solo tensor y convertir a Float
+                # Optimización: usar from_numpy cuando es posible para mejor performance
                 try:
                     stacked_data = np.stack(df[col].values)
-                    self.tensors[col] = torch.tensor(stacked_data, dtype=torch.float32)
+                    self.tensors[col] = torch.from_numpy(stacked_data).float()
                 except ValueError as e:
-                    print(f"Error al apilar la columna multi-etiqueta: {col}")
-                    # Esto puede pasar si 'transform' no se ejecutó correctamente
-                    # y la columna contiene listas de diferentes longitudes.
-                    raise e
+                    raise ValueError(
+                        f"Error al apilar la columna multi-etiqueta '{col}'. "
+                        "Verifica que transform() se ejecutó correctamente."
+                    ) from e
             else:
                 # Para inputs y targets de etiqueta única
-                # Convertir a Long como antes
+                # Optimización: usar from_numpy para evitar copia innecesaria
                 try:
-                    self.tensors[col] = torch.tensor(df[col].values, dtype=torch.long)
-                except TypeError as e:
-                    print(
-                        f"Error al crear tensor para la columna: {col}. ¿Contiene tipos mixtos?"
-                    )
-                    raise e
+                    col_values = df[col].values
+                    self.tensors[col] = torch.from_numpy(col_values).long()
+                except (TypeError, ValueError) as e:
+                    raise TypeError(
+                        f"Error al crear tensor para la columna '{col}'. "
+                        "Verifica que no contenga tipos mixtos."
+                    ) from e
 
     def __len__(self):
+        """Retorna el número de muestras en el dataset."""
         return len(next(iter(self.tensors.values())))
 
     def __getitem__(self, idx):
-        # Devuelve un diccionario de tensores para este índice
+        """
+        Obtiene una muestra del dataset.
+        
+        Args:
+            idx: Índice de la muestra
+            
+        Returns:
+            Diccionario con tensores de la muestra
+        """
         return {k: v[idx] for k, v in self.tensors.items()}
 
 
