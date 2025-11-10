@@ -87,14 +87,63 @@ CLINICAL_PRIORITIES = {
 }
 
 DEFAULT_HYPERPARAMS = {
-    "batch_size": 64,
-    "epochs": 100,
-    "learning_rate": 1e-4,  # Un default seguro
-    "embedding_dim": 256,
-    "hidden_dim": 512,
-    "dropout_rate": 0.3,
-    "patience": 20,
-    "weight_decay": 1e-5,
+        "embedding_dim": [128, 256, 384, 512, 640, 768, 1024],
+        "n_layers": [2, 3, 4, 5, 6, 7],
+        "hidden_dim": ["int", 512, 4096, 256],
+            
+        "dropout_rate": (0.1, 0.7),
+        "weight_decay": (1e-6, 1e-2),
+            
+        "learning_rate": (1e-5, 1e-3),
+        "batch_size": [64, 128, 256, 512],
+            
+            # === TRANSFORMER ATTENTION (based on your attention_layer) ===
+            "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
+            "attention_dropout": (0.0, 0.5),
+            "num_attention_layers": [1, 2, 3, 4],  # Stack multiple transformer layers
+            
+            # === FOCAL LOSS (you're using it for effect_type) ===
+            "focal_gamma": (1.0, 5.0),  # Currently hardcoded to 2.0
+            "focal_alpha_weight": (0.5, 3.0),  # Multiplier for class weights
+            "label_smoothing": (0.05, 0.3),  # Currently hardcoded to 0.15
+            
+            # === OPTIMIZER VARIANTS ===
+            "optimizer_type": ["adamw", "adam", "sgd", "rmsprop"],
+            "adam_beta1": (0.8, 0.95),
+            "adam_beta2": (0.95, 0.999),
+            "sgd_momentum": (0.85, 0.99),
+            
+            # === SCHEDULER ===
+            "scheduler_type": ["plateau", "cosine", "step", "exponential", "none"],
+            "scheduler_factor": (0.1, 0.8),  # For ReduceLROnPlateau
+            "scheduler_patience": ["int", 3, 15, 1],
+            
+            # === TASK WEIGHTING ===
+            "uncertainty_weighting": [True, False],  # Toggle your uncertainty weighting
+            "manual_task_weights": [True, False],  # Use CLINICAL_PRIORITIES vs learned weights
+            
+            # === ADVANCED ARCHITECTURE ===
+            "use_batch_norm": [True, False],
+            "use_layer_norm": [True, False], 
+            "activation_function": ["gelu", "relu", "swish", "mish"],  # You're using GELU
+            "gradient_clip_norm": (0.5, 5.0),
+            
+            # === FM BRANCH ENHANCEMENTS ===
+            "fm_dropout": (0.0, 0.5),  # Separate dropout for FM interactions
+            "fm_hidden_layers": [0, 1, 2],  # Add layers after FM interactions
+            "fm_hidden_dim": ["int", 64, 512, 32],
+            
+            # === EMBEDDING VARIATIONS ===
+            "embedding_dropout": (0.0, 0.3),
+            "drug_embedding_dim": ["int", 64, 1024, 32],  # Separate embedding dims
+            "gene_embedding_dim": ["int", 64, 1024, 32],
+            "allele_embedding_dim": ["int", 32, 512, 16],
+            "genalle_embedding_dim": ["int", 64, 1024, 32],
+            
+            # === TRAINING DYNAMICS ===
+            "warmup_epochs": ["int", 0, 20, 1],
+            "early_stopping_patience": ["int", 15, 50, 5],
+            "validation_frequency": ["int", 1, 5, 1],  # Validate every N epochs
 }
 
 MASTER_WEIGHTS = {
@@ -147,17 +196,68 @@ MODEL_REGISTRY = {
             "weight_decay": 4.30e-05
         },
         "params_optuna": {
-            "embedding_dim": [128, 256, 384, 512, 640, 768],
-            "n_layers": [2, 3, 4, 5],
-            "hidden_dim": ["int", 512, 2048, 256],
+            "embedding_dim": [128, 256, 384, 512, 640, 768, 1024],
+            "n_layers": [2, 3, 4, 5, 6, 7],
+            "hidden_dim": ["int", 512, 4096, 256],
             
-            "dropout_rate": (0.2, 0.7),
+            "dropout_rate": (0.15, 0.6),
             "weight_decay": (1e-6, 1e-2),
             
             "learning_rate": (1e-5, 1e-3),
             "batch_size": [64, 128, 256, 512],
-
+            
+            # === TRANSFORMER ATTENTION (based on your attention_layer) ===
+            "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
+            "attention_dropout": (0.0, 0.5),
+            "num_attention_layers": [1, 2, 3, 4],  # Stack multiple transformer layers
+            
+            # === FOCAL LOSS (you're using it for effect_type) ===
+            "focal_gamma": (1.0, 5.0),  # Currently hardcoded to 2.0
+            "focal_alpha_weight": (0.5, 3.0),  # Multiplier for class weights
+            "label_smoothing": (0.05, 0.3),  # Currently hardcoded to 0.15
+            
+            # === OPTIMIZER VARIANTS ===
+            "optimizer_type": ["adamw", "adam", "sgd", "rmsprop"],
+            "adam_beta1": (0.8, 0.95),
+            "adam_beta2": (0.95, 0.999),
+            "sgd_momentum": (0.85, 0.99),
+            
+            # === SCHEDULER ===
+            "scheduler_type": ["plateau", "cosine", "step", "exponential", "none"],
+            "scheduler_factor": (0.1, 0.8),  # For ReduceLROnPlateau
+            "scheduler_patience": ["int", 3, 15, 1],
+            
+            # === TASK WEIGHTING ===
+            "uncertainty_weighting": [True, False],  # Toggle your uncertainty weighting
+            "manual_task_weights": [True, False],  # Use CLINICAL_PRIORITIES vs learned weights
+            
+            # === ADVANCED ARCHITECTURE ===
+            "use_batch_norm": [True, False],
+            "use_layer_norm": [True, False], 
+            "activation_function": ["gelu", "relu", "swish", "mish"],  # You're using GELU
+            "gradient_clip_norm": (0.5, 5.0),
+            
+            # === FM BRANCH ENHANCEMENTS ===
+            "fm_dropout": (0.0, 0.5),  # Separate dropout for FM interactions
+            "fm_hidden_layers": [0, 1, 2],  # Add layers after FM interactions
+            "fm_hidden_dim": ["int", 64, 512, 32],
+            
+            # === EMBEDDING VARIATIONS ===
+            "embedding_dropout": (0.0, 0.3),
+            "drug_embedding_dim": ["int", 64, 1024, 32],  # Separate embedding dims
+            "gene_embedding_dim": ["int", 64, 1024, 32],
+            "allele_embedding_dim": ["int", 32, 512, 16],
+            "genalle_embedding_dim": ["int", 64, 1024, 32],
+            
+            # === TRAINING DYNAMICS ===
+            "warmup_epochs": ["int", 0, 20, 1],
+            "early_stopping_patience": ["int", 15, 50, 5],
+            "validation_frequency": ["int", 1, 5, 1],  # Validate every N epochs
+            
         },
+        
+        
+        
     },
     "ATC_Phenotype_Effect_Outcome": {   # choice 2
         "targets": ["Phenotype_outcome", "Effect_direction", "Effect_type", "Effect_phenotype", "Effect_phenotype_id", "Pop_Phenotypes/Diseases", "Pop_phenotype_id"],
@@ -208,6 +308,10 @@ MODEL_REGISTRY = {
             "effect_direction": 1.0,
             "effect_type": 1.0,
             "effect_phenotype": 1.0,
+            
+            
+            
+            
         },
     },
 }
