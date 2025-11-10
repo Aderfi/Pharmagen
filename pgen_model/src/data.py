@@ -162,13 +162,18 @@ class PGenDataProcess:
         df = df[self.cols_to_process]
         
         print("Limpiando nombres de entidades (reemplazando espacios con '_')...")
-        # Optimize: vectorized operation instead of loop
-        for col in self.cols_to_process:
-            if col in df.columns and col not in self.multi_label_cols:
-                # Vectorized string replacement for single-label columns
+        # Optimized: process single-label and multi-label columns separately
+        single_label_cols = [col for col in self.cols_to_process if col in df.columns and col not in self.multi_label_cols]
+        multi_label_cols_present = [col for col in self.multi_label_cols if col in df.columns]
+        
+        # Vectorized operation for all single-label columns at once
+        if single_label_cols:
+            for col in single_label_cols:
                 df[col] = df[col].astype(str).str.replace(' ', '_', regex=False)
-            elif col in df.columns and col in self.multi_label_cols:
-                # For multi-label columns, process in vectorized manner
+        
+        # Process multi-label columns only if present
+        if multi_label_cols_present:
+            for col in multi_label_cols_present:
                 df[col] = df[col].apply(
                     lambda lst: [s.replace(' ', '_') for s in lst] if isinstance(lst, list) else lst
                 )
@@ -241,15 +246,12 @@ class PGenDataProcess:
         
         logging.info("Ajustando codificadores con datos de entrenamiento...")
         
-        # Añadir un token para valores desconocidos a todas las clases de LabelEncoder
-        # Esto es crucial para manejar datos no vistos en validación/test
-        df_train_copy = df_train.copy()
-        
+        # No se necesita copia completa del DataFrame, trabajamos directamente
         for col in self.cols_to_process:
             if col in self.multi_label_cols:
                 # MultiLabelBinarizer para columnas con múltiples etiquetas.
                 encoder = MultiLabelBinarizer()
-                encoder.fit(df_train_copy[col])
+                encoder.fit(df_train[col])
                 self.encoders[col] = encoder
                 logging.debug(f"Ajustado MultiLabelBinarizer para la columna: {col}")
 
@@ -257,13 +259,11 @@ class PGenDataProcess:
                 # LabelEncoder para todas las demás columnas (inputs y targets).
                 encoder = LabelEncoder()
                 
-                # Convertir la columna a string para asegurar consistencia
-                series = df_train_copy[col].astype(str)
+                # Optimización: obtener valores únicos directamente y añadir token desconocido
+                unique_labels = df_train[col].astype(str).unique().tolist()
+                unique_labels.append(self.unknown_token)
                 
-                # Añadir el token de "desconocido" al set de clases para que el encoder lo aprenda
-                all_labels = list(series.unique()) + [self.unknown_token]
-                
-                encoder.fit(all_labels)
+                encoder.fit(unique_labels)
                 self.encoders[col] = encoder
                 logging.debug(f"Ajustado LabelEncoder para la columna: {col}")
         
@@ -335,6 +335,12 @@ class PGenDataProcess:
         """
         Transforma un DataFrame usando los codificadores ya ajustados.
         Maneja las etiquetas no vistas reemplazándolas con un token de 'desconocido'.
+        
+        Args:
+            df: DataFrame a transformar
+            
+        Returns:
+            DataFrame transformado con columnas codificadas
         """
         if not self.encoders:
             raise RuntimeError("fit() debe ser llamado antes de transform()")
@@ -351,16 +357,16 @@ class PGenDataProcess:
                 df_transformed[col] = list(encoder.transform(df_transformed[col]))
             
             elif isinstance(encoder, LabelEncoder):
-                # Para LabelEncoder, reemplazamos valores no vistos por nuestro token
+                # Optimización: operación vectorizada para reemplazar valores desconocidos
                 known_labels = set(encoder.classes_)
                 
-                # Aplicamos la transformación, usando 'unknown_token' para lo no conocido
-                df_transformed[col] = df_transformed[col].astype(str).apply(
-                    lambda x: x if x in known_labels else self.unknown_token
-                )
+                # Convertir a string y reemplazar valores desconocidos (operación vectorizada)
+                col_values = df_transformed[col].astype(str)
+                mask_unknown = ~col_values.isin(known_labels)
+                col_values[mask_unknown] = self.unknown_token
                 
-                # Ahora transformamos de forma segura
-                df_transformed[col] = encoder.transform(df_transformed[col])
+                # Transformar de forma segura
+                df_transformed[col] = encoder.transform(col_values)
         
         logging.info(f"Transformación completada para {len(df)} filas.")
         return df_transformed
