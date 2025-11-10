@@ -4,6 +4,7 @@ from node2vec import Node2Vec
 import gensim
 import warnings
 import sys
+import multiprocessing
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -19,24 +20,29 @@ NUM_WALKS = 200  # Número de paseos aleatorios por nodo
 # --- Parámetros de Gensim (Word2Vec) ---
 WINDOW_SIZE = 10    # Tamaño de la ventana de contexto
 MIN_COUNT = 1       # Contar todas las entidades (incluso las raras)
-WORKERS = 16         # Usar 4 cores de CPU para entrenar (ajusta a tu PC)
+# Optimización: usar número óptimo de workers basado en CPU disponibles
+# Dejar 1-2 cores libres para el sistema
+WORKERS = max(1, min(multiprocessing.cpu_count() - 2, 8))
 
 EMBEDDING_FILE = 'encoders/kge_embeddings.kv' # .kv es el formato de KeyedVectors
 
 print(f"Iniciando el proceso de pre-entrenamiento de embeddings...")
 print(f"Archivo de entrada: {FILE_PATH}")
 print(f"Dimensiones del embedding: {EMBEDDING_DIM}")
+print(f"Workers: {WORKERS} (CPU cores disponibles: {multiprocessing.cpu_count()})")
 
 try:
     # --- 2. Cargar Datos y Construir el Grafo ---
     print(f"\nCargando datos desde {FILE_PATH}...")
-    df = pd.read_csv(FILE_PATH, sep='\t')
+    # Optimización: especificar dtype y usecols para reducir memoria
+    df = pd.read_csv(FILE_PATH, sep='\t', usecols=ENTITY_COLUMNS, 
+                     dtype={col: str for col in ENTITY_COLUMNS})
     
     # Filtrar filas donde falte un nombre de entidad
     df = df.dropna(subset=ENTITY_COLUMNS)
     
-    for col in ENTITY_COLUMNS:
-        df[col] = df[col].astype(str).str.replace(' ', '_')
+    # Optimización: operación vectorizada en lugar de loop
+    df[ENTITY_COLUMNS] = df[ENTITY_COLUMNS].apply(lambda x: x.str.replace(' ', '_'))
     
     print("Construyendo el grafo con NetworkX...")
     # Crear un grafo no dirigido a partir de las dos columnas
