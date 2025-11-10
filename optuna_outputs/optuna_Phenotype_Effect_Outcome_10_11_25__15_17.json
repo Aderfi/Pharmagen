@@ -1,0 +1,609 @@
+{
+  "model": "Phenotype_Effect_Outcome",
+  "optimization_type": "multi_objective",
+  "n_trials": 300,
+  "completed_trials": 300,
+  "best_trial": {
+    "number": 56,
+    "values": [
+      2.7921445142655146,
+      -0.489052545772569
+    ],
+    "params": {
+      "embedding_dim": 256,
+      "n_layers": 2,
+      "hidden_dim": 2176,
+      "dropout_rate": 0.6826665445146843,
+      "weight_decay": 0.0001478755319922093,
+      "learning_rate": 0.0002023597603520488,
+      "batch_size": 64,
+      "attention_dim_feedforward": 3840,
+      "attention_dropout": 0.48387265129374835,
+      "num_attention_layers": 2,
+      "focal_gamma": 1.1605241620974445,
+      "focal_alpha_weight": 1.3417203741569734,
+      "label_smoothing": 0.11100845590336689,
+      "optimizer_type": "rmsprop",
+      "adam_beta1": 0.9274739067173281,
+      "adam_beta2": 0.9918746988410512,
+      "sgd_momentum": [
+        0.85,
+        0.99
+      ],
+      "scheduler_type": "none",
+      "scheduler_factor": 0.38890844194888574,
+      "scheduler_patience": 4,
+      "uncertainty_weighting": [
+        true,
+        false
+      ],
+      "manual_task_weights": true,
+      "use_batch_norm": true,
+      "use_layer_norm": true,
+      "activation_function": "gelu",
+      "gradient_clip_norm": 2.231503593586354,
+      "fm_dropout": 0.34731215338736454,
+      "fm_hidden_layers": 2,
+      "fm_hidden_dim": 384,
+      "embedding_dropout": 0.1546248948072961,
+      "drug_embedding_dim": [
+        "int",
+        64,
+        1024,
+        32
+      ],
+      "gene_embedding_dim": [
+        "int",
+        64,
+        1024,
+        32
+      ],
+      "allele_embedding_dim": [
+        "int",
+        32,
+        512,
+        16
+      ],
+      "genalle_embedding_dim": [
+        "int",
+        64,
+        1024,
+        32
+      ],
+      "warmup_epochs": [
+        "int",
+        0,
+        20,
+        1
+      ],
+      "early_stopping_patience": 25,
+      "validation_frequency": [
+        "int",
+        1,
+        5,
+        1
+      ]
+    },
+    "user_attrs": {
+      "all_accuracies": [
+        0.868920972644377,
+        0.6607142857142857,
+        0.4673252279635258
+      ],
+      "avg_accuracy": 0.6656534954407295,
+      "critical_task_f1": 0.489052545772569,
+      "critical_task_name": "effect_type",
+      "effect_direction_f1_macro": 0.5623500562305223,
+      "effect_direction_f1_weighted": 0.6586071937527107,
+      "effect_direction_precision_macro": 0.6054750844102922,
+      "effect_direction_recall_macro": 0.5368957785471086,
+      "effect_type_f1_macro": 0.3570673248384186,
+      "effect_type_f1_weighted": 0.489052545772569,
+      "effect_type_precision_macro": 0.35661561911612866,
+      "effect_type_recall_macro": 0.3679149266753298,
+      "full_params": {
+        "embedding_dim": 256,
+        "n_layers": 2,
+        "hidden_dim": 2176,
+        "dropout_rate": 0.6826665445146843,
+        "weight_decay": 0.0001478755319922093,
+        "learning_rate": 0.0002023597603520488,
+        "batch_size": 64,
+        "attention_dim_feedforward": 3840,
+        "attention_dropout": 0.48387265129374835,
+        "num_attention_layers": 2,
+        "focal_gamma": 1.1605241620974445,
+        "focal_alpha_weight": 1.3417203741569734,
+        "label_smoothing": 0.11100845590336689,
+        "optimizer_type": "rmsprop",
+        "adam_beta1": 0.9274739067173281,
+        "adam_beta2": 0.9918746988410512,
+        "sgd_momentum": [
+          0.85,
+          0.99
+        ],
+        "scheduler_type": "none",
+        "scheduler_factor": 0.38890844194888574,
+        "scheduler_patience": 4,
+        "uncertainty_weighting": [
+          true,
+          false
+        ],
+        "manual_task_weights": true,
+        "use_batch_norm": true,
+        "use_layer_norm": true,
+        "activation_function": "gelu",
+        "gradient_clip_norm": 2.231503593586354,
+        "fm_dropout": 0.34731215338736454,
+        "fm_hidden_layers": 2,
+        "fm_hidden_dim": 384,
+        "embedding_dropout": 0.1546248948072961,
+        "drug_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "gene_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "allele_embedding_dim": [
+          "int",
+          32,
+          512,
+          16
+        ],
+        "genalle_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "warmup_epochs": [
+          "int",
+          0,
+          20,
+          1
+        ],
+        "early_stopping_patience": 25,
+        "validation_frequency": [
+          "int",
+          1,
+          5,
+          1
+        ]
+      },
+      "normalized_loss": 0.5501574164582328,
+      "phenotype_outcome_f1_macro": 0.5567717773248989,
+      "phenotype_outcome_f1_samples": 0.6903495440729484,
+      "phenotype_outcome_precision_samples": 0.6916793313069909,
+      "phenotype_outcome_recall_samples": 0.7025709219858155,
+      "seed": 711
+    }
+  },
+  "clinical_priorities": {
+    "effect_type": 0.6,
+    "phenotype_outcome": 0.25,
+    "effect_direction": 0.15
+  },
+  "pareto_front": [
+    {
+      "number": 56,
+      "values": [
+        2.7921445142655146,
+        -0.489052545772569
+      ],
+      "params": {
+        "embedding_dim": 256,
+        "n_layers": 2,
+        "hidden_dim": 2176,
+        "dropout_rate": 0.6826665445146843,
+        "weight_decay": 0.0001478755319922093,
+        "learning_rate": 0.0002023597603520488,
+        "batch_size": 64,
+        "attention_dim_feedforward": 3840,
+        "attention_dropout": 0.48387265129374835,
+        "num_attention_layers": 2,
+        "focal_gamma": 1.1605241620974445,
+        "focal_alpha_weight": 1.3417203741569734,
+        "label_smoothing": 0.11100845590336689,
+        "optimizer_type": "rmsprop",
+        "adam_beta1": 0.9274739067173281,
+        "adam_beta2": 0.9918746988410512,
+        "sgd_momentum": [
+          0.85,
+          0.99
+        ],
+        "scheduler_type": "none",
+        "scheduler_factor": 0.38890844194888574,
+        "scheduler_patience": 4,
+        "uncertainty_weighting": [
+          true,
+          false
+        ],
+        "manual_task_weights": true,
+        "use_batch_norm": true,
+        "use_layer_norm": true,
+        "activation_function": "gelu",
+        "gradient_clip_norm": 2.231503593586354,
+        "fm_dropout": 0.34731215338736454,
+        "fm_hidden_layers": 2,
+        "fm_hidden_dim": 384,
+        "embedding_dropout": 0.1546248948072961,
+        "drug_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "gene_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "allele_embedding_dim": [
+          "int",
+          32,
+          512,
+          16
+        ],
+        "genalle_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "warmup_epochs": [
+          "int",
+          0,
+          20,
+          1
+        ],
+        "early_stopping_patience": 25,
+        "validation_frequency": [
+          "int",
+          1,
+          5,
+          1
+        ]
+      },
+      "critical_f1": 0.489052545772569
+    },
+    {
+      "number": 92,
+      "values": [
+        1.4223171330633617,
+        -0.4621774492803488
+      ],
+      "params": {
+        "embedding_dim": 256,
+        "n_layers": 3,
+        "hidden_dim": 1920,
+        "dropout_rate": 0.5817860886625308,
+        "weight_decay": 3.076396316622712e-05,
+        "learning_rate": 0.0003335936245062351,
+        "batch_size": 64,
+        "attention_dim_feedforward": 3328,
+        "attention_dropout": 0.31815961482316035,
+        "num_attention_layers": 1,
+        "focal_gamma": 1.6185340809435065,
+        "focal_alpha_weight": 0.3621772430109659,
+        "label_smoothing": 0.03348775966166659,
+        "optimizer_type": "adam",
+        "adam_beta1": 0.8969140490939378,
+        "adam_beta2": 0.99513584629384,
+        "sgd_momentum": [
+          0.85,
+          0.99
+        ],
+        "scheduler_type": "plateau",
+        "scheduler_factor": 0.5933988106311064,
+        "scheduler_patience": 5,
+        "uncertainty_weighting": [
+          true,
+          false
+        ],
+        "manual_task_weights": true,
+        "use_batch_norm": true,
+        "use_layer_norm": false,
+        "activation_function": "mish",
+        "gradient_clip_norm": 1.5738392211932337,
+        "fm_dropout": 0.31144860113216327,
+        "fm_hidden_layers": 2,
+        "fm_hidden_dim": 448,
+        "embedding_dropout": 0.129643637280772,
+        "drug_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "gene_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "allele_embedding_dim": [
+          "int",
+          32,
+          512,
+          16
+        ],
+        "genalle_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "warmup_epochs": [
+          "int",
+          0,
+          20,
+          1
+        ],
+        "early_stopping_patience": 35,
+        "validation_frequency": [
+          "int",
+          1,
+          5,
+          1
+        ]
+      },
+      "critical_f1": 0.4621774492803488
+    },
+    {
+      "number": 122,
+      "values": [
+        2.139568402653649,
+        -0.4850961150528136
+      ],
+      "params": {
+        "embedding_dim": 512,
+        "n_layers": 2,
+        "hidden_dim": 1408,
+        "dropout_rate": 0.6947320244282208,
+        "weight_decay": 3.920827579856915e-05,
+        "learning_rate": 0.0006341051276114944,
+        "batch_size": 128,
+        "attention_dim_feedforward": 3584,
+        "attention_dropout": 0.3240806550160321,
+        "num_attention_layers": 2,
+        "focal_gamma": 1.0173845427998542,
+        "focal_alpha_weight": 0.7132977918449812,
+        "label_smoothing": 0.12408253455979056,
+        "optimizer_type": "adam",
+        "adam_beta1": 0.8672172278807032,
+        "adam_beta2": 0.9956705458031407,
+        "sgd_momentum": [
+          0.85,
+          0.99
+        ],
+        "scheduler_type": "plateau",
+        "scheduler_factor": 0.43676599213268985,
+        "scheduler_patience": 5,
+        "uncertainty_weighting": [
+          true,
+          false
+        ],
+        "manual_task_weights": true,
+        "use_batch_norm": true,
+        "use_layer_norm": false,
+        "activation_function": "mish",
+        "gradient_clip_norm": 2.1458987452618192,
+        "fm_dropout": 0.33641745711442084,
+        "fm_hidden_layers": 2,
+        "fm_hidden_dim": 448,
+        "embedding_dropout": 0.2441180841338149,
+        "drug_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "gene_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "allele_embedding_dim": [
+          "int",
+          32,
+          512,
+          16
+        ],
+        "genalle_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "warmup_epochs": [
+          "int",
+          0,
+          20,
+          1
+        ],
+        "early_stopping_patience": 25,
+        "validation_frequency": [
+          "int",
+          1,
+          5,
+          1
+        ]
+      },
+      "critical_f1": 0.4850961150528136
+    },
+    {
+      "number": 199,
+      "values": [
+        1.4918670711063204,
+        -0.4696661905686931
+      ],
+      "params": {
+        "embedding_dim": 640,
+        "n_layers": 3,
+        "hidden_dim": 1280,
+        "dropout_rate": 0.27292257008518017,
+        "weight_decay": 0.0004530709667882949,
+        "learning_rate": 0.0007591373479688049,
+        "batch_size": 128,
+        "attention_dim_feedforward": 3328,
+        "attention_dropout": 0.48738975162037257,
+        "num_attention_layers": 1,
+        "focal_gamma": 2.9708669258673748,
+        "focal_alpha_weight": 0.40435465144242927,
+        "label_smoothing": 0.08937100059519267,
+        "optimizer_type": "adam",
+        "adam_beta1": 0.8736532993412761,
+        "adam_beta2": 0.9966991612264591,
+        "sgd_momentum": [
+          0.85,
+          0.99
+        ],
+        "scheduler_type": "plateau",
+        "scheduler_factor": 0.4861325669165593,
+        "scheduler_patience": 4,
+        "uncertainty_weighting": [
+          true,
+          false
+        ],
+        "manual_task_weights": true,
+        "use_batch_norm": true,
+        "use_layer_norm": false,
+        "activation_function": "mish",
+        "gradient_clip_norm": 3.4826037471068556,
+        "fm_dropout": 0.38975449311689336,
+        "fm_hidden_layers": 2,
+        "fm_hidden_dim": 448,
+        "embedding_dropout": 0.2976870288520728,
+        "drug_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "gene_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "allele_embedding_dim": [
+          "int",
+          32,
+          512,
+          16
+        ],
+        "genalle_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "warmup_epochs": [
+          "int",
+          0,
+          20,
+          1
+        ],
+        "early_stopping_patience": 30,
+        "validation_frequency": [
+          "int",
+          1,
+          5,
+          1
+        ]
+      },
+      "critical_f1": 0.4696661905686931
+    },
+    {
+      "number": 209,
+      "values": [
+        1.5407552435284568,
+        -0.47021671344643184
+      ],
+      "params": {
+        "embedding_dim": 512,
+        "n_layers": 2,
+        "hidden_dim": 2432,
+        "dropout_rate": 0.6420766610758742,
+        "weight_decay": 0.00045719956131448923,
+        "learning_rate": 0.0008906269601536714,
+        "batch_size": 128,
+        "attention_dim_feedforward": 3840,
+        "attention_dropout": 0.3960976085458593,
+        "num_attention_layers": 1,
+        "focal_gamma": 1.4783625472544366,
+        "focal_alpha_weight": 0.4127667985606241,
+        "label_smoothing": 0.050014500255402196,
+        "optimizer_type": "adam",
+        "adam_beta1": 0.8861747838610505,
+        "adam_beta2": 0.9699131858033141,
+        "sgd_momentum": [
+          0.85,
+          0.99
+        ],
+        "scheduler_type": "plateau",
+        "scheduler_factor": 0.5075990714635921,
+        "scheduler_patience": 8,
+        "uncertainty_weighting": [
+          true,
+          false
+        ],
+        "manual_task_weights": true,
+        "use_batch_norm": true,
+        "use_layer_norm": false,
+        "activation_function": "mish",
+        "gradient_clip_norm": 2.5700075542290377,
+        "fm_dropout": 0.22142706659172898,
+        "fm_hidden_layers": 2,
+        "fm_hidden_dim": 512,
+        "embedding_dropout": 0.14194741128614408,
+        "drug_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "gene_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "allele_embedding_dim": [
+          "int",
+          32,
+          512,
+          16
+        ],
+        "genalle_embedding_dim": [
+          "int",
+          64,
+          1024,
+          32
+        ],
+        "warmup_epochs": [
+          "int",
+          0,
+          20,
+          1
+        ],
+        "early_stopping_patience": 15,
+        "validation_frequency": [
+          "int",
+          1,
+          5,
+          1
+        ]
+      },
+      "critical_f1": 0.47021671344643184
+    }
+  ]
+}

@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import src.config.config as cfg
 import torch
-from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer, OneHotEncoder
 from src.config.config import *
 from torch.utils.data import Dataset
 from .model_configs import MULTI_LABEL_COLUMN_NAMES
@@ -109,8 +109,10 @@ class PGenDataProcess:
         self.cols_to_process = []
         self.target_cols = []
         self.multi_label_cols = set()
+        self.input_cols = ["drug", "genalle", "gene", "allele"]
 
-        self.unknown_token = "__UNKNOWN__" 
+        self.unknown_token = "__UNKNOWN__"
+        self.one_hot_encoded_cols = []
 
     def _split_labels(self, label_str):
         """Helper: Divide un string 'A, B' en una lista ['A', 'B'] y maneja nulos."""
@@ -118,8 +120,9 @@ class PGenDataProcess:
             return []  # MultiLabelBinarizer necesita un iterable
         return [s.strip() for s in re.split(r",|;", label_str) if s.strip()]
 
-    def load_data(self, csv_path: str, all_cols: List[str], target_cols: List[str], 
-                  multi_label_targets: Optional[List[str]], stratify_cols: List[str]) -> pd.DataFrame:
+    def load_data(self, csv_path: str, all_cols: List[str], input_cols: List[str],
+                  target_cols: List[str], multi_label_targets: Optional[List[str]], 
+                  stratify_cols: List[str]) -> pd.DataFrame:
         """
         Load, clean and prepare data for splitting.
         
@@ -216,49 +219,57 @@ class PGenDataProcess:
 
     def fit(self, df_train: pd.DataFrame) -> None:
         """
-        Fit encoders using ONLY training data to prevent data leakage.
-        
-        Must be called before transform(). Adds an UNKNOWN token to handle
-        unseen labels in validation/test sets.
-        
+        Ajusta los codificadores usando SOLAMENTE datos de entrenamiento para prevenir
+        fugas de datos (data leakage).
+
+        Debe ser llamado antes de transform().
+
         Args:
-            df_train: Training DataFrame with columns matching cols_to_process
+            df_train: DataFrame de entrenamiento con las columnas a procesar.
             
         Raises:
-            ValueError: If df_train is empty or missing required columns
+            ValueError: Si df_train está vacío o le faltan columnas requeridas.
         """
         if df_train.empty:
-            raise ValueError("df_train cannot be empty")
+            raise ValueError("df_train no puede estar vacío")
         
-        missing_cols = set(self.cols_to_process) - set(df_train.columns)
+        # Comprobar si faltan columnas definidas en la inicialización
+        required_cols = self.cols_to_process
+        missing_cols = set(required_cols) - set(df_train.columns)
         if missing_cols:
-            raise ValueError(f"df_train missing columns: {missing_cols}")
+            raise ValueError(f"A df_train le faltan las columnas: {missing_cols}")
         
-        logger.info("Fitting encoders with training data...")
+        logging.info("Ajustando codificadores con datos de entrenamiento...")
+        
+        # Añadir un token para valores desconocidos a todas las clases de LabelEncoder
+        # Esto es crucial para manejar datos no vistos en validación/test
+        df_train_copy = df_train.copy()
+        
         for col in self.cols_to_process:
             if col in self.multi_label_cols:
-                # MultiLabelBinarizer: se ajusta a las listas de etiquetas
+                # MultiLabelBinarizer para columnas con múltiples etiquetas.
                 encoder = MultiLabelBinarizer()
-                encoder.fit(df_train[col])
+                encoder.fit(df_train_copy[col])
                 self.encoders[col] = encoder
-                logger.debug(f"Fitted MultiLabelBinarizer for {col}")
+                logging.debug(f"Ajustado MultiLabelBinarizer para la columna: {col}")
+
             else:
-                # LabelEncoder: se ajusta a etiquetas únicas
+                # LabelEncoder para todas las demás columnas (inputs y targets).
                 encoder = LabelEncoder()
                 
-                # <--- LÓGICA MEJORADA ---
-                # Añadir un token "UNKNOWN" al vocabulario del encoder
-                # para manejar valores en 'val' o 'test' que no estaban en 'train'.
-                all_labels = list(df_train[col].astype(str).unique())
-                if self.unknown_token not in all_labels:
-                    all_labels.append(self.unknown_token)
+                # Convertir la columna a string para asegurar consistencia
+                series = df_train_copy[col].astype(str)
+                
+                # Añadir el token de "desconocido" al set de clases para que el encoder lo aprenda
+                all_labels = list(series.unique()) + [self.unknown_token]
                 
                 encoder.fit(all_labels)
                 self.encoders[col] = encoder
-                logger.debug(f"Fitted LabelEncoder for {col} with {len(all_labels)} classes")
+                logging.debug(f"Ajustado LabelEncoder para la columna: {col}")
         
-        logger.info("Encoders fitted successfully.")
+        logging.info("Codificadores ajustados correctamente.")
 
+    '''
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform a DataFrame using fitted encoders.
@@ -317,6 +328,41 @@ class PGenDataProcess:
         if unknown_counts:
             logger.info(f"Transform summary - Unknown labels replaced: {unknown_counts}")
         
+        return df_transformed
+    '''
+    
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Transforma un DataFrame usando los codificadores ya ajustados.
+        Maneja las etiquetas no vistas reemplazándolas con un token de 'desconocido'.
+        """
+        if not self.encoders:
+            raise RuntimeError("fit() debe ser llamado antes de transform()")
+        
+        df_transformed = df.copy()
+        
+        for col, encoder in self.encoders.items():
+            if col not in df_transformed.columns:
+                logging.warning(f"La columna {col} no se encontró en el DataFrame, se omite.")
+                continue
+
+            if isinstance(encoder, MultiLabelBinarizer):
+                # MLB transforma las listas en vectores binarios y maneja desconocidos.
+                df_transformed[col] = list(encoder.transform(df_transformed[col]))
+            
+            elif isinstance(encoder, LabelEncoder):
+                # Para LabelEncoder, reemplazamos valores no vistos por nuestro token
+                known_labels = set(encoder.classes_)
+                
+                # Aplicamos la transformación, usando 'unknown_token' para lo no conocido
+                df_transformed[col] = df_transformed[col].astype(str).apply(
+                    lambda x: x if x in known_labels else self.unknown_token
+                )
+                
+                # Ahora transformamos de forma segura
+                df_transformed[col] = encoder.transform(df_transformed[col])
+        
+        logging.info(f"Transformación completada para {len(df)} filas.")
         return df_transformed
     
     def __repr__(self) -> str:

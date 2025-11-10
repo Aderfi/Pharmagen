@@ -83,7 +83,7 @@ def load_encoders(model_name, encoders_dir=None):
         raise Exception(f"Error al cargar los encoders: {e}")
 
 
-def predict_single_input(drug, genotype, gene, allele, model, encoders, target_cols):
+def predict_single_input(drug, genalle, gene, allele, model, encoders, target_cols):
     """
     Predicción para una sola entrada, compatible con DeepFM_PGenModel
     (salida de diccionario y manejo de multi-etiqueta).
@@ -97,13 +97,9 @@ def predict_single_input(drug, genotype, gene, allele, model, encoders, target_c
     # --- 1. Transformar Inputs (Corregido con manejo de UNKNOWN) ---
     try:
         drug_tensor = _transform_input(encoders["drug"], drug, device)
+        genal_tensor = _transform_input(encoders["genalle"], genalle, device)
         gene_tensor = _transform_input(encoders["gene"], gene, device)
         allele_tensor = _transform_input(encoders["allele"], allele, device)
-        
-        # <--- CORRECCIÓN 1: Usar la clave correcta del encoder ---
-        geno_tensor = _transform_input(
-            encoders["variant/haplotypes"], genotype, device
-        )
         
     except Exception as e:
         print(f"Error fatal al transformar inputs: {e}")
@@ -113,7 +109,7 @@ def predict_single_input(drug, genotype, gene, allele, model, encoders, target_c
     with torch.no_grad():
         # <--- CORRECCIÓN 2: Orden de argumentos ---
         # El orden debe coincidir con model.py -> forward(self, drug, genotype, gene, allele)
-        predictions_dict = model(drug_tensor, geno_tensor, gene_tensor, allele_tensor)
+        predictions_dict = model(drug_tensor, genal_tensor, gene_tensor, allele_tensor)
 
     # --- 3. Procesar Salidas Dinámicamente ---
     results = {}

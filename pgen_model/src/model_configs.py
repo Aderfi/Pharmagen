@@ -47,6 +47,7 @@ def get_model_config(model_name: str) -> dict:
     
     final_config = {
             "targets": model_conf["targets"],
+            "inputs": model_conf["inputs"],
             "cols": model_conf["cols"],
             "params": final_hyperparams,
             "weights": model_conf.get("weights")
@@ -87,16 +88,17 @@ CLINICAL_PRIORITIES = {
 }
 
 DEFAULT_HYPERPARAMS = {
-        "embedding_dim": [128, 256, 384, 512, 640, 768, 1024],
-        "n_layers": [2, 3, 4, 5, 6, 7],
-        "hidden_dim": ["int", 512, 4096, 256],
+        "embedding_dim": 128,
+        "n_layers": 2,
+        "hidden_dim": 2048,
             
-        "dropout_rate": (0.1, 0.7),
-        "weight_decay": (1e-6, 1e-2),
+        "dropout_rate": 0.2,
+        "weight_decay": 1e-3,
             
-        "learning_rate": (1e-5, 1e-3),
-        "batch_size": [64, 128, 256, 512],
+        "learning_rate": 1e-4,
+        "batch_size": 128,
             
+        '''
             # === TRANSFORMER ATTENTION (based on your attention_layer) ===
             "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
             "attention_dropout": (0.1, 0.5),
@@ -144,6 +146,7 @@ DEFAULT_HYPERPARAMS = {
             "warmup_epochs": ["int", 0, 20, 1],
             "early_stopping_patience": ["int", 15, 50, 5],
             "validation_frequency": ["int", 1, 5, 1],  # Validate every N epochs
+        ''': None,
 }
 
 MASTER_WEIGHTS = {
@@ -165,26 +168,46 @@ MULTI_LABEL_COLUMN_NAMES = {  # Columnas que son MULTI-LABEL
 MODEL_REGISTRY = {
     "Phenotype_Effect_Outcome": {   # choice 1
         "targets": ["Phenotype_outcome", "Effect_direction", "Effect_type"],
-        "cols": [
-            "ATC",
-            "Drug",
-            "Genalle",
-            #"Variant/Haplotypes",
-            "Gene",
-            "Allele",
-            "Phenotype_outcome",
-            "Effect_direction",
-            "Effect_type",
-            "Effect_phenotype",
-        ],
+        "inputs": ["Drug", "Genalle", "Gene", "Allele"],
+        "cols": ["Drug", "Genalle", "Gene", "Allele", "Phenotype_outcome", "Effect_direction", "Effect_type"],
+        #"cols": [
+        #    "ATC",
+        #    "Drug",
+        #    "Genalle",
+        #    #"Variant/Haplotypes",
+        #    "Gene",
+        #    "Allele",
+        #    "Phenotype_outcome",
+        #    "Effect_direction",
+        #    "Effect_type",
+        #    "Effect_phenotype",
+        #],
         "params": {
+            "embedding_dim": 256,
+            "n_layers": 2,
+            "hidden_dim": 2176,
+            "dropout_rate": 0.6826665445146843,
+            "weight_decay": 0.0001478755319922093,
+            "learning_rate": 0.0002023597603520488,
             "batch_size": 64,
-            "embedding_dim": 384,
-            "n_layers": 4,
-            "hidden_dim": 1280,
-            "dropout_rate": 0.391,
-            "learning_rate": 6.32e-05,
-            "weight_decay": 4.30e-05
+            "attention_dim_feedforward": 3840,
+            "attention_dropout": 0.48387265129374835,
+            "num_attention_layers": 2,
+            "focal_gamma": 1.1605241620974445,
+            "focal_alpha_weight": 1.3417203741569734,
+            "label_smoothing": 0.11100845590336689,
+            "optimizer_type": "rmsprop",
+            "manual_task_weights": True,
+            "use_batch_norm": True,
+            "use_layer_norm": True,
+            "activation_function": "gelu",
+            "gradient_clip_norm": 2.231503593586354,
+            "fm_dropout": 0.34731215338736454,
+            "fm_hidden_layers": 2,
+            "fm_hidden_dim": 384,
+            "embedding_dropout": 0.1546248948072961,
+            "early_stopping_patience": 25,
+            "scheduler_type": "none",
         },
         "params_optuna": {
             # === CORE ARCHITECTURE ===
@@ -207,7 +230,7 @@ MODEL_REGISTRY = {
             # === OPTIMIZER & LEARNING RATE ===
             "learning_rate": (1e-5, 1e-3),
             "batch_size": [64, 128, 256],
-            "optimizer_type": ["adamw", "adam", "rmsprop"], # SGD can be slow to converge
+            "optimizer_type": ["adamw", "adam", "rmsprop"], 
             "adam_beta1": (0.85, 0.95),
             "adam_beta2": (0.95, 0.999),
             
