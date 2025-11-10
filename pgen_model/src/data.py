@@ -17,6 +17,9 @@ from .model_configs import MULTI_LABEL_COLUMN_NAMES
 
 logger = logging.getLogger(__name__)
 
+# Constantes de configuración
+MIN_SAMPLES_FOR_CLASS_GROUPING = 20  # Umbral mínimo de muestras por clase antes de agrupar
+
 
 def train_data_import(targets):
     csv_path = MODEL_TRAIN_DATA
@@ -67,27 +70,6 @@ def load_equivalencias(csv_path: str) -> Dict:
 
     logger.info(f"Loaded {len(filtered_equivalencias)} valid RS identifiers from equivalences")
     return filtered_equivalencias
-
-def get_tensors(self, cols):
-        # Esta función parece no usarse en el pipeline de PGenDataset,
-        # pero si se usa, necesitaría lógica similar a PGenDataset.__init__
-        tensors = {}
-        for col in cols:
-            if col in self.data:
-                if col in self.multi_label_cols:
-                    stacked_data = np.stack(self.data[col].values)
-                    tensors[col.lower()] = torch.tensor(stacked_data, dtype=torch.float32)
-                else:
-                    tensors[col.lower()] = torch.tensor(self.data[col].values, dtype=torch.long)
-        
-        for target in self.target_cols:
-             if target in self.data:
-                if target in self.multi_label_cols:
-                    stacked_data = np.stack(self.data[target].values)
-                    tensors[target] = torch.tensor(stacked_data, dtype=torch.float32)
-                else:
-                    tensors[target] = torch.tensor(self.data[target].values, dtype=torch.long)
-        return tensors
 
 
 class PGenDataProcess:
@@ -181,20 +163,17 @@ class PGenDataProcess:
         task3_name = "effect_type"
         if task3_name in df.columns:
             logging.info(f"Agrupando clases raras para '{task3_name}'...")
-            MIN_SAMPLES = 20  # Umbral: agrupar cualquier clase con < 20 muestras
             
             # 1. Obtener los conteos de clase
             counts = df[task3_name].value_counts()
             
             # 2. Identificar las clases a agrupar
-            to_group = counts[counts < MIN_SAMPLES].index
+            to_group = counts[counts < MIN_SAMPLES_FOR_CLASS_GROUPING].index
             
             if len(to_group) > 0:
                 logging.info(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
-                # 3. Reemplazarlas en el DataFrame
-                df[task3_name] = df[task3_name].apply(
-                    lambda x: "Other_Grouped" if x in to_group else x
-                )
+                # Optimización: usar replace() en lugar de apply() para mejor performance
+                df[task3_name] = df[task3_name].replace(to_group.tolist(), "Other_Grouped")
             else:
                 logging.info("No se encontraron clases raras para agrupar.")
                 
@@ -268,68 +247,6 @@ class PGenDataProcess:
                 logging.debug(f"Ajustado LabelEncoder para la columna: {col}")
         
         logging.info("Codificadores ajustados correctamente.")
-
-    '''
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Transform a DataFrame using fitted encoders.
-        
-        Handles unseen labels by replacing them with UNKNOWN token.
-        Logs statistics about unknown label replacements.
-        
-        Args:
-            df: DataFrame to transform (train, val, or test)
-            
-        Returns:
-            Transformed DataFrame with encoded columns
-            
-        Raises:
-            RuntimeError: If fit() has not been called yet
-        """
-        if not self.encoders:
-            raise RuntimeError("fit() must be called before transform()")
-        
-        df_transformed = df.copy()
-        unknown_counts = {}
-        
-        for col, encoder in self.encoders.items():
-            if col not in df_transformed.columns:
-                logger.warning(f"Column {col} not found in DataFrame, skipping")
-                continue
-
-            if isinstance(encoder, MultiLabelBinarizer):
-                # MLB transforma las listas en vectores binarios
-                # (Ignora etiquetas que no vio en 'fit', lo cual es correcto)
-                df_transformed[col] = list(encoder.transform(df_transformed[col]))
-            
-            elif isinstance(encoder, LabelEncoder):
-                # <--- LÓGICA MEJORADA ---
-                # 1. Obtener las etiquetas que el encoder conoce (de 'fit')
-                known_labels = set(encoder.classes_)
-                
-                # 2. Reemplazar cualquier etiqueta no conocida por el token UNKNOWN
-                original_col = df_transformed[col].astype(str)
-                unknown_mask = ~original_col.isin(known_labels)
-                unknown_count = unknown_mask.sum()
-                
-                if unknown_count > 0:
-                    unknown_counts[col] = unknown_count
-                    logger.warning(
-                        f"Column '{col}': {unknown_count} unknown labels replaced with '{self.unknown_token}'"
-                    )
-                
-                transformed_col = original_col.apply(
-                    lambda x: x if x in known_labels else self.unknown_token
-                )
-                
-                # 3. Ahora, transformar de forma segura
-                df_transformed[col] = encoder.transform(transformed_col)
-        
-        if unknown_counts:
-            logger.info(f"Transform summary - Unknown labels replaced: {unknown_counts}")
-        
-        return df_transformed
-    '''
     
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
