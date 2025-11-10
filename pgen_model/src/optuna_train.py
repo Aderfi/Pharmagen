@@ -289,7 +289,7 @@ def optuna_objective(
         torch.nn.utils.clip_grad_norm_(model.parameters(), params["gradient_clip_norm"])
         
     # 5. Train model
-    best_loss, best_accuracies_list, _ = train_model(
+    best_loss, best_accuracies_list = train_model( # type: ignore
         train_loader, 
         val_loader, 
         model, 
