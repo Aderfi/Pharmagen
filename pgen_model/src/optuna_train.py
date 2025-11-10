@@ -53,6 +53,15 @@ from .model_configs import (
     get_model_config,
 )
 from .train import train_model
+from .train_utils import (
+    get_input_dims, 
+    get_output_sizes, 
+    calculate_task_metrics, 
+    create_optimizer, 
+    create_criterions,
+    create_scheduler,
+    )
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -63,9 +72,9 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 # ============================================================================
 
 # Optuna optimization settings
-N_TRIALS = 100
-EPOCH = 100
-PATIENCE = 18
+N_TRIALS = 250
+EPOCH = 120
+PATIENCE = 20
 
 # Random seed for reproducibility
 RANDOM_SEED = 711
@@ -74,7 +83,7 @@ RANDOM_SEED = 711
 VALIDATION_SPLIT = 0.2
 
 # Loss function settings
-LABEL_SMOOTHING = 0.1
+LABEL_SMOOTHING = 0.12
 
 # Sampler configuration
 N_STARTUP_TRIALS = 15
@@ -97,39 +106,15 @@ optuna_results.mkdir(parents=True, exist_ok=True)
 # Helper Functions
 # ============================================================================
 
-
 def get_optuna_params(trial: optuna.Trial, model_name: str) -> Dict[str, Any]:
-    """
-    Suggest hyperparameters for an Optuna trial based on dynamic configuration.
-    
-    Reads from MODEL_REGISTRY and suggests parameters according to their
-    search space definitions. Supports int, float, and categorical parameters.
-    
-    Args:
-        trial: Optuna trial object
-        model_name: Name of the model configuration to use
-    
-    Returns:
-        Dictionary mapping parameter names to suggested values
-    
-    Raises:
-        ValueError: If model_name not found in MODEL_REGISTRY
-        KeyError: If required configuration keys are missing
-    """
+    """Enhanced parameter suggestion with new search space."""
     model_conf = MODEL_REGISTRY.get(model_name)
-
     if not model_conf:
-        raise ValueError(
-            f"Model configuration not found: {model_name}. "
-            f"Available models: {list(MODEL_REGISTRY.keys())}"
-        )
+        raise ValueError(f"Model configuration not found: {model_name}")
 
     search_space = model_conf.get("params_optuna")
     if not search_space:
-        logger.warning(
-            f"No 'params_optuna' found for '{model_name}'. "
-            f"Using fixed 'params' from registry."
-        )
+        logger.warning(f"No 'params_optuna' found for '{model_name}'")
         return model_conf.get("params", {}).copy()
 
     suggested_params = {}
@@ -153,185 +138,21 @@ def get_optuna_params(trial: optuna.Trial, model_name: str) -> Dict[str, Any]:
             elif isinstance(space_definition, tuple):
                 # Float parameter: (low, high)
                 low, high = space_definition
-                is_log_scale = param_name in ["learning_rate", "weight_decay"]
+                # Determine if log scale should be used
+                is_log_scale = param_name in [
+                    "learning_rate", "weight_decay", "attention_dropout",
+                    "dropout_rate", "fm_dropout", "embedding_dropout"
+                ]
                 suggested_params[param_name] = trial.suggest_float(
                     param_name, low, high, log=is_log_scale
                 )
             else:
-                logger.warning(
-                    f"Unknown search space type for '{param_name}': "
-                    f"{type(space_definition)}. Skipping."
-                )
+                logger.warning(f"Unknown search space type for '{param_name}': {type(space_definition)}")
+        
         except (ValueError, TypeError, IndexError) as e:
-            logger.error(
-                f"Error parsing search space for '{param_name}': {e}. Skipping."
-            )
+            logger.error(f"Error parsing search space for '{param_name}': {e}")
 
     return suggested_params
-
-
-def get_input_dims(data_loader: PGenDataProcess) -> Dict[str, int]:
-    """
-    Get vocabulary sizes for all input columns.
-    
-    Args:
-        data_loader: Fitted PGenDataProcess instance with encoders
-    
-    Returns:
-        Dictionary mapping input column names to vocabulary sizes
-    
-    Raises:
-        KeyError: If required encoder not found
-        AttributeError: If encoder missing 'classes_' attribute
-    """
-    input_cols = ["drug", "genalle", "gene", "allele"]
-    dims = {}
-    
-    for col in input_cols:
-        try:
-            if col not in data_loader.encoders:
-                raise KeyError(f"Encoder not found for input column: {col}")
-            
-            encoder = data_loader.encoders[col]
-            if not hasattr(encoder, "classes_"):
-                raise AttributeError(f"Encoder for '{col}' missing 'classes_' attribute")
-            
-            dims[col] = len(encoder.classes_)
-        except (KeyError, AttributeError) as e:
-            logger.error(f"Error getting input dimension for '{col}': {e}")
-            raise
-
-    return dims
-
-
-def get_output_sizes(
-    data_loader: PGenDataProcess, target_cols: List[str]
-) -> List[int]:
-    """
-    Get vocabulary sizes for all target columns.
-    
-    Args:
-        data_loader: Fitted PGenDataProcess instance with encoders
-        target_cols: List of target column names
-    
-    Returns:
-        List of vocabulary sizes corresponding to target_cols
-    
-    Raises:
-        KeyError: If target encoder not found
-    """
-    sizes = []
-    for col in target_cols:
-        try:
-            if col not in data_loader.encoders:
-                raise KeyError(f"Encoder not found for target column: {col}")
-            
-            encoder = data_loader.encoders[col]
-            if not hasattr(encoder, "classes_"):
-                raise AttributeError(f"Encoder for '{col}' missing 'classes_' attribute")
-            
-            sizes.append(len(encoder.classes_))
-        except (KeyError, AttributeError) as e:
-            logger.error(f"Error getting output size for '{col}': {e}")
-            raise
-
-    return sizes
-
-
-def calculate_task_metrics(
-    model: nn.Module,
-    data_loader: DataLoader,
-    target_cols: List[str],
-    multi_label_cols: set,
-    device: torch.device,
-) -> Dict[str, Dict[str, float]]:
-    """
-    Calculate detailed metrics (F1, precision, recall) for each task.
-    
-    Handles both single-label and multi-label classification tasks.
-    For single-label: uses argmax for predictions.
-    For multi-label: uses sigmoid with 0.5 threshold.
-    
-    Args:
-        model: Trained model in eval mode
-        data_loader: DataLoader with validation/test data
-        target_cols: List of target column names
-        multi_label_cols: Set of multi-label column names
-        device: Torch device (CPU or CUDA)
-    
-    Returns:
-        Dictionary with structure:
-        {
-            'task_name': {
-                'f1_macro': float,
-                'f1_weighted': float,
-                'precision_macro': float,
-                'recall_macro': float
-            }
-        }
-    """
-    model.eval()
-
-    # Store predictions and ground truth
-    all_preds = {col: [] for col in target_cols}
-    all_targets = {col: [] for col in target_cols}
-
-    with torch.no_grad():
-        for batch in data_loader:
-            drug = batch["drug"].to(device)
-            genalle = batch["genalle"].to(device)
-            gene = batch["gene"].to(device)
-            allele = batch["allele"].to(device)
-
-            outputs = model(drug, genalle, gene, allele)
-
-            for col in target_cols:
-                true = batch[col].to(device)
-                pred = outputs[col]
-
-                if col in multi_label_cols:
-                    # Multi-label: apply sigmoid and threshold
-                    probs = torch.sigmoid(pred)
-                    predicted = (probs > 0.5).float()
-                else:
-                    # Single-label: argmax
-                    predicted = torch.argmax(pred, dim=1)
-
-                all_preds[col].append(predicted.cpu())
-                all_targets[col].append(true.cpu())
-
-    # Calculate metrics per task
-    metrics = {}
-    for col in target_cols:
-        preds = torch.cat(all_preds[col]).numpy()
-        targets = torch.cat(all_targets[col]).numpy()
-
-        if col in multi_label_cols:
-            # Multi-label: use 'samples' average
-            metrics[col] = {
-                "f1_samples": f1_score(targets, preds, average="samples", zero_division=0),
-                "f1_macro": f1_score(targets, preds, average="macro", zero_division=0),
-                "precision_samples": precision_score(
-                    targets, preds, average="samples", zero_division=0
-                ),
-                "recall_samples": recall_score(
-                    targets, preds, average="samples", zero_division=0
-                ),
-            }
-        else:
-            # Single-label
-            metrics[col] = {
-                "f1_macro": f1_score(targets, preds, average="macro", zero_division=0),
-                "f1_weighted": f1_score(targets, preds, average="weighted", zero_division=0),
-                "precision_macro": precision_score(
-                    targets, preds, average="macro", zero_division=0
-                ),
-                "recall_macro": recall_score(
-                    targets, preds, average="macro", zero_division=0
-                ),
-            }
-
-    return metrics
 
 
 def optuna_objective(
@@ -390,12 +211,13 @@ def optuna_objective(
     )
 
     # Optimize DataLoader configuration
+    batch_size = params.get("batch_size", 64)
     num_workers = min(multiprocessing.cpu_count(), 8)
     pin_memory = torch.cuda.is_available()
     
     train_loader = DataLoader(
         train_dataset,
-        batch_size=params["batch_size"],
+        batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=pin_memory,
@@ -403,7 +225,7 @@ def optuna_objective(
     )
     val_loader = DataLoader(
         val_dataset,
-        batch_size=params["batch_size"],
+        batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=pin_memory,
         persistent_workers=True if num_workers > 0 else False,
@@ -412,9 +234,16 @@ def optuna_objective(
     # 3. Create model
     input_dims = get_input_dims(fitted_data_loader)
     n_targets_list = get_output_sizes(fitted_data_loader, target_cols)
-    target_dims = {
-        col_name: n_targets_list[i] for i, col_name in enumerate(target_cols)
-    }
+    target_dims = {col_name: n_targets_list[i] for i, col_name in enumerate(target_cols)}
+
+    separate_embedding_dims = None
+    if any(key.endswith("_embedding_dim") for key in params):
+        separate_embedding_dims = {
+            "drug": params.get("drug_embedding_dim", params["embedding_dim"]),
+            "gene": params.get("gene_embedding_dim", params["embedding_dim"]),
+            "allele": params.get("allele_embedding_dim", params["embedding_dim"]),
+            "genalle": params.get("genalle_embedding_dim", params["embedding_dim"]),
+        }
 
     if trial.number == 0:
         logger.info(f"Loading data from: {Path(csvfiles)}")
@@ -431,54 +260,46 @@ def optuna_objective(
         hidden_dim=params["hidden_dim"],
         dropout_rate=params["dropout_rate"],
         target_dims=target_dims,
-    )
-    model = model.to(device)
-
+        attention_dim_feedforward=params.get("attention_dim_feedforward"),
+        attention_dropout=params.get("attention_dropout", 0.1),
+        num_attention_layers=params.get("num_attention_layers", 1),
+        use_batch_norm=params.get("use_batch_norm", False),
+        use_layer_norm=params.get("use_layer_norm", False),
+        activation_function=params.get("activation_function", "gelu"),
+        fm_dropout=params.get("fm_dropout", 0.0),
+        fm_hidden_layers=params.get("fm_hidden_layers", 0),
+        fm_hidden_dim=params.get("fm_hidden_dim", 256),
+        embedding_dropout=params.get("embedding_dropout", 0.0),
+        separate_embedding_dims=separate_embedding_dims,
+        
+    ).to(device)
+    
     # 4. Define optimizer and loss functions
-    optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=params["learning_rate"],
-        weight_decay=params.get("weight_decay", 1e-5),
-    )
-
-    criterions = []
-    task3_name = "effect_type"
-
-    for col in target_cols:
-        if col in MULTI_LABEL_COLUMN_NAMES:
-            criterions.append(nn.BCEWithLogitsLoss())
-        elif col == task3_name and class_weights_task3 is not None:
-            criterions.append(
-                nn.CrossEntropyLoss(
-                    label_smoothing=LABEL_SMOOTHING, weight=class_weights_task3
-                )
-            )
-            if trial.number == 0:
-                logger.info(f"Applying class weighting with label smoothing for '{task3_name}'")
-        else:
-            criterions.append(nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING))
-
+    optimizer = create_optimizer(model, params)
+    scheduler = create_scheduler(optimizer, params)
+    
+    criterions = create_criterions(target_cols, params, class_weights_task3, device)
     criterions.append(optimizer)
-
+    
+    epochs = params.get("epochs", EPOCH)
+    patience = params.get("patience", PATIENCE)
+    
     # 5. Train model
-    best_loss, best_accuracies_list = train_model( #type: ignore
-        train_loader,
-        val_loader,
-        model,
+    best_loss, best_accuracies_list, _ = train_model(
+        train_loader, 
+        val_loader, 
+        model, 
         criterions,
-        epochs=EPOCH,
-        patience=PATIENCE,
+        epochs=epochs, 
+        patience=patience, 
         target_cols=target_cols,
-        scheduler=None,
+        scheduler=scheduler, 
         params_to_txt=params,
         multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
-        progress_bar=False,
+        progress_bar=False, 
         model_name=model_name,
-        task_priorities=None, # type: ignore
-        return_per_task_losses=False,
         trial=trial,
     )
-
     # 6. Calculate detailed metrics
     task_metrics = calculate_task_metrics(
         model, val_loader, target_cols, MULTI_LABEL_COLUMN_NAMES, device
@@ -558,21 +379,29 @@ def get_best_trials(
         List of top N trials, sorted by objective values
     """
     valid_trials = [
-        t
-        for t in study.trials
-        if t.values is not None and all(isinstance(v, (int, float)) for v in t.values)
+        t for t in study.trials
+        if t.values is not None and 
+           all(isinstance(v, (int, float)) and not math.isnan(v) for v in t.values) and
+           t.state == optuna.trial.TrialState.COMPLETE
     ]
 
     if not valid_trials:
-        logger.warning("No valid trials found in study")
+        logger.warning("No valid completed trials found in study")
         return []
 
-    # For multi-objective, return Pareto front trials
+    # Para multi-objetivo, usar best_trials (Pareto front)
     if len(valid_trials[0].values) > 1:
-        # Already ordered by Pareto dominance
-        return valid_trials[:n]
+        try:
+            # Obtener trials del frente de Pareto
+            pareto_trials = study.best_trials
+            # Limitar a N trials
+            return pareto_trials[:n] if pareto_trials else valid_trials[:n]
+        except Exception as e:
+            logger.warning(f"Error getting Pareto trials: {e}")
+            # Fallback: ordenar por primera métrica
+            return sorted(valid_trials, key=lambda t: t.values[0])[:n]
     else:
-        # For single-objective, sort by value
+        # Para single-objetivo, ordenar por valor
         return sorted(valid_trials, key=lambda t: t.values[0])[:n]
 
 
@@ -602,19 +431,27 @@ def _save_optuna_report(
         logger.warning("No valid trials found to save in report")
         return
 
+    # Para multi-objetivo, el "mejor" trial es subjetivo, tomar el primero del Pareto front
     best_trial = top_5_trials[0]
 
     # Save JSON
     output = {
         "model": model_name,
         "optimization_type": "multi_objective" if is_multi_objective else "single_objective",
+        "n_trials": len(study.trials),
+        "completed_trials": len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]),
         "best_trial": {
             "number": best_trial.number,
             "values": list(best_trial.values) if best_trial.values else [],
             "params": best_trial.params,
             "user_attrs": dict(best_trial.user_attrs),
         },
-        "top5": [
+        "clinical_priorities": CLINICAL_PRIORITIES,
+    }
+    
+    if is_multi_objective:
+        # Para multi-objetivo, incluir todos los trials del Pareto front
+        output["pareto_front"] = [
             {
                 "number": t.number,
                 "values": list(t.values) if t.values else [],
@@ -622,10 +459,18 @@ def _save_optuna_report(
                 "critical_f1": t.user_attrs.get("critical_task_f1", 0.0),
             }
             for t in top_5_trials
-        ],
-        "n_trials": len(study.trials),
-        "clinical_priorities": CLINICAL_PRIORITIES,
-    }
+        ]
+    else:
+        # Para single-objetivo, incluir top 5 por loss
+        output["top5"] = [
+            {
+                "number": t.number,
+                "values": list(t.values) if t.values else [],
+                "params": t.params,
+                "critical_f1": t.user_attrs.get("critical_task_f1", 0.0),
+            }
+            for t in top_5_trials
+        ]
 
     try:
         with open(results_file_json, "w") as f:
@@ -638,20 +483,19 @@ def _save_optuna_report(
     # Save TXT
     try:
         with open(results_file_txt, "w", encoding="utf-8") as f:
-            f.write(" -----------------------------------------------------------|\n")
-            f.write(f"|  OPTIMIZATION REPORT: {model_name:^30} |\n")
-            f.write(" -----------------------------------------------------------|\n\n")
+            f.write("=" * 70 + "\n")
+            f.write(f"OPTIMIZATION REPORT: {model_name}\n")
+            f.write("=" * 70 + "\n\n")
 
             if is_multi_objective:
                 f.write("Optimization Type: Multi-Objective\n")
                 f.write("   - Objective 1: Minimize Loss\n")
-                f.write(
-                    f"   - Objective 2: Maximize F1 ({best_trial.user_attrs.get('critical_task_name', 'N/A')})\n\n"
-                )
+                f.write(f"   - Objective 2: Maximize F1 ({best_trial.user_attrs.get('critical_task_name', 'N/A')})\n\n")
+                f.write("Note: Results show Pareto-optimal solutions\n\n")
             else:
                 f.write("Optimization Type: Single-Objective (Loss)\n\n")
 
-            f.write(f"Best Trial (#{best_trial.number})\n")
+            f.write(f"Representative Trial (#{best_trial.number})\n")
             f.write("-" * 60 + "\n\n")
 
             # Objective values
@@ -674,20 +518,28 @@ def _save_optuna_report(
             # Hyperparameters
             f.write("Hyperparameters:\n")
             for key, value in best_trial.params.items():
-                f.write(f"   {key:20s}: {value}\n")
+                f.write(f"   {key:25s}: {value}\n")
             f.write("\n")
 
-            # Top 5
-            f.write("Top 5 Trials\n")
-            f.write("-" * 60 + "\n\n")
-            for i, t in enumerate(top_5_trials, 1):
-                f.write(f"{i}. Trial #{t.number}\n")
-                if t.values:
-                    if is_multi_objective:
+            # Top results
+            if is_multi_objective:
+                f.write("Pareto Front (Top Solutions)\n")
+                f.write("-" * 60 + "\n\n")
+                for i, t in enumerate(top_5_trials, 1):
+                    f.write(f"{i}. Trial #{t.number}\n")
+                    if t.values:
                         f.write(f"   Loss: {t.values[0]:.5f}, F1: {-t.values[1]:.5f}\n")
-                    else:
+                    f.write(f"   Critical F1: {t.user_attrs.get('critical_task_f1', 0.0):.4f}\n")
+                    f.write(f"   Key params: batch_size={t.params.get('batch_size')}, lr={t.params.get('learning_rate'):.2e}\n\n")
+            else:
+                f.write("Top 5 Trials by Loss\n")
+                f.write("-" * 60 + "\n\n")
+                for i, t in enumerate(top_5_trials, 1):
+                    f.write(f"{i}. Trial #{t.number}\n")
+                    if t.values:
                         f.write(f"   Loss: {t.values[0]:.5f}\n")
-                f.write(f"   Params: {t.params}\n\n")
+                    f.write(f"   Critical F1: {t.user_attrs.get('critical_task_f1', 0.0):.4f}\n")
+                    f.write(f"   Key params: batch_size={t.params.get('batch_size')}, lr={t.params.get('learning_rate'):.2e}\n\n")
 
         logger.info(f"TXT report saved: {results_file_txt}")
     except IOError as e:
@@ -871,11 +723,41 @@ def run_optuna_with_progress(
             logger.info(f"Optimization history saved: {graph_filename}")
 
             # Pareto front (multi-objective only)
-            if use_multi_objective and len(study.best_trials) > 1:
-                fig_pareto = plot_pareto_front(study)
-                pareto_filename = optuna_results / f"pareto_{model_name}_{datetime_study}.html"
-                fig_pareto.write_html(str(pareto_filename))
-                logger.info(f"Pareto front saved: {pareto_filename}")
+            if use_multi_objective:
+                # Para multi-objetivo, usamos study.best_trials en lugar de study.best_trial
+                if len(study.best_trials) > 1:
+                    try:
+                        fig_pareto = plot_pareto_front(study)
+                        pareto_filename = optuna_results / f"pareto_{model_name}_{datetime_study}.html"
+                        fig_pareto.write_html(str(pareto_filename))
+                        logger.info(f"Pareto front saved: {pareto_filename}")
+                    except Exception as pareto_error:
+                        logger.warning(f"Error creating Pareto front plot: {pareto_error}")
+                else:
+                    logger.info("Not enough trials for Pareto front visualization (need at least 2)")
+            
+            # Visualizaciones adicionales para ambos modos
+            try:
+                # Parameter importances (solo funciona con single-objective)
+                if not use_multi_objective and len(study.trials) >= 10:
+                    from optuna.visualization import plot_param_importances
+                    fig_importance = plot_param_importances(study)
+                    importance_filename = optuna_results / f"param_importance_{model_name}_{datetime_study}.html"
+                    fig_importance.write_html(str(importance_filename))
+                    logger.info(f"Parameter importance saved: {importance_filename}")
+            except Exception as importance_error:
+                logger.debug(f"Could not create parameter importance plot: {importance_error}")
+                
+            try:
+                # Slice plot (funciona para ambos modos)
+                from optuna.visualization import plot_slice
+                fig_slice = plot_slice(study)
+                slice_filename = optuna_results / f"slice_{model_name}_{datetime_study}.html"
+                fig_slice.write_html(str(slice_filename))
+                logger.info(f"Slice plot saved: {slice_filename}")
+            except Exception as slice_error:
+                logger.debug(f"Could not create slice plot: {slice_error}")
+
         except Exception as e:
             logger.warning(f"Error saving visualizations: {e}")
 
@@ -907,18 +789,26 @@ def run_optuna_with_progress(
     best_f1 = best_trial.user_attrs.get("critical_task_f1", 0.0)
 
     # Print summary
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print("OPTIMIZATION COMPLETED")
-    print("=" * 60)
+    print("=" * 70)
+    
     if use_multi_objective:
-        print(f"Best Trial (Pareto-Optimal): #{best_trial.number}")
+        print(f"Mode: Multi-Objective Optimization")
+        print(f"Pareto Front Solutions: {len(study.best_trials)}")
+        print(f"\nRepresentative Solution (Trial #{best_trial.number}):")
         print(f"   Loss:           {best_loss:.5f}")
         print(f"   F1 (Critical):  {best_f1:.5f}")
+        if len(best_trial.values) > 1:
+            print(f"   F1 (Objective): {-best_trial.values[1]:.5f}")
     else:
+        print(f"Mode: Single-Objective Optimization")
         print(f"Best Trial: #{best_trial.number}")
         print(f"   Loss:           {best_loss:.5f}")
+        print(f"   F1 (Critical):  {best_f1:.5f}")
 
-    print(f"\nReports saved in: {results_dir}")
-    print("=" * 60 + "\n")
+    print(f"\nCompleted Trials: {len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE])}/{len(study.trials)}")
+    print(f"Reports saved in: {results_dir}")
+    print("=" * 70 + "\n")
 
     return best_params, best_loss, results_file_json, normalized_loss

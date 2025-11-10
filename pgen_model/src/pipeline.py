@@ -16,6 +16,7 @@ from .data import PGenDataset, PGenDataProcess, train_data_import
 from .model import DeepFM_PGenModel
 from .model_configs import CLINICAL_PRIORITIES, MULTI_LABEL_COLUMN_NAMES, get_model_config
 from .train import train_model, save_model
+from .train_utils import create_optimizer, create_scheduler, create_criterions
 from .focal_loss import FocalLoss
 
 EPOCHS = 1
@@ -207,44 +208,25 @@ def train_pipeline(
         params["hidden_dim"],
         params["dropout_rate"],
         target_dims=target_dims,  # Dinámico #type: ignore
+        ############
+        attention_dim_feedforward=params.get("attention_dim_feedforward"),
+        attention_dropout=params.get("attention_dropout", 0.1),
+        num_attention_layers=params.get("num_attention_layers", 1),
+        use_batch_norm=params.get("use_batch_norm", False),
+        use_layer_norm=params.get("use_layer_norm", False),
+        activation_function=params.get("activation_function", "gelu"),
+        fm_dropout=params.get("fm_dropout", 0.0),
+        fm_hidden_layers=params.get("fm_hidden_layers", 0),
+        fm_hidden_dim=params.get("fm_hidden_dim", 256),
+        embedding_dropout=params.get("embedding_dropout", 0.0),
     )
     model = model.to(device)
 
     # --- Definir Optimizador y Criterios de Loss ---
-    optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=params["learning_rate"],
-        weight_decay=params.get("weight_decay", 1e-5),
-    )
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.2, patience=5)
+    optimizer = create_optimizer(model, params)
+    scheduler = create_scheduler(optimizer, params)
 
-    criterions_list = []
-    task3_name = 'effect_type'
-    
-    for col in target_cols:
-        print(f"DEBUG: Configurando loss para columna '{col}'")
-        if col in MULTI_LABEL_COLUMN_NAMES:
-            criterions_list.append(nn.BCEWithLogitsLoss())
-            print(f"  -> BCEWithLogitsLoss (multi-label)")
-        
-        elif col == task3_name and class_weights_task3 is not None:
-            # ✅ FOCAL LOSS CON GAMMA AJUSTADO
-            # Dado que la loss es MUY alta (2.81), usar gamma alto
-            criterions_list.append(FocalLoss(
-                alpha=class_weights_task3,
-                gamma=2.0,  # ✅ Más agresivo que el estándar (2.0)
-                label_smoothing=0.15,  # ✅ Más smoothing para regularizar
-            ))
-            print(f"🔥 Aplicando Focal Loss (γ=2.0) + Class Weighting a '{task3_name}'")
-            print(f"   Baseline Loss: 2.8147 → Target: <2.0")
-        
-        else:
-            # Tareas sin pesos de clase especiales
-            criterions_list.append(nn.CrossEntropyLoss(label_smoothing=0.1))
-            print(f"  -> CrossEntropyLoss (label_smoothing=0.1)")
-
-    print(f"DEBUG: Total de criterions creados: {len(criterions_list)} para {len(target_cols)} targets")
+    criterions_list = create_criterions(target_cols, params, class_weights_task3, device)
     criterions = criterions_list + [optimizer]
     
     # ---------------------------------------------------------
