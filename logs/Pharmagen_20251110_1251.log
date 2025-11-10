@@ -1,0 +1,4 @@
+2025-11-10 12:51:11,006 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-10 12:51:11,794 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-10 12:51:19,902 - __main__ - INFO - Lanzando pgen_model
+2025-11-10 12:52:41,200 - __main__ - INFO - Programa interrumpido por el usuario (Ctrl+C)
