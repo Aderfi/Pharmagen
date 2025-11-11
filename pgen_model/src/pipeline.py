@@ -1,4 +1,17 @@
 # coding=utf-8
+"""
+Pipeline de entrenamiento para modelos farmacogenéticos.
+
+Gestiona el flujo completo de entrenamiento incluyendo:
+- Carga y preprocesamiento de datos
+- División train/validation
+- Configuración de hiperparámetros
+- Entrenamiento del modelo
+- Guardado de modelos y encoders
+"""
+
+import logging
+import multiprocessing
 import os
 import random
 from pathlib import Path
@@ -7,10 +20,9 @@ import joblib
 import numpy as np
 import torch
 import torch.nn as nn
+from sklearn.model_selection import train_test_split
 from src.config.config import MODEL_ENCODERS_DIR
 from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
-import multiprocessing 
 
 from .data import PGenDataset, PGenDataProcess, train_data_import
 from .model import DeepFM_PGenModel
@@ -19,6 +31,9 @@ from .train import train_model, save_model
 from .train_utils import create_optimizer, create_scheduler, create_criterions
 from .focal_loss import FocalLoss
 
+logger = logging.getLogger(__name__)
+
+# Constantes de configuración por defecto
 EPOCHS = 100
 PATIENCE = 25
 
@@ -91,11 +106,11 @@ def train_pipeline(
             stratify_cols=stratify_cols,
         )
     except AttributeError as e:
-        print(f"Error: {e}")
-        print("Asegúrate de que PGenDataProcess tiene el método 'load_data' (o 'load_and_clean_data')")
+        logger.error(f"Error: {e}")
+        logger.error("Asegúrate de que PGenDataProcess tiene el método 'load_data' (o 'load_and_clean_data')")
         raise
 
-    print(f"Semilla utilizada: {seed}")
+    logger.info(f"Semilla utilizada: {seed}")
     
     # 3. Dividir ANTES de procesar (Usando estratificación)
     train_df, val_df = train_test_split(
@@ -107,7 +122,7 @@ def train_pipeline(
     val_df = val_df.reset_index(drop=True)
     train_df = train_df.reset_index(drop=True)
     
-    print(f"División estratificada completada. Train: {len(train_df)}, Val: {len(val_df)}")
+    logger.info(f"División estratificada completada. Train: {len(train_df)}, Val: {len(val_df)}")
 
     # 4. Ajustar (FIT) SÓLO con datos de entrenamiento
     data_loader_obj.fit(train_df)
