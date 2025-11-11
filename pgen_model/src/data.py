@@ -17,6 +17,9 @@ from .model_configs import MULTI_LABEL_COLUMN_NAMES
 
 logger = logging.getLogger(__name__)
 
+# Constantes de configuración
+MIN_SAMPLES_FOR_CLASS_GROUPING = 20  # Umbral mínimo de muestras por clase antes de agrupar
+
 
 def train_data_import(targets):
     csv_path = MODEL_TRAIN_DATA
@@ -27,7 +30,7 @@ def train_data_import(targets):
     if not csv_files:
         raise FileNotFoundError(f"No se encontraron archivos TSV en: {csv_path}")
     elif len(csv_files) == 1:
-        print(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
+        logging.info(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
         csv_files = csv_files[0]
     csv_files = Path(csv_path, "final_test_genalle.tsv")
             
@@ -67,27 +70,6 @@ def load_equivalencias(csv_path: str) -> Dict:
 
     logger.info(f"Loaded {len(filtered_equivalencias)} valid RS identifiers from equivalences")
     return filtered_equivalencias
-
-def get_tensors(self, cols):
-        # Esta función parece no usarse en el pipeline de PGenDataset,
-        # pero si se usa, necesitaría lógica similar a PGenDataset.__init__
-        tensors = {}
-        for col in cols:
-            if col in self.data:
-                if col in self.multi_label_cols:
-                    stacked_data = np.stack(self.data[col].values)
-                    tensors[col.lower()] = torch.tensor(stacked_data, dtype=torch.float32)
-                else:
-                    tensors[col.lower()] = torch.tensor(self.data[col].values, dtype=torch.long)
-        
-        for target in self.target_cols:
-             if target in self.data:
-                if target in self.multi_label_cols:
-                    stacked_data = np.stack(self.data[target].values)
-                    tensors[target] = torch.tensor(stacked_data, dtype=torch.float32)
-                else:
-                    tensors[target] = torch.tensor(self.data[target].values, dtype=torch.long)
-        return tensors
 
 
 class PGenDataProcess:
@@ -161,37 +143,39 @@ class PGenDataProcess:
         
         df = df[self.cols_to_process]
         
-        print("Limpiando nombres de entidades (reemplazando espacios con '_')...")
-        # Optimize: vectorized operation instead of loop
-        for col in self.cols_to_process:
-            if col in df.columns and col not in self.multi_label_cols:
-                # Vectorized string replacement for single-label columns
+        logging.info("Limpiando nombres de entidades (reemplazando espacios con '_')...")
+        # Optimized: process single-label and multi-label columns separately
+        single_label_cols = [col for col in self.cols_to_process if col in df.columns and col not in self.multi_label_cols]
+        multi_label_cols_present = [col for col in self.multi_label_cols if col in df.columns]
+        
+        # Vectorized operation for all single-label columns at once
+        if single_label_cols:
+            for col in single_label_cols:
                 df[col] = df[col].astype(str).str.replace(' ', '_', regex=False)
-            elif col in df.columns and col in self.multi_label_cols:
-                # For multi-label columns, process in vectorized manner
+        
+        # Process multi-label columns only if present
+        if multi_label_cols_present:
+            for col in multi_label_cols_present:
                 df[col] = df[col].apply(
                     lambda lst: [s.replace(' ', '_') for s in lst] if isinstance(lst, list) else lst
                 )
         
         task3_name = "effect_type"
         if task3_name in df.columns:
-            print(f"Agrupando clases raras para '{task3_name}'...")
-            MIN_SAMPLES = 20 # Umbral: agrupar cualquier clase con < 50 muestras
+            logging.info(f"Agrupando clases raras para '{task3_name}'...")
             
             # 1. Obtener los conteos de clase
             counts = df[task3_name].value_counts()
             
             # 2. Identificar las clases a agrupar
-            to_group = counts[counts < MIN_SAMPLES].index
+            to_group = counts[counts < MIN_SAMPLES_FOR_CLASS_GROUPING].index
             
             if len(to_group) > 0:
-                print(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
-                # 3. Reemplazarlas en el DataFrame
-                df[task3_name] = df[task3_name].apply(
-                    lambda x: "Other_Grouped" if x in to_group else x
-                )
+                logging.info(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
+                # Optimización: usar replace() en lugar de apply() para mejor performance
+                df[task3_name] = df[task3_name].replace(to_group.tolist(), "Other_Grouped")
             else:
-                print("No se encontraron clases raras para agrupar.")
+                logging.info("No se encontraron clases raras para agrupar.")
                 
         # 1. Normaliza columnas target (y de estratificación) a string
         for t in self.target_cols:
@@ -214,7 +198,7 @@ class PGenDataProcess:
             if col in df.columns:
                 df[col] = df[col].apply(self._split_labels)
         
-        print(f"Datos cargados y limpios. Total de filas: {len(df)}")
+        logging.info(f"Datos cargados y limpios. Total de filas: {len(df)}")
         return df
 
     def fit(self, df_train: pd.DataFrame) -> None:
@@ -241,15 +225,12 @@ class PGenDataProcess:
         
         logging.info("Ajustando codificadores con datos de entrenamiento...")
         
-        # Añadir un token para valores desconocidos a todas las clases de LabelEncoder
-        # Esto es crucial para manejar datos no vistos en validación/test
-        df_train_copy = df_train.copy()
-        
+        # No se necesita copia completa del DataFrame, trabajamos directamente
         for col in self.cols_to_process:
             if col in self.multi_label_cols:
                 # MultiLabelBinarizer para columnas con múltiples etiquetas.
                 encoder = MultiLabelBinarizer()
-                encoder.fit(df_train_copy[col])
+                encoder.fit(df_train[col])
                 self.encoders[col] = encoder
                 logging.debug(f"Ajustado MultiLabelBinarizer para la columna: {col}")
 
@@ -257,84 +238,26 @@ class PGenDataProcess:
                 # LabelEncoder para todas las demás columnas (inputs y targets).
                 encoder = LabelEncoder()
                 
-                # Convertir la columna a string para asegurar consistencia
-                series = df_train_copy[col].astype(str)
+                # Optimización: obtener valores únicos directamente y añadir token desconocido
+                unique_labels = df_train[col].astype(str).unique().tolist()
+                unique_labels.append(self.unknown_token)
                 
-                # Añadir el token de "desconocido" al set de clases para que el encoder lo aprenda
-                all_labels = list(series.unique()) + [self.unknown_token]
-                
-                encoder.fit(all_labels)
+                encoder.fit(unique_labels)
                 self.encoders[col] = encoder
                 logging.debug(f"Ajustado LabelEncoder para la columna: {col}")
         
         logging.info("Codificadores ajustados correctamente.")
-
-    '''
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Transform a DataFrame using fitted encoders.
-        
-        Handles unseen labels by replacing them with UNKNOWN token.
-        Logs statistics about unknown label replacements.
-        
-        Args:
-            df: DataFrame to transform (train, val, or test)
-            
-        Returns:
-            Transformed DataFrame with encoded columns
-            
-        Raises:
-            RuntimeError: If fit() has not been called yet
-        """
-        if not self.encoders:
-            raise RuntimeError("fit() must be called before transform()")
-        
-        df_transformed = df.copy()
-        unknown_counts = {}
-        
-        for col, encoder in self.encoders.items():
-            if col not in df_transformed.columns:
-                logger.warning(f"Column {col} not found in DataFrame, skipping")
-                continue
-
-            if isinstance(encoder, MultiLabelBinarizer):
-                # MLB transforma las listas en vectores binarios
-                # (Ignora etiquetas que no vio en 'fit', lo cual es correcto)
-                df_transformed[col] = list(encoder.transform(df_transformed[col]))
-            
-            elif isinstance(encoder, LabelEncoder):
-                # <--- LÓGICA MEJORADA ---
-                # 1. Obtener las etiquetas que el encoder conoce (de 'fit')
-                known_labels = set(encoder.classes_)
-                
-                # 2. Reemplazar cualquier etiqueta no conocida por el token UNKNOWN
-                original_col = df_transformed[col].astype(str)
-                unknown_mask = ~original_col.isin(known_labels)
-                unknown_count = unknown_mask.sum()
-                
-                if unknown_count > 0:
-                    unknown_counts[col] = unknown_count
-                    logger.warning(
-                        f"Column '{col}': {unknown_count} unknown labels replaced with '{self.unknown_token}'"
-                    )
-                
-                transformed_col = original_col.apply(
-                    lambda x: x if x in known_labels else self.unknown_token
-                )
-                
-                # 3. Ahora, transformar de forma segura
-                df_transformed[col] = encoder.transform(transformed_col)
-        
-        if unknown_counts:
-            logger.info(f"Transform summary - Unknown labels replaced: {unknown_counts}")
-        
-        return df_transformed
-    '''
     
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transforma un DataFrame usando los codificadores ya ajustados.
         Maneja las etiquetas no vistas reemplazándolas con un token de 'desconocido'.
+        
+        Args:
+            df: DataFrame a transformar
+            
+        Returns:
+            DataFrame transformado con columnas codificadas
         """
         if not self.encoders:
             raise RuntimeError("fit() debe ser llamado antes de transform()")
@@ -351,16 +274,16 @@ class PGenDataProcess:
                 df_transformed[col] = list(encoder.transform(df_transformed[col]))
             
             elif isinstance(encoder, LabelEncoder):
-                # Para LabelEncoder, reemplazamos valores no vistos por nuestro token
+                # Optimización: operación vectorizada para reemplazar valores desconocidos
                 known_labels = set(encoder.classes_)
                 
-                # Aplicamos la transformación, usando 'unknown_token' para lo no conocido
-                df_transformed[col] = df_transformed[col].astype(str).apply(
-                    lambda x: x if x in known_labels else self.unknown_token
-                )
+                # Convertir a string y reemplazar valores desconocidos (operación vectorizada)
+                col_values = df_transformed[col].astype(str)
+                mask_unknown = ~col_values.isin(known_labels)
+                col_values[mask_unknown] = self.unknown_token
                 
-                # Ahora transformamos de forma segura
-                df_transformed[col] = encoder.transform(df_transformed[col])
+                # Transformar de forma segura
+                df_transformed[col] = encoder.transform(col_values)
         
         logging.info(f"Transformación completada para {len(df)} filas.")
         return df_transformed
@@ -378,47 +301,64 @@ class PGenDataProcess:
 
 
 class PGenDataset(Dataset):
+    """
+    Dataset de PyTorch optimizado para datos farmacogenéticos.
+    
+    Convierte datos pre-procesados a tensores para entrenamiento eficiente.
+    Soporta columnas multi-etiqueta y single-etiqueta.
+    
+    Args:
+        df: DataFrame con datos procesados (post-transform)
+        target_cols: Lista de nombres de columnas objetivo
+        multi_label_cols: Set de columnas multi-etiqueta (opcional)
+    """
+    
     def __init__(self, df, target_cols, multi_label_cols=None):
-        """
-        Crea tensores para el DataLoader.
-        'multi_label_cols' es un set de nombres de columnas que deben ser
-        convertidas a tensores Float32 (para BCEWithLogitsLoss).
-        """
         self.tensors = {}
         self.target_cols = [t.lower() for t in target_cols]
         self.multi_label_cols = multi_label_cols or set()
 
-        for col in df.columns:
-            if col == "stratify_col" or col not in df:
-                continue
-
+        # Optimización: procesar solo columnas relevantes
+        relevant_cols = [col for col in df.columns if col != "stratify_col"]
+        
+        for col in relevant_cols:
             if col in self.multi_label_cols:
                 # Para columnas multi-etiqueta (que contienen arrays)
-                # Apilarlas en un solo tensor y convertir a Float
+                # Optimización: usar from_numpy cuando es posible para mejor performance
                 try:
                     stacked_data = np.stack(df[col].values)
-                    self.tensors[col] = torch.tensor(stacked_data, dtype=torch.float32)
+                    self.tensors[col] = torch.from_numpy(stacked_data).float()
                 except ValueError as e:
-                    print(f"Error al apilar la columna multi-etiqueta: {col}")
-                    # Esto puede pasar si 'transform' no se ejecutó correctamente
-                    # y la columna contiene listas de diferentes longitudes.
-                    raise e
+                    raise ValueError(
+                        f"Error al apilar la columna multi-etiqueta '{col}'. "
+                        "Verifica que transform() se ejecutó correctamente."
+                    ) from e
             else:
                 # Para inputs y targets de etiqueta única
-                # Convertir a Long como antes
+                # Optimización: usar from_numpy para evitar copia innecesaria
                 try:
-                    self.tensors[col] = torch.tensor(df[col].values, dtype=torch.long)
-                except TypeError as e:
-                    print(
-                        f"Error al crear tensor para la columna: {col}. ¿Contiene tipos mixtos?"
-                    )
-                    raise e
+                    col_values = df[col].values
+                    self.tensors[col] = torch.from_numpy(col_values).long()
+                except (TypeError, ValueError) as e:
+                    raise TypeError(
+                        f"Error al crear tensor para la columna '{col}'. "
+                        "Verifica que no contenga tipos mixtos."
+                    ) from e
 
     def __len__(self):
+        """Retorna el número de muestras en el dataset."""
         return len(next(iter(self.tensors.values())))
 
     def __getitem__(self, idx):
-        # Devuelve un diccionario de tensores para este índice
+        """
+        Obtiene una muestra del dataset.
+        
+        Args:
+            idx: Índice de la muestra
+            
+        Returns:
+            Diccionario con tensores de la muestra
+        """
         return {k: v[idx] for k, v in self.tensors.items()}
 
 
