@@ -8,6 +8,7 @@ import torch.nn.functional as F
 
 logger = logging.getLogger(__name__)
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class DeepFM_PGenModel(nn.Module):
     """
@@ -406,3 +407,60 @@ class DeepFM_PGenModel(nn.Module):
             f"n_tasks={len(self.output_heads)}, "
             f"tasks={list(self.target_dims.keys())})"
         )
+
+    def load_pretrained_embeddings(self, weights_path: str, freeze: bool = False):
+            """
+            Carga los embeddings pre-entrenados desde un archivo .pth
+            
+            Args:
+                weights_path: Ruta al archivo .pth con el diccionario de tensores.
+                freeze: Si es True, congela los pesos para que no se actualicen durante el entrenamiento.
+            """
+            import os
+            if not os.path.exists(weights_path):
+                logger.warning(f"No se encontró archivo de pesos en {weights_path}. Se usarán pesos aleatorios.")
+                return
+
+            logger.info(f"Cargando embeddings pre-entrenados desde: {weights_path}")
+            try:
+                # Cargar el diccionario de la CPU
+                pretrained_dict = torch.load(weights_path, map_location=device)
+                
+                # Mapeo entre las claves del diccionario guardado y las capas del modelo
+                # Clave en .pth : Atributo en self
+                layer_mapping = {
+                    'drug': self.drug_emb,
+                    'genalle': self.genal_emb, # Nota: en tu modelo se llama genal_emb
+                    'gene': self.gene_emb,
+                    'allele': self.allele_emb
+                }
+                
+                loaded_count = 0
+                for key, layer in layer_mapping.items():
+                    if key in pretrained_dict:
+                        weights = pretrained_dict[key]
+                        
+                        # Verificación de dimensiones
+                        model_shape = layer.weight.shape
+                        input_shape = weights.shape
+                        
+                        if model_shape != input_shape:
+                            logger.error(f"Error de dimensión en '{key}': Modelo {model_shape} vs Archivo {input_shape}")
+                            continue
+                            
+                        # Copiar los datos
+                        layer.weight.data.copy_(weights)
+                        loaded_count += 1
+                        
+                        # Congelar si se solicita
+                        if freeze:
+                            layer.weight.requires_grad = False
+                            logger.info(f"Capa '{key}' congelada (no-trainable).")
+                    else:
+                        logger.warning(f"La clave '{key}' no existe en el archivo de pesos.")
+                
+                logger.info(f"Se cargaron exitosamente {loaded_count} capas de embeddings.")
+                
+            except Exception as e:
+                logger.error(f"Error crítico cargando embeddings: {e}")
+                raise e

@@ -1,0 +1,6 @@
+2025-11-12 17:28:43,082 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-12 17:28:44,870 - __main__ - INFO - Usuario seleccionó opción: 1
+2025-11-12 17:28:44,871 - __main__ - INFO - Iniciando procesamiento de datos genómicos
+2025-11-12 17:28:50,280 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-12 17:28:58,376 - __main__ - INFO - Lanzando pgen_model
+2025-11-12 17:29:08,934 - __main__ - INFO - Programa interrumpido por el usuario (Ctrl+C)

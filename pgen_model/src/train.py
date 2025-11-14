@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, overload
 
 import optuna
+import pickle
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -456,8 +457,12 @@ def save_model(
         # Save model weights
         path_model_file = model_save_dir / f"pmodel_{model_name}.pth"
         torch.save(model.state_dict(), path_model_file)
-        logger.info(f"Model saved: {path_model_file}")
-
+        logger.info(f"Model weights saved: {path_model_file}")
+        
+        # Save model
+        model_pickle_file = model_save_dir / f"pickledpmodel_{model_name}.pkl"
+        #torch.save. #(model, model_pickle_file)
+        
         # Create report directory
         path_txt_file = model_save_dir / "txt_files"
         path_txt_file.mkdir(parents=True, exist_ok=True)

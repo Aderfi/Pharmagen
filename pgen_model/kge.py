@@ -8,12 +8,12 @@ import multiprocessing
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-FILE_PATH = 'train_data/relationships_associated_corrected.tsv'
+FILE_PATH = 'train_data/relationships_associated_corrected_mapped.tsv'
 
 ENTITY_COLUMNS = ['Entity1_name', 'Entity2_name']
 
 # --- Parámetros de Node2Vec (Hiperparámetros del KGE) ---
-EMBEDDING_DIM = 128 # Dimensión de los vectores (128 es un buen inicio)
+EMBEDDING_DIM = 256 # Dimensión de los vectores (128 es un buen inicio)
 WALK_LENGTH = 30    # Longitud de cada paseo aleatorio
 NUM_WALKS = 200  # Número de paseos aleatorios por nodo
 
@@ -42,7 +42,28 @@ try:
     df = df.dropna(subset=ENTITY_COLUMNS)
     
     # Optimización: operación vectorizada en lugar de loop
-    df[ENTITY_COLUMNS] = df[ENTITY_COLUMNS].apply(lambda x: x.str.replace(' ', '_'))
+    # --- CORRECCIÓN INICIO ---
+    print("Procesando listas y limpiando nombres...")
+
+    # 1. Convertir las cadenas con comas en listas reales
+    # Ejemplo: "GenA, GenB" -> ["GenA", " GenB"]
+    for col in ENTITY_COLUMNS:
+        df[col] = df[col].astype(str).str.split(',')
+
+    # 2. "Explotar" las listas (Explode)
+    # Esto crea una nueva fila por cada elemento de la lista, manteniendo la relación
+    # Si tanto Entity1 como Entity2 tienen listas, hacemos explode dos veces para cubrir todas las combinaciones (producto cartesiano)
+    df = df.explode(ENTITY_COLUMNS[0]).explode(ENTITY_COLUMNS[1])
+
+    # 3. Limpieza final: Quitar espacios en blanco sobrantes y sustituir espacios internos por guion bajo
+    # Es importante hacer el strip() primero por si quedaron espacios tras la coma (ej: "GenA, GenB")
+    for col in ENTITY_COLUMNS:
+        df[col] = df[col].str.strip().str.replace(' ', '_')
+
+    # 4. Eliminar posibles vacíos generados por comas consecutivas o finales
+    df = df.dropna(subset=ENTITY_COLUMNS)
+    df = df[(df[ENTITY_COLUMNS[0]] != '') & (df[ENTITY_COLUMNS[1]] != '')]
+    # --- CORRECCIÓN FIN ---
     
     print("Construyendo el grafo con NetworkX...")
     # Crear un grafo no dirigido a partir de las dos columnas
