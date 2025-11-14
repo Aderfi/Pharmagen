@@ -21,7 +21,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
-from src.config.config import MODEL_ENCODERS_DIR
+from src.config.config import MODEL_ENCODERS_DIR, MODELS_DIR
 from torch.utils.data import DataLoader
 
 from .data import PGenDataset, PGenDataProcess, train_data_import
@@ -237,6 +237,11 @@ def train_pipeline(
         fm_hidden_dim=params.get("fm_hidden_dim", 256),
         embedding_dropout=params.get("embedding_dropout", 0.1),
     )
+    ######################## TESTEO ####################
+    #PRETRAINED_PATH = Path(MODELS_DIR, "pmodel_Phenotype_Effect_Outcome.pth")
+    #model.load_pretrained_embeddings(str(PRETRAINED_PATH), freeze=False)
+    ######################## TESTEO ####################
+
     model = model.to(device)
 
     # --- Definir Optimizador y Criterios de Loss ---
@@ -308,8 +313,13 @@ def train_pipeline(
 
     # Guardar los encoders usados
     encoders_dir = Path(MODEL_ENCODERS_DIR)
+    #models_dir = Path(MODELS_DIR)
+    #model_picke_file = models_dir / f"pmodel_{model_name}_complete.pkl"
     if not encoders_dir.exists():
         encoders_dir.mkdir(parents=True, exist_ok=True)
+
+    
+    #print(f"Modelo_Completo guardado en: {model_picke_file}")
 
     encoders_file = encoders_dir / f"encoders_{model_name}.pkl"
     joblib.dump(data_loader_obj.encoders, encoders_file)
