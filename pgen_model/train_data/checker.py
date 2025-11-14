@@ -9,21 +9,18 @@ import itertools
 
 df = pd.read_csv('relationships_associated_corrected.tsv', sep='\t', dtype=str)
 
-mask = df['Entity1_name'].str.contains(r'rs\d+', na=False) | df['Entity2_name'].str.contains(r'rs\d+', na=False)
+df2 = pd.read_csv('snp_genes_table.tsv', sep='\t', dtype=str)
 
-
-list_rsid = [i for i in df['Entity1_name'].tolist() if re.match(r'rs\d+', str(i))] + \
-            [i for i in df['Entity2_name'].tolist() if re.match(r'rs\d+', str(i))]
-
-dict_rsid = {k:'Pend' for k in list_rsid}
-
-print(dict_rsid)
-print(f"Total unique rsIDs found: {len(dict_rsid)}")
-
-with open('rsid_dict.json', 'w') as f:
-    json.dump(dict_rsid, f, indent=1)
+dict_id = {f"rs{str(row['SNP_Id'])}": row['Genalle'] for idx, row in df2.iterrows()}
 
 
 
 
+#df[['Entity1_name', 'Entity2_name']] = df[['Entity1_name', 'Entity2_name']].map(lambda x: dict_id.get(x) if x in dict_id else x)
 
+#df.to_csv('relationships_associated_corrected_mapped.tsv', sep='\t', index=False)
+#35320474
+with open('test.json', 'w') as f:
+    json.dump(dict_id, f, indent=1)
+
+print(df.sample(10))
