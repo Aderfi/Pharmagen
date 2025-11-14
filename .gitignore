@@ -10,3 +10,5 @@
 *.pth
 *.pk2l
 *.pkl
+*.fa 
+*.fa.gz
