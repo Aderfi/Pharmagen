@@ -59,7 +59,7 @@ def procesar_paciente(vcf_file, fasta_path):
         # --- VALIDACIÓN DE SEGURIDAD ---
         # Consultamos el genoma real para ver si el VCF dice la verdad
         # pysam fetch usa base-0, así que restamos 1 al start
-        ref_genome = genome.fetch(chrom, pos_1based - 1, pos_1based + len(ref_vcf) - 1).upper()
+        ref_genome = genome.fetch(chrom, pos_1based - 1, int(pos_1based + len(ref_vcf) - 1)).upper() #type: ignore
         
         if ref_genome != ref_vcf:
             print(f"🚨 ERROR CRÍTICO en {chrom}:{pos_1based}. ")
