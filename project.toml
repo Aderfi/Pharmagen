@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "Pharmagen"
+version = "0.667"
+dependencies = [
+  ]
+requires-python = "3.10"
+authors = [
+  {name = "Adrim Hamed Outmani", alias = "Aderfi", email = ""},
+]
+
+
+readme = "README.md"
+license = ""
+license-files = [""]
+keywords = [""]
