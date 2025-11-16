@@ -67,6 +67,8 @@ MODEL_FILES_TRAINING = (
 # === RUTAS DE ARCHIVOS ESPECÍFICOS ===
 CONFIG_FILE = PROJECT_ROOT / "config.json"
 LOG_FILE = LOGS_DIR / f"pharmagen_{DATE_STAMP}.log"
+REF_GENOME_FASTA = DATA_DIR / "ref_genome" / "HSapiens_GChr38.fa"
+REF_GENOME_FAI = DATA_DIR / "ref_genome" / "HSapiens_GChr38.fa.fai"
 
 # === METADATOS DEL SOFTWARE ===
 AUTOR = "Astordna/Aderfi/Adrim Hamed Outmani"
