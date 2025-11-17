@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 FILE_PATH = 'train_data/snp_summary.tsv'
 
-ENTITY_COLUMNS = ['snp', 'gene', 'Alt_Allele', 'chr', 'pos']
+ENTITY_COLUMNS = ['snp', 'gene', 'Alt_Allele', 'chr', 'clin_sig']
 
 # --- Parámetros de Node2Vec (Hiperparámetros del KGE) ---
 EMBEDDING_DIM = 256 # Dimensión de los vectores (128 es un buen inicio)
@@ -24,7 +24,7 @@ MIN_COUNT = 1       # Contar todas las entidades (incluso las raras)
 # Dejar 1-2 cores libres para el sistema
 WORKERS = max(1, min(multiprocessing.cpu_count() - 2, 8))
 
-EMBEDDING_FILE = 'encoders/kge_embeddings.kv' # .kv es el formato de KeyedVectors
+EMBEDDING_FILE = 'encoders/rs_chropos_kge_embeddings.kv' # .kv es el formato de KeyedVectors
 
 print(f"Iniciando el proceso de pre-entrenamiento de embeddings...")
 print(f"Archivo de entrada: {FILE_PATH}")
@@ -36,19 +36,20 @@ try:
     print(f"\nCargando datos desde {FILE_PATH}...")
     # Optimización: especificar dtype y usecols para reducir memoria
     df = pd.read_csv(FILE_PATH, sep='\t', usecols=ENTITY_COLUMNS, 
-                     dtype={col: str for col in ENTITY_COLUMNS})
+                     dtype={col: str for col in ENTITY_COLUMNS}, low_memory=False)
     df['gene'].fillna('INTRON', inplace=True)
     
     # Filtrar filas donde falte un nombre de entidad
     df = df.dropna(subset=ENTITY_COLUMNS)
-    
+    print(df.columns)
     # Optimización: operación vectorizada en lugar de loop
     # --- CORRECCIÓN INICIO ---
     print("Procesando listas y limpiando nombres...")
 
     # 1. Convertir las cadenas con comas en listas reales
     # Ejemplo: "GenA, GenB" -> ["GenA", " GenB"]
-    for col in ENTITY_COLUMNS:
+    for col in ENTITY_COLUMNS[1:3]:  # Solo para 'Alt_Allele' y 'chr'
+        # Primero dividir por comas, luego por punto y coma si es necesario
         df[col] = df[col].astype(str).str.split(',')
         df[col] = df[col].astype(str).str.split(';')
 
@@ -71,8 +72,9 @@ try:
     # Crear un grafo no dirigido a partir de las dos columnas
     G = nx.from_pandas_edgelist(
         df,
-        source=ENTITY_COLUMNS[1],
-        target=ENTITY_COLUMNS[2],
+        source=ENTITY_COLUMNS[0],
+        target=ENTITY_COLUMNS[1],
+        edge_attr=ENTITY_COLUMNS[2]
     )
     
     print(f"Grafo construido exitosamente.")
@@ -81,6 +83,7 @@ try:
 
     # --- 3. Preparar y Ejecutar Node2Vec ---
     # p=1, q=1 hace que se comporte como DeepWalk (paseos sin sesgo)
+    # ENTITY_COLUMNS = ['snp', 'gene', 'Alt_Allele', 'chr', 'pos']
     print("\nPreparando Node2Vec...")
     n2v = Node2Vec(
         G, 
