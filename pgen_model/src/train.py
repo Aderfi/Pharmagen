@@ -28,7 +28,7 @@ from torch.amp.autocast_mode import autocast
 from torch.amp.grad_scaler import GradScaler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from src.config.config import MODELS_DIR
+from src.config.config import MODELS_DIR, PROJECT_ROOT
 from .model import DeepFM_PGenModel
 
 logger = logging.getLogger(__name__)
@@ -51,32 +51,6 @@ EPSILON = 1e-8
 # Type Definitions and Overloads
 # ============================================================================
 
-
-@overload
-def train_model( # type: ignore
-    train_loader: Any,
-    val_loader: Any,
-    model: DeepFM_PGenModel,
-    criterions: List[Union[nn.Module, torch.optim.Optimizer]],
-    epochs: int,
-    patience: int,
-    model_name: str,
-    device: Optional[torch.device] = None,
-    target_cols: Optional[List[str]] = None,
-    scheduler: Optional[Any] = None,
-    params_to_txt: Optional[Dict[str, Any]] = None,
-    multi_label_cols: Optional[set] = None,
-    progress_bar: bool = False,
-    optuna_check_weights: bool = False,
-    use_weighted_loss: bool = False,
-    task_priorities: Optional[Dict[str, float]] = None,
-    return_per_task_losses: bool = True,
-    trial: Optional[optuna.Trial] = None,
-) -> Tuple[float, List[float], List[float]]:
-    """Overload: return_per_task_losses=True returns 3 values."""
-    ...
-
-
 @overload
 def train_model( # type:ignore
     train_loader: Any,
@@ -86,6 +60,7 @@ def train_model( # type:ignore
     epochs: int,
     patience: int,
     model_name: str,
+    feature_cols: List[str],
     device: Optional[torch.device] = None,
     target_cols: Optional[List[str]] = None,
     scheduler: Optional[Any] = None,
@@ -102,6 +77,31 @@ def train_model( # type:ignore
     ...
 
 
+@overload
+def train_model( # type: ignore
+    train_loader: Any,
+    val_loader: Any,
+    model: DeepFM_PGenModel,
+    criterions: List[Union[nn.Module, torch.optim.Optimizer]],
+    epochs: int,
+    patience: int,
+    model_name: str,
+    feature_cols: List[str],
+    device: Optional[torch.device] = None,
+    target_cols: Optional[List[str]] = None,
+    scheduler: Optional[Any] = None,
+    params_to_txt: Optional[Dict[str, Any]] = None,
+    multi_label_cols: Optional[set] = None,
+    progress_bar: bool = False,
+    optuna_check_weights: bool = False,
+    use_weighted_loss: bool = False,
+    task_priorities: Optional[Dict[str, float]] = None,
+    return_per_task_losses: bool = True | False,
+    trial: Optional[optuna.Trial] = None,
+) -> Tuple[float, List[float], List[float]] | Tuple[float, List[float]]:
+    """Overload: return_per_task_losses=True returns 3 values."""
+    ...
+
 # ============================================================================
 # Main Training Function
 # ============================================================================
@@ -115,6 +115,7 @@ def train_model(
     epochs: int,
     patience: int,
     model_name: str,
+    feature_cols: List[str],
     device: Optional[torch.device] = None,
     target_cols: Optional[List[str]] = None,
     scheduler: Optional[Any] = None,
@@ -126,7 +127,7 @@ def train_model(
     task_priorities: Optional[Dict[str, float]] = None,
     return_per_task_losses: bool = False,
     trial: Optional[optuna.Trial] = None,
-) -> Union[Tuple[float, List[float]], Tuple[float, List[float], List[float]]]:
+) :
     """
     Train a multi-task deep learning model with early stopping.
     
@@ -233,10 +234,7 @@ def train_model(
 
         for batch in train_iterator:
             # Move inputs to device (non_blocking for faster transfer)
-            drug = batch["drug"].to(device, non_blocking=True)
-            genalle = batch["genalle"].to(device, non_blocking=True)
-            gene = batch["gene"].to(device, non_blocking=True)
-            allele = batch["allele"].to(device, non_blocking=True)
+            features = {col: batch[col].to(device, non_blocking=True) for col in feature_cols}
 
             # Move targets to device
             targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
@@ -246,7 +244,7 @@ def train_model(
             
             if use_amp:
                 with autocast(device_type=str(device)):
-                    outputs = model(drug, genalle, gene, allele)
+                    outputs = model(**features)
                     
                     # Calculate per-task losses
                     individual_losses = []
@@ -264,7 +262,7 @@ def train_model(
                 scaler.step(optimizer) # type: ignore
                 scaler.update() # type: ignore
             else:
-                outputs = model(drug, genalle, gene, allele)
+                outputs = model(**features)
                 
                 # Calculate per-task losses
                 individual_losses = []
@@ -298,16 +296,13 @@ def train_model(
         with torch.no_grad():
             for batch in val_loader:
                 # Move inputs to device (non_blocking for faster transfer)
-                drug = batch["drug"].to(device, non_blocking=True)
-                genalle = batch["genalle"].to(device, non_blocking=True)
-                gene = batch["gene"].to(device, non_blocking=True)
-                allele = batch["allele"].to(device, non_blocking=True)
+                features = {col: batch[col].to(device, non_blocking=True) for col in feature_cols}
 
                 # Move targets to device
                 targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
 
                 # Forward pass
-                outputs = model(drug, genalle, gene, allele)
+                outputs = model(**features)
 
                 # Calculate per-task losses
                 individual_losses_val = []
@@ -406,16 +401,14 @@ def train_model(
                     f"without improvement"
                 )
                 break
-
-    # Return results based on flag
-    if return_per_task_losses:
         avg_per_task_losses = [
             loss_sum / len(val_loader) for loss_sum in individual_loss_sums
-        ]
-        return best_loss, best_accuracies, avg_per_task_losses
-    else:
-        return best_loss, best_accuracies
-
+            ]
+        
+        if return_per_task_losses == True:
+            return best_loss, best_accuracies, avg_per_task_losses
+        if return_per_task_losses == False:
+            return best_loss, best_accuracies
 
 # ============================================================================
 # Model Saving Function
@@ -451,6 +444,8 @@ def save_model(
     """
     try:
         # Create model directory
+        reports_dir = Path(PROJECT_ROOT) / "reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
         model_save_dir = Path(MODELS_DIR)
         model_save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -460,16 +455,11 @@ def save_model(
         logger.info(f"Model weights saved: {path_model_file}")
         
         # Save model
-        model_pickle_file = model_save_dir / f"pickledpmodel_{model_name}.pkl"
-        #torch.save. #(model, model_pickle_file)
-        
-        # Create report directory
-        path_txt_file = model_save_dir / "txt_files"
-        path_txt_file.mkdir(parents=True, exist_ok=True)
+        torch.save(model, path_model_file.with_suffix(".pkl"))
 
         # Generate report filename
         report_filename = f"report_{model_name}_{round(best_loss, 5)}.txt"
-        file_report = path_txt_file / report_filename
+        file_report = reports_dir / report_filename
 
         # Write report
         with open(file_report, "w", encoding="utf-8") as f:

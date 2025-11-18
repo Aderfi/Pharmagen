@@ -1,9 +1,11 @@
 import json
 import sys
 import os
-import subprocess
 from ..config.config import *
 import shutil
+
+import glob
+from pathlib import Path
 
 __all__ = ["mensaje_introduccion", "load_config", "check_config"]
 
@@ -92,3 +94,11 @@ def check_config(config_df, choice):
             print(f"Error al intentar crear el entorno virtual: {e}")
             return
     return
+
+def _search_files(path_to_search: Path, ext: None | str):
+    # Lógica para buscar archivos en el directorio de predicción
+    if ext is None:
+        files = [i for i in glob.glob(str(path_to_search / '*'))]
+    elif ext is not None and isinstance(ext, str):
+        files = [i for i in glob.glob(str(path_to_search / f'*.{ext}'))]
+    return files

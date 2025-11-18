@@ -24,7 +24,7 @@ from sklearn.model_selection import train_test_split
 from src.config.config import MODEL_ENCODERS_DIR, MODELS_DIR
 from torch.utils.data import DataLoader
 
-from .data import PGenDataset, PGenDataProcess, train_data_import
+from .data import PGenDataset, PGenDataProcess
 from .model import DeepFM_PGenModel
 from .model_configs import CLINICAL_PRIORITIES, MULTI_LABEL_COLUMN_NAMES, get_model_config
 from .train import train_model, save_model
@@ -37,10 +37,7 @@ logger = logging.getLogger(__name__)
 EPOCHS = 100
 PATIENCE = 25
 
-# <--- CORRECCIÓN 1: Firma de la función ---
-# La firma ahora acepta 'params' (un dict) como lo pasa __main__.py.
-# Los argumentos 'epochs', 'patience', etc., se eliminan de aquí
-# porque ya están DENTRO de 'params'.
+
 def train_pipeline(
     PGEN_MODEL_DIR,
     csv_files, # Este argumento parece no usarse, pero lo mantenemos
@@ -51,6 +48,17 @@ def train_pipeline(
 ):
     """
     Función principal para entrenar un modelo PGen.
+    
+    Args: 
+        PGEN_MODEL_DIR (str): Directorio base para guardar modelos y resultados.
+        csv_files (list): Lista de rutas a archivos CSV/TSV con datos de entrenamiento.
+        model_name (str): Nombre del modelo a entrenar (debe coincidir con una configuración).
+        target_cols (list, optional): Lista de columnas target a predecir. Si es None, se usan las definidas en la configuración del modelo.
+        patience (int, optional): Número de épocas sin mejora antes de detener el entrenamiento temprano.
+        epochs (int, optional): Número máximo de épocas para entrenar.
+        
+    Returns:
+        None
     """
     seed = 711  # Mantener una semilla fija para reproducibilidad
     random.seed(seed)
@@ -63,21 +71,19 @@ def train_pipeline(
         # Enable TF32 on Ampere GPUs for faster matrix operations
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
     # --- Obtener Configuración Completa del Modelo ---
     config = get_model_config(model_name)
-    inputs_from_config = config["inputs"]  # Columnas de entrada definidas para el modelo
+    inputs_from_config = config["features"]  # Columnas de entrada definidas para el modelo
     cols_from_config = config["cols"]  # Columnas a leer del CSV
     targets_from_config = config["targets"]  # Targets definidos para el modelo
+    params = config["params"]  # Hiperparámetros del modelo
+    stratify_cols = targets_from_config if len(targets_from_config) == 1 else config["stratify"]
     
-    # <--- CORRECCIÓN 2: Estratificación ---
-    # 'phenotype_outcome' es multi-label y fallará.
-    # Usamos 'effect_type' que es single-label y tiene pocos NaNs (que limpiamos después).
-    #stratify_cols = ['phenotype_outcome']
-    stratify_cols = ['effect_type']
-    
-    params = config["params"]  # <--- ELIMINADO: 'params' ahora se pasa como argumento.
-    # -----------------------------------------------
+    # --- Estratificación ---
+    # -----------------------
     
     # Extraer hiperparámetros del diccionario 'params'
     epochs = EPOCHS
@@ -85,20 +91,13 @@ def train_pipeline(
     # --------------------------------------------------
 
     # Determinar las columnas target finales a usar
-    if target_cols is None:
-        target_cols = [t.lower() for t in targets_from_config]
-    else:
-        target_cols = [t.lower() for t in target_cols]
-
-    # --- Cargar y Preparar Datos ---
-    actual_csv_files = csv_files
-
-    data_loader_obj = PGenDataProcess()  # 1. Crear el procesador
-
+    target_cols = [t.lower() for t in targets_from_config]
+    
+    data_loader_obj = PGenDataProcess()  # 1. Crear el procesador de datos
     # 2. Cargar y limpiar el DataFrame COMPLETO
     try:
         df = data_loader_obj.load_data(
-            actual_csv_files,
+            csv_files,
             cols_from_config,
             inputs_from_config,
             targets_from_config,
@@ -107,7 +106,6 @@ def train_pipeline(
         )
     except AttributeError as e:
         logger.error(f"Error: {e}")
-        logger.error("Asegúrate de que PGenDataProcess tiene el método 'load_data' (o 'load_and_clean_data')")
         raise
 
     logger.info(f"Semilla utilizada: {seed}")
@@ -130,57 +128,24 @@ def train_pipeline(
     # 5. Transformar AMBOS sets por separado
     train_processed_df = data_loader_obj.transform(train_df)
     val_processed_df = data_loader_obj.transform(val_df)
+    logger.info("Pre-procesamiento de datos completado.")
     
-    """    aqui camios"""
-    
-    class_weights_task3 = None
-    task3_name = 'effect_type'
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    if task3_name in target_cols:
-        print(f"Calculando pesos de clase SUAVES para '{task3_name}'...")
-        try:
-            # Debug: Verificar qué encoders están disponibles
-            print(f"DEBUG: Encoders disponibles: {list(data_loader_obj.encoders.keys())}")
-            print(f"DEBUG: target_cols = {target_cols}")
-            
-            encoder_task3 = data_loader_obj.encoders[task3_name]
-            print(f"DEBUG: Número de clases en encoder '{task3_name}': {len(encoder_task3.classes_)}")
-            print(f"DEBUG: Clases: {encoder_task3.classes_}")
-            
-            counts = train_processed_df[task3_name].value_counts().sort_index()
-            print(f"DEBUG: Distribución de clases en datos: {counts}")
-            
-            all_counts = torch.zeros(len(encoder_task3.classes_))
-            for class_id, count in counts.items():
-                all_counts[int(class_id)] = count # type: ignore
-            
-            # Usar la fórmula de Log Smoothing que funcionó
-            weights = 1.0 / torch.log(all_counts + 2) # +2 para evitar log(1)=0
-            weights = weights / weights.mean() # Normalizar
-            class_weights_task3 = weights.to(device)
-            print(f"DEBUG: Shape de class_weights_task3: {class_weights_task3.shape}")
-            print("Pesos de clase listos para el entrenamiento final.")
-        except Exception as e:
-            print(f"Error calculando pesos de clase en pipeline: {e}")
-            import traceback
-            traceback.print_exc()
-    
-    """fin cambios"""
-    
-    # --- FIN DE LA CORRECCIÓN DE DATOS ---
-
+    logger.info("\nIniciando creación de DataLoaders...")
     # Crear Datasets y DataLoaders
     train_dataset = PGenDataset(
-        train_processed_df, target_cols, multi_label_cols=MULTI_LABEL_COLUMN_NAMES
+        train_processed_df,
+        inputs_from_config, 
+        target_cols, 
+        multi_label_cols=MULTI_LABEL_COLUMN_NAMES
     )
     val_dataset = PGenDataset(
-        val_processed_df, target_cols, multi_label_cols=MULTI_LABEL_COLUMN_NAMES
+        val_processed_df,
+        inputs_from_config,
+        target_cols, 
+        multi_label_cols=MULTI_LABEL_COLUMN_NAMES
     )
-
-    # Optimize num_workers based on available CPU cores
+    # Optimize attributes
     num_workers = min(multiprocessing.cpu_count(), 8)
-    
     # Enable pin_memory for faster GPU transfer when CUDA is available
     pin_memory = torch.cuda.is_available()
     
@@ -208,24 +173,20 @@ def train_pipeline(
     }
 
     # Obtener número de clases para los inputs
-    n_drugs = len(data_loader_obj.encoders["drug"].classes_)
-    n_genalle = len(data_loader_obj.encoders["genalle"].classes_) # cambiado a Genalle
-    n_genes = len(data_loader_obj.encoders["gene"].classes_)
-    n_alleles = len(data_loader_obj.encoders["allele"].classes_)
+    n_features_list = [len(data_loader_obj.encoders[f].classes_) for f in inputs_from_config]
+    feature_dims = {
+        col_name: n_features_list[i] for i, col_name in enumerate(inputs_from_config)
+    }
 
     # --- Instanciar el Modelo ---
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DeepFM_PGenModel(
-        n_drugs,
-        n_genalle,
-        n_genes, 
-        n_alleles,
-        params["embedding_dim"],
-        params["n_layers"],
-        params["hidden_dim"],
-        params["dropout_rate"],
-        target_dims=target_dims,  # Dinámico #type: ignore
-        ############
+        n_features=feature_dims,
+        target_dims=target_dims,
+        embedding_dim=params["embedding_dim"],
+        hidden_dim=params["hidden_dim"],
+        dropout_rate=params["dropout_rate"],
+        n_layers=params["n_layers"],
+        #------------------------------------------
         attention_dim_feedforward=params.get("attention_dim_feedforward"),
         attention_dropout=params.get("attention_dropout", 0.1),
         num_attention_layers=params.get("num_attention_layers", 1),
@@ -248,14 +209,14 @@ def train_pipeline(
     optimizer = create_optimizer(model, params)
     scheduler = create_scheduler(optimizer, params)
 
-    criterions_list = create_criterions(target_cols, params, class_weights_task3, device)
+    criterions_list = create_criterions(target_cols, params, device)
     criterions = criterions_list + [optimizer]
     
     # ---------------------------------------------------------
 
     # --- Ejecutar Entrenamiento ---
     print(f"Iniciando entrenamiento final para {model_name} con Ponderación de Incertidumbre...")
-    best_loss, best_accuracy_list, avg_per_task_losses = train_model( #type: ignore
+    best_loss, best_accuracy_list, avg_per_task_losses = train_model( # type: ignore
         train_loader,
         val_loader,
         model,
@@ -263,6 +224,7 @@ def train_pipeline(
         epochs=epochs,
         patience=patience,
         model_name=model_name,
+        feature_cols=inputs_from_config,
         device=device,
         target_cols=target_cols,
         multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
@@ -284,7 +246,7 @@ def train_pipeline(
                 params_to_txt=params
             )
 
-    results_dir = Path(PGEN_MODEL_DIR, "results")  # Usar Path para consistencia
+    results_dir = Path(PGEN_MODEL_DIR, "results")
     results_dir.mkdir(parents=True, exist_ok=True)
     report_file = (
         results_dir / f"training_report_{model_name}_{round(best_loss, 4)}.txt"
