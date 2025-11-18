@@ -1,11 +1,12 @@
 from pathlib import Path
+from typing import Dict, List, Any
 
 import joblib
 import pandas as pd
 import torch
 import numpy as np
 from src.config.config import MODEL_ENCODERS_DIR
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 
 from .model_configs import MULTI_LABEL_COLUMN_NAMES
 
@@ -66,11 +67,12 @@ def load_encoders(model_name, encoders_dir=None):
         )
 
     try:
-        encoders = joblib.load(encoders_file)
+        encoders: dict[str, LabelEncoder | MultiLabelBinarizer] = joblib.load(encoders_file)
         print(f"Encoders cargados correctamente desde: {encoders_file}")
         
         # <--- AÑADIDO: Asegurarse de que __UNKNOWN__ existe en los encoders
         # (Si PGenDataProcess no se corrió, esto lo arregla)
+        
         for col, encoder in encoders.items():
             if isinstance(encoder, LabelEncoder):
                 if UNKNOWN_TOKEN not in encoder.classes_:
@@ -83,7 +85,7 @@ def load_encoders(model_name, encoders_dir=None):
         raise Exception(f"Error al cargar los encoders: {e}")
 
 
-def predict_single_input(drug, genalle, gene, allele, model, encoders, target_cols):
+def predict_single_input(features_dict, model, encoders: Dict[str, Any], target_cols):
     """
     Predicción para una sola entrada, compatible con DeepFM_PGenModel
     (salida de diccionario y manejo de multi-etiqueta).
@@ -94,22 +96,34 @@ def predict_single_input(drug, genalle, gene, allele, model, encoders, target_co
     device = next(model.parameters()).device
     model.eval()
 
-    # --- 1. Transformar Inputs (Corregido con manejo de UNKNOWN) ---
+    model_inputs = {}
+    
+    # --- 1. Transformar Inputs ---
     try:
-        drug_tensor = _transform_input(encoders["drug"], drug, device)
-        genal_tensor = _transform_input(encoders["genalle"], genalle, device)
-        gene_tensor = _transform_input(encoders["gene"], gene, device)
-        allele_tensor = _transform_input(encoders["allele"], allele, device)
-        
+        # Iteramos sobre las características proporcionadas en el diccionario
+        for feature_name, feature_value in features_dict.items():
+            
+            # Verificamos si tenemos un encoder para esta característica
+            if feature_name in encoders:
+                # Asumimos que _transform_input es tu función auxiliar existente
+                tensor = _transform_input(encoders[feature_name], feature_value, device)
+                model_inputs[feature_name] = tensor
+            else:
+                # Opcional: Loggear si llega un feature que no esperábamos o no tiene encoder
+                print(f"Ignorando feature '{feature_name}' por falta de encoder.")
+                pass
     except Exception as e:
         print(f"Error fatal al transformar inputs: {e}")
         return None
 
     # --- 2. Obtener Predicciones (Diccionario) ---
     with torch.no_grad():
-        # <--- CORRECCIÓN 2: Orden de argumentos ---
-        # El orden debe coincidir con model.py -> forward(self, drug, genotype, gene, allele)
-        predictions_dict = model(drug_tensor, genal_tensor, gene_tensor, allele_tensor)
+        try:
+            predictions_dict = model(**model_inputs)
+        except TypeError as e:
+            print(f"Error de argumentos en el modelo: {e}")
+            print(f"Inputs enviados: {list(model_inputs.keys())}")
+            return None
 
     # --- 3. Procesar Salidas Dinámicamente ---
     results = {}
@@ -137,7 +151,7 @@ def predict_single_input(drug, genalle, gene, allele, model, encoders, target_co
             
             # No mostrar la etiqueta __UNKNOWN__ al usuario
             if decoded_label == UNKNOWN_TOKEN:
-                decoded_label = "Desconocido (Etiqueta no vista en entrenamiento)"
+                decoded_label = " --- "
             
             results[col] = decoded_label
 
@@ -152,8 +166,14 @@ def predict_from_file(file_path, model, encoders, target_cols):
     if model is None or encoders is None or target_cols is None:
         raise ValueError("Se requieren modelo, encoders y target_cols")
 
+    ext = Path(file_path).suffix.lower()
+    ext_sep = {
+            ".csv": ",", 
+            ".tsv": "\t"
+    }.get(ext, ",")
+    
     try:
-        df = pd.read_csv(file_path, sep=";", dtype=str)
+        df = pd.read_csv(file_path, sep=ext_sep, dtype=str)
     except Exception as e:
         print(f"Error al leer el archivo CSV: {e}")
         return []

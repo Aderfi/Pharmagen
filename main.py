@@ -10,6 +10,7 @@ Descripción: Punto de entrada principal del software. Orquesta todas las funcio
 import datetime
 import itertools
 import logging
+import random
 import sys
 import subprocess
 import time
@@ -21,6 +22,8 @@ from src.config.config import LOGS_DIR
 # from src.visualization import visualize_results
 # from pgen_model import main as pgen_model_main
 
+#global seed 
+#seed = random.randint(0, 2**32 - 1)
 
 
 def process_genomic_data(): #1
@@ -28,12 +31,10 @@ def process_genomic_data(): #1
     logger.info("Iniciando procesamiento de datos genómicos")
     print(">> Procesando datos genómicos (pendiente de implementar)")
 
-
 def advanced_analysis(): #3
     logger = logging.getLogger(__name__)
     logger.info("Iniciando análisis avanzado")
     print(">> Análisis avanzado (pendiente de implementar)")
-
 
 def launch_pgen_model(): # 2   
     logger = logging.getLogger(__name__)
@@ -79,6 +80,9 @@ def loading_animation():
     sys.stdout.write("\n")
     sys.stdout.flush()
 
+def debug_main():
+    from .debug_utils import inspect_encoders
+    
 
 def main():
     

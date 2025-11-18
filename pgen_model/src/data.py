@@ -1,3 +1,4 @@
+from typing import Any, Union
 import glob
 import json
 import logging
@@ -8,11 +9,12 @@ from typing import Dict, List, Set, Tuple, Optional
 
 import numpy as np
 import pandas as pd
-import src.config.config as cfg
 import torch
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer, OneHotEncoder
-from src.config.config import *
 from torch.utils.data import Dataset
+
+import src.config.config as cfg
+from src.config.config import MODEL_TRAIN_DATA
 from .model_configs import MULTI_LABEL_COLUMN_NAMES
 
 logger = logging.getLogger(__name__)
@@ -20,57 +22,31 @@ logger = logging.getLogger(__name__)
 # Constantes de configuración
 MIN_SAMPLES_FOR_CLASS_GROUPING = 20  # Umbral mínimo de muestras por clase antes de agrupar
 
-
-def train_data_import(targets):
-    csv_path = MODEL_TRAIN_DATA
-    
-    
-    csv_files = glob.glob(f"{csv_path}/*.tsv")
-
-    if not csv_files:
-        raise FileNotFoundError(f"No se encontraron archivos TSV en: {csv_path}")
-    elif len(csv_files) == 1:
-        logging.info(f"Se encontró un único archivo TSV. Usando: {csv_files[0]}")
-        csv_files = csv_files[0]
-    csv_files = Path(csv_path, "final_test_genalle.tsv")
-            
-    targets = [t.lower() for t in targets]
-
-    read_cols_set = set(targets) | {"Drug", "Genalle", "Gene", "Allele"} #Variant/Haplotypes cambiado a Genalle
-    read_cols = [c.lower() for c in read_cols_set]
-
-    # equivalencias = load_equivalencias(csv_path)
-    return csv_files, read_cols
-
-def load_equivalencias(csv_path: str) -> Dict:
+def serialize_multi_labelcols(label_input):
     """
-    Load and filter genotype-allele equivalences from JSON file.
-    
-    Keeps only entries with RS identifiers (rs[0-9]+), removes others.
-    
-    Args:
-        csv_path: Path to directory containing json_dicts/geno_alleles_dict.json
-        
-    Returns:
-        Dictionary with filtered equivalences (only RS identifiers)
+    Convierte una lista/array en un string ordenado.
+    Ejemplo: ['Nausea', 'Headache'] -> 'Headache|Nausea'
     """
-    with open(f"{csv_path}/json_dicts/geno_alleles_dict.json", "r") as f:
-        equivalencias = json.load(f)
+    labels_list = []
+    if isinstance(label_input, list):
+        labels_list = [str(x).strip() for x in label_input if x is not None]
+    elif isinstance(label_input, str):
+        if not pd.isna(label_input) and label_input.lower() not in ["nan", "", "null"]:
+             labels_list = [s.strip() for s in re.split(r"[,;]+", label_input) if s.strip()]
+    elif isinstance(label_input, (list, tuple, set, np.ndarray)):
+        # Si ya viene como lista (por un proceso previo)
+        labels_list = [str(x).strip() for x in label_input if x is not None]
+    else:
+        labels_list = []
 
-    # Filter: keep only RS identifiers, mark others as NaN
-    filtered_equivalencias = {}
-    for k, v in equivalencias.items():
-        if re.match(r"rs[0-9]+", k):
-            filtered_equivalencias[k] = v
-        else:
-            filtered_equivalencias[k] = np.nan
-
-    # Remove entries with NaN values
-    filtered_equivalencias = {k: v for k, v in filtered_equivalencias.items() if not pd.isna(v)}
-
-    logger.info(f"Loaded {len(filtered_equivalencias)} valid RS identifiers from equivalences")
-    return filtered_equivalencias
-
+    if not labels_list:
+        return "" # Retornamos string vacío para listas vacías
+    
+    # Ordenamos alfabéticamente para que el orden original no importe
+    labels_list.sort() 
+    
+    # Unimos con un separador seguro (pipe |)
+    return ",".join(labels_list)
 
 class PGenDataProcess:
     """
@@ -88,23 +64,33 @@ class PGenDataProcess:
 
     def __init__(self):
         self.encoders = {}
-        self.cols_to_process = []
+        self.feature_cols = set()
         self.target_cols = []
         self.multi_label_cols = set()
-        self.input_cols = ["drug", "genalle", "gene", "allele"]
-
+        
+        self.cols_to_process = list(self.feature_cols.union(set(self.target_cols)))
+    
         self.unknown_token = "__UNKNOWN__"
-        self.one_hot_encoded_cols = []
+        
 
-    def _split_labels(self, label_str):
+    def _split_labels(self, label_str) -> list[Any] | list[str | Any]:
         """Helper: Divide un string 'A, B' en una lista ['A', 'B'] y maneja nulos."""
-        if not isinstance(label_str, str) or pd.isna(label_str) or label_str.lower() in ["nan", "", "null"]:
-            return []  # MultiLabelBinarizer necesita un iterable
+        if not isinstance(label_str, str) \
+            or pd.isna(label_str) \
+            or label_str.lower() in ["nan", "", "null"]:
+            return []
+          
         return [s.strip() for s in re.split(r",|;", label_str) if s.strip()]
 
-    def load_data(self, csv_path: str, all_cols: List[str], input_cols: List[str],
-                  target_cols: List[str], multi_label_targets: Optional[List[str]], 
-                  stratify_cols: List[str]) -> pd.DataFrame:
+    def load_data(self, 
+                  csv_path: str | Path, 
+                  all_cols: List[str], 
+                  input_cols: List[str],
+                  target_cols: List[str], 
+                  multi_label_targets: Optional[List[str]], 
+                  stratify_cols: List[str]
+    ) -> pd.DataFrame:
+        
         """
         Load, clean and prepare data for splitting.
         
@@ -131,74 +117,66 @@ class PGenDataProcess:
         # Validate that csv_path exists
         csv_path_obj = Path(csv_path)
         if not csv_path_obj.exists():
-            raise FileNotFoundError(f"CSV file not found: {csv_path}")
+            raise FileNotFoundError(f"CSV/TSV file not found: {csv_path}")
+        logger.info(f"Cargando datos desde: {csv_path}")
         
-        df = pd.read_csv(str(csv_path), sep="\t", index_col=False)
+        try:
+            df = pd.read_csv(str(csv_path_obj), sep="\t", index_col=False, usecols=self.cols_to_process, dtype=str)
+        except Exception as e:
+            raise KeyError(f"Error al leer el archivo CSV/TSV. Verifica las columnas requeridas: {self.cols_to_process}") from e
+                
         df.columns = [col.lower() for col in df.columns]
-        
-        # Validate that all required columns exist
-        missing_cols = set(self.cols_to_process) - set(df.columns)
-        if missing_cols:
-            raise KeyError(f"Missing columns in CSV: {missing_cols}")
-        
-        df = df[self.cols_to_process]
-        
+                
         logging.info("Limpiando nombres de entidades (reemplazando espacios con '_')...")
-        # Optimized: process single-label and multi-label columns separately
         single_label_cols = [col for col in self.cols_to_process if col in df.columns and col not in self.multi_label_cols]
         multi_label_cols_present = [col for col in self.multi_label_cols if col in df.columns]
         
         # Vectorized operation for all single-label columns at once
         if single_label_cols:
             for col in single_label_cols:
-                df[col] = df[col].astype(str).str.replace(' ', '_', regex=False)
-        
-        # Process multi-label columns only if present
+                # Convertimos a string, manejando NaNs primero para no tener "nan" literal si no queremos
+                df[col] = df[col].fillna("UNKNOWN").astype(str)
+                
+                # Si hay comas en una columna single, las reemplazamos por pipe (limpieza)
+                if any(df[col].str.contains(r'[,;]+')):
+                    df[col] = df[col].str.replace(r',\s+|;\s+', ',', regex=True)
+                
+                # Reemplazar espacios por guiones bajos
+                df[col] = df[col].str.replace(' ', '_', regex=False).str.strip()
+                
         if multi_label_cols_present:
             for col in multi_label_cols_present:
-                df[col] = df[col].apply(
-                    lambda lst: [s.replace(' ', '_') for s in lst] if isinstance(lst, list) else lst
-                )
+                # Aplicamos la limpieza y serialización ordenada
+                df[col] = df[col].apply(serialize_multi_labelcols)
+        del single_label_cols, multi_label_cols_present     
+        logger.info("Nombres de entidades limpiados.")
         
-        task3_name = "effect_type"
-        if task3_name in df.columns:
-            logging.info(f"Agrupando clases raras para '{task3_name}'...")
-            
-            # 1. Obtener los conteos de clase
-            counts = df[task3_name].value_counts()
-            
-            # 2. Identificar las clases a agrupar
-            to_group = counts[counts < MIN_SAMPLES_FOR_CLASS_GROUPING].index
-            
-            if len(to_group) > 0:
-                logging.info(f"Se agruparán {len(to_group)} clases en 'Other_Grouped'.")
-                # Optimización: usar replace() en lugar de apply() para mejor performance
-                df[task3_name] = df[task3_name].replace(to_group.tolist(), "Other_Grouped")
-            else:
-                logging.info("No se encontraron clases raras para agrupar.")
-                
         # 1. Normaliza columnas target (y de estratificación) a string
-        for t in self.target_cols:
-            df[t] = df[t].astype(str)
-            
-        for s_col in stratify_cols:
-             df[s_col] = df[s_col].astype(str)
+        all_target_and_stratify = set(self.target_cols + stratify_cols)
+        for col in all_target_and_stratify:
+            if col in df.columns:
+                # Rellenar nulos si queda alguno y asegurar string
+                df[col] = df[col].astype(str).str.strip()
 
         # 2. Crear 'stratify_col'
         # Usamos las columnas de estratificación proporcionadas
+                
         df["stratify_col"] = df[stratify_cols].agg("_".join, axis=1)
 
+        
+        
         # 3. Filtrar datos insuficientes (opcional, pero buena práctica)
         counts = df["stratify_col"].value_counts()
         suficientes = counts[counts > 1].index
         df = df[df["stratify_col"].isin(suficientes)].reset_index(drop=True)
+        del counts, suficientes
 
         # 4. Procesar las columnas multi-etiqueta (convertir string a lista)
         for col in self.multi_label_cols:
             if col in df.columns:
                 df[col] = df[col].apply(self._split_labels)
         
-        logging.info(f"Datos cargados y limpios. Total de filas: {len(df)}")
+        logger.info(f"Datos cargados y limpios. Total de filas: {len(df)}")
         return df
 
     def fit(self, df_train: pd.DataFrame) -> None:
@@ -214,6 +192,7 @@ class PGenDataProcess:
         Raises:
             ValueError: Si df_train está vacío o le faltan columnas requeridas.
         """
+        
         if df_train.empty:
             raise ValueError("df_train no puede estar vacío")
         
@@ -222,31 +201,29 @@ class PGenDataProcess:
         missing_cols = set(required_cols) - set(df_train.columns)
         if missing_cols:
             raise ValueError(f"A df_train le faltan las columnas: {missing_cols}")
+        logger.info("Ajustando codificadores con datos de entrenamiento...")
         
-        logging.info("Ajustando codificadores con datos de entrenamiento...")
-        
-        # No se necesita copia completa del DataFrame, trabajamos directamente
         for col in self.cols_to_process:
             if col in self.multi_label_cols:
                 # MultiLabelBinarizer para columnas con múltiples etiquetas.
                 encoder = MultiLabelBinarizer()
                 encoder.fit(df_train[col])
                 self.encoders[col] = encoder
-                logging.debug(f"Ajustado MultiLabelBinarizer para la columna: {col}")
-
-            else:
+                logger.debug(f"Ajustado MultiLabelBinarizer para la columna: {col}")
+                continue
+            
                 # LabelEncoder para todas las demás columnas (inputs y targets).
-                encoder = LabelEncoder()
+            encoder = LabelEncoder()
                 
-                # Optimización: obtener valores únicos directamente y añadir token desconocido
-                unique_labels = df_train[col].astype(str).unique().tolist()
-                unique_labels.append(self.unknown_token)
+            # Optimización: obtener valores únicos directamente y añadir token desconocido
+            unique_labels = df_train[col].astype(str).unique().tolist()
+            unique_labels.append(self.unknown_token)
                 
-                encoder.fit(unique_labels)
-                self.encoders[col] = encoder
-                logging.debug(f"Ajustado LabelEncoder para la columna: {col}")
+            encoder.fit(unique_labels)
+            self.encoders[col] = encoder
+            logger.debug(f"Ajustado LabelEncoder para la columna: {col}")
         
-        logging.info("Codificadores ajustados correctamente.")
+        logger.info("Encoders ajustados correctamente.")
     
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -293,12 +270,14 @@ class PGenDataProcess:
         return (
             f"PGenDataProcess("
             f"cols_to_process={len(self.cols_to_process)}, "
+            f"feature_cols={len(self.cols_to_process) - len(self.target_cols)}, "
             f"target_cols={self.target_cols}, "
             f"multi_label_cols={self.multi_label_cols}, "
             f"encoders_fitted={len(self.encoders)}/{len(self.cols_to_process)})"
         )
 
-
+    def _transform_single_input(self, df: pd.DataFrame) -> dict:
+        ...
 
 class PGenDataset(Dataset):
     """
@@ -313,18 +292,18 @@ class PGenDataset(Dataset):
         multi_label_cols: Set de columnas multi-etiqueta (opcional)
     """
     
-    def __init__(self, df, target_cols, multi_label_cols=None):
+    def __init__(self, df, feature_cols, target_cols, multi_label_cols=None):
         self.tensors = {}
+        self.feature_cols = [f.lower() for f in feature_cols]
         self.target_cols = [t.lower() for t in target_cols]
         self.multi_label_cols = multi_label_cols or set()
 
         # Optimización: procesar solo columnas relevantes
-        relevant_cols = [col for col in df.columns if col != "stratify_col"]
+        relevant_cols = df.columns - set(df['stratify_col'])
         
         for col in relevant_cols:
             if col in self.multi_label_cols:
-                # Para columnas multi-etiqueta (que contienen arrays)
-                # Optimización: usar from_numpy cuando es posible para mejor performance
+                # Para columnas multi-etiqueta
                 try:
                     stacked_data = np.stack(df[col].values)
                     self.tensors[col] = torch.from_numpy(stacked_data).float()
@@ -360,5 +339,3 @@ class PGenDataset(Dataset):
             Diccionario con tensores de la muestra
         """
         return {k: v[idx] for k, v in self.tensors.items()}
-
-

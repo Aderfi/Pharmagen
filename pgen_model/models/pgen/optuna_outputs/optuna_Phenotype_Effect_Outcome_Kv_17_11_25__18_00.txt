@@ -1,0 +1,130 @@
+======================================================================
+OPTIMIZATION REPORT: Phenotype_Effect_Outcome_Kv
+======================================================================
+
+Optimization Type: Multi-Objective
+   - Objective 1: Minimize Loss
+   - Objective 2: Maximize F1 (effect_type)
+
+Note: Results show Pareto-optimal solutions
+
+Representative Trial (#4)
+------------------------------------------------------------
+
+Objective Values:
+   Loss:         -0.92954
+   F1 (negated): -0.47667 → F1 actual: 0.47667
+
+Detailed Metrics:
+   Normalized Loss:    -0.18315
+   Average Accuracy:   0.6661
+   Critical Task F1:   0.4767
+
+Hyperparameters:
+   
+            # === TRANSFORMER ATTENTION (based on your attention_layer) ===
+            "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
+            "attention_dropout": (0.1, 0.5),
+            "num_attention_layers": [1, 2, 3, 4],  # Stack multiple transformer layers
+            
+            # === FOCAL LOSS (you're using it for effect_type) ===
+            "focal_gamma": (1.0, 5.0),  # Currently hardcoded to 2.0
+            "focal_alpha_weight": (0.5, 3.0),  # Multiplier for class weights
+            "label_smoothing": (0.05, 0.3),  # Currently hardcoded to 0.15
+            
+            # === OPTIMIZER VARIANTS ===
+            "optimizer_type": ["adamw", "adam", "sgd", "rmsprop"],
+            "adam_beta1": (0.8, 0.95),
+            "adam_beta2": (0.95, 0.999),
+            "sgd_momentum": (0.85, 0.99),
+            
+            # === SCHEDULER ===
+            "scheduler_type": ["plateau", "cosine", "step", "exponential", "none"],
+            "scheduler_factor": (0.1, 0.8),  # For ReduceLROnPlateau
+            "scheduler_patience": ["int", 3, 15, 1],
+            
+            # === TASK WEIGHTING ===
+            "uncertainty_weighting": [True, False],  # Toggle your uncertainty weighting
+            "manual_task_weights": [True, False],  # Use CLINICAL_PRIORITIES vs learned weights
+            
+            # === ADVANCED ARCHITECTURE ===
+            "use_batch_norm": [True, False],
+            "use_layer_norm": [True, False], 
+            "activation_function": ["gelu", "relu", "swish", "mish"],  # You're using GELU
+            "gradient_clip_norm": (0.5, 5.0),
+            
+            # === FM BRANCH ENHANCEMENTS ===
+            "fm_dropout": (0.1, 0.5),  # Separate dropout for FM interactions
+            "fm_hidden_layers": [0, 1, 2],  # Add layers after FM interactions
+            "fm_hidden_dim": ["int", 64, 512, 32],
+            
+            # === EMBEDDING VARIATIONS ===
+            "embedding_dropout": (0.1, 0.3),
+            "drug_embedding_dim": ["int", 64, 1024, 32],  # Separate embedding dims
+            "gene_embedding_dim": ["int", 64, 1024, 32],
+            "allele_embedding_dim": ["int", 32, 512, 16],
+            "genalle_embedding_dim": ["int", 64, 1024, 32],
+            
+            # === TRAINING DYNAMICS ===
+            "warmup_epochs": ["int", 0, 20, 1],
+            "early_stopping_patience": ["int", 15, 50, 5],
+            "validation_frequency": ["int", 1, 5, 1],  # Validate every N epochs
+        : None
+   activation_function      : swish
+   adam_beta1               : 0.9424628448704079
+   adam_beta2               : 0.9951479086904819
+   attention_dim_feedforward: 2048
+   attention_dropout        : 0.25678901053743164
+   batch_size               : 64
+   dropout_rate             : 0.5613000284153746
+   early_stopping_patience  : 35
+   embedding_dim            : 512
+   embedding_dropout        : 0.15522107054152176
+   fm_dropout               : 0.460209483756725
+   fm_hidden_dim            : 320
+   fm_hidden_layers         : 1
+   focal_alpha_weight       : 1.691898591324244
+   focal_gamma              : 2.6657529089835705
+   gradient_clip_norm       : 1.9544926603756845
+   hidden_dim               : 3968
+   label_smoothing          : 0.021285972400163142
+   learning_rate            : 0.000439654554875526
+   manual_task_weights      : True
+   n_layers                 : 2
+   num_attention_layers     : 1
+   optimizer_type           : rmsprop
+   scheduler_factor         : 0.4819244095785148
+   scheduler_patience       : 4
+   scheduler_type           : plateau
+   use_batch_norm           : False
+   use_layer_norm           : True
+   weight_decay             : 0.00029352732386852306
+
+Pareto Front (Top Solutions)
+------------------------------------------------------------
+
+1. Trial #4
+   Loss: -0.92954, F1: 0.47667
+   Critical F1: 0.4767
+   Key params: batch_size=64, lr=4.40e-04
+
+2. Trial #19
+   Loss: -1.57443, F1: 0.45689
+   Critical F1: 0.4569
+   Key params: batch_size=64, lr=2.15e-04
+
+3. Trial #21
+   Loss: -1.94774, F1: 0.45519
+   Critical F1: 0.4552
+   Key params: batch_size=64, lr=1.67e-04
+
+4. Trial #38
+   Loss: -3.25775, F1: 0.44407
+   Critical F1: 0.4441
+   Key params: batch_size=64, lr=6.05e-04
+
+5. Trial #39
+   Loss: -3.52732, F1: 0.44300
+   Critical F1: 0.4430
+   Key params: batch_size=64, lr=5.73e-04
+

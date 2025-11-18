@@ -18,6 +18,7 @@ LOGS_DIR = PROJECT_ROOT / "logs"  # Carpeta para logs
 SRC_DIR = PROJECT_ROOT / "src"  # Carpeta para código fuente
 ENV_SCRIPTS_DIR = PROJECT_ROOT / "venv_utils"  # Carpeta para scripts de entorno virtual
 RESULTS_DIR = PROJECT_ROOT / "results"
+PREDICT_FILES_DIR = PROJECT_ROOT / "predict_files"  # Carpeta para archivos de predicción
 
 # === SUBCARPETAS DENTRO DE SRC ===
 SCRIPTS_DIR = SRC_DIR / "scripts"  # Carpeta para scripts
