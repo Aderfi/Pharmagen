@@ -19,23 +19,22 @@ def get_input_dims(data_loader: PGenDataProcess) -> Dict[str, int]:
         # Solo nos importan features, no targets (aunque estén en data_loader)
         if hasattr(encoder, "classes_"):
             dims[col] = len(encoder.classes_)
-        else: # MultiLabel
+        else:  # MultiLabel
             dims[col] = len(encoder.classes_)
     return dims
 
-def get_output_sizes(
-    data_loader: PGenDataProcess, target_cols: List[str]
-) -> List[int]:
+
+def get_output_sizes(data_loader: PGenDataProcess, target_cols: List[str]) -> List[int]:
     """
     Get vocabulary sizes for all target columns.
-    
+
     Args:
         data_loader: Fitted PGenDataProcess instance with encoders
         target_cols: List of target column names
-    
+
     Returns:
         List of vocabulary sizes corresponding to target_cols
-    
+
     Raises:
         KeyError: If target encoder not found
     """
@@ -44,17 +43,20 @@ def get_output_sizes(
         try:
             if col not in data_loader.encoders:
                 raise KeyError(f"Encoder not found for target column: {col}")
-            
+
             encoder = data_loader.encoders[col]
             if not hasattr(encoder, "classes_"):
-                raise AttributeError(f"Encoder for '{col}' missing 'classes_' attribute")
-            
+                raise AttributeError(
+                    f"Encoder for '{col}' missing 'classes_' attribute"
+                )
+
             sizes.append(len(encoder.classes_))
         except (KeyError, AttributeError) as e:
             logger.error(f"Error getting output size for '{col}': {e}")
             raise
 
     return sizes
+
 
 def calculate_task_metrics(
     model: nn.Module,
@@ -66,18 +68,18 @@ def calculate_task_metrics(
 ) -> Dict[str, Dict[str, float]]:
     """
     Calculate detailed metrics (F1, precision, recall) for each task.
-    
+
     Handles both single-label and multi-label classification tasks.
     For single-label: uses argmax for predictions.
     For multi-label: uses sigmoid with 0.5 threshold.
-    
+
     Args:
         model: Trained model in eval mode
         data_loader: DataLoader with validation/test data
         target_cols: List of target column names
         multi_label_cols: Set of multi-label column names
         device: Torch device (CPU or CUDA)
-    
+
     Returns:
         Dictionary with structure:
         {
@@ -97,8 +99,12 @@ def calculate_task_metrics(
 
     with torch.no_grad():
         for batch in data_loader:
-            features = {col: batch[col].to(device, non_blocking=True) for col in feature_cols}
-            targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
+            features = {
+                col: batch[col].to(device, non_blocking=True) for col in feature_cols
+            }
+            targets = {
+                col: batch[col].to(device, non_blocking=True) for col in target_cols
+            }
 
             # Forward pass
             outputs = model(**features)
@@ -127,7 +133,9 @@ def calculate_task_metrics(
         if col in multi_label_cols:
             # Multi-label: use 'samples' average
             metrics[col] = {
-                "f1_samples": f1_score(targets, preds, average="samples", zero_division=0),
+                "f1_samples": f1_score(
+                    targets, preds, average="samples", zero_division=0
+                ),
                 "f1_macro": f1_score(targets, preds, average="macro", zero_division=0),
                 "precision_samples": precision_score(
                     targets, preds, average="samples", zero_division=0
@@ -140,7 +148,9 @@ def calculate_task_metrics(
             # Single-label
             metrics[col] = {
                 "f1_macro": f1_score(targets, preds, average="macro", zero_division=0),
-                "f1_weighted": f1_score(targets, preds, average="weighted", zero_division=0),
+                "f1_weighted": f1_score(
+                    targets, preds, average="weighted", zero_division=0
+                ),
                 "precision_macro": precision_score(
                     targets, preds, average="macro", zero_division=0
                 ),
@@ -150,6 +160,7 @@ def calculate_task_metrics(
             }
 
     return metrics
+
 
 def create_optimizer(model: nn.Module, params: Dict[str, Any]) -> torch.optim.Optimizer:
     lr = params.get("learning_rate", 1e-3)
@@ -165,16 +176,22 @@ def create_optimizer(model: nn.Module, params: Dict[str, Any]) -> torch.optim.Op
     else:
         return torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
+
 def create_scheduler(optimizer: torch.optim.Optimizer, params: Dict[str, Any]):
     stype = params.get("scheduler_type", "plateau")
     if stype == "plateau":
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="min", factor=params.get("scheduler_factor", 0.5), 
-            patience=params.get("scheduler_patience", 5)
+            optimizer,
+            mode="min",
+            factor=params.get("scheduler_factor", 0.5),
+            patience=params.get("scheduler_patience", 5),
         )
     return None
 
-def create_criterions(target_cols: List[str], params: Dict[str, Any], device: torch.device) -> List[nn.Module]:
+
+def create_criterions(
+    target_cols: List[str], params: Dict[str, Any], device: torch.device
+) -> List[nn.Module]:
     """Crea una lista de funciones de pérdida correspondiente al orden de target_cols."""
     criterions = []
     for col in target_cols:
@@ -184,5 +201,7 @@ def create_criterions(target_cols: List[str], params: Dict[str, Any], device: to
             # Ejemplo de uso de Focal Loss para una columna específica
             criterions.append(create_focal_loss(gamma=params.get("focal_gamma", 2.0)))
         else:
-            criterions.append(nn.CrossEntropyLoss(label_smoothing=params.get("label_smoothing", 0.1)))
+            criterions.append(
+                nn.CrossEntropyLoss(label_smoothing=params.get("label_smoothing", 0.1))
+            )
     return criterions

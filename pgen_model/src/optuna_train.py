@@ -89,13 +89,14 @@ OPTUNA_DBS.mkdir(parents=True, exist_ok=True)
 # Helper Functions
 # ============================================================================
 
+
 def get_optuna_params(trial: optuna.Trial, model_name: str) -> Dict[str, Any]:
     """Extract hyperparameter suggestions based on model config."""
     model_conf = MODEL_REGISTRY.get(model_name)
     if not model_conf:
         raise ValueError(f"Model configuration not found: {model_name}")
 
-    search_space = model_conf.get('params_optuna')
+    search_space = model_conf.get("params_optuna")
     if not search_space:
         raise ValueError(f"No 'params_optuna' found for '{model_name}'")
 
@@ -108,15 +109,23 @@ def get_optuna_params(trial: optuna.Trial, model_name: str) -> Dict[str, Any]:
                     low, high = space[1], space[2]
                     step = space[3] if len(space) > 3 else 1
                     log = space[4] if len(space) > 4 else False
-                    params[param_name] = trial.suggest_int(param_name, low, high, step=step, log=log)
+                    params[param_name] = trial.suggest_int(
+                        param_name, low, high, step=step, log=log
+                    )
                 else:
                     # Categorical
                     params[param_name] = trial.suggest_categorical(param_name, space)
             elif isinstance(space, tuple):
                 # Float (low, high)
                 low, high = space
-                is_log = "rate" in param_name or "decay" in param_name or "dropout" in param_name
-                params[param_name] = trial.suggest_float(param_name, low, high, log=is_log)
+                is_log = (
+                    "rate" in param_name
+                    or "decay" in param_name
+                    or "dropout" in param_name
+                )
+                params[param_name] = trial.suggest_float(
+                    param_name, low, high, log=is_log
+                )
         except Exception as e:
             logger.error(f"Error parsing param '{param_name}': {e}")
 
@@ -134,7 +143,7 @@ def optuna_objective(
     use_multi_objective: bool = False,
 ) -> Tuple[float, ...]:
     """
-    Función objetivo optimizada. 
+    Función objetivo optimizada.
     Recibe Datasets ya instanciados (referencias a memoria) para evitar IO repetitivo.
     """
     # 1. Sugerir Hiperparámetros
@@ -145,24 +154,32 @@ def optuna_objective(
     # Como los datasets residen en RAM (numpy), usamos workers=4 y pin_memory=True para velocidad
     batch_size = params.get("batch_size", 64)
     num_workers = 4
-    
+
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, 
-        num_workers=num_workers, pin_memory=True, persistent_workers=True
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=True,
     )
     val_loader = DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, 
-        num_workers=num_workers, pin_memory=True, persistent_workers=True
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=True,
     )
 
     # 3. Configurar Dimensiones
     # Filtramos solo las dimensiones necesarias para este modelo específico
     n_features = {k: v for k, v in encoder_dims.items() if k in feature_cols}
     target_dims = {k: v for k, v in encoder_dims.items() if k in target_cols}
-    
+
     # 4. Instanciar Modelo
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+
     model = DeepFM_PGenModel(
         n_features=n_features,
         target_dims=target_dims,
@@ -179,7 +196,7 @@ def optuna_objective(
         fm_dropout=params.get("fm_dropout", 0.0),
         fm_hidden_layers=params.get("fm_hidden_layers", 0),
         fm_hidden_dim=params.get("fm_hidden_dim", 64),
-        embedding_dropout=params.get("embedding_dropout", 0.0)
+        embedding_dropout=params.get("embedding_dropout", 0.0),
     ).to(device)
 
     # 5. Configurar Entrenamiento
@@ -189,17 +206,25 @@ def optuna_objective(
     criterions.append(optimizer)
 
     # 6. Ejecutar Entrenamiento
-    # Para Optuna, generalmente queremos return_per_task_losses=False 
+    # Para Optuna, generalmente queremos return_per_task_losses=False
     # a menos que queramos optimizar multi-objetivo específico.
     try:
         best_loss, best_accs = train_model(
-            train_loader, val_loader, model, criterions,
-            epochs=EPOCHS, patience=PATIENCE, model_name=model_name,
-            feature_cols=feature_cols, target_cols=target_cols,
-            device=device, scheduler=scheduler,
-            trial=trial, multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
-            return_per_task_losses=False, 
-            progress_bar=False # Desactivar barra interna para no saturar log de Optuna
+            train_loader,
+            val_loader,
+            model,
+            criterions,
+            epochs=EPOCHS,
+            patience=PATIENCE,
+            model_name=model_name,
+            feature_cols=feature_cols,
+            target_cols=target_cols,
+            device=device,
+            scheduler=scheduler,
+            trial=trial,
+            multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
+            return_per_task_losses=False,
+            progress_bar=False,  # Desactivar barra interna para no saturar log de Optuna
         )
     except optuna.TrialPruned:
         raise
@@ -216,17 +241,17 @@ def optuna_objective(
     if use_multi_objective:
         # Ejemplo: Minimizar Loss y Maximizar Accuracy (retornamos -Acc para minimizar)
         return best_loss, -avg_acc
-    
+
     return (best_loss,)
 
 
 def run_optuna_with_progress(
     model_name: str,
-    csv_path: Path, # Ruta explícita al archivo de datos
+    csv_path: Path,  # Ruta explícita al archivo de datos
     n_trials: int = N_TRIALS,
     use_multi_objective: bool = False,
 ) -> Dict[str, Any]:
-    
+
     datetime_str = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     logger.info(f"Starting Optuna for {model_name} at {datetime_str}")
 
@@ -239,32 +264,33 @@ def run_optuna_with_progress(
     cols_to_load = list(set(config["cols"] + config["targets"] + config["features"]))
 
     logger.info("Loading and preprocessing data (One-time setup)...")
-    
+
     data_proc = PGenDataProcess()
     df = data_proc.load_data(
         csv_path=csv_path,
-        all_cols=config["cols"],
-        cols_to_use=cols_to_load,
+        all_cols=cols_to_load,  # Use cols_to_load directly
         input_cols=feature_cols,
         target_cols=target_cols,
         multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
-        stratify_cols=config["stratify"]
+        stratify_cols=config["stratify"],
     )
-    
+
     # Split
     train_df, val_df = train_test_split(
         df, test_size=0.2, stratify=df["stratify_col"], random_state=RANDOM_SEED
     )
-    
+
     # Fit & Transform
     data_proc.fit(train_df)
     train_enc = data_proc.transform(train_df)
     val_enc = data_proc.transform(val_df)
-    
+
     # Crear Datasets en Memoria (Numpy Arrays)
-    train_ds = PGenDataset(train_enc, feature_cols, target_cols, MULTI_LABEL_COLUMN_NAMES)
+    train_ds = PGenDataset(
+        train_enc, feature_cols, target_cols, MULTI_LABEL_COLUMN_NAMES
+    )
     val_ds = PGenDataset(val_enc, feature_cols, target_cols, MULTI_LABEL_COLUMN_NAMES)
-    
+
     # Extraer dimensiones globales de los encoders
     encoder_dims = {}
     for col, enc in data_proc.encoders.items():
@@ -281,18 +307,18 @@ def run_optuna_with_progress(
         n_startup_trials=N_STARTUP_TRIALS,
         n_ei_candidates=N_EI_CANDIDATES,
         multivariate=True,
-        seed=RANDOM_SEED
+        seed=RANDOM_SEED,
     )
 
     if use_multi_objective:
-        directions = ["minimize", "minimize"] # Ej: Loss, -Accuracy
-        pruner = None # Pruning no compatible con multi-obj estándar
+        directions = ["minimize", "minimize"]  # Ej: Loss, -Accuracy
+        pruner = None  # Pruning no compatible con multi-obj estándar
     else:
         directions = ["minimize"]
         pruner = MedianPruner(
             n_startup_trials=N_PRUNER_STARTUP_TRIALS,
             n_warmup_steps=N_PRUNER_WARMUP_STEPS,
-            interval_steps=PRUNER_INTERVAL_STEPS
+            interval_steps=PRUNER_INTERVAL_STEPS,
         )
 
     study = optuna.create_study(
@@ -301,7 +327,7 @@ def run_optuna_with_progress(
         directions=directions,
         sampler=sampler,
         pruner=pruner,
-        load_if_exists=True
+        load_if_exists=True,
     )
 
     # 3. EJECUTAR OPTIMIZACIÓN
@@ -315,30 +341,40 @@ def run_optuna_with_progress(
         train_dataset=train_ds,
         val_dataset=val_ds,
         encoder_dims=encoder_dims,
-        use_multi_objective=use_multi_objective
+        use_multi_objective=use_multi_objective,
     )
 
     # Barra de progreso externa
     with tqdm(total=n_trials, desc=f"Optuna {model_name}", colour="blue") as pbar:
+
         def callback(study, trial):
             pbar.update(1)
             best_val = study.best_trials[0].values[0] if study.best_trials else 0
             pbar.set_postfix(best_loss=f"{best_val:.4f}")
 
-        study.optimize(objective_func, n_trials=n_trials, callbacks=[callback], gc_after_trial=True)
+        study.optimize(
+            objective_func, n_trials=n_trials, callbacks=[callback], gc_after_trial=True
+        )
 
     # 4. REPORTES Y GUARDADO
     # ----------------------
     logger.info("Optimization finished. Saving results...")
-    
+
     plots_saving(study, model_name, datetime_str, OPTUNA_FIGS, use_multi_objective)
-    
+
     best_trials = get_best_trials(study, n=5)
-    _save_optuna_report(study, model_name, f"report_{study_name}", OPTUNA_OUTPUTS, best_trials, use_multi_objective)
-    
+    _save_optuna_report(
+        study,
+        model_name,
+        f"report_{study_name}",
+        OPTUNA_OUTPUTS,
+        best_trials,
+        use_multi_objective,
+    )
+
     print(f"\nEstudio guardado en: {storage_url}")
     print(f"Mejores parámetros: {study.best_trials[0].params}")
-    
+
     return study.best_trials[0].params
 
 
@@ -346,38 +382,49 @@ def run_optuna_with_progress(
 # Reporting Utils
 # ============================================================================
 
+
 def get_best_trials(study: optuna.Study, n: int = 5) -> List[optuna.trial.FrozenTrial]:
     """Retorna los N mejores trials (o frente de Pareto)."""
-    valid_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
-    
+    valid_trials = [
+        t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE
+    ]
+
     if not valid_trials:
         return []
-        
+
     # Si es multi-objetivo, best_trials retorna el Frente de Pareto
     # Si es single, retorna [best_trial]
     best_candidates = study.best_trials
-    
+
     if len(best_candidates) >= n:
         return best_candidates[:n]
-    
+
     # Si queremos más de lo que da el frente de pareto o el mejor único,
     # ordenamos por la primera función objetivo (Loss)
-    return sorted(valid_trials, key=lambda t: t.values[0] if t.values else float('inf'))[:n]
+    return sorted(
+        valid_trials, key=lambda t: t.values[0] if t.values else float("inf")
+    )[:n]
 
 
-def plots_saving(study: optuna.Study, model_name: str, datetime_str: str, output_dir: Path, is_multi: bool):
+def plots_saving(
+    study: optuna.Study,
+    model_name: str,
+    datetime_str: str,
+    output_dir: Path,
+    is_multi: bool,
+):
     """Genera y guarda gráficos usando Matplotlib backend."""
     import matplotlib.pyplot as plt
     from optuna.visualization.matplotlib import (
         plot_optimization_history,
         plot_pareto_front,
         plot_param_importances,
-        plot_slice
+        plot_slice,
     )
-    
-    plt.style.use('ggplot')
+
+    plt.style.use("ggplot")
     base_filename = f"{model_name}_{datetime_str}"
-    
+
     # 1. History
     try:
         plt.figure(figsize=(10, 6))
@@ -400,7 +447,7 @@ def plots_saving(study: optuna.Study, model_name: str, datetime_str: str, output
             plt.close()
         except Exception as e:
             logger.warning(f"Plot Error (Pareto): {e}")
-    
+
     # 3. Importance & Slice (Single only usually, or first objective)
     if not is_multi and len(study.trials) > 10:
         try:
@@ -409,7 +456,7 @@ def plots_saving(study: optuna.Study, model_name: str, datetime_str: str, output
             plt.tight_layout()
             plt.savefig(output_dir / f"importance_{base_filename}.png", dpi=150)
             plt.close()
-            
+
             plt.figure(figsize=(10, 8))
             plot_slice(study)
             plt.tight_layout()
@@ -423,34 +470,38 @@ def _save_optuna_report(study, model_name, filename, output_dir, best_trials, is
     """Guarda JSON y TXT con resumen."""
     json_path = output_dir / f"{filename}.json"
     txt_path = output_dir / f"{filename}.txt"
-    
+
     # Estructura JSON
     report = {
         "model": model_name,
         "trials_total": len(study.trials),
-        "trials_completed": len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]),
+        "trials_completed": len(
+            [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+        ),
         "is_multi_objective": is_multi,
-        "best_trials": []
+        "best_trials": [],
     }
-    
+
     for t in best_trials:
-        report["best_trials"].append({
-            "number": t.number,
-            "values": t.values,
-            "params": t.params,
-            "user_attrs": t.user_attrs
-        })
-        
+        report["best_trials"].append(
+            {
+                "number": t.number,
+                "values": t.values,
+                "params": t.params,
+                "user_attrs": t.user_attrs,
+            }
+        )
+
     with open(json_path, "w") as f:
         json.dump(report, f, indent=2)
-        
+
     # Estructura TXT
     with open(txt_path, "w") as f:
         f.write(f"OPTUNA REPORT FOR {model_name}\n")
-        f.write("="*50 + "\n\n")
+        f.write("=" * 50 + "\n\n")
         f.write(f"Total Trials: {len(study.trials)}\n")
         f.write(f"Best Solutions Found: {len(best_trials)}\n\n")
-        
+
         for i, t in enumerate(best_trials):
             f.write(f"Rank {i+1} (Trial {t.number}):\n")
             f.write(f"  Values: {t.values}\n")
@@ -460,6 +511,7 @@ def _save_optuna_report(study, model_name, filename, output_dir, best_trials, is
             f.write("-" * 30 + "\n")
 
     logger.info(f"Reports saved to {output_dir}")
+
 
 if __name__ == "__main__":
     # Ejemplo de uso

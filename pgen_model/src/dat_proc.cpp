@@ -9,10 +9,11 @@
 namespace py = pybind11;
 
 // Función para procesar columnas multi-label
-// Entrada: Lista de strings crudos ["GenA, GenB", "GenC", ...]
+// Entrada: Lista de strings crudos, mapa de clases, y separador
 // Salida: Matriz binaria numpy (One-Hot Encoding)
 py::array_t<float> fast_multi_label_binarize(const std::vector<std::string>& raw_data, 
-                                             const std::unordered_map<std::string, int>& mapping) {
+                                             const std::unordered_map<std::string, int>& mapping,
+                                             char separator) {
     
     size_t n_samples = raw_data.size();
     size_t n_classes = mapping.size();
@@ -21,19 +22,18 @@ py::array_t<float> fast_multi_label_binarize(const std::vector<std::string>& raw
     auto result = py::array_t<float>({n_samples, n_classes});
     auto ptr = result.mutable_unchecked<2>(); // Acceso directo a memoria sin chequeos Python
 
-    // Inicializar a 0 (opcional si el constructor ya lo hace, pero seguro)
-    // En C++ esto es extremadamente rápido
+    // Inicializar a 0
     std::fill(ptr.mutable_data(0, 0), ptr.mutable_data(0, 0) + result.size(), 0.0f);
 
     for (size_t i = 0; i < n_samples; ++i) {
         std::stringstream ss(raw_data[i]);
         std::string segment;
         
-        // Splitting manual (más rápido que regex para casos simples)
-        while (std::getline(ss, segment, ',')) { // Asumiendo separador coma
-            // Trim de espacios (implementación simple)
+        // Splitting usando el separador proporcionado
+        while (std::getline(ss, segment, separator)) {
+            // Trim de espacios
             size_t first = segment.find_first_not_of(' ');
-            if (string::npos == first) continue;
+            if (std::string::npos == first) continue;
             size_t last = segment.find_last_not_of(' ');
             std::string label = segment.substr(first, (last - first + 1));
 
@@ -42,7 +42,6 @@ py::array_t<float> fast_multi_label_binarize(const std::vector<std::string>& raw
             if (it != mapping.end()) {
                 ptr(i, it->second) = 1.0f; 
             }
-            // Si no se encuentra, se ignora (comportamiento __UNKNOWN__)
         }
     }
 
@@ -51,5 +50,6 @@ py::array_t<float> fast_multi_label_binarize(const std::vector<std::string>& raw
 
 PYBIND11_MODULE(fast_processor, m) {
     m.doc() = "Módulo C++ para acelerar preprocesamiento de farmaco-genética";
-    m.def("multi_label_binarize", &fast_multi_label_binarize, "Fast MultiLabel Binarizer");
+    m.def("multi_label_binarize", &fast_multi_label_binarize, "Fast MultiLabel Binarizer",
+          py::arg("raw_data"), py::arg("mapping"), py::arg("separator") = ',');
 }

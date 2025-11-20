@@ -22,20 +22,21 @@ import optuna
 import torch
 import torch.nn as nn
 from tqdm.auto import tqdm
-from torch.amp.grad_scaler import GradScaler # PyTorch 2.x standard
+from torch.amp.grad_scaler import GradScaler  # PyTorch 2.x standard
 from torch.amp.autocast_mode import autocast
 
 from src.config.config import MODELS_DIR, PROJECT_ROOT
 from .model import DeepFM_PGenModel
 
 logger = logging.getLogger(__name__)
-"""
+
+
 @overload
 def train_model(
-    train_loader,
-    val_loader,
+    train_loader: Any,
+    val_loader: Any,
     model: DeepFM_PGenModel,
-    criterions: List[Any], # [Loss1, Loss2..., Optimizer]
+    criterions: List[Any],  # [Loss1, Loss2..., Optimizer]
     epochs: int,
     patience: int,
     model_name: str,
@@ -46,19 +47,19 @@ def train_model(
     multi_label_cols: Optional[set] = None,
     task_priorities: Optional[Dict[str, float]] = None,
     trial: Optional[optuna.Trial] = None,
-    params_to_txt: dict | None=None, # Compatibilidad
+    params_to_txt: dict | None = None,  # Compatibilidad
     return_per_task_losses: bool = True,
     progress_bar: bool = False,
-    **kwargs # Capturar argumentos legacy
-) -> Tuple[float, List[float], List[float]]:
-    ...
+    **kwargs,  # Capturar argumentos legacy
+) -> Tuple[float, List[float], List[float]]: ...
+
 
 @overload
 def train_model(
-    train_loader,
-    val_loader,
+    train_loader: Any,
+    val_loader: Any,
     model: DeepFM_PGenModel,
-    criterions: List[Any], # [Loss1, Loss2..., Optimizer]
+    criterions: List[Any],  # [Loss1, Loss2..., Optimizer]
     epochs: int,
     patience: int,
     model_name: str,
@@ -69,19 +70,18 @@ def train_model(
     multi_label_cols: Optional[set] = None,
     task_priorities: Optional[Dict[str, float]] = None,
     trial: Optional[optuna.Trial] = None,
-    params_to_txt: dict | None, # Compatibilidad
+    params_to_txt: dict | None = None,  # Compatibilidad
     return_per_task_losses: bool = False,
     progress_bar: bool = False,
-    **kwargs # Capturar argumentos legacy
-) -> Tuple[float, List[float]]:
-    ...
-"""
+    **kwargs,  # Capturar argumentos legacy
+) -> Tuple[float, List[float]]: ...
+
 
 def train_model(
     train_loader,
     val_loader,
     model: DeepFM_PGenModel,
-    criterions: List[Any], # [Loss1, Loss2..., Optimizer]
+    criterions: List[Any],  # [Loss1, Loss2..., Optimizer]
     epochs: int,
     patience: int,
     model_name: str,
@@ -92,10 +92,10 @@ def train_model(
     multi_label_cols: Optional[set] = None,
     task_priorities: Optional[Dict[str, float]] = None,
     trial: Optional[optuna.Trial] = None,
-    params_to_txt: dict | None=None, # Compatibilidad
+    params_to_txt: dict | None = None,  # Compatibilidad
     return_per_task_losses: bool = False,
     progress_bar: bool = False,
-    **kwargs # Capturar argumentos legacy
+    **kwargs,  # Capturar argumentos legacy
 ):
     optimizer = criterions[-1]
     loss_fns = {col: fn for col, fn in zip(target_cols, criterions[:-1])}
@@ -103,41 +103,51 @@ def train_model(
 
     # Inicializar Mixed Precision Scaler
     scaler = GradScaler("cuda") if device.type == "cuda" else None
-    
+
     best_val_loss = float("inf")
     best_accuracies = []
     per_task_loss_history = []
     patience_counter = 0
-    
+
     epoch_iter = tqdm(range(epochs), desc="Epochs", disable=not progress_bar)
-    
+
     for epoch in epoch_iter:
         # --- TRAIN ---
         model.train()
         train_loss_accum = 0.0
-        
-        train_pbar = tqdm(train_loader, leave=False, disable=not progress_bar, desc="Train")
+
+        train_pbar = tqdm(
+            train_loader, leave=False, disable=not progress_bar, desc="Train"
+        )
         for batch in train_pbar:
             # non_blocking=True acelera la transferencia si pin_memory=True en DataLoader
-            inputs = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in feature_cols}
-            targets = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in target_cols}
-            
-            optimizer.zero_grad(set_to_none=True) # Más eficiente que zero_grad()
+            inputs = {
+                k: v.to(device, non_blocking=True)
+                for k, v in batch.items()
+                if k in feature_cols
+            }
+            targets = {
+                k: v.to(device, non_blocking=True)
+                for k, v in batch.items()
+                if k in target_cols
+            }
+
+            optimizer.zero_grad(set_to_none=True)  # Más eficiente que zero_grad()
 
             # Contexto de precisión mixta automática
             with autocast(device_type=device.type, enabled=(scaler is not None)):
                 outputs = model(inputs)
-                
+
                 losses = {}
                 for t_col, t_val in targets.items():
                     # Asegurar tipos correctos para pérdidas
                     if t_col in multi_label_cols:
-                         # BCE espera floats
-                         losses[t_col] = loss_fns[t_col](outputs[t_col], t_val.float())
+                        # BCE espera floats
+                        losses[t_col] = loss_fns[t_col](outputs[t_col], t_val.float())
                     else:
-                         # CrossEntropy espera Long
-                         losses[t_col] = loss_fns[t_col](outputs[t_col], t_val)
-                
+                        # CrossEntropy espera Long
+                        losses[t_col] = loss_fns[t_col](outputs[t_col], t_val)
+
                 total_loss = model.get_weighted_loss(losses, task_priorities)
 
             # Backpropagation escalado
@@ -148,7 +158,7 @@ def train_model(
             else:
                 total_loss.backward()
                 optimizer.step()
-            
+
             train_loss_accum += total_loss.item()
 
         avg_train_loss = train_loss_accum / len(train_loader)
@@ -162,23 +172,31 @@ def train_model(
 
         with torch.inference_mode():
             for batch in val_loader:
-                inputs = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in feature_cols}
-                targets = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in target_cols}
+                inputs = {
+                    k: v.to(device, non_blocking=True)
+                    for k, v in batch.items()
+                    if k in feature_cols
+                }
+                targets = {
+                    k: v.to(device, non_blocking=True)
+                    for k, v in batch.items()
+                    if k in target_cols
+                }
 
                 with autocast(device_type=device.type, enabled=(scaler is not None)):
                     outputs = model(inputs)
                     losses = {}
                     for t_col, t_val in targets.items():
                         if t_col in multi_label_cols:
-                             loss_val = loss_fns[t_col](outputs[t_col], t_val.float())
+                            loss_val = loss_fns[t_col](outputs[t_col], t_val.float())
                         else:
-                             loss_val = loss_fns[t_col](outputs[t_col], t_val)
-                        
+                            loss_val = loss_fns[t_col](outputs[t_col], t_val)
+
                         losses[t_col] = loss_val
                         val_task_losses[t_col] += loss_val.item()
-                    
+
                     total_loss = model.get_weighted_loss(losses, task_priorities)
-                
+
                 val_loss_accum += total_loss.item()
 
                 # Métricas
@@ -196,11 +214,15 @@ def train_model(
 
         avg_val_loss = val_loss_accum / len(val_loader)
         accuracies = [correct_counts[t] / max(total_counts[t], 1) for t in target_cols]
-        avg_task_losses_list = [val_task_losses[t] / len(val_loader) for t in target_cols]
+        avg_task_losses_list = [
+            val_task_losses[t] / len(val_loader) for t in target_cols
+        ]
 
         # --- UPDATES ---
         if progress_bar:
-            epoch_iter.set_postfix(train=f"{avg_train_loss:.4f}", val=f"{avg_val_loss:.4f}")
+            epoch_iter.set_postfix(
+                train=f"{avg_train_loss:.4f}", val=f"{avg_val_loss:.4f}"
+            )
 
         if scheduler:
             if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
@@ -229,6 +251,7 @@ def train_model(
     else:
         return best_val_loss, best_accuracies
 
+
 # ============================================================================
 # Model Saving Function
 # ============================================================================
@@ -245,10 +268,10 @@ def save_model(
 ) -> None:
     """
     Save trained model and generate report.
-    
+
     Saves model weights to .pth file and generates a text report with
     training metrics and hyperparameters.
-    
+
     Args:
         model: Trained DeepFM_PGenModel instance
         target_cols: List of target column names
@@ -257,7 +280,7 @@ def save_model(
         model_name: Name of the model
         avg_per_task_losses: List of average per-task losses
         params_to_txt: Optional dict of hyperparameters to save
-    
+
     Raises:
         IOError: If model or report cannot be saved
     """
@@ -272,7 +295,7 @@ def save_model(
         path_model_file = model_save_dir / f"pmodel_{model_name}.pth"
         torch.save(model.state_dict(), path_model_file)
         logger.info(f"Model weights saved: {path_model_file}")
-        
+
         # Save model
         torch.save(model, path_model_file.with_suffix(".pkl"))
 
