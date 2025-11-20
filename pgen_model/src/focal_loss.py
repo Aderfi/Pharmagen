@@ -10,6 +10,7 @@ https://arxiv.org/abs/1708.02002
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import Optional
 
 
 class FocalLoss(nn.Module):
@@ -45,29 +46,18 @@ class FocalLoss(nn.Module):
     
     def __init__(
         self, 
-        alpha: torch.Tensor | None = None,
+        alpha: Optional[torch.Tensor] = None,
         gamma: float = 2.0,
         reduction: str = 'mean',
-        label_smoothing: float = 0.15,
+        label_smoothing: float = 0.1,
     ):
         super().__init__()
-        
         self.alpha = alpha
         self.gamma = gamma
         self.reduction = reduction
         self.label_smoothing = label_smoothing
-        
-        # Validación de parámetros
-        if gamma < 0:
-            raise ValueError(f"gamma debe ser >= 0, recibido: {gamma}")
-        
-        if not 0.0 <= label_smoothing < 1.0:
-            raise ValueError(f"label_smoothing debe estar en [0, 1), recibido: {label_smoothing}")
-        
-        if reduction not in ['none', 'mean', 'sum']:
-            raise ValueError(f"reduction debe ser 'none', 'mean' o 'sum', recibido: {reduction}")
     
-    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:        
         """
         Args:
             inputs: Logits del modelo (sin softmax/sigmoid)
@@ -80,6 +70,10 @@ class FocalLoss(nn.Module):
                   o tensor de shape [batch_size] (si reduction='none')
         """
         # 1. Calcular CrossEntropy con label smoothing (sin reducción)
+        # Mover alpha al dispositivo correcto si existe
+        if self.alpha is not None and self.alpha.device != inputs.device:
+            self.alpha = self.alpha.to(inputs.device)
+
         ce_loss = F.cross_entropy(
             inputs, 
             targets, 
@@ -88,37 +82,14 @@ class FocalLoss(nn.Module):
             label_smoothing=self.label_smoothing,
         )
         
-        # 2. Calcular probabilidades de la clase correcta (pt)
-        # Aplicar log_softmax y luego exp para obtener probabilidades
-        log_probs = F.log_softmax(inputs, dim=-1)
-        probs = torch.exp(log_probs)
+        pt = torch.exp(-ce_loss) # Cross Entropy = -log(pt) -> pt = exp(-CE)
+        focal_loss = ((1 - pt) ** self.gamma) * ce_loss
         
-        # Obtener la probabilidad de la clase correcta para cada muestra
-        # pt = probs[batch_idx, target_class]
-        pt = probs.gather(dim=1, index=targets.unsqueeze(1)).squeeze(1)
-        
-        # 3. Calcular el término de enfoque: (1 - pt)^gamma
-        focal_weight = (1 - pt) ** self.gamma
-        
-        # 4. Aplicar Focal Loss: FL = focal_weight * CE
-        focal_loss = focal_weight * ce_loss
-        
-        # 5. Reducción
         if self.reduction == 'mean':
             return focal_loss.mean()
         elif self.reduction == 'sum':
             return focal_loss.sum()
-        else:  # 'none'
-            return focal_loss
-    
-    def extra_repr(self) -> str:
-        """Representación string para debugging."""
-        return (
-            f"alpha={'custom' if self.alpha is not None else None}, "
-            f"gamma={self.gamma}, "
-            f"reduction={self.reduction}, "
-            f"label_smoothing={self.label_smoothing}"
-        )
+        return focal_loss
 
 
 class AdaptiveFocalLoss(FocalLoss):
@@ -165,37 +136,5 @@ class AdaptiveFocalLoss(FocalLoss):
 # FUNCIÓN HELPER PARA CREAR FOCAL LOSS FÁCILMENTE
 # ══════════════════════════════════════════════════════════════
 
-def create_focal_loss(
-    class_weights: torch.Tensor | None = None,
-    gamma: float = 2.0,
-    label_smoothing: float = 0.1,
-    adaptive: bool = False,
-) -> nn.Module:
-    """
-    Factory function para crear Focal Loss.
-    
-    Args:
-        class_weights: Tensor con pesos por clase (opcional)
-        gamma: Parámetro de enfoque (default: 2.0)
-        label_smoothing: Label smoothing (default: 0.1)
-        adaptive: Usar gamma adaptativo (default: False)
-    
-    Returns:
-        FocalLoss o AdaptiveFocalLoss instance
-    
-    Ejemplo:
-        >>> weights = torch.tensor([1.0, 2.5, 1.8, ...])
-        >>> criterion = create_focal_loss(class_weights=weights, gamma=2.0)
-    """
-    if adaptive:
-        return AdaptiveFocalLoss(
-            alpha=class_weights,
-            gamma=gamma,
-            label_smoothing=label_smoothing,
-        )
-    else:
-        return FocalLoss(
-            alpha=class_weights,
-            gamma=gamma,
-            label_smoothing=label_smoothing,
-        )
+def create_focal_loss(class_weights: Optional[torch.Tensor] = None, gamma: float = 2.0) -> FocalLoss:
+    return FocalLoss(alpha=class_weights, gamma=gamma)

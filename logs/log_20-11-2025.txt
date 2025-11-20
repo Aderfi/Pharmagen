@@ -1,0 +1,563 @@
+2025-11-20 03:04:42,525 [INFO] - Loading and preprocessing data...
+2025-11-20 03:04:42,525 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:04:42,600 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:04:42,678 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:04:42,717 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:04:43,841 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:04:43,870 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:04:43,888 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:04:43,899 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:04:43,911 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:04:44,025 [INFO] - Data ready.
+2025-11-20 03:04:44,026 [INFO] - #######################################################
+2025-11-20 03:04:44,026 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:04:44,026 [INFO] - #######################################################
+2025-11-20 03:04:44,028 [INFO] - Pruning disabled (incompatible with multi-objective)
+2025-11-20 03:04:45,012 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 741, in run_optuna_with_progress
+    study.optimize(optuna_func, n_trials=n_trials, gc_after_trial=True)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 490, in optimize
+    _optimize(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 63, in _optimize
+    _optimize_sequential(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 160, in _optimize_sequential
+    frozen_trial_id = _run_trial(study, func, catch)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 258, in _run_trial
+    raise func_err
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 201, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 237, in optuna_objective
+    train_loader = DataLoader(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\dataloader.py", line 394, in __init__
+    batch_sampler = BatchSampler(sampler, batch_size, drop_last)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\sampler.py", line 315, in __init__
+    raise ValueError(
+ValueError: batch_size should be a positive integer value, but got batch_size=[64, 128, 256]
+2025-11-20 03:11:23,817 [INFO] - Loading and preprocessing data...
+2025-11-20 03:11:23,818 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:11:23,886 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:11:23,963 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:11:24,000 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:11:25,069 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:11:25,096 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:11:25,113 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:11:25,121 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:11:25,133 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:11:25,246 [INFO] - Data ready.
+2025-11-20 03:11:25,246 [INFO] - #######################################################
+2025-11-20 03:11:25,246 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:11:25,246 [INFO] - #######################################################
+2025-11-20 03:11:25,248 [INFO] - Pruning enabled (single-objective)
+2025-11-20 03:11:26,085 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 741, in run_optuna_with_progress
+    study.optimize(optuna_func, n_trials=n_trials, gc_after_trial=True)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 490, in optimize
+    _optimize(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 63, in _optimize
+    _optimize_sequential(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 160, in _optimize_sequential
+    frozen_trial_id = _run_trial(study, func, catch)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 258, in _run_trial
+    raise func_err
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 201, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 254, in optuna_objective
+    n_targets_list = [len(fitted_data_loader.encoders[tc].classes_) for tc in target_cols]
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 254, in <listcomp>
+    n_targets_list = [len(fitted_data_loader.encoders[tc].classes_) for tc in target_cols]
+KeyError: 'Phenotype_outcome'
+2025-11-20 03:11:50,747 [INFO] - Loading and preprocessing data...
+2025-11-20 03:11:50,747 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:11:50,813 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:11:50,889 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:11:50,924 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:11:52,077 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:11:52,107 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:11:52,124 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:11:52,132 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:11:52,142 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:11:52,253 [INFO] - Data ready.
+2025-11-20 03:11:52,253 [INFO] - #######################################################
+2025-11-20 03:11:52,253 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:11:52,253 [INFO] - #######################################################
+2025-11-20 03:11:52,255 [INFO] - Pruning disabled (incompatible with multi-objective)
+2025-11-20 03:11:52,685 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: UNIQUE constraint failed: studies.study_name
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\storages\_rdb\storage.py", line 273, in create_new_study
+    with _create_scoped_session(self.scoped_session) as session:
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 142, in __exit__
+    next(self.gen)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\storages\_rdb\storage.py", line 78, in _create_scoped_session
+    session.commit()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: studies.study_name
+[SQL: INSERT INTO studies (study_name) VALUES (?)]
+[parameters: ('OPTUNA_Features-Phenotype_20_11_25__03_11',)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 724, in run_optuna_with_progress
+    study = optuna.create_study(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\_convert_positional_args.py", line 135, in converter_wrapper
+    return func(**kwargs)  # type: ignore[call-arg]
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 1299, in create_study
+    study_id = storage.create_new_study(direction_objects, study_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\storages\_cached_storage.py", line 78, in create_new_study
+    study_id = self._backend.create_new_study(directions=directions, study_name=study_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\storages\_rdb\storage.py", line 285, in create_new_study
+    raise optuna.exceptions.DuplicatedStudyError(
+optuna.exceptions.DuplicatedStudyError: Another study with name 'OPTUNA_Features-Phenotype_20_11_25__03_11' already exists. Please specify a different name, or reuse the existing one by setting `load_if_exists` (for Python API) or `--skip-if-exists` flag (for CLI).
+2025-11-20 03:12:36,245 [INFO] - Loading and preprocessing data...
+2025-11-20 03:12:36,245 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:12:36,314 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:12:36,386 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:12:36,424 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:12:37,530 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:12:37,558 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:12:37,576 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:12:37,586 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:12:37,599 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:12:37,714 [INFO] - Data ready.
+2025-11-20 03:12:37,714 [INFO] - #######################################################
+2025-11-20 03:12:37,714 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:12:37,715 [INFO] - #######################################################
+2025-11-20 03:12:37,716 [INFO] - Pruning enabled (single-objective)
+2025-11-20 03:12:38,599 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 741, in run_optuna_with_progress
+    study.optimize(optuna_func, n_trials=n_trials, gc_after_trial=True)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 490, in optimize
+    _optimize(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 63, in _optimize
+    _optimize_sequential(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 160, in _optimize_sequential
+    frozen_trial_id = _run_trial(study, func, catch)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 258, in _run_trial
+    raise func_err
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 201, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 254, in optuna_objective
+    n_targets_list = [len(fitted_data_loader.encoders[tc].classes_) for tc in target_cols]
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 254, in <listcomp>
+    n_targets_list = [len(fitted_data_loader.encoders[tc].classes_) for tc in target_cols]
+KeyError: 'Phenotype_outcome'
+2025-11-20 03:14:27,841 [INFO] - Loading and preprocessing data...
+2025-11-20 03:14:27,841 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:14:27,922 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:14:27,995 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:14:28,031 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:14:29,100 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:14:29,128 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:14:29,144 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:14:29,152 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:14:29,165 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:14:29,280 [INFO] - Data ready.
+2025-11-20 03:14:29,280 [INFO] - #######################################################
+2025-11-20 03:14:29,280 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:14:29,280 [INFO] - #######################################################
+2025-11-20 03:14:29,282 [INFO] - Pruning enabled (single-objective)
+2025-11-20 03:14:30,033 [INFO] - Loading data from: C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv
+2025-11-20 03:14:30,033 [INFO] - Tasks: phenotype_outcome
+2025-11-20 03:14:30,033 [INFO] - Clinical priorities: {'effect_type': 0.6, 'phenotype_outcome': 0.25, 'effect_direction': 0.15}
+2025-11-20 03:14:30,064 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:14:31,672 [INFO] - Device auto-selected: cuda
+2025-11-20 03:14:31,673 [INFO] - Model moved to device: cuda
+2025-11-20 03:14:31,673 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:14:42,781 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 744, in run_optuna_with_progress
+    study.optimize(optuna_func, n_trials=n_trials, gc_after_trial=True)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 490, in optimize
+    _optimize(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 63, in _optimize
+    _optimize_sequential(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 160, in _optimize_sequential
+    frozen_trial_id = _run_trial(study, func, catch)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 258, in _run_trial
+    raise func_err
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 201, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 322, in optuna_objective
+    task_metrics = calculate_task_metrics(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\train_utils.py", line 127, in calculate_task_metrics
+    drug = batch["drug"].to(device)
+KeyError: 'drug'
+2025-11-20 03:18:47,250 [INFO] - Loading and preprocessing data...
+2025-11-20 03:18:47,250 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:18:47,310 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:18:47,383 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:18:47,419 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:18:48,529 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:18:48,558 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:18:48,577 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:18:48,589 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:18:48,601 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:18:48,716 [INFO] - Data ready.
+2025-11-20 03:18:48,716 [INFO] - #######################################################
+2025-11-20 03:18:48,716 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:18:48,716 [INFO] - #######################################################
+2025-11-20 03:18:48,719 [INFO] - Pruning enabled (single-objective)
+2025-11-20 03:18:49,526 [INFO] - Loading data from: C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv
+2025-11-20 03:18:49,526 [INFO] - Tasks: phenotype_outcome
+2025-11-20 03:18:49,526 [INFO] - Clinical priorities: {'effect_type': 0.6, 'phenotype_outcome': 0.25, 'effect_direction': 0.15}
+2025-11-20 03:18:49,559 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:18:50,991 [INFO] - Device auto-selected: cuda
+2025-11-20 03:18:50,992 [INFO] - Model moved to device: cuda
+2025-11-20 03:18:50,992 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:19:01,187 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:19:01,216 [INFO] - Device auto-selected: cuda
+2025-11-20 03:19:01,216 [INFO] - Model moved to device: cuda
+2025-11-20 03:19:01,216 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:19:10,920 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:19:10,953 [INFO] - Device auto-selected: cuda
+2025-11-20 03:19:10,954 [INFO] - Model moved to device: cuda
+2025-11-20 03:19:10,954 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:19:20,755 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:19:20,767 [INFO] - Device auto-selected: cuda
+2025-11-20 03:19:20,768 [INFO] - Model moved to device: cuda
+2025-11-20 03:19:20,768 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:19:30,651 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:19:30,681 [INFO] - Device auto-selected: cuda
+2025-11-20 03:19:30,681 [INFO] - Model moved to device: cuda
+2025-11-20 03:19:30,681 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:19:41,967 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:19:41,975 [INFO] - Device auto-selected: cuda
+2025-11-20 03:19:41,975 [INFO] - Model moved to device: cuda
+2025-11-20 03:19:41,975 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:19:52,748 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:19:52,793 [INFO] - Device auto-selected: cuda
+2025-11-20 03:19:52,794 [INFO] - Model moved to device: cuda
+2025-11-20 03:19:52,794 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:20:05,467 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:20:05,494 [INFO] - Device auto-selected: cuda
+2025-11-20 03:20:05,495 [INFO] - Model moved to device: cuda
+2025-11-20 03:20:05,495 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:20:15,476 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:20:15,502 [INFO] - Device auto-selected: cuda
+2025-11-20 03:20:15,502 [INFO] - Model moved to device: cuda
+2025-11-20 03:20:15,502 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:20:41,342 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:20:41,370 [INFO] - Device auto-selected: cuda
+2025-11-20 03:20:41,372 [INFO] - Model moved to device: cuda
+2025-11-20 03:20:41,372 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:20:52,015 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:20:52,025 [INFO] - Device auto-selected: cuda
+2025-11-20 03:20:52,025 [INFO] - Model moved to device: cuda
+2025-11-20 03:20:52,026 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:21:08,909 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:21:08,942 [INFO] - Device auto-selected: cuda
+2025-11-20 03:21:08,942 [INFO] - Model moved to device: cuda
+2025-11-20 03:21:08,942 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:22:37,321 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:22:37,352 [INFO] - Device auto-selected: cuda
+2025-11-20 03:22:37,353 [INFO] - Model moved to device: cuda
+2025-11-20 03:22:37,353 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:24:37,039 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:24:37,071 [INFO] - Device auto-selected: cuda
+2025-11-20 03:24:37,073 [INFO] - Model moved to device: cuda
+2025-11-20 03:24:37,073 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:25:16,094 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:25:16,116 [INFO] - Device auto-selected: cuda
+2025-11-20 03:25:16,117 [INFO] - Model moved to device: cuda
+2025-11-20 03:25:16,117 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:26:25,794 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:26:25,807 [INFO] - Device auto-selected: cuda
+2025-11-20 03:26:25,808 [INFO] - Model moved to device: cuda
+2025-11-20 03:26:25,808 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:26:41,872 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:26:41,894 [INFO] - Device auto-selected: cuda
+2025-11-20 03:26:41,895 [INFO] - Model moved to device: cuda
+2025-11-20 03:26:41,895 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:27:35,958 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:27:35,984 [INFO] - Device auto-selected: cuda
+2025-11-20 03:27:35,985 [INFO] - Model moved to device: cuda
+2025-11-20 03:27:35,985 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:28:34,422 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:28:34,434 [INFO] - Device auto-selected: cuda
+2025-11-20 03:28:34,434 [INFO] - Model moved to device: cuda
+2025-11-20 03:28:34,435 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:34:39,065 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:34:39,090 [INFO] - Device auto-selected: cuda
+2025-11-20 03:34:39,091 [INFO] - Model moved to device: cuda
+2025-11-20 03:34:39,091 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:35:24,173 [INFO] - DeepFM_PGenModel initialized with 1 output heads
+2025-11-20 03:35:24,193 [INFO] - Device auto-selected: cuda
+2025-11-20 03:35:24,193 [INFO] - Model moved to device: cuda
+2025-11-20 03:35:24,194 [INFO] - Mixed precision training (AMP) enabled for faster GPU computation
+2025-11-20 03:35:58,678 [INFO] - Loading and preprocessing data...
+2025-11-20 03:35:58,678 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 03:35:58,745 [INFO] - Limpiando nombres de entidades (reemplazando espacios con '_')...
+2025-11-20 03:35:58,816 [INFO] - Nombres de entidades limpiados.
+2025-11-20 03:35:58,852 [INFO] - Columna 'stratify_col' creada para estratificación a partir de ['Phenotype_outcome'].
+2025-11-20 03:35:59,930 [INFO] - 
+Tokens sin asignar: 258
+
+2025-11-20 03:35:59,958 [INFO] - Añadiendo 'atc' a cols_to_process para codificación.
+2025-11-20 03:35:59,975 [INFO] - Datos cargados y limpios. Total de filas: 13156
+2025-11-20 03:35:59,984 [INFO] - Ajustando codificadores con datos de entrenamiento...
+2025-11-20 03:35:59,996 [INFO] - Encoders ajustados correctamente.
+2025-11-20 03:36:00,110 [INFO] - Data ready.
+2025-11-20 03:36:00,110 [INFO] - #######################################################
+2025-11-20 03:36:00,110 [INFO] - ## GPU optimizations enabled (cuDNN benchmark, TF32) ##
+2025-11-20 03:36:00,110 [INFO] - #######################################################
+2025-11-20 03:36:00,124 [INFO] - Pruning enabled (single-objective)
+2025-11-20 03:36:01,076 [INFO] - Loading data from: C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv
+2025-11-20 03:36:01,077 [INFO] - Tasks: phenotype_outcome
+2025-11-20 03:36:01,077 [INFO] - Clinical priorities: {'effect_type': 0.6, 'phenotype_outcome': 0.25, 'effect_direction': 0.15}
+2025-11-20 04:13:21,145 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 749, in run_optuna_with_progress
+    pbar.close()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 490, in optimize
+    _optimize(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 63, in _optimize
+    _optimize_sequential(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 160, in _optimize_sequential
+    frozen_trial_id = _run_trial(study, func, catch)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 258, in _run_trial
+    raise func_err
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 201, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 303, in optuna_objective
+    val_loader,
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\train.py", line 293, in train_model
+    for batch in val_loader:
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\dataloader.py", line 734, in __next__
+    data = self._next_data()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\dataloader.py", line 1516, in _next_data
+    return self._process_data(data, worker_id)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\dataloader.py", line 1551, in _process_data
+    data.reraise()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\_utils.py", line 769, in reraise
+    raise exception
+AttributeError: Caught AttributeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\_utils\worker.py", line 349, in _worker_loop
+    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\_utils\fetch.py", line 52, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\utils\data\_utils\fetch.py", line 52, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\data.py", line 177, in __getitem__
+    for col, array in self.data.items():
+AttributeError: 'PGenDataset' object has no attribute 'data'
+
+2025-11-20 04:49:57,573 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 20, in <module>
+    from pgen_model.src.pipeline import train_pipeline
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\pipeline.py", line 32, in <module>
+    from .train_utils import create_optimizer, create_scheduler, create_criterions
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\train_utils.py", line 59, in <module>
+    data_loader: DataLoader,
+NameError: name 'DataLoader' is not defined
+2025-11-20 04:52:15,597 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 04:52:15,773 [INFO] - Mapeando fármacos a ATC...
+2025-11-20 04:52:19,467 [INFO] - Ajustando encoders...
+2025-11-20 04:55:06,176 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+TypeError: run_optuna_with_progress() got an unexpected keyword argument 'output_dir'
+2025-11-20 04:57:09,841 [INFO] - Starting Optuna for Features-Phenotype at 20251120_0457
+2025-11-20 04:57:09,841 [INFO] - Loading and preprocessing data (One-time setup)...
+2025-11-20 04:57:09,841 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 04:57:10,024 [INFO] - Mapeando fármacos a ATC...
+2025-11-20 04:57:13,835 [INFO] - Ajustando encoders...
+2025-11-20 04:57:14,991 [INFO] - Data setup complete. Starting optimization loop...
+2025-11-20 04:57:15,925 [CRITICAL] - Excepción no controlada:
+Traceback (most recent call last):
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\rukia\AppData\Local\Programs\Python\Python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 388, in <module>
+    main()
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 385, in main
+    cli_menu(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 188, in cli_menu
+    optuna_choice(model_name)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\__main__.py", line 239, in optuna_choice
+    run_optuna_with_progress(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 328, in run_optuna_with_progress
+    study.optimize(objective_func, n_trials=n_trials, callbacks=[callback], gc_after_trial=True)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\study.py", line 490, in optimize
+    _optimize(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 63, in _optimize
+    _optimize_sequential(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 160, in _optimize_sequential
+    frozen_trial_id = _run_trial(study, func, catch)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 258, in _run_trial
+    raise func_err
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\optuna\study\_optimize.py", line 201, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\optuna_train.py", line 166, in optuna_objective
+    model = DeepFM_PGenModel(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\src\model.py", line 49, in __init__
+    encoder_layer = TransformerEncoderLayer(
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\nn\modules\transformer.py", line 764, in __init__
+    activation = _get_activation_fn(activation)
+  File "C:\Users\rukia\Documents\Master\Pharmagen\.env_pgen\lib\site-packages\torch\nn\modules\transformer.py", line 1191, in _get_activation_fn
+    raise RuntimeError(f"activation should be relu/gelu, not {activation}")
+RuntimeError: activation should be relu/gelu, not swish
+2025-11-20 04:59:44,795 [INFO] - Starting Optuna for Features-Phenotype at 20251120_0459
+2025-11-20 04:59:44,795 [INFO] - Loading and preprocessing data (One-time setup)...
+2025-11-20 04:59:44,795 [INFO] - Cargando datos desde C:\Users\rukia\Documents\Master\Pharmagen\pgen_model\train_data\final_test_genalle.tsv...
+2025-11-20 04:59:44,937 [INFO] - Mapeando fármacos a ATC...
+2025-11-20 04:59:47,794 [INFO] - Ajustando encoders...
+2025-11-20 04:59:48,683 [INFO] - Data setup complete. Starting optimization loop...
+2025-11-20 05:01:26,396 [INFO] - Early stopping @ Epoch 39

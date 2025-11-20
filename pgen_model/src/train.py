@@ -16,399 +16,218 @@ References:
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, overload
+from typing import Any, Dict, List, Tuple, Optional, overload
 
 import optuna
-import pickle
 import torch
 import torch.nn as nn
-from tqdm import tqdm
-
+from tqdm.auto import tqdm
+from torch.amp.grad_scaler import GradScaler # PyTorch 2.x standard
 from torch.amp.autocast_mode import autocast
-from torch.amp.grad_scaler import GradScaler
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from src.config.config import MODELS_DIR, PROJECT_ROOT
 from .model import DeepFM_PGenModel
 
 logger = logging.getLogger(__name__)
-
-# ============================================================================
-# Configuration Constants
-# ============================================================================
-
-# Multi-label classification threshold
-MULTILABEL_THRESHOLD = 0.2
-
-# Model saving directory
-TRAINED_ENCODERS_PATH = Path(MODELS_DIR)
-
-# Accuracy calculation
-EPSILON = 1e-8
-
-
-# ============================================================================
-# Type Definitions and Overloads
-# ============================================================================
-
+"""
 @overload
-def train_model( # type:ignore
-    train_loader: Any,
-    val_loader: Any,
+def train_model(
+    train_loader,
+    val_loader,
     model: DeepFM_PGenModel,
-    criterions: List[Union[nn.Module, torch.optim.Optimizer]],
+    criterions: List[Any], # [Loss1, Loss2..., Optimizer]
     epochs: int,
     patience: int,
     model_name: str,
     feature_cols: List[str],
-    device: Optional[torch.device] = None,
-    target_cols: Optional[List[str]] = None,
+    target_cols: List[str],
+    device: torch.device,
     scheduler: Optional[Any] = None,
-    params_to_txt: Optional[Dict[str, Any]] = None,
     multi_label_cols: Optional[set] = None,
-    progress_bar: bool = False,
-    optuna_check_weights: bool = False,
-    use_weighted_loss: bool = False,
     task_priorities: Optional[Dict[str, float]] = None,
+    trial: Optional[optuna.Trial] = None,
+    params_to_txt: dict | None=None, # Compatibilidad
+    return_per_task_losses: bool = True,
+    progress_bar: bool = False,
+    **kwargs # Capturar argumentos legacy
+) -> Tuple[float, List[float], List[float]]:
+    ...
+
+@overload
+def train_model(
+    train_loader,
+    val_loader,
+    model: DeepFM_PGenModel,
+    criterions: List[Any], # [Loss1, Loss2..., Optimizer]
+    epochs: int,
+    patience: int,
+    model_name: str,
+    feature_cols: List[str],
+    target_cols: List[str],
+    device: torch.device,
+    scheduler: Optional[Any] = None,
+    multi_label_cols: Optional[set] = None,
+    task_priorities: Optional[Dict[str, float]] = None,
+    trial: Optional[optuna.Trial] = None,
+    params_to_txt: dict | None, # Compatibilidad
     return_per_task_losses: bool = False,
-    trial: Optional[optuna.Trial] = None,
-) -> Tuple[float, List[float]]:
-    """Overload: return_per_task_losses=False returns 2 values."""
-    ...
-
-
-@overload
-def train_model( # type: ignore
-    train_loader: Any,
-    val_loader: Any,
-    model: DeepFM_PGenModel,
-    criterions: List[Union[nn.Module, torch.optim.Optimizer]],
-    epochs: int,
-    patience: int,
-    model_name: str,
-    feature_cols: List[str],
-    device: Optional[torch.device] = None,
-    target_cols: Optional[List[str]] = None,
-    scheduler: Optional[Any] = None,
-    params_to_txt: Optional[Dict[str, Any]] = None,
-    multi_label_cols: Optional[set] = None,
     progress_bar: bool = False,
-    optuna_check_weights: bool = False,
-    use_weighted_loss: bool = False,
-    task_priorities: Optional[Dict[str, float]] = None,
-    return_per_task_losses: bool = True | False,
-    trial: Optional[optuna.Trial] = None,
-) -> Tuple[float, List[float], List[float]] | Tuple[float, List[float]]:
-    """Overload: return_per_task_losses=True returns 3 values."""
+    **kwargs # Capturar argumentos legacy
+) -> Tuple[float, List[float]]:
     ...
-
-# ============================================================================
-# Main Training Function
-# ============================================================================
-
+"""
 
 def train_model(
-    train_loader: Any,
-    val_loader: Any,
+    train_loader,
+    val_loader,
     model: DeepFM_PGenModel,
-    criterions: List[Union[nn.Module, torch.optim.Optimizer]],
+    criterions: List[Any], # [Loss1, Loss2..., Optimizer]
     epochs: int,
     patience: int,
     model_name: str,
     feature_cols: List[str],
-    device: Optional[torch.device] = None,
-    target_cols: Optional[List[str]] = None,
+    target_cols: List[str],
+    device: torch.device,
     scheduler: Optional[Any] = None,
-    params_to_txt: Optional[Dict[str, Any]] = None,
     multi_label_cols: Optional[set] = None,
-    progress_bar: bool = False,
-    optuna_check_weights: bool = False,
-    use_weighted_loss: bool = False,
     task_priorities: Optional[Dict[str, float]] = None,
-    return_per_task_losses: bool = False,
     trial: Optional[optuna.Trial] = None,
-) :
-    """
-    Train a multi-task deep learning model with early stopping.
-    
-    Implements the main training loop with support for multi-task learning,
-    early stopping, Optuna integration, and comprehensive metric tracking.
-    
-    Args:
-        train_loader: DataLoader for training data
-        val_loader: DataLoader for validation data
-        model: DeepFM_PGenModel instance to train
-        criterions: List of loss functions followed by optimizer
-                   Format: [loss_fn_1, loss_fn_2, ..., optimizer]
-        epochs: Maximum number of training epochs
-        patience: Number of epochs without improvement before early stopping
-        model_name: Name of the model (for logging and saving)
-        device: Torch device (CPU or CUDA). If None, auto-detects.
-        target_cols: List of target column names. Required.
-        scheduler: Optional learning rate scheduler
-        params_to_txt: Optional dict of hyperparameters to save
-        multi_label_cols: Set of multi-label column names
-        progress_bar: If True, show progress bars
-        optuna_check_weights: If True, print per-task losses and exit
-        use_weighted_loss: If True, use uncertainty weighting. If False, sum losses.
-        task_priorities: Optional dict of task priority weights
-        return_per_task_losses: If True, return per-task losses as 3rd value
-        trial: Optional Optuna trial for pruning
-    
-    Returns:
-        If return_per_task_losses=True:
-            (best_loss, best_accuracies, per_task_losses)
-        If return_per_task_losses=False:
-            (best_loss, best_accuracies)
-    
-    Raises:
-        ValueError: If target_cols not provided or criterions mismatch
-        RuntimeError: If model training fails
-    """
-    # Validate inputs
-    if device is None:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        logger.info(f"Device auto-selected: {device}")
-
-    if target_cols is None:
-        raise ValueError("target_cols must be provided as a list of target column names")
-
-    if not isinstance(target_cols, list) or len(target_cols) == 0:
-        raise ValueError("target_cols must be a non-empty list")
-
-    if multi_label_cols is None:
-        multi_label_cols = set()
-
-    num_targets = len(target_cols)
-
-    # Extract optimizer and loss functions
+    params_to_txt: dict | None=None, # Compatibilidad
+    return_per_task_losses: bool = False,
+    progress_bar: bool = False,
+    **kwargs # Capturar argumentos legacy
+):
     optimizer = criterions[-1]
-    criterions_list = criterions[:-1]
+    loss_fns = {col: fn for col, fn in zip(target_cols, criterions[:-1])}
+    multi_label_cols = multi_label_cols or set()
 
-    if len(criterions_list) != num_targets:
-        raise ValueError(
-            f"Mismatch: received {len(criterions_list)} loss functions, "
-            f"but expected {num_targets} (based on target_cols)"
-        )
-
-    # Initialize tracking variables
-    best_loss = float("inf")
-    best_accuracies = [0.0] * num_targets
-    trigger_times = 0
-    individual_loss_sums = [0.0] * num_targets
-
-    model = model.to(device)
-    logger.info(f"Model moved to device: {device}")
+    # Inicializar Mixed Precision Scaler
+    scaler = GradScaler("cuda") if device.type == "cuda" else None
     
-    # Initialize mixed precision training (AMP) for faster training on GPU
-    use_amp = torch.cuda.is_available()
-    scaler = GradScaler() if use_amp else None
-    if use_amp:
-        logger.info("Mixed precision training (AMP) enabled for faster GPU computation")
-
-    # Training loop
-    epoch_iterator = (
-        tqdm(range(epochs), desc="Training", unit="epoch")
-        if progress_bar
-        else range(epochs)
-    )
-
-    for epoch in epoch_iterator:
-        # ====================================================================
-        # Training Phase
-        # ====================================================================
+    best_val_loss = float("inf")
+    best_accuracies = []
+    per_task_loss_history = []
+    patience_counter = 0
+    
+    epoch_iter = tqdm(range(epochs), desc="Epochs", disable=not progress_bar)
+    
+    for epoch in epoch_iter:
+        # --- TRAIN ---
         model.train()
-        total_loss = 0.0
-
-        train_iterator = (
-            tqdm(
-                train_loader,
-                desc=f"Epoch {epoch + 1}/{epochs}",
-                unit="batch",
-                colour="green",
-                leave=False,
-            )
-            if progress_bar
-            else train_loader
-        )
-
-        for batch in train_iterator:
-            # Move inputs to device (non_blocking for faster transfer)
-            features = {col: batch[col].to(device, non_blocking=True) for col in feature_cols}
-
-            # Move targets to device
-            targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
-
-            # Forward pass with mixed precision
-            optimizer.zero_grad()
+        train_loss_accum = 0.0
+        
+        train_pbar = tqdm(train_loader, leave=False, disable=not progress_bar, desc="Train")
+        for batch in train_pbar:
+            # non_blocking=True acelera la transferencia si pin_memory=True en DataLoader
+            inputs = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in feature_cols}
+            targets = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in target_cols}
             
-            if use_amp:
-                with autocast(device_type=str(device)):
-                    outputs = model(**features)
-                    
-                    # Calculate per-task losses
-                    individual_losses = []
-                    for i, col in enumerate(target_cols):
-                        loss_fn = criterions_list[i]
-                        pred = outputs[col]
-                        true = targets[col]
-                        individual_losses.append(loss_fn(pred, true)) # type: ignore
-                    
-                    # Combine losses
-                    loss = torch.stack(individual_losses).sum()
+            optimizer.zero_grad(set_to_none=True) # Más eficiente que zero_grad()
+
+            # Contexto de precisión mixta automática
+            with autocast(device_type=device.type, enabled=(scaler is not None)):
+                outputs = model(inputs)
                 
-                # Backward pass with gradient scaling
-                scaler.scale(loss).backward() # type: ignore
-                scaler.step(optimizer) # type: ignore
-                scaler.update() # type: ignore
-            else:
-                outputs = model(**features)
-                
-                # Calculate per-task losses
-                individual_losses = []
-                for i, col in enumerate(target_cols):
-                    loss_fn = criterions_list[i]
-                    pred = outputs[col]
-                    true = targets[col]
-                    individual_losses.append(loss_fn(pred, true)) # type: ignore
-                
-                # Combine losses
-                loss = torch.stack(individual_losses).sum()
-                
-                # Backward pass
-                loss.backward()
-                optimizer.step() # type: ignore
-
-            total_loss += loss.item()
-
-            if progress_bar:
-                train_iterator.set_postfix({"Loss": f"{loss.item():.4f}"})
-
-        # ====================================================================
-        # Validation Phase
-        # ====================================================================
-        model.eval()
-        val_loss = 0.0
-        corrects = [0] * num_targets
-        totals = [0] * num_targets
-        individual_loss_sums = [0.0] * num_targets
-
-        with torch.no_grad():
-            for batch in val_loader:
-                # Move inputs to device (non_blocking for faster transfer)
-                features = {col: batch[col].to(device, non_blocking=True) for col in feature_cols}
-
-                # Move targets to device
-                targets = {col: batch[col].to(device, non_blocking=True) for col in target_cols}
-
-                # Forward pass
-                outputs = model(**features)
-
-                # Calculate per-task losses
-                individual_losses_val = []
-                for i, col in enumerate(target_cols):
-                    loss_fn = criterions_list[i]
-                    pred = outputs[col]
-                    true = targets[col]
-                    individual_losses_val.append(loss_fn(pred, true)) # type: ignore
-
-                # Track individual losses
-                individual_losses_val_tensor = torch.stack(individual_losses_val)
-                for i in range(num_targets):
-                    individual_loss_sums[i] += individual_losses_val_tensor[i].item()
-
-                # Combine losses
-                individual_losses_val_dict = {
-                    col: individual_losses_val[i] for i, col in enumerate(target_cols)
-                }
-
-                loss = torch.stack(individual_losses_val).sum()
-                
-                val_loss += loss.item()
-
-                # Calculate per-task accuracies
-                for i, col in enumerate(target_cols):
-                    pred = outputs[col]
-                    true = targets[col]
-
-                    if col in multi_label_cols:
-                        # Multi-label: Hamming accuracy
-                        probs = torch.sigmoid(pred)
-                        predicted = (probs > MULTILABEL_THRESHOLD).float()
-                        corrects[i] += (predicted == true).sum().item()
-                        totals[i] += true.numel()
+                losses = {}
+                for t_col, t_val in targets.items():
+                    # Asegurar tipos correctos para pérdidas
+                    if t_col in multi_label_cols:
+                         # BCE espera floats
+                         losses[t_col] = loss_fns[t_col](outputs[t_col], t_val.float())
                     else:
-                        # Single-label: standard accuracy
-                        _, predicted = torch.max(pred, 1)
-                        corrects[i] += (predicted == true).sum().item()
-                        totals[i] += true.size(0)
+                         # CrossEntropy espera Long
+                         losses[t_col] = loss_fns[t_col](outputs[t_col], t_val)
+                
+                total_loss = model.get_weighted_loss(losses, task_priorities)
 
-        # Normalize validation loss
-        val_loss /= len(val_loader)
+            # Backpropagation escalado
+            if scaler:
+                scaler.scale(total_loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                total_loss.backward()
+                optimizer.step()
+            
+            train_loss_accum += total_loss.item()
 
-        # Optuna pruning (if applicable)
-        if trial is not None:
-            try:
-                trial.report(val_loss, epoch)
-                if trial.should_prune():
-                    logger.info(f"Trial pruned at epoch {epoch} (val_loss={val_loss:.4f})")
-                    raise optuna.TrialPruned()
-            except NotImplementedError:
-                # Multi-objective optimization doesn't support pruning
-                pass
+        avg_train_loss = train_loss_accum / len(train_loader)
 
-        # Debug mode: print per-task losses and exit
-        if optuna_check_weights:
-            avg_individual_losses = [
-                loss_sum / len(val_loader) for loss_sum in individual_loss_sums
-            ]
-            logger.info("=" * 60)
-            logger.info("Epoch Validation Summary")
-            logger.info("=" * 60)
-            logger.info(f"Total Weighted Val Loss: {val_loss:.5f}")
-            logger.info("Average Individual Task Losses (Unweighted):")
-            for i, col in enumerate(target_cols):
-                logger.info(f"  {col}: {avg_individual_losses[i]:.5f}")
-            logger.info("=" * 60)
-            raise SystemExit(0)
+        # --- VALIDATION ---
+        model.eval()
+        val_loss_accum = 0.0
+        val_task_losses = {t: 0.0 for t in target_cols}
+        correct_counts = {t: 0 for t in target_cols}
+        total_counts = {t: 0 for t in target_cols}
 
-        # Learning rate scheduling
-        if scheduler is not None:
-            if isinstance(scheduler, ReduceLROnPlateau):
-                scheduler.step(val_loss)
+        with torch.inference_mode():
+            for batch in val_loader:
+                inputs = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in feature_cols}
+                targets = {k: v.to(device, non_blocking=True) for k, v in batch.items() if k in target_cols}
+
+                with autocast(device_type=device.type, enabled=(scaler is not None)):
+                    outputs = model(inputs)
+                    losses = {}
+                    for t_col, t_val in targets.items():
+                        if t_col in multi_label_cols:
+                             loss_val = loss_fns[t_col](outputs[t_col], t_val.float())
+                        else:
+                             loss_val = loss_fns[t_col](outputs[t_col], t_val)
+                        
+                        losses[t_col] = loss_val
+                        val_task_losses[t_col] += loss_val.item()
+                    
+                    total_loss = model.get_weighted_loss(losses, task_priorities)
+                
+                val_loss_accum += total_loss.item()
+
+                # Métricas
+                for t_col, t_true in targets.items():
+                    pred = outputs[t_col]
+                    if t_col in multi_label_cols:
+                        # Hamming Accuracy (Threshold 0.5)
+                        preds_bin = (torch.sigmoid(pred) > 0.5).long()
+                        correct_counts[t_col] += (preds_bin == t_true).sum().item()
+                        total_counts[t_col] += t_true.numel()
+                    else:
+                        preds_cls = torch.argmax(pred, dim=1)
+                        correct_counts[t_col] += (preds_cls == t_true).sum().item()
+                        total_counts[t_col] += t_true.size(0)
+
+        avg_val_loss = val_loss_accum / len(val_loader)
+        accuracies = [correct_counts[t] / max(total_counts[t], 1) for t in target_cols]
+        avg_task_losses_list = [val_task_losses[t] / len(val_loader) for t in target_cols]
+
+        # --- UPDATES ---
+        if progress_bar:
+            epoch_iter.set_postfix(train=f"{avg_train_loss:.4f}", val=f"{avg_val_loss:.4f}")
+
+        if scheduler:
+            if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step(avg_val_loss)
             else:
                 scheduler.step()
 
-        # Calculate accuracies
-        val_accuracies = [
-            c / t if t > EPSILON else 0.0 for c, t in zip(corrects, totals)
-        ]
+        if trial:
+            trial.report(avg_val_loss, epoch)
+            if trial.should_prune():
+                raise optuna.TrialPruned()
 
-        # Early stopping logic
-        if val_loss < best_loss:
-            best_loss = val_loss
-            best_accuracies = val_accuracies.copy()
-            trigger_times = 0
-            logger.debug(
-                f"Epoch {epoch}: New best loss {best_loss:.5f}, "
-                f"accuracies {best_accuracies}"
-            )
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            best_accuracies = accuracies
+            per_task_loss_history = avg_task_losses_list
+            patience_counter = 0
         else:
-            trigger_times += 1
-            if trigger_times >= patience:
-                logger.info(
-                    f"Early stopping triggered after {epoch - patience + 1} epochs "
-                    f"without improvement"
-                )
+            patience_counter += 1
+            if patience_counter >= patience:
+                logger.info(f"Early stopping @ Epoch {epoch}")
                 break
-        avg_per_task_losses = [
-            loss_sum / len(val_loader) for loss_sum in individual_loss_sums
-            ]
-        
-        if return_per_task_losses == True:
-            return best_loss, best_accuracies, avg_per_task_losses
-        if return_per_task_losses == False:
-            return best_loss, best_accuracies
+
+    if return_per_task_losses:
+        return best_val_loss, best_accuracies, per_task_loss_history
+    else:
+        return best_val_loss, best_accuracies
 
 # ============================================================================
 # Model Saving Function

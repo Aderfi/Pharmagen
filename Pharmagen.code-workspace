@@ -5,6 +5,11 @@
 		}
 	],
 	"settings": {
-		"codium.codeCompletion.enable": true
+		"codium.codeCompletion.enable": true,
+		"python-env.workspaceSearchPaths": [
+			".env_pgen"
+		],
+		"python.languageServer": "Default",
+		"python.envFile": "${workspaceFolder}/.env_pgen"
 	}
 }

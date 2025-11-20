@@ -1,0 +1,27 @@
+======================================================================
+MODEL TRAINING REPORT
+======================================================================
+
+Model Configuration:
+  Model Name: Features-Phenotype
+  Target Columns: phenotype_outcome
+
+Training Results:
+  Best Validation Loss: 0.39757
+
+Per-Task Average Losses:
+  phenotype_outcome: 0.39757
+
+Per-Task Best Accuracies:
+  phenotype_outcome: 0.7545
+
+Hyperparameters:
+  batch_size: 512
+  embedding_dim: 192
+  n_layers: 1
+  hidden_dim: 1024
+  dropout_rate: 0.6996731804616522
+  learning_rate: 0.0001271487593514609
+  weight_decay: 0.001761363247217078
+
+======================================================================
