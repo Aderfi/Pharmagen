@@ -1,0 +1,39 @@
+2025-11-19 18:17:57,475 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 18:17:59,771 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 18:18:07,856 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 18:18:18,341 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 18:19:43,722 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 18:19:51,803 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 18:20:02,017 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 18:50:19,018 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 18:50:27,115 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 18:50:36,952 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 18:56:49,762 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 18:56:57,863 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 18:57:05,704 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:10:41,398 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:10:49,512 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:10:57,646 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:11:57,714 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:12:05,811 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:12:14,796 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:19:48,642 - __main__ - INFO - Usuario seleccionó opción: 22
+2025-11-19 19:19:48,642 - __main__ - WARNING - Opción no válida seleccionada: 22
+2025-11-19 19:19:52,137 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:20:00,236 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:20:09,211 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:23:46,221 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:23:54,326 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:24:07,444 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:25:13,259 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:25:21,360 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:25:29,689 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:37:07,733 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:37:15,856 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:38:11,039 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:42:38,051 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:42:46,210 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:43:40,768 - __main__ - INFO - Pharmagen_Log iniciado correctamente
+2025-11-19 19:44:18,594 - __main__ - INFO - Usuario seleccionó opción: 2
+2025-11-19 19:44:26,744 - __main__ - INFO - Lanzando pgen_model
+2025-11-19 19:49:29,540 - __main__ - INFO - Programa interrumpido por el usuario (Ctrl+C)

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Union
 
 import joblib
 import pandas as pd
@@ -40,16 +40,20 @@ def _transform_input(encoder: LabelEncoder, label: str, device: torch.device):
 def _transform_batch(encoder: LabelEncoder, series: pd.Series, unknown_token: str):
     """
     Transforma de forma segura un Series de pandas, manejando etiquetas desconocidas.
+    Optimizado con numpy.isin.
     """
-    known_labels = set(encoder.classes_)
+    # 1. Convertir a numpy array de strings
+    vals = series.astype(str).to_numpy()
     
-    # 1. Reemplazar cualquier etiqueta no conocida por el token UNKNOWN
-    transformed_series = series.astype(str).apply(
-        lambda x: x if x in known_labels else unknown_token
-    )
+    # 2. Identificar valores desconocidos
+    mask = ~np.isin(vals, encoder.classes_)
     
-    # 2. Transformar de forma segura
-    return encoder.transform(transformed_series)
+    # 3. Reemplazar desconocidos con el token
+    if mask.any():
+        vals[mask] = unknown_token
+        
+    # 4. Transformar (ahora seguro)
+    return encoder.transform(vals)
 
 
 def load_encoders(model_name, encoders_dir=None):
@@ -158,10 +162,11 @@ def predict_single_input(features_dict, model, encoders: Dict[str, Any], target_
     return results
 
 
-def predict_from_file(file_path, model, encoders, target_cols):
+def predict_from_file(file_path, model, encoders, target_cols, batch_size=1024):
     """
-    Predicción desde archivo, compatible con DeepFM_PGenModel
-    (salida de diccionario y manejo de multi-etiqueta).
+    Predicción desde archivo optimizada (vectorizada).
+    Procesa todo el archivo en batches para evitar OOM en archivos muy grandes,
+    pero usa operaciones vectorizadas dentro de cada batch.
     """
     if model is None or encoders is None or target_cols is None:
         raise ValueError("Se requieren modelo, encoders y target_cols")
@@ -173,6 +178,7 @@ def predict_from_file(file_path, model, encoders, target_cols):
     }.get(ext, ",")
     
     try:
+        # Leer todo el DF (asumiendo que cabe en memoria, si es gigante usar chunks)
         df = pd.read_csv(file_path, sep=ext_sep, dtype=str)
     except Exception as e:
         print(f"Error al leer el archivo CSV: {e}")
@@ -180,90 +186,115 @@ def predict_from_file(file_path, model, encoders, target_cols):
 
     device = next(model.parameters()).device
     model.eval()
+    
+    # Preparar columnas de entrada
+    # Mapeo de nombres de columnas del CSV a nombres de encoders/modelo
+    col_map = {
+        "drug": "drug",
+        "gene": "gene",
+        "allele": "allele",
+        "genotype": "variant/haplotypes" # CSV tiene 'genotype', encoder tiene 'variant/haplotypes'
+    }
+    
+    # Verificar columnas
+    for csv_col in col_map.keys():
+        if csv_col not in df.columns:
+             print(f"Error: La columna '{csv_col}' no se encontró en el archivo.")
+             return []
 
-    # --- 1. Transformar Inputs (Batch, Corregido con manejo de UNKNOWN) ---
+    # --- 1. Transformar Inputs (Vectorizado) ---
+    # Se transforman todas las filas de una vez (es rápido con numpy)
+    input_tensors = {}
     try:
-        drug_tensor = torch.tensor(
-            _transform_batch(encoders["drug"], df["drug"], UNKNOWN_TOKEN),
-            dtype=torch.long, device=device
-        )
-        gene_tensor = torch.tensor(
-            _transform_batch(encoders["gene"], df["gene"], UNKNOWN_TOKEN),
-            dtype=torch.long, device=device
-        )
-        allele_tensor = torch.tensor(
-            _transform_batch(encoders["allele"], df["allele"], UNKNOWN_TOKEN),
-            dtype=torch.long, device=device
-        )
-        
-        # <--- CORRECCIÓN 1: Usar la clave correcta del encoder y la columna correcta ---
-        # Transforma la columna "genotype" del CSV usando el encoder "variant/haplotypes"
-        geno_tensor = torch.tensor(
-            _transform_batch(encoders["variant/haplotypes"], df["genotype"], UNKNOWN_TOKEN),
-            dtype=torch.long, device=device
-        )
-        
-    except KeyError as e:
-        print(f"Error: La columna {e} no se encontró en el CSV o el encoder no existe.")
-        return []
+        for csv_col, encoder_key in col_map.items():
+            if encoder_key not in encoders:
+                print(f"Error: Encoder '{encoder_key}' no encontrado.")
+                return []
+            
+            encoded_vals = _transform_batch(encoders[encoder_key], df[csv_col], UNKNOWN_TOKEN)
+            # Guardar como tensor en CPU, moveremos a GPU por batches
+            input_tensors[csv_col] = torch.tensor(encoded_vals, dtype=torch.long)
+            
     except Exception as e:
         print(f"Error al transformar inputs del archivo: {e}")
         return []
 
-    # --- 2. Obtener Predicciones (Diccionario) ---
+    # --- 2. Inferencia por Batches ---
+    num_samples = len(df)
+    all_predictions = {col: [] for col in target_cols}
+    
     with torch.no_grad():
-        # <--- CORRECCIÓN 2: Orden de argumentos ---
-        # El orden debe coincidir con model.py -> forward(self, drug, genotype, gene, allele)
-        predictions_dict = model(drug_tensor, geno_tensor, gene_tensor, allele_tensor)
+        for i in range(0, num_samples, batch_size):
+            # Slice del batch
+            batch_end = min(i + batch_size, num_samples)
+            
+            # Preparar inputs del batch y mover a device
+            # El orden de argumentos en forward es importante si no se usan kwargs
+            # DeepFM_PGenModel.forward(drug, genalle, gene, allele) -> Nombres en modelo
+            # Mapeo: drug->drug, genotype->genalle, gene->gene, allele->allele
+            
+            b_drug = input_tensors["drug"][i:batch_end].to(device)
+            b_genalle = input_tensors["genotype"][i:batch_end].to(device)
+            b_gene = input_tensors["gene"][i:batch_end].to(device)
+            b_allele = input_tensors["allele"][i:batch_end].to(device)
+            
+            # Forward
+            # IMPORTANTE: El modelo espera argumentos posicionales o kwargs que coincidan
+            # forward(self, inputs: Dict) o forward(self, drug, genalle, gene, allele)
+            # Revisando model.py, forward toma un dict 'inputs' O kwargs.
+            # Pero en kge_test.py y otros sitios se llama con args posicionales?
+            # En model.py original: forward(self, inputs: Dict[str, torch.Tensor], **kwargs)
+            # Así que pasamos kwargs.
+            
+            batch_outputs = model(
+                drug=b_drug, 
+                genalle=b_genalle, 
+                gene=b_gene, 
+                allele=b_allele
+            )
+            
+            # Procesar outputs del batch
+            for col in target_cols:
+                if col not in batch_outputs:
+                    continue
+                    
+                logits = batch_outputs[col]
+                
+                if col in MULTI_LABEL_COLUMN_NAMES:
+                    # Multi-label: Sigmoid > 0.5
+                    probs = torch.sigmoid(logits)
+                    preds = (probs > 0.5).float().cpu().numpy()
+                    all_predictions[col].append(preds)
+                else:
+                    # Single-label: Argmax
+                    preds = torch.argmax(logits, dim=1).cpu().numpy()
+                    all_predictions[col].append(preds)
 
-    # --- 3. Procesar Salidas (Batch) ---
-    decoded_outputs = {}
-
+    # --- 3. Decodificar y Ensamblar (Vectorizado) ---
+    # Concatenar resultados de batches
+    final_results = df.copy()
+    
     for col in target_cols:
-        if col not in predictions_dict:
+        if not all_predictions[col]:
             continue
-
-        logits = predictions_dict[col]  # Shape [N_BATCH, N_CLASSES]
-
+            
+        # Concatenar lista de arrays
+        preds_array = np.concatenate(all_predictions[col], axis=0)
+        
         if col in MULTI_LABEL_COLUMN_NAMES:
-            # --- Lógica Multi-Etiqueta ---
-            probs = torch.sigmoid(logits)
-            predicted_matrix = (
-                (probs > 0.5).float().cpu().numpy()
-            )  # Shape [N_BATCH, N_CLASSES]
-            
-            decoded_labels_tuples = encoders[col].inverse_transform(predicted_matrix)
-            decoded_outputs[col] = [list(labels) for labels in decoded_labels_tuples]
-
+            # Inverse transform de multilabel es lento (lista de tuplas)
+            # No hay forma vectorizada directa en sklearn para inverse_transform de MLB que devuelva strings planos
+            decoded = encoders[col].inverse_transform(preds_array)
+            # Convertir tuplas a listas
+            final_results[col] = [list(d) for d in decoded]
         else:
-            # --- Lógica Etiqueta-Única ---
-            predicted_indices = torch.argmax(logits, dim=1).cpu().numpy()
-            decoded_labels = encoders[col].inverse_transform(predicted_indices)
+            # Inverse transform de label encoder es rápido
+            decoded = encoders[col].inverse_transform(preds_array)
             
-            # No mostrar la etiqueta __UNKNOWN__ al usuario
-            decoded_outputs[col] = [
-                "Desconocido" if label == UNKNOWN_TOKEN else label
-                for label in decoded_labels
-            ]
+            # Reemplazar UNKNOWN_TOKEN con "Desconocido" (vectorizado)
+            # Usamos numpy para reemplazo rápido
+            decoded = np.where(decoded == UNKNOWN_TOKEN, "Desconocido", decoded)
+            final_results[col] = decoded
 
-    # --- 4. Re-ensamblar en la Estructura de Salida ---
-    results = []
-    num_rows = len(df)
-
-    for i in range(num_rows):
-        row_result = {
-            # Añadir inputs originales
-            "drug": df.iloc[i]["drug"],
-            "gene": df.iloc[i]["gene"],
-            "allele": df.iloc[i]["allele"],
-            "genotype": df.iloc[i]["variant/haplotypes"],
-            # Añadir predicciones
-            **{
-                col: decoded_outputs[col][i]
-                for col in target_cols
-                if col in decoded_outputs
-            },
-        }
-        results.append(row_result)
-
-    return results
+    # Convertir a lista de dicts para mantener compatibilidad de retorno
+    return final_results.to_dict(orient="records")

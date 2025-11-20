@@ -1,0 +1,16 @@
+Modelo: Features-Phenotype
+Mejor loss en validación: 0.39757
+Precisión Promedio (Avg Acc) en mejor época: 0.7545
+Precisión por Tarea:
+  - phenotype_outcome: 0.7545
+Pérdida Promedio por Tarea:
+  - phenotype_outcome: 0.3976
+
+Hiperparámetros Utilizados:
+  batch_size: 512
+  embedding_dim: 192
+  n_layers: 1
+  hidden_dim: 1024
+  dropout_rate: 0.6996731804616522
+  learning_rate: 0.0001271487593514609
+  weight_decay: 0.001761363247217078

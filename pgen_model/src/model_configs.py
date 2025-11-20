@@ -45,7 +45,7 @@ def get_model_config(model_name: str, optuna: bool = False) -> dict:
     final_config = {
             "features": model_conf["features"],
             "targets": model_conf["targets"],
-            "stratify": model_conf["stratify"],  # Estratificamos por el primer target
+            "stratify": model_conf["stratify_col"],  # Estratificamos por el primer target
             "cols": model_conf["cols"],
             "params": model_conf["params"],
             "weights": model_conf.get("weights")
@@ -79,11 +79,6 @@ def get_model_config(model_name: str, optuna: bool = False) -> dict:
 #+----+-------------------------------------+---------+
 
 
-CLINICAL_PRIORITIES = {
-    'effect_type': 0.6,           # 50% - Crítico (toxicidad/eficacia)
-    'phenotype_outcome': 0.25,     # 30% - Importante (resultado clínico)
-    'effect_direction': 0.15,      # 20% - Útil (dirección del efecto)
-}
 
 DEFAULT_HYPERPARAMS = {
         "embedding_dim": 128,
@@ -95,72 +90,12 @@ DEFAULT_HYPERPARAMS = {
             
         "learning_rate": 1e-4,
         "batch_size": 128,
-        
-        """ 
-        # === TRANSFORMER ATTENTION (based on your attention_layer) ===
-        "attention_dim_feedforward": ["int", 512, 4096, 256],  # For transformer feedforward
-        "attention_dropout": (0.1, 0.5),
-        "num_attention_layers": [1, 2, 3, 4],  # Stack multiple transformer layers
-            
-        # === FOCAL LOSS (you're using it for effect_type) ==="focal_gamma": (1.0, 5.0),  # Currently hardcoded to 2.0
-        "focal_gamma": (1.0, 5.0),  # Currently hardcoded to 2.0
-        "focal_alpha_weight": (0.5, 3.0),  # Multiplier for class weights
-        "label_smoothing": (0.05, 0.3),  # Currently hardcoded to 0.15
-        
-        # === OPTIMIZER VARIANTS ===
-        "optimizer_type": ["adamw", "adam", "sgd", "rmsprop"],
-        "adam_beta1": (0.8, 0.95),
-        "adam_beta2": (0.95, 0.999),
-        "sgd_momentum": (0.85, 0.99),
-            
-        # === SCHEDULER ===
-        "scheduler_type": ["plateau", "cosine", "step", "exponential", "none"],
-        "scheduler_factor": (0.1, 0.8),  # For ReduceLROnPlateau
-        "scheduler_patience": ["int", 3, 15, 1],
-            
-        # === TASK WEIGHTING ===
-        "uncertainty_weighting": [True, False],  # Toggle your uncertainty weighting
-        "manual_task_weights": [True, False],  # Use CLINICAL_PRIORITIES vs learned weights
-            
-            # === ADVANCED ARCHITECTURE ===
-        "use_batch_norm": [True, False],
-        "use_layer_norm": [True, False], 
-        "activation_function": ["gelu", "relu", "swish", "mish"],  # You're using GELU
-        "gradient_clip_norm": (0.5, 5.0),
-            
-        # === FM BRANCH ENHANCEMENTS ===
-        "fm_dropout": (0.1, 0.5),  # Separate dropout for FM interactions
-        "fm_hidden_layers": [0, 1, 2],  # Add layers after FM interactions
-        "fm_hidden_dim": ["int", 64, 512, 32],
-            
-        # === EMBEDDING VARIATIONS ===
-        "embedding_dropout": (0.1, 0.3),
-        "drug_embedding_dim": ["int", 64, 1024, 32],  # Separate embedding dims
-        "gene_embedding_dim": ["int", 64, 1024, 32],
-        "allele_embedding_dim": ["int", 32, 512, 16],
-        "genalle_embedding_dim": ["int", 64, 1024, 32],
-            
-        # === TRAINING DYNAMICS ===
-        "warmup_epochs": ["int", 0, 20, 1],
-        "early_stopping_patience": ["int", 15, 50, 5],
-        "validation_frequency": ["int", 1, 5, 1],  # Validate every N epochs
-        """:None
+
 }
 
-MASTER_WEIGHTS = {
-    "outcome": 1.0,
-    "effect_direction": 1.0,
-    "effect": 1.0,
-    "effect_subcat": 1.0,
-    "entity_affected": 1.0,
-    # "population_affected": 1.0,
-    # "therapeutic_outcome": 1.0  #
-}
 
 MULTI_LABEL_COLUMN_NAMES = {  # Columnas que son MULTI-LABEL
     "phenotype_outcome",
-    #"effect_phenotype",
-    #"pop_phenotypes/diseases",
 } 
 
 MODEL_REGISTRY = {
@@ -260,7 +195,7 @@ MODEL_REGISTRY = {
     "Features-Phenotype": {   # choice 2
         "stratify_col": ["Phenotype_outcome"],
         "targets": ["Phenotype_outcome"],
-        "features": ["Drug", "Genalle", "Gene", "Allele"],
+        "features": ["atc", "Genalle", "Gene", "Allele"],
         "cols": ["Drug", "Genalle", "Gene", "Allele", "Phenotype_outcome", "Effect_direction", "Effect_type"],
         "params": {
             "batch_size": 512,
@@ -274,13 +209,13 @@ MODEL_REGISTRY = {
         
         "params_optuna": {
             # === CORE ARCHITECTURE ===
-            "embedding_dim": [128, 256, 384, 512, 640, 768],
-            "n_layers": ["int", 2, 8, 1],
+            "embedding_dim": [128, 256, 512],
+            "n_layers": ["int", 2, 4, 1],
             "hidden_dim": ["int", 512, 4096, 128],
-            "activation_function": ["gelu", "relu", "swish", "mish"],
+            "activation_function": ["gelu", "relu"],# "swish", "mish"],
 
             # === REGULARIZATION ===
-            "dropout_rate": (0.1, 0.7),
+            "dropout_rate": (0.1, 0.5),
             "weight_decay": (1e-6, 1e-2),
             "label_smoothing": (0.0, 0.3),
             "embedding_dropout": (0.1, 0.4),

@@ -94,6 +94,7 @@ def main():
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     logger = logging.getLogger(__name__)
+    logging.getLogger().setLevel(logging.DEBUG)  # Nivel de logging detallado para depuración
     logger.info("Pharmagen_Log iniciado correctamente")
     
     print(

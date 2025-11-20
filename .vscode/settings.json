@@ -5,5 +5,8 @@
     "python.analysis.extraPaths": [
         "."
     ],
-    "python.analysis.supportDocstringTemplate": false
+    "python.analysis.supportDocstringTemplate": false,
+    "python-env.workspaceSearchPaths": [
+        ".env_pgen"
+    ]
 }
