@@ -31,7 +31,6 @@ class PGenDataProcess:
         self,
         csv_path: Union[str, Path],
         all_cols: List[str],
-        cols_to_use: List[str],
         input_cols: List[str],
         target_cols: List[str],
         multi_label_targets: Optional[List[str]],
@@ -43,9 +42,13 @@ class PGenDataProcess:
         # Carga eficiente: leer solo lo necesario si es posible
         try:
             df = pd.read_csv(
-                csv_path, sep="\t", usecols=lambda c: c in cols_to_use, dtype=str
+                csv_path, sep="\t", usecols=lambda c: c in all_cols, dtype=str
             )
         except ValueError:
+            # Fallback if usecols fails (e.g., column not found in file), read all
+            logger.warning(
+                f"Error al cargar con usecols. Leyendo todas las columnas desde {csv_path}"
+            )
             df = pd.read_csv(csv_path, sep="\t", dtype=str)
 
         # Normalizar
