@@ -1,4 +1,5 @@
-# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,14 +56,15 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-# Importaciones locales (Asumiendo que los archivos previos existen)
-from src.config.config import PROJECT_ROOT, MODEL_TRAIN_DATA
-from .data import PGenDataProcess, PGenDataset
-from .model import DeepFM_PGenModel
-from .model_configs import MODEL_REGISTRY, MULTI_LABEL_COLUMN_NAMES, get_model_config
-from .train import train_model
-from .train_utils import create_optimizer, create_task_criterions, create_scheduler
-from losses import MultiTaskUncertaintyLoss 
+# Importaciones locales
+from src.data import PGenDataProcess, PGenDataset
+from src.model import DeepFM_PGenModel
+from src.train import train_model
+from src.utils.training import create_optimizer, create_task_criterions, create_scheduler
+from src.loss_functions import MultiTaskUncertaintyLoss 
+
+from src.cfg.model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
+from src.cfg.config import PROJECT_ROOT
 
 # Configuración Global
 logger = logging.getLogger(__name__)

@@ -1,4 +1,5 @@
-# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,15 +17,16 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Set, Dict
 
 import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+from sklearn.base import BaseEstimator, TransformerMixin
 
-from .data_utils import data_import_normalize, drugs_to_atc, UNKNOWN_TOKEN
+from src.utils.data import normalize_dataframe, drugs_to_atc, UNKNOWN_TOKEN
 
 logger = logging.getLogger(__name__)
 
@@ -233,70 +235,3 @@ class PGenDataset(Dataset):
             batch[col] = torch.tensor(data[idx], dtype=torch.long)
 
         return batch
-
-"""
-class PGenDataset(Dataset):
-    """
-    Dataset optimizado para memoria.
-    Mantiene los datos en numpy arrays y solo convierte a Tensor al servirlos.
-    """
-
-    def __init__(
-        self,
-        df: pd.DataFrame,
-        feature_cols: List[str],
-        target_cols: List[str],
-        multi_label_cols: set,
-    ):
-        self.data = {}
-        self.feature_cols = [f.lower() for f in feature_cols]
-        self.target_cols = [t.lower() for t in target_cols]
-        self.multi_label_cols = multi_label_cols
-
-        # Validar columnas
-        cols_needed = [
-            c for c in (self.feature_cols + self.target_cols) if c in df.columns
-        ]
-
-        for col in cols_needed:
-            series = df[col]
-            if col in self.multi_label_cols:
-                # Convertir lista de listas/arrays a un único ndarray 2D
-                try:
-                    # Asumiendo que transform() dejó listas o arrays en las celdas
-                    # np.vstack es eficiente si la entrada es lista de arrays
-                    matrix = np.vstack(series.values).astype(np.float32)  # type: ignore
-                    self.data[col] = matrix
-                except Exception as e:
-                    logger.error(f"Error apilando columna multilabel {col}: {e}")
-                    raise
-            else:
-                # Single label -> array de enteros
-                # Usar tipos de datos más pequeños si es posible para ahorrar memoria
-                # int32 suele ser suficiente para índices de clases
-                self.data[col] = series.values.astype(np.int32)
-
-        self.length = len(df)
-
-    def __len__(self):
-        return self.length
-
-    def __getitem__(self, idx):
-        # Conversión on-the-fly a Tensor.
-        # Esto es muy rápido y evita tener todo duplicado en memoria Tensor.
-        batch = {}
-        for col, array in self.data.items():
-            # torch.from_numpy comparte memoria si es posible.
-            # Al hacer slicing [idx], numpy devuelve una copia si es un slice complejo,
-            # pero para un escalar (single label) devuelve un valor.
-            val = array[idx]
-            if isinstance(val, np.ndarray):
-                # Multi-label: es un array, convertir a tensor float
-                tensor = torch.from_numpy(val)
-            else:
-                # Single-label: es un escalar (numpy scalar), convertir a tensor long
-                tensor = torch.tensor(val, dtype=torch.long)
-
-            batch[col] = tensor
-        return batch
-"""

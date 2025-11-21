@@ -1,4 +1,5 @@
-# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,15 +23,15 @@ from pathlib import Path
 from datetime import datetime
 
 # Proyecto
-from src.config.config import DATA_DIR, DATE_STAMP
-from src.config.model_configs import select_model
-from src.pgen_model.pipeline import train_pipeline
-from src.pgen_model.optuna_tuner import run_optuna_study
-from src.pgen_model.predict import PGenPredictor
+from src.cfg.config import DATA_DIR #, DATE_STAMP
+from src.cfg.model_configs import select_model
+from src.pipeline import train_pipeline
+from src.optuna_tuner import run_optuna_study
+from src.predict import PGenPredictor
 
 # UI
 from src.interface.utils import Spinner, input_path, print_header, print_success, print_error
-
+from src.utils.system import print_gnu_notice, print_conditions_details, print_warranty_details
 logger = logging.getLogger(__name__)
 
 # ==============================================================================
@@ -181,6 +182,10 @@ def run_advanced_analysis():
 
 def main_menu_loop():
     logger.info("Iniciando menú interactivo.")
+    
+    # 1. Imprimir el aviso legal al arrancar el modo interactivo
+    print_gnu_notice()
+    
     while True:
         print_header(f"Pharmagen v0.667 - Menú Principal")
         print("  1. Procesar Datos Genómicos (ETL)")
@@ -192,6 +197,16 @@ def main_menu_loop():
         
         choice = input("Selecciona opción (1-5): ").strip()
         
+        # --- 2. INTERCEPTAR COMANDOS LEGALES ---
+        if choice == "show w":
+            print_warranty_details()
+            continue # Volver a pintar el menú
+            
+        if choice == "show c":
+            print_conditions_details()
+            continue # Volver a pintar el menú
+        # ---------------------------------------
+
         if choice == "1":
             run_genomic_processing()
         elif choice == "2":
@@ -206,3 +221,6 @@ def main_menu_loop():
             sys.exit(0)
         else:
             print("Opción no válida.")
+
+if __name__ == "__main__":
+    main_menu_loop()

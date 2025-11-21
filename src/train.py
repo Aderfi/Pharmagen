@@ -1,4 +1,5 @@
-# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,8 +42,8 @@ from tqdm.auto import tqdm
 from torch.amp.grad_scaler import GradScaler
 from torch.amp.autocast_mode import autocast
 
-from src.config.config import MODELS_DIR, PROJECT_ROOT
-from .model import DeepFM_PGenModel
+from src.cfg.config import MODELS_DIR, PROJECT_ROOT
+from src.model import DeepFM_PGenModel
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,6 @@ def _run_epoch(
     target_cols: List[str],
     loss_fns: Dict[str, nn.Module],
     device: torch.device,
-    performance_monitor = None
     optimizer: Optional[torch.optim.Optimizer] = None,
     scaler: Optional[GradScaler] = None,
     multi_label_cols: Set[str] = set(),
@@ -126,17 +126,12 @@ def _run_epoch(
 
     with context:
         for batch in pbar:
-            if performance_monitor: 
-                performance_monitor.start_batch()
                 
             inputs = _move_batch_to_device(batch, feature_cols, device)
             targets = _move_batch_to_device(batch, target_cols, device)
 
             if is_train and optimizer:
                 optimizer.zero_grad(set_to_none=True)
-
-            if performance_monitor: 
-                performance_monitor.record_data_loading()
 
             # --- Forward Pass con Mixed Precision ---
             with autocast(device_type=device.type, enabled=(scaler is not None)):

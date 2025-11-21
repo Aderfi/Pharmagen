@@ -1,4 +1,5 @@
-# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,6 +51,9 @@ PROCESSED_DATA_DIR = _resolve_path(_data.get("processed", "data/processed"))
 DICTS_DATA_DIR = _resolve_path(_data.get("dicts", "data/dicts"))
 REF_GENOME_DIR = _resolve_path(_data.get("ref_genome", "data/ref_genome"))
 
+# Datos de entrenamiento
+MODEL_TRAIN_DATA = _resolve_path(_data.get("train", "train_data"))
+
 # Subdirectorios de Modelos
 _models = _PATHS_CONFIG.get("models", {})
 PGEN_MODEL_DIR = _resolve_path(_models.get("root", "src/pgen_model"))
@@ -65,6 +69,8 @@ FIGURES_DIR = _resolve_path(_reports.get("figures", "reports/figures"))
 # Archivos Específicos (Helpers)
 REF_GENOME_FASTA = REF_GENOME_DIR / "HSapiens_GChr38.fa"
 LOG_FILE = LOGS_DIR / "pharmagen_runtime.log"
+
+MULTI_LABEL_COLUMN_NAMES = _PATHS_CONFIG.get("multi_label_column_names", {})
 
 # Crear directorios si no existen
 for path in [DATA_DIR, LOGS_DIR, RESULTS_DIR, MODELS_DIR, CACHE_DIR]:

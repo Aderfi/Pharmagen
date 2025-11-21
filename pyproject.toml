@@ -3,17 +3,14 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pharmagen"
-version = "..."
+name = "Pharmagen"
+version = "0.7"
 description = "Software de predicción farmacogenética y eficacia terapéutica mediante Deep Learning."
 readme = "README.md"
 requires-python = ">=3.10, <3.11"
 license = { text = "Proprietary" }
-authors = [
-  { name = "Astordna" },
-  { name = "Aderfi" },
-  { name = "Adrim Hamed Outmani" },
-]
+authors = [{ name = "Adrim Hamed Outmani", email = "adrimh.outmani@gmail.com" }]
+
 keywords = [
   "pharmacogenetics",
   "deep-learning",

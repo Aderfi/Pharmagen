@@ -1,9 +1,8 @@
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
+# Licensed under the GNU GPLv3. See LICENSE file in the project root.
+#
 # src/config/paths.toml
-
-[metadata]
-project_name = "Pharmagen"
-version = "0.667"
-author = "Astordna/Aderfi/Adrim Hamed Outmani"
 
 [base]
 # Carpetas raíz

@@ -1,4 +1,5 @@
-# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
+# Copyright (C) 2025 Adrim Hamed Outmani
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,9 +26,9 @@ from typing import Dict, List, Any, Union, Optional
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 
 # Imports del proyecto
-from src.config.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES
-from .model import DeepFM_PGenModel
-from .model_configs import get_model_config
+from src.cfg.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES
+from src.model import DeepFM_PGenModel
+from src.cfg.model_configs import get_model_config
 
 logger = logging.getLogger(__name__)
 

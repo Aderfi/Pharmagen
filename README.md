@@ -1,5 +1,7 @@
 # 💊 Pharmagen
 
+Autor: Adrim Hamed Outmani (@Aderfi)
+
 > **Predicción Farmacogenética y Eficacia Terapéutica mediante Deep Learning.**
 
 ![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)
