@@ -1,0 +1,187 @@
+# config.toml
+
+[DEFAULT_HYPERPARAMS]
+embedding_dim = 128
+n_layers = 2
+hidden_dim = 2048
+dropout_rate = 0.2
+weight_decay = 1e-3
+learning_rate = 1e-4
+batch_size = 128
+
+MULTI_LABEL_COLUMN_NAMES = ["phenotype_outcome"]
+
+# ==========================================
+# MODEL REGISTRY
+# ==========================================
+
+[MODEL_REGISTRY.Phenotype_Effect_Outcome]
+targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
+inputs = ["Drug", "Genalle", "Gene", "Allele"]
+cols = [
+    "Drug",
+    "Genalle",
+    "Gene",
+    "Allele",
+    "Phenotype_outcome",
+    "Effect_direction",
+    "Effect_type",
+]
+
+[MODEL_REGISTRY.Phenotype_Effect_Outcome.params]
+embedding_dim = 256
+n_layers = 2
+hidden_dim = 2176
+dropout_rate = 0.6826665445146843
+weight_decay = 0.0001478755319922093
+learning_rate = 0.0002023597603520488
+batch_size = 64
+attention_dim_feedforward = 3840
+attention_dropout = 0.48387265129374835
+num_attention_layers = 2
+focal_gamma = 1.1605241620974445
+focal_alpha_weight = 1.3417203741569734
+label_smoothing = 0.11100845590336689
+optimizer_type = "rmsprop"
+manual_task_weights = true
+use_batch_norm = true
+use_layer_norm = true
+activation_function = "gelu"
+gradient_clip_norm = 2.231503593586354
+fm_dropout = 0.34731215338736454
+fm_hidden_layers = 2
+fm_hidden_dim = 384
+embedding_dropout = 0.1546248948072961
+early_stopping_patience = 25
+scheduler_type = "none"
+
+[MODEL_REGISTRY.Phenotype_Effect_Outcome.params_optuna]
+# CORE ARCHITECTURE
+embedding_dim = [128, 256, 384, 512, 640, 768]
+n_layers = ["int", 2, 8, 1]
+hidden_dim = ["int", 512, 4096, 128]
+activation_function = ["gelu", "relu", "swish", "mish"]
+
+# REGULARIZATION (Tuples converted to Arrays)
+dropout_rate = [0.1, 0.7]
+weight_decay = [1e-6, 1e-2]
+label_smoothing = [0.0, 0.3]
+embedding_dropout = [0.1, 0.4]
+gradient_clip_norm = [0.5, 5.0]
+
+# BATCH & LAYER NORMALIZATION
+use_batch_norm = [true, false]
+use_layer_norm = [true, false]
+
+# OPTIMIZER & LEARNING RATE
+learning_rate = [1e-5, 1e-3]
+batch_size = [64, 128, 256]
+optimizer_type = ["adamw", "adam", "rmsprop"]
+adam_beta1 = [0.85, 0.95]
+adam_beta2 = [0.95, 0.999]
+
+# SCHEDULER
+scheduler_type = ["plateau", "cosine", "exponential", "none"]
+scheduler_factor = [0.1, 0.7]
+scheduler_patience = ["int", 3, 10, 1]
+early_stopping_patience = ["int", 15, 40, 5]
+
+# ATTENTION MECHANISM
+num_attention_layers = [1, 2, 3, 4]
+attention_dim_feedforward = ["int", 512, 4096, 256]
+attention_dropout = [0.1, 0.5]
+
+# FOCAL LOSS
+focal_gamma = [1.0, 5.0]
+focal_alpha_weight = [0.25, 4.0]
+
+# FM BRANCH
+fm_dropout = [0.1, 0.5]
+fm_hidden_layers = [0, 1, 2]
+fm_hidden_dim = ["int", 64, 512, 64]
+
+# TASK WEIGHTING
+manual_task_weights = [true, false]
+
+
+# --- Modelo 2: Features-Phenotype ---
+[MODEL_REGISTRY.Features-Phenotype]
+stratify_col = ["Phenotype_outcome"]
+targets = ["Phenotype_outcome"]
+features = ["atc", "Genalle", "Gene", "Allele"]
+cols = [
+    "Drug",
+    "Genalle",
+    "Gene",
+    "Allele",
+    "Phenotype_outcome",
+    "Effect_direction",
+    "Effect_type",
+]
+
+[MODEL_REGISTRY.Features-Phenotype.params]
+batch_size = 512
+embedding_dim = 192
+n_layers = 1
+hidden_dim = 1024
+dropout_rate = 0.6996731804616522
+learning_rate = 0.0001271487593514609
+weight_decay = 0.001761363247217078
+
+[MODEL_REGISTRY.Features-Phenotype.params_optuna]
+# CORE ARCHITECTURE
+embedding_dim = [128, 256, 512]
+n_layers = ["int", 2, 4, 1]
+hidden_dim = ["int", 512, 4096, 128]
+activation_function = ["gelu", "relu"]
+
+# REGULARIZATION
+dropout_rate = [0.1, 0.5]
+weight_decay = [1e-6, 1e-2]
+label_smoothing = [0.0, 0.3]
+embedding_dropout = [0.1, 0.4]
+gradient_clip_norm = [0.5, 5.0]
+
+# BATCH & LAYER NORMALIZATION
+use_batch_norm = [true, false]
+use_layer_norm = [true, false]
+
+# OPTIMIZER & LEARNING RATE
+learning_rate = [1e-5, 1e-3]
+batch_size = [64, 128, 256]
+optimizer_type = ["adamw", "adam", "rmsprop"]
+adam_beta1 = [0.85, 0.95]
+adam_beta2 = [0.95, 0.999]
+
+# SCHEDULER
+scheduler_type = ["plateau", "cosine", "exponential", "none"]
+scheduler_factor = [0.1, 0.7]
+scheduler_patience = ["int", 3, 10, 1]
+early_stopping_patience = ["int", 15, 40, 5]
+
+# ATTENTION MECHANISM
+num_attention_layers = [1, 2, 3, 4]
+attention_dim_feedforward = ["int", 512, 4096, 256]
+attention_dropout = [0.1, 0.5]
+
+# FOCAL LOSS
+focal_gamma = [1.0, 5.0]
+focal_alpha_weight = [0.25, 4.0]
+
+# FM BRANCH
+fm_dropout = [0.1, 0.5]
+fm_hidden_layers = [0, 1, 2]
+fm_hidden_dim = ["int", 64, 512, 64]
+
+# TASK WEIGHTING
+manual_task_weights = [true, false]
+
+[MODEL_REGISTRY.Features-Phenotype.weights]
+phenotype_outcome = 1.0
+effect_direction = 1.0
+effect_type = 1.0
+effect_phenotype = 1.0
+
+
+# --- Modelo 3: Features_PhenEff ---
+[MODEL_REGISTRY.Features_PhenEff]

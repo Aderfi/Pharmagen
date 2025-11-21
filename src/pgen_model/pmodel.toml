@@ -1,0 +1,193 @@
+# ==========================================
+# PRIORIDADES CLÍNICAS
+# ==========================================
+[clinical_priorities]
+effect_type = 0.6       # 50% - Crítico (toxicidad/eficacia)
+phenotype_outcome = 0.25 # 30% - Importante (resultado clínico)
+effect_direction = 0.15  # 20% - Útil (dirección del efecto)
+
+# ==========================================
+# HIPERPARÁMETROS POR DEFECTO
+# ==========================================
+[default_hyperparams]
+embedding_dim = 128
+n_layers = 2
+hidden_dim = 2048
+dropout_rate = 0.2
+weight_decay = 1e-3
+learning_rate = 1e-4
+batch_size = 128
+
+# He convertido el bloque de texto comentado en Python a una sección útil aquí.
+# Nota: En TOML las tuplas ( ) se convierten en arrays [ ].
+[default_hyperparams.optuna_ranges]
+# === TRANSFORMER ATTENTION ===
+attention_dim_feedforward = ["int", 512, 4096, 256]
+attention_dropout = [0.1, 0.5]
+num_attention_layers = [1, 2, 3, 4]
+
+# === FOCAL LOSS ===
+focal_gamma = [1.0, 5.0]
+focal_alpha_weight = [0.5, 3.0]
+label_smoothing = [0.05, 0.3]
+
+# === OPTIMIZER VARIANTS ===
+optimizer_type = ["adamw", "adam", "sgd", "rmsprop"]
+adam_beta1 = [0.8, 0.95]
+adam_beta2 = [0.95, 0.999]
+sgd_momentum = [0.85, 0.99]
+
+# === SCHEDULER ===
+scheduler_type = ["plateau", "cosine", "step", "exponential", "none"]
+scheduler_factor = [0.1, 0.8]
+scheduler_patience = ["int", 3, 15, 1]
+
+# === TASK WEIGHTING ===
+uncertainty_weighting = [true, false]
+manual_task_weights = [true, false]
+
+# === ADVANCED ARCHITECTURE ===
+use_batch_norm = [true, false]
+use_layer_norm = [true, false]
+activation_function = ["gelu", "relu", "swish", "mish"]
+gradient_clip_norm = [0.5, 5.0]
+
+# === FM BRANCH ENHANCEMENTS ===
+fm_dropout = [0.1, 0.5]
+fm_hidden_layers = [0, 1, 2]
+fm_hidden_dim = ["int", 64, 512, 32]
+
+# === EMBEDDING VARIATIONS ===
+embedding_dropout = [0.1, 0.3]
+drug_embedding_dim = ["int", 64, 1024, 32]
+gene_embedding_dim = ["int", 64, 1024, 32]
+allele_embedding_dim = ["int", 32, 512, 16]
+genalle_embedding_dim = ["int", 64, 1024, 32]
+
+# === TRAINING DYNAMICS ===
+warmup_epochs = ["int", 0, 20, 1]
+early_stopping_patience = ["int", 15, 50, 5]
+validation_frequency = ["int", 1, 5, 1]
+
+# ==========================================
+# PESOS MAESTROS Y COLUMNAS
+# ==========================================
+[master_weights]
+outcome = 1.0
+effect_direction = 1.0
+effect = 1.0
+effect_subcat = 1.0
+entity_affected = 1.0
+# population_affected = 1.0
+# therapeutic_outcome = 1.0
+
+# TOML no tiene sets {}, usamos arrays []
+multi_label_column_names = [
+    "phenotype_outcome",
+    # "effect_phenotype",
+    # "pop_phenotypes/diseases"
+]
+
+# ==========================================
+# REGISTRO DE MODELOS
+# ==========================================
+
+# --- MODELO 1: Phenotype_Effect_Outcome ---
+[model_registry.Phenotype_Effect_Outcome]
+targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
+inputs = ["Drug", "Genalle", "Gene", "Allele"]
+cols = ["Drug", "Genalle", "Gene", "Allele", "Phenotype_outcome", "Effect_direction", "Effect_type"]
+
+[model_registry.Phenotype_Effect_Outcome.params]
+embedding_dim = 256
+n_layers = 2
+hidden_dim = 2176
+dropout_rate = 0.6826665445146843
+weight_decay = 0.0001478755319922093
+learning_rate = 0.0002023597603520488
+batch_size = 64
+attention_dim_feedforward = 3840
+attention_dropout = 0.48387265129374835
+num_attention_layers = 2
+focal_gamma = 1.1605241620974445
+focal_alpha_weight = 1.3417203741569734
+label_smoothing = 0.11100845590336689
+optimizer_type = "rmsprop"
+manual_task_weights = true
+use_batch_norm = true
+use_layer_norm = true
+activation_function = "gelu"
+gradient_clip_norm = 2.231503593586354
+fm_dropout = 0.34731215338736454
+fm_hidden_layers = 2
+fm_hidden_dim = 384
+embedding_dropout = 0.1546248948072961
+early_stopping_patience = 25
+scheduler_type = "none"
+
+[model_registry.Phenotype_Effect_Outcome.params_optuna]
+embedding_dim = [128, 256, 384, 512, 640, 768]
+n_layers = ["int", 2, 8, 1]
+hidden_dim = ["int", 512, 4096, 128]
+activation_function = ["gelu", "relu", "swish", "mish"]
+dropout_rate = [0.1, 0.7]
+weight_decay = [1e-6, 1e-2]
+label_smoothing = [0.0, 0.3]
+embedding_dropout = [0.1, 0.4]
+gradient_clip_norm = [0.5, 5.0]
+use_batch_norm = [true, false]
+use_layer_norm = [true, false]
+learning_rate = [1e-5, 1e-3]
+batch_size = [64, 128, 256]
+optimizer_type = ["adamw", "adam", "rmsprop"]
+adam_beta1 = [0.85, 0.95]
+adam_beta2 = [0.95, 0.999]
+scheduler_type = ["plateau", "cosine", "exponential", "none"]
+scheduler_factor = [0.1, 0.7]
+scheduler_patience = ["int", 3, 10, 1]
+early_stopping_patience = ["int", 15, 40, 5]
+num_attention_layers = [1, 2, 3, 4]
+attention_dim_feedforward = ["int", 512, 4096, 256]
+attention_dropout = [0.1, 0.5]
+focal_gamma = [1.0, 5.0]
+focal_alpha_weight = [0.25, 4.0]
+fm_dropout = [0.1, 0.5]
+fm_hidden_layers = [0, 1, 2]
+fm_hidden_dim = ["int", 64, 512, 64]
+manual_task_weights = [true, false]
+
+# --- MODELO 2: ATC_Phenotype_Effect_Outcome ---
+[model_registry.ATC_Phenotype_Effect_Outcome]
+targets = ["Phenotype_outcome", "Effect_direction", "Effect_type", "Effect_phenotype", "Effect_phenotype_id", "Pop_Phenotypes/Diseases", "Pop_phenotype_id"]
+cols = [
+    "ATC", "Drug", "Variant/Haplotypes", "Gene", "Allele",
+    "Phenotype_outcome", "Effect_direction", "Effect_type",
+    "Effect_phenotype", "Effect_phenotype_id", "Pop_Phenotypes/Diseases",
+    "Pop_phenotype_id", "Metabolizer types", "Population types",
+    "Comparison Allele(s) or Genotype(s)", "Comparison Metabolizer types",
+    "Notes", "Sentence", "Variant Annotation ID"
+]
+
+[model_registry.ATC_Phenotype_Effect_Outcome.params]
+batch_size = 512
+embedding_dim = 192
+n_layers = 1
+hidden_dim = 1024
+dropout_rate = 0.6996731804616522
+learning_rate = 0.0001271487593514609
+weight_decay = 0.001761363247217078
+
+[model_registry.ATC_Phenotype_Effect_Outcome.params_optuna]
+batch_size = [512]
+embedding_dim = [192]
+n_layers = [1]
+hidden_dim = ["int", 512, 1024, 256]
+dropout_rate = [0.4, 0.7]
+learning_rate = [1e-4, 6e-4]
+weight_decay = [1e-3, 1e-2]
+
+[model_registry.ATC_Phenotype_Effect_Outcome.weights]
+phenotype_outcome = 1.0
+effect_direction = 1.0
+effect_type = 1.0
+effect_phenotype = 1.0
