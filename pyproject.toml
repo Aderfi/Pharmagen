@@ -1,0 +1,90 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pharmagen"
+version = "..."
+description = "Software de predicción farmacogenética y eficacia terapéutica mediante Deep Learning."
+readme = "README.md"
+requires-python = ">=3.10, <3.11"
+license = { text = "Proprietary" }
+authors = [
+  { name = "Astordna" },
+  { name = "Aderfi" },
+  { name = "Adrim Hamed Outmani" },
+]
+keywords = [
+  "pharmacogenetics",
+  "deep-learning",
+  "bioinformatics",
+  "pytorch",
+  "pharmacy",
+  "pharmacogenomics",
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Healthcare Industry",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "torch>=2.0.0",
+  "numpy>=1.24.0",
+  "pandas>=2.0.0",
+  "scikit-learn>=1.3.0",
+  "joblib>=1.3.0",
+  "biopython>=1.80",
+  "tqdm>=4.66.0",
+  "tomli>=2.0.1",
+  "rapidfuzz>=3.0.0",
+  "packaging>=23.0",
+]
+
+[project.optional-dependencies]
+# Dependencias EXTRA para entrenamiento y optimización
+# Se instalan con: pip install ".[train]"
+train = ["optuna>=3.0.0", "matplotlib>=3.7.0"]
+
+# Dependencias para desarrollo (formato, linting)
+# Se instalan con: pip install ".[dev]"
+dev = ["black", "isort", "mypy", "pytest"]
+
+[project.urls]
+"Homepage" = "https://github.com/Aderfi/pharmagen_pmodel"           # Opcional
+"Bug Tracker" = "https://github.com/Aderfi/pharmagen_pmodel/issues" # Opcional
+
+# =============================================================================
+# CONFIGURACIÓN DE SETUPTOOLS (Layout src)
+# =============================================================================
+[tool.setuptools.packages.find]
+where = ["src"] # Indica que el código fuente está dentro de la carpeta 'src'
+include = ["*"] # Incluye todos los paquetes encontrados dentro de src
+
+# =============================================================================
+# CONFIGURACIÓN DE HERRAMIENTAS DE CALIDAD DE CÓDIGO
+# =============================================================================
+
+# Configuración para Black (Formateador de código)
+[tool.black]
+line-length = 100
+target-version = ['py310']
+include = '\.pyi?$'
+
+# Configuración para Isort (Ordenador de importaciones)
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 100
+known_first_party = ["src"]
+
+# Configuración para Mypy (Chequeo de tipos estáticos)
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

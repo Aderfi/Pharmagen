@@ -1,0 +1,18 @@
+# --- Core Deep Learning ---
+torch>=2.0.0
+
+# --- Procesamiento de Datos ---
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+joblib>=1.3.0  
+biopython>=1.80
+
+# --- Utilidades ---
+tqdm>=4.66.0   
+tomli>=2.0.1   # Lectura de archivos .toml en Python < 3.11
+rapidfuzz>=3.0.0 # Para el fuzzy matching de fármacos que usamos en data_utils
+packaging>=23.0
+
+# --- Opcional (Solo si generas reportes gráficos en predicción) ---
+matplotlib>=3.7.0
