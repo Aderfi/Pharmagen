@@ -1,0 +1,113 @@
+# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import json
+import os
+import sys
+import logging
+from pathlib import Path
+from typing import Dict, Any
+
+from src.cfg.config import VERSION, LOGS_DIR, CONFIG_FILE
+
+def welcome_message():
+    msg = f"""
+    ============================================
+            PHARMAGEN v{VERSION}
+    ============================================
+    Software para farmacogenética y deep learning.
+    
+    Logs: {LOGS_DIR}
+    ============================================
+    """
+    print(msg)
+
+def check_system_config() -> Dict[str, Any]:
+    """Carga o crea el archivo de estado del sistema."""
+    if CONFIG_FILE.exists():
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            pass # Si falla, recreamos
+            
+    # Default Config
+    config = {
+        "version": VERSION,
+        "os": os.name,
+        "setup_completed": False
+    }
+    save_system_config(config)
+    return config
+
+def save_system_config(config: Dict[str, Any]):
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(config, f, indent=4)
+
+def is_venv_active() -> bool:
+    """Detecta si estamos corriendo dentro de un entorno virtual (Venv o Conda)."""
+    # Check standard venv
+    is_base = (sys.prefix == sys.base_prefix)
+    # Check Conda
+    is_conda = 'CONDA_DEFAULT_ENV' in sys.modules.get('os').environ
+    
+    return (not is_base) or is_conda
+
+def check_environment_and_setup():
+    """
+    Verifica el estado del entorno antes de arrancar la aplicación.
+    Si es la primera vez, lanza el setup interactivo.
+    """
+    # 1. Verificar si es la primera ejecución (Flag File)
+    flag_file = PROJECT_ROOT / "src" / "cfg" / "venv_setup_true"
+    
+    if not flag_file.exists():
+        print("\n" + "!"*60)
+        print(" ⚠️  PRIMERA EJECUCIÓN DETECTADA O ENTORNO NO CONFIGURADO")
+        print("!"*60)
+        print("\nEs necesario configurar los directorios y dependencias.")
+        input(">> Pulse [ENTER] para iniciar el asistente de configuración (setup.py)...")
+        
+        try:
+            # Importación dinámica para evitar errores circulares o si setup no existe
+            # Como main.py añade PROJECT_ROOT al path, esto debería funcionar
+            import setup
+            setup.main()
+        except ImportError:
+            print("❌ Error: No se encontró 'setup.py' en la raíz del proyecto.")
+            sys.exit(1)
+        except Exception as e:
+            print(f"❌ Error crítico durante el setup: {e}")
+            sys.exit(1)
+            
+        print("\n✅ Setup finalizado. Iniciando Pharmagen...\n")
+        time.sleep(1)
+
+    # 2. Verificar Versión de Python (Warning)
+    if sys.version_info < (3, 10) or sys.version_info >= (3, 11):
+        print(f"⚠️  ADVERTENCIA: Estás usando Python {sys.version_info.major}.{sys.version_info.minor}.")
+        print("   Este software fue diseñado para Python 3.10. Pueden ocurrir errores.\n")
+        time.sleep(2)
+
+    # 3. Verificar Entorno Virtual Activo
+    if not is_venv_active():
+        print("⚠️  ADVERTENCIA: No se detectó un entorno virtual activo.")
+        print("   Se recomienda ejecutar este software dentro de un entorno 'venv' o 'conda'.")
+        choice = input("   ¿Desea continuar de todos modos? (s/n): ").lower()
+        if choice != 's':
+            sys.exit(0)
+
+if __name__ == "__main__":
+    welcome_message()

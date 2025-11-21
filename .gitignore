@@ -1,16 +1,84 @@
-.env/*
-.env_pgen/*
-.vscode/*
-*__pycache__/
+# --- Python & Core ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+dist/
+build/
 
---------------------------------------
+# --- Entornos Virtuales ---
+.env/
+.env_pgen/
+venv/
+env/
+.venv/
+anaconda/
+*.conda
 
-# Ignorar modelos guardados (Pesan demasiado)
-*.pt
-*.pth
-*.pk2l
-*.pkl
-*.fa 
+# --- IDE & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Datos Sensibles & Bioinformática (CRÍTICO) ---
+# Evita subir datos genómicos por error
+*.vcf
+*.vcf.gz
+*.tbi
+*.fa
+*.fasta
 *.fa.gz
-*.kv
-*.code-workspace
+*.fai
+*.bam
+*.sam
+*.cram
+
+# --- Datos Tabulares y Temporales ---
+# Ignoramos CSV/TSV en general para no subir datos de pacientes
+# Si tienes configs en CSV que SÍ quieres subir, usa 'git add -f archivo.csv'
+#*.csv
+#*.tsv
+*.xlsx
+*.parquet
+*.feather
+
+# --- Directorios Dinámicos del Proyecto ---
+# Estas carpetas se generan al ejecutar el código/setup
+# Queremos ignorar su contenido, pero quizás mantener la estructura si usas .gitkeep
+#data/raw/*
+#data/processed/*
+#data/ref_genome/*
+#cache/*
+#results/*
+#logs/*
+#reports/*
+
+# Excepciones: Si usas .gitkeep para mantener la estructura de carpetas vacías
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!results/.gitkeep
+!logs/.gitkeep
+
+# --- Modelos & Pesos (Pesados) ---
+*.pth
+*.pt
+*.pkl
+*.h5
+*.ckpt
+*.onnx
+model_*.txt
+
+# --- Optuna & Bases de Datos ---
+*.db
+reports/optuna_reports/
+reports/train_reports/
+
+# --- Configuración de Estado Local ---
+# Ignorar el flag que indica si el setup ya corrió en ESTA máquina
+src/cfg/venv_setup_true
+
+# --- Logs ---
+*.log
+npm-debug.log*

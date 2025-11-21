@@ -1,111 +1,153 @@
-from glob import glob
+# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import pysam
 from pathlib import Path
-
+from typing import Optional, List, Dict, Any, Generator
 import src.config.config as cfg
-from src.config.config import REF_GENOME_FASTA, REF_GENOME_FAI
 
-# Rutas a tus archivos
-ruta_fasta = REF_GENOME_FASTA
-ruta_fai = REF_GENOME_FAI
-ruta_vcf = Path(cfg.DATA_DIR, "raw") # Debe estar comprimido y tener su índice .tbi
+# Rutas constantes
+RUTA_FASTA = cfg.REF_GENOME_FASTA
+RUTA_VCF_DIR = Path(cfg.DATA_DIR, "raw")
 
+def seleccionar_vcf(vcf_path: Path = RUTA_VCF_DIR) -> Optional[Path]:
+    """
+    Lista y permite seleccionar un archivo VCF.gz del directorio.
+    """
+    # Usamos list(path.glob) que es más moderno que glob.glob
+    vcf_files = list(vcf_path.glob("*.vcf.gz"))
     
-
-
-
-
-def seleccionar_vcf(vcf_path=ruta_vcf):
-    # Listar todos los VCFs disponibles
-    vcf_files = glob(str(vcf_path / "*.vcf.gz"))
     if not vcf_files:
-        print("No se encontraron archivos VCF en la ruta especificada.")
+        print(f"❌ No se encontraron archivos .vcf.gz en {vcf_path}")
         return None
 
-    print("Archivos VCF disponibles:")
+    print("\n📂 Pacientes disponibles:")
     for i, vcf_file in enumerate(vcf_files):
-        print(f"{i + 1}. {Path(vcf_file).name.strip('.vcf.gz')}")
+        print(f"  {i + 1}. {vcf_file.name.replace('.vcf.gz', '')}")
 
-    seleccion = int(input("Selecciona el número del paciente a analizar: ")) - 1
-    if 0 <= seleccion < len(vcf_files):
-        return Path(vcf_files[seleccion])
-    else:
-        print("Selección inválida.")
-        return None
+    while True:
+        try:
+            entrada = input("\nSelecciona el número del paciente (o 'q' para salir): ")
+            if entrada.lower() == 'q': return None
+            
+            seleccion = int(entrada) - 1
+            if 0 <= seleccion < len(vcf_files):
+                return vcf_files[seleccion]
+            print("⚠️ Selección fuera de rango.")
+        except ValueError:
+            print("⚠️ Por favor, introduce un número válido.")
 
-
-def procesar_paciente(vcf_file, fasta_path):
-    # 1. Abrir conexiones (Lazy loading)
-    genome = pysam.FastaFile(fasta_path)
-    vcf = pysam.VariantFile(vcf_file)
+def decodificar_genotipo(record, sample_id: str) -> Dict[str, Any]:
+    """
+    Interpreta dinámicamente el genotipo, manejando multialélicos y nulos.
+    """
+    # Obtener llamada de genotipo (ej: (0, 1) o (None, None))
+    gt_tuple = record.samples[sample_id]['GT']
     
-    # Asumimos que el VCF es de un solo paciente (común en clínica)
-    # Si hubiera más, tendrías que iterar por sample.
-    sample_id = list(vcf.header.samples)[0]
-    #print(f"Analizando paciente: {sample_id}")
-    #print("-" * 50)
+    # Caso: Dato faltante (./.)
+    if None in gt_tuple:
+        return {"tipo": "No Llamado/Missing", "alelos": "./."}
 
-    # 2. Iterar sobre las variantes del VCF
-    for record in vcf:
-        
-        # Datos básicos del VCF
-        chrom = record.chrom
-        pos_1based = record.pos  # VCF usa coordenadas base-1
-        ref_vcf = record.ref     # Alelo de referencia según el VCF
-        alts_vcf = record.alts   # Lista de posibles variantes (ej. ['T'])
-        
-        if not alts_vcf: continue # Si no hay variantes, saltar
-        
-        # --- VALIDACIÓN DE SEGURIDAD ---
-        # Consultamos el genoma real para ver si el VCF dice la verdad
-        # pysam fetch usa base-0, así que restamos 1 al start
-        ref_genome = genome.fetch(chrom, pos_1based - 1, int(pos_1based + len(ref_vcf) - 1)).upper() #type: ignore
-        
-        if ref_genome != ref_vcf:
-            print(f"🚨 ERROR CRÍTICO en {chrom}:{pos_1based}. ")
-            print(f"   El VCF dice que la ref es {ref_vcf}, pero el genoma dice {ref_genome}.")
-            print("   Posible error de versión (hg19 vs hg38). Saltando variante.")
-            continue
+    # Mapear índices a bases reales
+    # record.alleles es una tupla con (REF, ALT1, ALT2...)
+    # Ej: record.alleles = ('A', 'T', 'G') -> índice 0='A', 1='T', 2='G'
+    alelos_decodificados = [record.alleles[idx] for idx in gt_tuple]
+    alelos_str = "/".join(alelos_decodificados)
 
-        # --- INTERPRETACIÓN DEL GENOTIPO ---
-        # record.samples[sample_id]['GT'] devuelve una tupla, ej: (0, 1)
-        # 0 = Referencia, 1 = Primera Alternativa, 2 = Segunda...
-        gt = record.samples[sample_id]['GT']
-        
-        # Interpretar la tupla
-        if gt == (0, 0):
-            tipo = "Wild Type (Normal)"
-            alelos = f"{ref_vcf}/{ref_vcf}"
-        elif gt == (0, 1):
-            tipo = "Heterocigoto"
-            alelos = f"{ref_vcf}/{alts_vcf[0]}"
-        elif gt == (1, 1):
-            tipo = "Homocigoto Alternativo"
-            alelos = f"{alts_vcf[0]}/{alts_vcf[0]}"
-        elif gt == (1, 2):
-             tipo = "Heterocigoto Compuesto (Dos variantes distintas)"
-             alelos = f"{alts_vcf[0]}/{alts_vcf[1]}"
+    # Determinar tipo
+    if len(set(gt_tuple)) == 1:
+        # Si todos los índices son iguales (0/0, 1/1, 2/2)
+        if gt_tuple[0] == 0:
+            tipo = "Homocigoto Referencia (WT)"
         else:
-            tipo = "Otro/No llamado"
-            alelos = "?"
+            tipo = "Homocigoto Alternativo"
+    else:
+        # Índices distintos (0/1, 1/2)
+        if 0 in gt_tuple:
+            tipo = "Heterocigoto"
+        else:
+            tipo = "Heterocigoto Compuesto (Alt1/Alt2)"
 
-        # Imprimir resultado útil para tu base de datos
-        print(f"Gen: {chrom} | Pos: {pos_1based} | Ref: {ref_vcf}")
-        print(f"   -> Variante detectada: {alts_vcf}")
-        print(f"   -> Genotipo Paciente: {gt} => {alelos} ({tipo})")
-        print("-" * 20)
+    return {"tipo": tipo, "alelos": alelos_str}
 
-    genome.close()
-    vcf.close()
+def procesar_paciente(vcf_path: Path, fasta_path: Path, region: Optional[str] = None) -> Generator[Dict, None, None]:
+    """
+    Generador que procesa variantes. Usa 'yield' para eficiencia de memoria.
+    Permite filtrar por región (ej: 'chr1:1000-2000').
+    """
+    if not vcf_path.exists():
+        raise FileNotFoundError(f"No existe el VCF: {vcf_path}")
 
+    # Uso de Context Managers (with) para cierre automático de archivos
+    with pysam.FastaFile(str(fasta_path)) as genome, pysam.VariantFile(str(vcf_path)) as vcf:
+        
+        sample_id = list(vcf.header.samples)[0]
+        print(f"\n🔬 Analizando: {sample_id} | Archivo: {vcf_path.name}")
+        print("-" * 60)
 
+        # fetch permite ir directo a una región si se especifica, o iterar todo si es None
+        iterator = vcf.fetch(region=region) if region else vcf
 
+        for record in iterator:
+            # Saltar variantes sin ALT (bloques homocigotos de referencia típicos en gVCF)
+            if not record.alts: 
+                continue
+
+            # --- VALIDACIÓN DE INTEGRIDAD (Tu lógica original mejorada) ---
+            # start en pysam es 0-based, stop es exclusivo
+            try:
+                ref_genome = genome.fetch(record.chrom, record.start, record.stop).upper()
+            except KeyError:
+                print(f"⚠️ Contig {record.chrom} no encontrado en FASTA.")
+                continue
+
+            if ref_genome != record.ref:
+                print(f"🚨 MISMATCH {record.chrom}:{record.pos}. VCF_REF={record.ref} vs FASTA={ref_genome}")
+                continue
+
+            # --- DECODIFICACIÓN ---
+            info_gt = decodificar_genotipo(record, sample_id)
+
+            # Estructurar resultado
+            variant_data = {
+                "chrom": record.chrom,
+                "pos": record.pos,
+                "ref": record.ref,
+                "alts": record.alts,
+                "quality": record.qual,
+                "genotype": info_gt["alelos"],
+                "zygosity": info_gt["tipo"]
+            }
+            
+            yield variant_data
 
 if __name__ == "__main__":
     
-    paciente_vcf = seleccionar_vcf()
     
-    paciente_vcf = paciente_vcf.name.strip('.vcf.gz') if isinstance(paciente_vcf, Path) else None
-    
-    if isinstance(paciente_vcf, str):
-        procesar_paciente(paciente_vcf, ruta_fasta)
+    archivo_seleccionado = seleccionar_vcf()
+
+    if archivo_seleccionado:
+        # Ejemplo: Procesar y guardar en una lista (o podrías volcarlo a CSV/Pandas)
+        # Pasamos el PATH COMPLETO, no solo el nombre
+        procesador = procesar_paciente(archivo_seleccionado, RUTA_FASTA)
+        
+        try:
+            for variante in procesador:
+                # Aquí puedes filtrar solo lo que te interesa imprimir
+                if "Homocigoto Referencia" not in variante["zygosity"]:
+                    print(f"📍 {variante['chrom']}:{variante['pos']} ({variante['ref']}->{variante['alts']})")
+                    print(f"   └── {variante['zygosity']} [{variante['genotype']}]")
+        except Exception as e:
+            print(f"❌ Error durante el procesamiento: {e}")

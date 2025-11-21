@@ -1,7 +1,73 @@
-.env_pgen/
-*__pycache__/
-.*
-BACKUPS/
-TEST/
-tests/
-venv_utils/
+# =======================================================
+data/raw/**
+data/processed/**
+data/dicts/**
+train_data/**
+results/**
+
+# Extensiones específicas de bioinformática 
+*.vcf
+*.vcf.gz
+*.tbi
+*.bcf
+*.bam
+*.sam
+*.bed
+
+# =======================================================
+# ARTEFACTOS DE MACHINE LEARNING Y BINARIOS
+# =======================================================
+src/pgen_model/models/**
+src/pgen_model/encoders/**
+src/pgen_model/labels_vocabs/**
+
+# Extensiones de modelos y serialización
+*.pth
+*.pt
+*.pkl
+*.joblib
+*.h5
+*.onnx
+*.ckpt
+
+# =======================================================
+# BASES DE DATOS Y REPORTES
+# =======================================================
+reports/optuna_reports/study_DBs/**
+*.db
+*.sqlite3
+
+# Figuras generadas (imágenes)
+reports/figures/**
+
+# Reportes de texto generados automáticamente
+reports/train_reports/**
+
+# =======================================================
+# ARCHIVOS TEMPORALES, LOGS Y BACKUPS
+# =======================================================
+BACKUPS/**
+cache/**
+logs/**
+src/pgen_model/labels_vocabs/logs/**
+*.log
+
+# Caches de Python y compilados
+**/__pycache__/**
+*.pyc
+*.pyo
+*.pyd
+
+# =======================================================
+# CONFIGURACIÓN DE ENTORNO Y SECRETOS
+# =======================================================
+.env
+.env_pgen
+.venv
+venv/
+env/
+.vscode/**
+
+# ============
+.vscode/
+!.vscode/settings.json

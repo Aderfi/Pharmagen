@@ -1,11 +1,17 @@
-"""
-Focal Loss para Multi-Class Classification
-===========================================
-Implementación optimizada para PyTorch con soporte para class weights.
-
-Referencia: Lin et al. "Focal Loss for Dense Object Detection" (2017)
-https://arxiv.org/abs/1708.02002
-"""
+# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import torch
 import torch.nn as nn
@@ -15,74 +21,44 @@ from typing import Optional
 
 class FocalLoss(nn.Module):
     """
-    Focal Loss para clasificación multi-clase con desbalanceo severo.
+    Focal Loss para Multi-Class Classification
+    ===========================================
+    Implementación optimizada para PyTorch con soporte para class weights.
 
-    Fórmula: FL(pt) = -αt * (1 - pt)^γ * log(pt)
+    Referencia: Lin et al. "Focal Loss for Dense Object Detection" (2017)
+    https://arxiv.org/abs/1708.02002
 
-    Parámetros:
-        alpha (Tensor | None): Pesos por clase (class weights).
-                               Si es None, todas las clases tienen peso 1.0.
-                               Shape: [num_classes]
-
-        gamma (float): Parámetro de enfoque.
-                       - γ = 0: Equivalente a CrossEntropyLoss
-                       - γ = 2: Configuración estándar (recomendado)
-                       - γ > 2: Enfoque más agresivo en ejemplos difíciles
-
-        reduction (str): Especifica la reducción a aplicar al output:
-                         'none' | 'mean' | 'sum'
-
-        label_smoothing (float): Label smoothing (opcional, 0.0 a 1.0)
-
-    Ejemplo:
-        >>> num_classes = 10
-        >>> class_weights = torch.tensor([1.0, 2.0, ...])  # Pesos calculados
-        >>> criterion = FocalLoss(alpha=class_weights, gamma=2.0)
-        >>>
-        >>> logits = model(inputs)  # Shape: [batch_size, num_classes]
-        >>> targets = ...           # Shape: [batch_size]
-        >>> loss = criterion(logits, targets)
+    Principalmente orientado a casos multi-target con desbalanceo de clases.
     """
-
     def __init__(
         self,
         alpha: Optional[torch.Tensor] = None,
         gamma: float = 2.0,
         reduction: str = "mean",
-        label_smoothing: float = 0.1,
+        label_smoothing: float = 0.0,
     ):
         super().__init__()
-        self.alpha = alpha
+        # Registramos alpha como buffer para que se mueva con el modelo (cuda/cpu)
+        # pero no sea un parámetro entrenable.
+        self.register_buffer("alpha", alpha)
         self.gamma = gamma
         self.reduction = reduction
         self.label_smoothing = label_smoothing
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            inputs: Logits del modelo (sin softmax/sigmoid)
-                    Shape: [batch_size, num_classes]
-            targets: Etiquetas de clase (enteros)
-                     Shape: [batch_size]
-
-        Returns:
-            loss: Scalar tensor (si reduction='mean' o 'sum')
-                  o tensor de shape [batch_size] (si reduction='none')
-        """
-        # 1. Calcular CrossEntropy con label smoothing (sin reducción)
-        # Mover alpha al dispositivo correcto si existe
-        if self.alpha is not None and self.alpha.device != inputs.device:
-            self.alpha = self.alpha.to(inputs.device)
-
+        # Mover alpha al dispositivo correcto si es necesario (manejado por register_buffer usualmente)
+        weight = self.alpha
+        
+        # Cross Entropy con Label Smoothing
         ce_loss = F.cross_entropy(
             inputs,
             targets,
-            weight=self.alpha,
+            weight=weight,
             reduction="none",
             label_smoothing=self.label_smoothing,
         )
 
-        pt = torch.exp(-ce_loss)  # Cross Entropy = -log(pt) -> pt = exp(-CE)
+        pt = torch.exp(-ce_loss)
         focal_loss = ((1 - pt) ** self.gamma) * ce_loss
 
         if self.reduction == "mean":
@@ -94,20 +70,12 @@ class FocalLoss(nn.Module):
 
 class AdaptiveFocalLoss(FocalLoss):
     """
-    Focal Loss con gamma adaptativo basado en la dificultad del batch.
-
-    Ajusta automáticamente gamma según:
-    - Si el batch es fácil (alta accuracy) → gamma bajo
-    - Si el batch es difícil (baja accuracy) → gamma alto
-
-    Parámetros adicionales:
-        gamma_min (float): Gamma mínimo (default: 1.0)
-        gamma_max (float): Gamma máximo (default: 3.0)
+    Focal Loss que ajusta 'gamma' dinámicamente según la accuracy del batch actual.
+    Útil cuando el entrenamiento es inestable al principio.
     """
-
     def __init__(
         self,
-        alpha: torch.Tensor | None = None,
+        alpha: Optional[torch.Tensor] = None,
         gamma: float = 2.0,
         gamma_min: float = 1.0,
         gamma_max: float = 3.0,
@@ -117,27 +85,88 @@ class AdaptiveFocalLoss(FocalLoss):
         super().__init__(alpha, gamma, reduction, label_smoothing)
         self.gamma_min = gamma_min
         self.gamma_max = gamma_max
-        self.base_gamma = gamma
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        # Calcular accuracy del batch
-        predictions = torch.argmax(inputs, dim=1)
-        batch_accuracy = (predictions == targets).float().mean()
-
-        # Ajustar gamma inversamente proporcional a la accuracy
-        # Alta accuracy → gamma bajo (enfoque ligero)
-        # Baja accuracy → gamma alto (enfoque agresivo)
-        self.gamma = self.gamma_max - (
-            batch_accuracy * (self.gamma_max - self.gamma_min)
-        )
+        # Cálculo rápido de accuracy sin romper el grafo de computación
+        with torch.no_grad():
+            predictions = torch.argmax(inputs, dim=1)
+            # Accuracy escalar
+            batch_acc = (predictions == targets).float().mean()
+            
+            # Mapeo lineal inverso: +Accuracy -> -Gamma (batch fácil, enfocar menos)
+            # Clamp para asegurar límites
+            new_gamma = self.gamma_max - (batch_acc * (self.gamma_max - self.gamma_min))
+            self.gamma = float(torch.clamp(new_gamma, self.gamma_min, self.gamma_max))
 
         return super().forward(inputs, targets)
 
 
+class GeometricLoss(nn.Module): # Opuesto de Uncertainty Loss
+    """
+    Estrategia de Pérdida Geométrica para Multi-Task Learning.
+    Penaliza tareas con pérdida muy alta más severamente que la suma aritmética.
+
+    Principalmente orientado a casos multi-target con desbalanceo severo.
+    """
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, losses: Dict[str, torch.Tensor]) -> torch.Tensor:
+        if not losses:
+            return torch.tensor(0.0, requires_grad=True)
+
+        # Obtener dispositivo del primer tensor
+        first_loss = next(iter(losses.values()))
+        device = first_loss.device
+        
+        log_sum = torch.tensor(0.0, device=device)
+        n_tasks = len(losses)
+
+        for loss in losses.values():
+            # Estabilidad numérica: clamp para evitar log(0)
+            safe_loss = torch.clamp(loss, min=1e-7)
+            log_sum = log_sum + torch.log(safe_loss)
+
+        # Exp(Mean(Log(Losses)))
+        return torch.exp(log_sum / n_tasks)
 
 
+class MultiTaskUncertaintyLoss(nn.Module):
+    """
+    Implementación de Kendall & Gal (2018) para ponderación automática de pérdidas.
+    
+    Mantiene parámetros entrenables (log_sigma) para cada tarea.
+    Aprende a 'confiar menos' (sigma alto) en tareas difíciles o ruidosas.
+    """
+    def __init__(self, task_names: List[str], priorities: Optional[Dict[str, float]] = None):
+        super().__init__()
+        self.task_names = task_names
+        self.priorities = priorities or {}
+        
+        # Creamos un ParameterDict para que el optimizador vea estos pesos
+        self.log_sigmas = nn.ParameterDict({
+            task: nn.Parameter(torch.zeros(1)) for task in task_names
+        })
 
-def create_focal_loss(
-    class_weights: Optional[torch.Tensor] = None, gamma: float = 2.0
-) -> FocalLoss:
-    return FocalLoss(alpha=class_weights, gamma=gamma)
+    def forward(self, losses: Dict[str, torch.Tensor]) -> torch.Tensor:
+        total_loss = torch.tensor(0.0, device=next(iter(losses.values())).device)
+        
+        for task, loss in losses.items():
+            if task not in self.log_sigmas:
+                # Fallback si llega una tarea no registrada (seguridad)
+                total_loss = total_loss + loss
+                continue
+
+            log_sigma = self.log_sigmas[task]
+            priority = self.priorities.get(task, 1.0)
+
+            # Fórmula: Loss * exp(-log_sigma) + log_sigma
+            # El término log_sigma actúa como regularizador para evitar que exp(-sigma) crezca infinito
+            weighted_loss = (loss * priority) * torch.exp(-log_sigma) + log_sigma
+            total_loss = total_loss + weighted_loss
+
+        return total_loss
+
+    def get_sigmas(self) -> Dict[str, float]:
+        """Retorna los valores actuales de incertidumbre (interpretables)."""
+        return {k: float(torch.exp(v).item()) for k, v in self.log_sigmas.items()}

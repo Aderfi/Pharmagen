@@ -1,302 +1,293 @@
-from pathlib import Path
-from typing import Dict, List, Any, Union
+# Copyright (C) 2023 [Tu Nombre / Pharmagen Team]
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+import logging
 import joblib
-import pandas as pd
 import torch
 import numpy as np
-from src.config.config import MODEL_ENCODERS_DIR
+import pandas as pd
+from pathlib import Path
+from typing import Dict, List, Any, Union, Optional
+
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 
-from .model_configs import MULTI_LABEL_COLUMN_NAMES
+# Imports del proyecto
+from src.config.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES
+from .model import DeepFM_PGenModel
+from .model_configs import get_model_config
 
-# <--- AÑADIDO: Token para etiquetas desconocidas (debe coincidir con PGenDataProcess)
+logger = logging.getLogger(__name__)
+
 UNKNOWN_TOKEN = "__UNKNOWN__"
 
-
-def _transform_input(encoder: LabelEncoder, label: str, device: torch.device):
+class PGenPredictor:
     """
-    Transforma de forma segura una única etiqueta de string a un tensor,
-    manejando etiquetas desconocidas.
+    Clase encargada de la inferencia.
+    Carga el modelo y los encoders una sola vez para realizar predicciones eficientes.
     """
-    # 1. Comprobar si la etiqueta es conocida por el encoder
-    if label not in encoder.classes_:
-        print(f"Advertencia: Etiqueta '{label}' desconocida. Usando '{UNKNOWN_TOKEN}'.")
-        label_to_transform = UNKNOWN_TOKEN
-    else:
-        label_to_transform = label
 
-    # 2. Transformar la etiqueta (que ahora es conocida o es __UNKNOWN__)
-    try:
-        idx = encoder.transform([label_to_transform])[0]  # type: ignore
-        return torch.tensor([idx], dtype=torch.long, device=device)
-    except ValueError:
-        # Fallback por si __UNKNOWN__ tampoco estuviera en el vocabulario
-        print(
-            f"Error: Ni '{label}' ni '{UNKNOWN_TOKEN}' están en el vocabulario del encoder."
-        )
-        # Intentar usar el índice 0 como un "desconocido" genérico
-        return torch.tensor([0], dtype=torch.long, device=device)
+    def __init__(self, model_name: str, device: Optional[str] = None):
+        self.model_name = model_name
+        self.device = torch.device(device if device else ("cuda" if torch.cuda.is_available() else "cpu"))
+        
+        logger.info(f"Inicializando PGenPredictor para '{model_name}' en {self.device}...")
 
+        # 1. Cargar Configuración
+        self.config = get_model_config(model_name)
+        self.feature_cols = [c.lower() for c in self.config["features"]]
+        self.target_cols = [t.lower() for t in self.config["targets"]]
+        self.params = self.config["params"]
 
-def _transform_batch(encoder: LabelEncoder, series: pd.Series, unknown_token: str):
-    """
-    Transforma de forma segura un Series de pandas, manejando etiquetas desconocidas.
-    Optimizado con numpy.isin.
-    """
-    # 1. Convertir a numpy array de strings
-    vals = series.astype(str).to_numpy()
+        # 2. Cargar Encoders
+        self.encoders = self._load_encoders()
 
-    # 2. Identificar valores desconocidos
-    mask = ~np.isin(vals, encoder.classes_)
+        # 3. Inicializar y Cargar Modelo
+        self.model = self._load_model()
+        self.model.eval()
 
-    # 3. Reemplazar desconocidos con el token
-    if mask.any():
-        vals[mask] = unknown_token
-
-    # 4. Transformar (ahora seguro)
-    return encoder.transform(vals)
-
-
-def load_encoders(model_name, encoders_dir=None):
-    """
-    Carga los encoders guardados para un modelo específico.
-    """
-    if encoders_dir is None:
-        encoders_dir = Path(MODEL_ENCODERS_DIR)
-
-    encoders_file = Path(encoders_dir, f"encoders_{model_name}.pkl")
-
-    if not encoders_file.exists():
-        raise FileNotFoundError(
-            f"No se encontró el archivo de encoders en {encoders_file}"
-        )
-
-    try:
-        encoders: dict[str, LabelEncoder | MultiLabelBinarizer] = joblib.load(
-            encoders_file
-        )
-        print(f"Encoders cargados correctamente desde: {encoders_file}")
-
-        # <--- AÑADIDO: Asegurarse de que __UNKNOWN__ existe en los encoders
-        # (Si PGenDataProcess no se corrió, esto lo arregla)
-
-        for col, encoder in encoders.items():
-            if isinstance(encoder, LabelEncoder):
-                if UNKNOWN_TOKEN not in encoder.classes_:
-                    print(
-                        f"Advertencia: Añadiendo '{UNKNOWN_TOKEN}' al encoder '{col}' para predicción."
-                    )
-                    # Añadir el token al vocabulario del encoder cargado
-                    encoder.classes_ = np.append(encoder.classes_, UNKNOWN_TOKEN)
-
+    def _load_encoders(self) -> Dict[str, Union[LabelEncoder, MultiLabelBinarizer]]:
+        """Carga los encoders y parchea el token desconocido."""
+        enc_path = Path(MODEL_ENCODERS_DIR) / f"encoders_{self.model_name}.pkl"
+        
+        if not enc_path.exists():
+            raise FileNotFoundError(f"No se encontraron encoders en: {enc_path}")
+            
+        encoders = joblib.load(enc_path)
+        
+        # Parchear UNKNOWN_TOKEN para LabelEncoders
+        for col, enc in encoders.items():
+            if isinstance(enc, LabelEncoder):
+                if UNKNOWN_TOKEN not in enc.classes_:
+                    # Truco eficiente: extender las clases numpy directamente
+                    enc.classes_ = np.append(enc.classes_, UNKNOWN_TOKEN)
+        
         return encoders
-    except Exception as e:
-        raise Exception(f"Error al cargar los encoders: {e}")
 
+    def _load_model(self) -> DeepFM_PGenModel:
+        """Instancia la arquitectura y carga los pesos."""
+        # Calcular dimensiones basadas en los encoders cargados
+        n_features = {
+            col: len(self.encoders[col].classes_) 
+            for col in self.feature_cols if col in self.encoders
+        }
+        target_dims = {
+            col: len(self.encoders[col].classes_) 
+            for col in self.target_cols if col in self.encoders
+        }
 
-def predict_single_input(features_dict, model, encoders: Dict[str, Any], target_cols):
-    """
-    Predicción para una sola entrada, compatible con DeepFM_PGenModel
-    (salida de diccionario y manejo de multi-etiqueta).
-    """
-    if model is None or encoders is None or target_cols is None:
-        raise ValueError("Se requieren modelo, encoders y target_cols")
+        # Instanciar arquitectura (Debe coincidir EXACTAMENTE con el entrenamiento)
+        model = DeepFM_PGenModel(
+            n_features=n_features,
+            target_dims=target_dims,
+            embedding_dim=self.params["embedding_dim"],
+            hidden_dim=self.params["hidden_dim"],
+            dropout_rate=self.params["dropout_rate"],
+            n_layers=self.params["n_layers"],
+            attention_dim_feedforward=self.params.get("attention_dim_feedforward"),
+            attention_dropout=self.params.get("attention_dropout", 0.1),
+            num_attention_layers=self.params.get("num_attention_layers", 1),
+            use_batch_norm=self.params.get("use_batch_norm", False),
+            use_layer_norm=self.params.get("use_layer_norm", False),
+            activation_function=self.params.get("activation_function", "gelu"),
+            fm_dropout=self.params.get("fm_dropout", 0.0),
+            fm_hidden_layers=self.params.get("fm_hidden_layers", 0),
+            fm_hidden_dim=self.params.get("fm_hidden_dim", 64),
+            embedding_dropout=self.params.get("embedding_dropout", 0.0),
+        )
 
-    device = next(model.parameters()).device
-    model.eval()
+        # Cargar Pesos
+        weights_path = Path(MODELS_DIR) / f"pmodel_{self.model_name}.pth"
+        if not weights_path.exists():
+            raise FileNotFoundError(f"No se encontraron pesos del modelo en: {weights_path}")
+        
+        # map_location asegura que cargue en CPU si no hay GPU disponible
+        state_dict = torch.load(weights_path, map_location=self.device)
+        model.load_state_dict(state_dict)
+        model.to(self.device)
+        
+        return model
 
-    model_inputs = {}
+    def _transform_scalar(self, col: str, val: Any) -> torch.Tensor:
+        """Transforma un único valor escalar."""
+        enc = self.encoders[col]
+        val_str = str(val)
+        
+        if val_str not in enc.classes_:
+            # logger.debug(f"Valor desconocido '{val}' en '{col}'. Usando token.")
+            val_str = UNKNOWN_TOKEN
+            
+        idx = enc.transform([val_str])[0]
+        return torch.tensor([idx], dtype=torch.long, device=self.device)
 
-    # --- 1. Transformar Inputs ---
-    try:
-        # Iteramos sobre las características proporcionadas en el diccionario
-        for feature_name, feature_value in features_dict.items():
+    def _transform_vectorized(self, col: str, series: pd.Series) -> torch.Tensor:
+        """Transforma una serie completa usando numpy (optimizado)."""
+        enc = self.encoders[col]
+        vals = series.astype(str).to_numpy()
+        
+        # Máscara booleana rápida
+        mask = ~np.isin(vals, enc.classes_)
+        if mask.any():
+            vals[mask] = UNKNOWN_TOKEN
+            
+        encoded = enc.transform(vals)
+        return torch.tensor(encoded, dtype=torch.long) # Se mueve a GPU por batches luego
 
-            # Verificamos si tenemos un encoder para esta característica
-            if feature_name in encoders:
-                # Asumimos que _transform_input es tu función auxiliar existente
-                tensor = _transform_input(encoders[feature_name], feature_value, device)
-                model_inputs[feature_name] = tensor
-            else:
-                # Opcional: Loggear si llega un feature que no esperábamos o no tiene encoder
-                print(f"Ignorando feature '{feature_name}' por falta de encoder.")
-                pass
-    except Exception as e:
-        print(f"Error fatal al transformar inputs: {e}")
-        return None
-
-    # --- 2. Obtener Predicciones (Diccionario) ---
-    with torch.no_grad():
+    def predict_single(self, input_dict: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Predicción para una sola muestra (input_dict).
+        Ej: {'drug': 'Aspirin', 'gene': 'CYP2D6', ...}
+        """
+        model_inputs = {}
+        
         try:
-            predictions_dict = model(**model_inputs)
-        except TypeError as e:
-            print(f"Error de argumentos en el modelo: {e}")
-            print(f"Inputs enviados: {list(model_inputs.keys())}")
+            # Solo procesamos las columnas que el modelo espera (feature_cols)
+            for col in self.feature_cols:
+                val = input_dict.get(col) or input_dict.get(col.capitalize()) # Intento básico de case-insensitive
+                
+                if val is None:
+                    raise ValueError(f"Falta el feature '{col}' en el input.")
+                
+                model_inputs[col] = self._transform_scalar(col, val).unsqueeze(0) # Batch dim
+
+            # Inferencia
+            with torch.no_grad():
+                outputs = self.model(model_inputs)
+
+            return self._decode_outputs(outputs, is_batch=False)[0]
+
+        except Exception as e:
+            logger.error(f"Error en predicción única: {e}")
             return None
 
-    # --- 3. Procesar Salidas Dinámicamente ---
-    results = {}
-    for col in target_cols:
-        if col not in predictions_dict:
-            print(f"Advertencia: El modelo no devolvió la salida para '{col}'.")
-            continue
-
-        logits = predictions_dict[col]  # Shape [1, N_CLASSES]
-
-        if col in MULTI_LABEL_COLUMN_NAMES:
-            # --- Lógica Multi-Etiqueta ---
-            probs = torch.sigmoid(logits)
-            predicted_vector = (
-                (probs > 0.5).float().cpu().numpy()
-            )  # Shape [1, N_CLASSES]
-
-            decoded_labels = encoders[col].inverse_transform(predicted_vector)
-            results[col] = list(decoded_labels[0])
-
-        else:
-            # --- Lógica Etiqueta-Única ---
-            predicted_idx = torch.argmax(logits, dim=1).item()
-            decoded_label = encoders[col].inverse_transform([predicted_idx])[0]
-
-            # No mostrar la etiqueta __UNKNOWN__ al usuario
-            if decoded_label == UNKNOWN_TOKEN:
-                decoded_label = " --- "
-
-            results[col] = decoded_label
-
-    return results
-
-
-def predict_from_file(file_path, model, encoders, target_cols, batch_size=1024):
-    """
-    Predicción desde archivo optimizada (vectorizada).
-    Procesa todo el archivo en batches para evitar OOM en archivos muy grandes,
-    pero usa operaciones vectorizadas dentro de cada batch.
-    """
-    if model is None or encoders is None or target_cols is None:
-        raise ValueError("Se requieren modelo, encoders y target_cols")
-
-    ext = Path(file_path).suffix.lower()
-    ext_sep = {".csv": ",", ".tsv": "\t"}.get(ext, ",")
-
-    try:
-        # Leer todo el DF (asumiendo que cabe en memoria, si es gigante usar chunks)
-        df = pd.read_csv(file_path, sep=ext_sep, dtype=str)
-    except Exception as e:
-        print(f"Error al leer el archivo CSV: {e}")
-        return []
-
-    device = next(model.parameters()).device
-    model.eval()
-
-    # Preparar columnas de entrada
-    # Mapeo de nombres de columnas del CSV a nombres de encoders/modelo
-    col_map = {
-        "drug": "drug",
-        "gene": "gene",
-        "allele": "allele",
-        "genotype": "variant/haplotypes",  # CSV tiene 'genotype', encoder tiene 'variant/haplotypes'
-    }
-
-    # Verificar columnas
-    for csv_col in col_map.keys():
-        if csv_col not in df.columns:
-            print(f"Error: La columna '{csv_col}' no se encontró en el archivo.")
+    def predict_file(self, file_path: Union[str, Path], batch_size: int = 1024) -> List[Dict[str, Any]]:
+        """
+        Predicción masiva desde archivo CSV/TSV.
+        Usa procesamiento vectorizado y por lotes para eficiencia.
+        """
+        file_path = Path(file_path)
+        sep = "\t" if file_path.suffix == ".tsv" else ","
+        
+        try:
+            df = pd.read_csv(file_path, sep=sep, dtype=str)
+            # Normalizar columnas del CSV a minúsculas para coincidir con feature_cols
+            df.columns = df.columns.str.lower().str.strip()
+        except Exception as e:
+            logger.error(f"Error leyendo archivo {file_path}: {e}")
             return []
 
-    # --- 1. Transformar Inputs (Vectorizado) ---
-    # Se transforman todas las filas de una vez (es rápido con numpy)
-    input_tensors = {}
-    try:
-        for csv_col, encoder_key in col_map.items():
-            if encoder_key not in encoders:
-                print(f"Error: Encoder '{encoder_key}' no encontrado.")
-                return []
-
-            encoded_vals = _transform_batch(
-                encoders[encoder_key], df[csv_col], UNKNOWN_TOKEN
-            )
-            # Guardar como tensor en CPU, moveremos a GPU por batches
-            input_tensors[csv_col] = torch.tensor(encoded_vals, dtype=torch.long)
-
-    except Exception as e:
-        print(f"Error al transformar inputs del archivo: {e}")
-        return []
-
-    # --- 2. Inferencia por Batches ---
-    num_samples = len(df)
-    all_predictions = {col: [] for col in target_cols}
-
-    with torch.no_grad():
-        for i in range(0, num_samples, batch_size):
-            # Slice del batch
-            batch_end = min(i + batch_size, num_samples)
-
-            # Preparar inputs del batch y mover a device
-            # El orden de argumentos en forward es importante si no se usan kwargs
-            # DeepFM_PGenModel.forward(drug, genalle, gene, allele) -> Nombres en modelo
-            # Mapeo: drug->drug, genotype->genalle, gene->gene, allele->allele
-
-            b_drug = input_tensors["drug"][i:batch_end].to(device)
-            b_genalle = input_tensors["genotype"][i:batch_end].to(device)
-            b_gene = input_tensors["gene"][i:batch_end].to(device)
-            b_allele = input_tensors["allele"][i:batch_end].to(device)
-
-            # Forward
-            # IMPORTANTE: El modelo espera argumentos posicionales o kwargs que coincidan
-            # forward(self, inputs: Dict) o forward(self, drug, genalle, gene, allele)
-            # Revisando model.py, forward toma un dict 'inputs' O kwargs.
-            # Pero en kge_test.py y otros sitios se llama con args posicionales?
-            # En model.py original: forward(self, inputs: Dict[str, torch.Tensor], **kwargs)
-            # Así que pasamos kwargs.
-
-            batch_outputs = model(
-                drug=b_drug, genalle=b_genalle, gene=b_gene, allele=b_allele
-            )
-
-            # Procesar outputs del batch
-            for col in target_cols:
-                if col not in batch_outputs:
-                    continue
-
-                logits = batch_outputs[col]
-
-                if col in MULTI_LABEL_COLUMN_NAMES:
-                    # Multi-label: Sigmoid > 0.5
-                    probs = torch.sigmoid(logits)
-                    preds = (probs > 0.5).float().cpu().numpy()
-                    all_predictions[col].append(preds)
+        # 1. Validar y Transformar Inputs
+        input_tensors = {}
+        try:
+            for col in self.feature_cols:
+                if col not in df.columns:
+                    # Mapeo de emergencia para retrocompatibilidad con nombres antiguos
+                    # Si tu CSV tiene 'genotype' pero el modelo quiere 'genalle'
+                    aliases = {"genalle": "genotype", "drug": "drug_name"} 
+                    alias = aliases.get(col)
+                    if alias and alias in df.columns:
+                        input_tensors[col] = self._transform_vectorized(col, df[alias])
+                    else:
+                        raise ValueError(f"Columna requerida '{col}' no encontrada en el CSV.")
                 else:
-                    # Single-label: Argmax
-                    preds = torch.argmax(logits, dim=1).cpu().numpy()
-                    all_predictions[col].append(preds)
+                    input_tensors[col] = self._transform_vectorized(col, df[col])
+        except Exception as e:
+            logger.error(f"Error pre-procesando datos: {e}")
+            return []
 
-    # --- 3. Decodificar y Ensamblar (Vectorizado) ---
-    # Concatenar resultados de batches
-    final_results = df.copy()
+        # 2. Inferencia por Batches
+        num_samples = len(df)
+        all_outputs_list = {t: [] for t in self.target_cols}
 
-    for col in target_cols:
-        if not all_predictions[col]:
-            continue
+        with torch.no_grad():
+            for i in range(0, num_samples, batch_size):
+                end = min(i + batch_size, num_samples)
+                
+                # Construir batch dict y mover a GPU
+                batch_inputs = {
+                    col: tensor[i:end].to(self.device) 
+                    for col, tensor in input_tensors.items()
+                }
 
-        # Concatenar lista de arrays
-        preds_array = np.concatenate(all_predictions[col], axis=0)
+                # Forward
+                batch_preds = self.model(batch_inputs)
+                
+                # Guardar logits en CPU para no saturar VRAM
+                for t in self.target_cols:
+                    all_outputs_list[t].append(batch_preds[t].cpu())
 
-        if col in MULTI_LABEL_COLUMN_NAMES:
-            # Inverse transform de multilabel es lento (lista de tuplas)
-            # No hay forma vectorizada directa en sklearn para inverse_transform de MLB que devuelva strings planos
-            decoded = encoders[col].inverse_transform(preds_array)
-            # Convertir tuplas a listas
-            final_results[col] = [list(d) for d in decoded]
-        else:
-            # Inverse transform de label encoder es rápido
-            decoded = encoders[col].inverse_transform(preds_array)
+        # 3. Concatenar y Decodificar
+        # Reconstruimos los tensores completos de logits
+        full_logits = {
+            t: torch.cat(all_outputs_list[t], dim=0) 
+            for t in self.target_cols
+        }
+        
+        # Decodificamos todo junto
+        results_list = self._decode_outputs(full_logits, is_batch=True)
+        
+        # Fusionar con datos originales para contexto
+        # Convertimos resultados a DataFrame para unir fácil
+        results_df = pd.DataFrame(results_list)
+        final_df = pd.concat([df.reset_index(drop=True), results_df], axis=1)
+        
+        return final_df.to_dict(orient="records")
 
-            # Reemplazar UNKNOWN_TOKEN con "Desconocido" (vectorizado)
-            # Usamos numpy para reemplazo rápido
-            decoded = np.where(decoded == UNKNOWN_TOKEN, "Desconocido", decoded)
-            final_results[col] = decoded
+    def _decode_outputs(self, outputs: Dict[str, torch.Tensor], is_batch: bool) -> List[Dict[str, Any]]:
+        """
+        Convierte Logits -> Etiquetas legibles.
+        Maneja Single-label y Multi-label.
+        """
+        # Determinamos el tamaño del batch desde el primer output
+        first_out = next(iter(outputs.values()))
+        batch_size = first_out.size(0)
+        
+        decoded_results = {col: [] for col in self.target_cols}
 
-    # Convertir a lista de dicts para mantener compatibilidad de retorno
-    return final_results.to_dict(orient="records")
+        for col in self.target_cols:
+            enc = self.encoders[col]
+            logits = outputs[col] # [Batch, Classes]
+
+            if col in MULTI_LABEL_COLUMN_NAMES:
+                # Multi-label
+                probs = torch.sigmoid(logits)
+                preds_bin = (probs > 0.5).int().numpy()
+                
+                # Inverse transform devuelve lista de tuplas de etiquetas
+                # Scikit-learn MultiLabelBinarizer inverse_transform toma matriz binaria
+                labels_tuples = enc.inverse_transform(preds_bin)
+                decoded_results[col] = [list(labels) for labels in labels_tuples]
+            
+            else:
+                # Single-label
+                preds_idx = torch.argmax(logits, dim=1).numpy()
+                labels = enc.inverse_transform(preds_idx)
+                
+                # Limpiar token desconocido para el usuario final
+                clean_labels = [
+                    label if label != UNKNOWN_TOKEN else "Desconocido" 
+                    for label in labels
+                ]
+                decoded_results[col] = clean_labels
+
+        # Transponer de Dict[List] a List[Dict]
+        # De: {'target1': [a, b], 'target2': [c, d]}
+        # A:  [{'target1': a, 'target2': c}, {'target1': b, 'target2': d}]
+        final_list = []
+        for i in range(batch_size):
+            row = {col: decoded_results[col][i] for col in self.target_cols}
+            final_list.append(row)
+            
+        return final_list

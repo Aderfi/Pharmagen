@@ -1,0 +1,34 @@
+Pharmagen/
+├── data/                  # Datos (Raw, Processed, Ref Genomes)
+├── logs/                  # Logs de ejecución
+├── reports/               # Gráficos y reportes de Optuna
+├── src/
+│   ├── config/            # Archivos TOML (config, models, paths)
+│   ├── interface/         # Lógica de CLI y Utilidades Visuales
+│   ├── pgen_model/        # Núcleo de Deep Learning
+│   │   ├── model.py       # Arquitectura DeepFM
+│   │   ├── pipeline.py    # Flujo de entrenamiento
+│   │   ├── predict.py     # Motor de inferencia
+│   │   └── optuna_tuner.py # Optimizador
+│   └── utils/             # Utilidades compartidas (Data, System, Training)
+├── main.py                # Punto de entrada (Entry Point)
+├── setup.py               # Script de configuración inicial
+└── pyproject.toml         # Definición del paquete y dependencias
+
+################################
+   USO
+################################
+
+# Activa tu entorno virtual primero
+pip install -e .
+
+# Para instalar también herramientas de entrenamiento
+pip install -e ".[train]"
+
+>> python main.py
+
+# Entrenamiento estándar
+>> python main.py --mode train --model Phenotype_Effect_Outcome --input data/processed/train_data.tsv
+
+# Con optimización de hiperparámetros (Optuna)
+>> python main.py --mode train --model Phenotype_Effect_Outcome --input data/processed/train_data.tsv --optuna

@@ -1,0 +1,35 @@
+# src/config/paths.toml
+
+[metadata]
+project_name = "Pharmagen"
+version = "0.667"
+author = "Astordna/Aderfi/Adrim Hamed Outmani"
+
+[base]
+# Carpetas raíz
+data = "data"
+logs = "logs"
+results = "results"
+reports = "reports"
+cache = "cache"
+src = "src"
+
+[data]
+# Subcarpetas de data
+raw = "data/raw"
+processed = "data/processed"
+dicts = "data/dicts"
+ref_genome = "data/ref_genome"
+
+[models]
+# Directorios relacionados con el modelo Deep Learning
+root = "src/pgen_model"
+models_saved = "src/pgen_model/models"
+encoders = "src/pgen_model/encoders"
+vocabs = "src/pgen_model/labels_vocabs"
+
+[reports]
+# Subcarpetas de reports
+figures = "reports/figures"
+optuna = "reports/optuna_reports"
+training = "reports/train_reports"
