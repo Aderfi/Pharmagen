@@ -1,0 +1,41 @@
+# paths.toml
+
+[metadata]
+project_name = "Pharmagen"
+autor = "Astordna/Aderfi/Adrim Hamed Outmani"
+version = "0.667"
+fecha_creacion = "2024-06-15"
+
+[project_dirs]
+root_cache = "cache"
+root_data = "data"
+root_logs = "logs"
+root_results = "results"
+
+[source_code]
+src_main = "src"
+src_scripts = "src/scripts"
+src_config = "src/config"
+
+[data]
+data_dict = "data/dicts"
+data_raw = ""
+data_processed = "data/processed"
+train_data = "data/training_files"
+
+
+[data.ref_genome]
+fasta = "data/ref_genome/HSapiens_GChr38.fa"
+fai = "data/ref_genome/HSapiens_GChr38.fa.fai"
+
+[deep_learning_model]
+model_root = "src/pgen_model"
+model_scripts = "src/pgen_model/scripts"   # Diferente de src_scripts
+model_weights = "src/pgen_model/models"
+model_encoders = "src/pgen_model/encoders"
+
+[reports]
+report_dir = "reports"
+optuna_reports = "reports/optuna_reports"
+train_pipeline_reports = "reports/train_pipeline_reports"
+figures = "reports/figures"

@@ -1,0 +1,137 @@
+{
+  "model": "Phenotype_Effect_Outcome",
+  "optimization_type": "multi_objective",
+  "best_trial": {
+    "number": 0,
+    "values": [
+      3.616928009759812,
+      -0.41142609857985185
+    ],
+    "params": {
+      "embedding_dim": 256,
+      "n_layers": 5,
+      "hidden_dim": 1792,
+      "dropout_rate": 0.2583975785700018,
+      "weight_decay": 8.211477990484627e-06,
+      "learning_rate": 1.3934316495446607e-05,
+      "batch_size": 128
+    },
+    "user_attrs": {
+      "avg_accuracy": 0.655884132612856,
+      "normalized_loss": 0.7126707658569464,
+      "all_accuracies": [
+        0.8947040695710908,
+        0.648176291793313,
+        0.4247720364741641
+      ],
+      "seed": 711,
+      "phenotype_outcome_f1_samples": 0.7654010706454333,
+      "phenotype_outcome_f1_macro": 0.4736148620550542,
+      "phenotype_outcome_precision_samples": 0.7870445748105325,
+      "phenotype_outcome_recall_samples": 0.7640164247928476,
+      "effect_direction_f1_macro": 0.487729407647089,
+      "effect_direction_f1_weighted": 0.6358521563936644,
+      "effect_direction_precision_macro": 0.5876208232744226,
+      "effect_direction_recall_macro": 0.46345463879343757,
+      "effect_type_f1_macro": 0.23275835293440122,
+      "effect_type_f1_weighted": 0.41142609857985185,
+      "effect_type_precision_macro": 0.25353540732746294,
+      "effect_type_recall_macro": 0.24535226507823263,
+      "critical_task_f1": 0.41142609857985185,
+      "critical_task_name": "effect_type"
+    }
+  },
+  "top5": [
+    {
+      "number": 0,
+      "values": [
+        3.616928009759812,
+        -0.41142609857985185
+      ],
+      "params": {
+        "embedding_dim": 256,
+        "n_layers": 5,
+        "hidden_dim": 1792,
+        "dropout_rate": 0.2583975785700018,
+        "weight_decay": 8.211477990484627e-06,
+        "learning_rate": 1.3934316495446607e-05,
+        "batch_size": 128
+      },
+      "critical_f1": 0.41142609857985185
+    },
+    {
+      "number": 1,
+      "values": [
+        3.5615928173065186,
+        -0.4540133967510696
+      ],
+      "params": {
+        "embedding_dim": 384,
+        "n_layers": 4,
+        "hidden_dim": 1280,
+        "dropout_rate": 0.3912812989383563,
+        "weight_decay": 4.302547650008131e-05,
+        "learning_rate": 6.322824047179971e-05,
+        "batch_size": 64
+      },
+      "critical_f1": 0.4540133967510696
+    },
+    {
+      "number": 2,
+      "values": [
+        3.6257749904285776,
+        -0.4034107149406334
+      ],
+      "params": {
+        "embedding_dim": 256,
+        "n_layers": 5,
+        "hidden_dim": 1792,
+        "dropout_rate": 0.2904942691236519,
+        "weight_decay": 3.3335637390843154e-06,
+        "learning_rate": 1.3861751067198894e-05,
+        "batch_size": 256
+      },
+      "critical_f1": 0.4034107149406334
+    },
+    {
+      "number": 3,
+      "values": [
+        3.578778346379598,
+        -0.45347662501789393
+      ],
+      "params": {
+        "embedding_dim": 256,
+        "n_layers": 2,
+        "hidden_dim": 2048,
+        "dropout_rate": 0.41779165949407104,
+        "weight_decay": 0.003560956427944018,
+        "learning_rate": 0.00014133859584085663,
+        "batch_size": 512
+      },
+      "critical_f1": 0.45347662501789393
+    },
+    {
+      "number": 4,
+      "values": [
+        3.679314895109697,
+        -0.4438938375599183
+      ],
+      "params": {
+        "embedding_dim": 640,
+        "n_layers": 4,
+        "hidden_dim": 512,
+        "dropout_rate": 0.38132951055570585,
+        "weight_decay": 0.0011881787730979865,
+        "learning_rate": 0.00010089872218717835,
+        "batch_size": 256
+      },
+      "critical_f1": 0.4438938375599183
+    }
+  ],
+  "n_trials": 100,
+  "clinical_priorities": {
+    "effect_type": 0.5,
+    "phenotype_outcome": 0.3,
+    "effect_direction": 0.2
+  }
+}
