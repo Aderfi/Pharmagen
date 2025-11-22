@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -22,19 +21,22 @@ import tomli  # Requiere: pip install tomli Python <= 3.10 | pip install tomllib
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PATHS_FILE = Path(__file__).parent / "paths.toml"
-if not PATHS_FILE.exists():
-    raise FileNotFoundError(f"CRITICAL: paths.toml not found at {PATHS_FILE}")
+CFG_FILE = Path(__file__).parent / "config.toml"
 
-with open(PATHS_FILE, "rb") as f:
-    _PATHS_CONFIG = tomli.load(f)
+if not PATHS_FILE.exists() or not CFG_FILE.exists():
+    raise FileNotFoundError(f"CRITICAL: paths.toml or config.toml not found at {PATHS_FILE} and {CFG_FILE}")
+
+with open(PATHS_FILE, "rb") as f_paths, open(CFG_FILE, "rb") as f_cfg:
+    _PATHS_CONFIG = tomli.load(f_paths  )
+    _GLOBAL_CONFIG = tomli.load(f_cfg)
 
 def _resolve_path(relative_path: str) -> Path:
     return PROJECT_ROOT / relative_path
 
 # Metadatos
-METADATA = _PATHS_CONFIG.get("metadata", {})
+METADATA = _GLOBAL_CONFIG.get("metadata", {})
 PROJECT_NAME = METADATA.get("project_name", "Pharmagen")
-VERSION = METADATA.get("version", "0.0.0")
+VERSION = METADATA.get("version", "Couldnt fetch version")
 
 # Directorios Base
 _base = _PATHS_CONFIG.get("base", {})
@@ -78,3 +80,12 @@ DATE_STAMP = datetime.now().strftime("%Y_%m_%d")
 # Crear directorios si no existen
 for path in [DATA_DIR, LOGS_DIR, RESULTS_DIR, MODELS_DIR, CACHE_DIR]:
     path.mkdir(parents=True, exist_ok=True)
+
+if __name__ == "__main__":
+    print(f"Project Root: {PROJECT_ROOT}")
+    print(f"Version: {VERSION}")
+
+    print(f"Data Dir: {DATA_DIR}")
+    print(f"Logs Dir: {LOGS_DIR}")
+    print(f"Models Dir: {MODELS_DIR}")
+    print(f"Model Train Data: {MODEL_TRAIN_DATA}")

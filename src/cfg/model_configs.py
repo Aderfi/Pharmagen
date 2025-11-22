@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os, sys
 import logging
 import sys
 from pathlib import Path
@@ -36,8 +37,13 @@ MODELS_FILE = CONFIG_DIR / "models.toml"
 def _load_toml(path: Path) -> Dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
-    with open(path, "rb") as f:
-        return tomli.load(f)
+    if sys.version_info >= (3, 11):
+        import tomllib
+        with open(path, "rb") as f:
+            return tomllib.load(f)
+    else:
+        with open(path, "rb") as f:
+            return tomli.load(f)
 
 def get_model_names() -> List[str]:
     """Devuelve lista de modelos disponibles en models.toml."""
@@ -51,8 +57,8 @@ def get_model_config(model_name: str) -> Dict[str, Any]:
     """
     # 1. Cargar Defaults Globales
     global_conf = _load_toml(GLOBAL_CONFIG_FILE)
-    defaults = global_conf.get("hyperparameters", {})
-    project_conf = global_conf.get("project", {})
+    defaults = global_conf.get("defaults", {}).get("params")
+    project_conf = global_conf.get("project", {}) and global_conf.get("metadata", {})
     
     # 2. Cargar Configuración del Modelo
     models_data = _load_toml(MODELS_FILE)
@@ -61,15 +67,13 @@ def get_model_config(model_name: str) -> Dict[str, Any]:
     
     specific_model_data = models_data[model_name]
     
-    # 3. Fusión (Merge)
-    # Comenzamos con los defaults
     final_config = defaults.copy()
     
     # Añadimos configuraciones de proyecto (ej: multi_label_cols)
     final_config.update(project_conf)
     
     # Extraemos subsecciones especiales antes de aplanar
-    optuna_params = specific_model_data.pop("optuna", {})
+    optuna_params = specific_model_data.pop("optuna")
     weights = specific_model_data.pop("weights", None)
     specific_params = specific_model_data.pop("params", {})
     
@@ -105,10 +109,14 @@ MULTI_LABEL_COLUMN_NAMES = set(_global.get("project", {}).get("multi_label_cols"
 # CLI SELECTION
 # =============================================================================
 
-def select_model(prompt: str = "Selecciona el modelo a entrenar:") -> str:
+def select_model(prompt: str = "Selecciona el modelo a entrenar:", default_choice: Optional[int] = 2) -> str:
     """CLI interactiva para elegir modelo."""
     options = get_model_names()
-    
+    if default_choice is not None and 1 <= default_choice <= len(options):
+        selected = options[default_choice - 1]
+        print(f"Selected by default: {selected}")
+        return selected
+
     if not options:
         print("Error: No hay modelos definidos en models.toml")
         sys.exit(1)
@@ -133,7 +141,8 @@ def select_model(prompt: str = "Selecciona el modelo a entrenar:") -> str:
 if __name__ == "__main__":
 
     PROJECT_ROOT = Path(__file__).parent.parent.parent
-    for model in get_model_names():
-        cfg = get_model_config(model)
-        print(f"Modelo: {model} | \n Features: {cfg['features']} | \n Targets: {cfg['targets']}")
-        print(f" Parámetros: { {k: v for k, v in cfg.items() if k not in ['features', 'targets', 'cols']} }")
+    model = select_model(default_choice=2)
+    cfg = get_model_config(model)
+
+    for i in cfg.keys():
+        print(f"\n{i}: {cfg[i]}")

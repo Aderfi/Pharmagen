@@ -12,8 +12,8 @@ author = "Adrim Hamed Outmani"
 multi_label_cols = ["phenotype_outcome"]
 seed = 711
 
-[hyperparameters]
-# Valores por defecto para cualquier modelo si no se especifican
+[defaults]
+[defaults.params]
 embedding_dim = 128
 n_layers = 2
 hidden_dim = 2048
@@ -27,11 +27,14 @@ use_batch_norm = false
 use_layer_norm = false
 early_stopping_patience = 15
 scheduler_type = "plateau"
-
-# Parámetros específicos de arquitecturas complejas (Defaults)
-attention_dim_feedforward = 512
+#==== Paramétros de arquitectura extendida =========
 attention_dropout = 0.1
 num_attention_layers = 1
 fm_dropout = 0.1
 fm_hidden_layers = 0
 fm_hidden_dim = 256
+
+
+
+
+
