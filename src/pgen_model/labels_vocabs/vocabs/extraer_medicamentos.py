@@ -1,6 +1,7 @@
 import json
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 # Carga el archivo JSON
 with open("drug_gene.json", "r", encoding="utf-8") as f:

@@ -7,9 +7,10 @@
 # var_fa_ann.csv: "Variant Annotation ID","Variant/Haplotypes","Gene","Drug(s)","PMID","Phenotype Category","Significance","Notes","Sentence","Alleles","Specialty Population","Assay type","Metabolizer types","isPlural","Is/Is Not associated","Direction of effect","Functional terms","Gene/gene product","When treated with/exposed to/when assayed with","Multiple drugs And/or","Cell type","Comparison Allele(s) or Genotype(s)","Comparison Metabolizer types"
 # var_pheno_ann.csv: "Variant Annotation ID","Variant/Haplotypes","Gene","Drug(s)","PMID","Phenotype Category","Significance","Notes","Sentence","Alleles","Specialty Population","Metabolizer types","isPlural","Is/Is Not associated","Direction of effect","Side effect/efficacy/other","Phenotype","Multiple phenotypes And/or","When treated with/exposed to/when assayed with","Multiple drugs And/or","Population types","Population Phenotypes or diseases","Multiple phenotypes or diseases And/or","Comparison Allele(s) or Genotype(s)","Comparison Metabolizer types"
 
-import pandas as pd
 import glob
 import re
+
+import pandas as pd
 
 csv_files = glob.glob("*.csv")
 match_list = {}

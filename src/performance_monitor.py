@@ -24,8 +24,9 @@ including GPU memory usage, data loading throughput, and training speed.
 import logging
 import time
 from typing import Dict, Optional
-import torch
+
 import psutil
+import torch
 
 logger = logging.getLogger(__name__)
 

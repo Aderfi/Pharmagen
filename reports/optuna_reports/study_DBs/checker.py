@@ -1,5 +1,6 @@
-import optuna
 import os
+
+import optuna
 
 # <--- AJUSTA ESTO --->
 # Pon aquí el nombre EXACTO de tu archivo .db

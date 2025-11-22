@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pysam #type: ignore      # Biblioteca solo disponible en Linux/Unix        
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Generator
+from typing import Any, Dict, Generator, List, Optional
+
+import pysam  # type: ignore      # Biblioteca solo disponible en Linux/Unix
+
 import src.cfg.config as cfg
 
 # Rutas constantes

@@ -17,7 +17,9 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+
 from src.cfg.config import LOGS_DIR
+
 
 def setup_logging():
     LOGS_DIR.mkdir(parents=True, exist_ok=True)

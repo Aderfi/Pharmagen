@@ -17,16 +17,16 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Optional, Union, Set, Dict
+from typing import Dict, List, Optional, Set, Union
 
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+from torch.utils.data import Dataset
 
-from src.utils.data import load_and_prep_dataset, drugs_to_atc, UNKNOWN_TOKEN
+from src.utils.data import UNKNOWN_TOKEN, drugs_to_atc, load_and_prep_dataset
 
 logger = logging.getLogger(__name__)
 

@@ -6,35 +6,35 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-import os
-import sys
 import logging
 import multiprocessing
+import os
+import sys
 import warnings
 from itertools import product
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict
 
-import pandas as pd
+import gensim
+import joblib
 import networkx as nx
 import numpy as np
+import pandas as pd
 import torch
-import joblib
-import gensim
 from gensim.models import Word2Vec
+from rapidfuzz import fuzz, process
 from tqdm import tqdm
-from rapidfuzz import process, fuzz
 
 # Imports condicionales para el método BioBERT
 try:
-    from transformers import AutoTokenizer, AutoModel # type: ignore
+    from transformers import AutoModel, AutoTokenizer  # type: ignore
 except ImportError:
     AutoTokenizer = None
     AutoModel = None
 
 # Imports condicionales para Graph/PecanPy
 try:
-    from pecanpy import pecanpy # type: ignore
+    from pecanpy import pecanpy  # type: ignore
 except ImportError:
     pecanpy = None
 

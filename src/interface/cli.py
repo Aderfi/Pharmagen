@@ -14,24 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+
 # src/interface/cli.py
 # Control de interfaz de usuario
 import sys
 import time
-import logging
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 # Proyecto
 from src.cfg.config import DATA_DIR, DATE_STAMP
 from src.cfg.model_configs import select_model
-from src.pipeline import train_pipeline
-from src.optuna_tuner import run_optuna_study
-from src.predict import PGenPredictor
 
 # UI
-from src.interface.utils import Spinner, input_path, print_header, print_success, print_error
-from src.utils.system import print_gnu_notice, print_conditions_details, print_warranty_details
+from src.interface.utils import Spinner, input_path, print_error, print_header, print_success
+from src.optuna_tuner import run_optuna_study
+from src.pipeline import train_pipeline
+from src.predict import PGenPredictor
+from src.utils.system import print_conditions_details, print_gnu_notice, print_warranty_details
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +83,7 @@ def run_training_flow():
         print_error("Opción inválida.")
 
 def _run_standard_training(model_name: str, csv_path: Path):
-    epochs_str = input("Número de épocas [100]: ").strip()
+    epochs_str = input("Número de épocas [default -> 100]: ").strip() 
     epochs = int(epochs_str) if epochs_str.isdigit() else 100
     
     print(f"\nIniciando entrenamiento estándar para '{model_name}'...")
@@ -93,7 +95,7 @@ def _run_standard_training(model_name: str, csv_path: Path):
     print_success("Entrenamiento finalizado.")
 
 def _run_optuna_training(model_name: str, csv_path: Path):
-    trials_str = input("Número de trials [50]: ").strip()
+    trials_str = input("Número de trials [default -> 50]: ").strip()
     n_trials = int(trials_str) if trials_str.isdigit() else 50
     
     print(f"\nIniciando Optuna para '{model_name}' ({n_trials} trials)...")

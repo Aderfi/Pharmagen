@@ -15,16 +15,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
-import os
-import time
-import sys
 import logging
-
+import os
+import sys
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from src.cfg.config import VERSION, LOGS_DIR, PROJECT_ROOT, METADATA
+from src.cfg.config import LOGS_DIR, METADATA, PROJECT_ROOT, VERSION
 
 CONFIG_FILE = Path("asaver")
 

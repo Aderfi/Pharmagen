@@ -16,19 +16,19 @@
 
 
 import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union, cast
+
 import joblib
-import torch
 import numpy as np
 import pandas as pd
-from pathlib import Path
-from typing import Dict, List, Any, Union, Optional, cast
-
+import torch
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 
 # Imports del proyecto
 from src.cfg.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES
-from src.model import DeepFM_PGenModel
 from src.cfg.model_configs import get_model_config
+from src.model import DeepFM_PGenModel
 
 logger = logging.getLogger(__name__)
 

@@ -14,13 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import itertools
+
 # Agrupación de herramientas visuales genéricas
 import sys
-import time
 import threading
-import itertools
+import time
 from pathlib import Path
 from typing import Optional
+
 
 class Spinner:
     """
