@@ -3,7 +3,7 @@ import joblib
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 import numpy as np
 from pathlib import Path
-from src.config.config import MODEL_ENCODERS_DIR
+from src.cfg.config import MODEL_ENCODERS_DIR
 
 file_name = "f"
 ENCODERS_FILE = Path(MODEL_ENCODERS_DIR / file_name)

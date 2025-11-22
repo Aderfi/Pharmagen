@@ -17,14 +17,24 @@
 #!/usr/bin/env python3
 # coding=utf-8
 """
-Script de Configuración Inicial del Proyecto (Setup Pipeline).
-Gestiona:
-1. Creación de la estructura de directorios.
-2. Creación de archivos de configuración base.
-3. Instalación de dependencias (Venv o Conda).
-4. Marcado del sistema como "Instalado".
-"""
+Script de Inicialización y Configuración de Entorno (Bootstrap).
 
+Este módulo es responsable de preparar el sistema operativo para ejecutar Pharmagen.
+Se debe ejecutar una única vez tras clonar el repositorio o si se necesita
+reparar la estructura del proyecto.
+
+Funcionalidades:
+    - Verificación de la versión de Python (Target: 3.10).
+    - Creación de la estructura de directorios estándar (data, logs, models, etc.).
+    - Detección e instalación automática de dependencias (pip/conda).
+    - Generación de archivos de bandera (flag files) para indicar estado saludable.
+
+Uso:
+    $ python setup.py
+
+Author:
+    Adrim Hamed Outmani (@Aderfi)
+"""
 import sys
 import subprocess
 import shutil
@@ -147,6 +157,8 @@ class ProjectSetup:
         print("1. Pip (Entorno Virtual actual)")
         print("2. Conda (Entorno actual)")
         print("3. Omitir instalación (Solo crear directorios)")
+        print("\n ===== ATENCION: Se recomienda CONDA si ejecutas en Windows.====\
+                  ===== Pip es más óptimo en Linux/OSX.                      ====")
         
         choice = input("Opción [1]: ").strip()
         

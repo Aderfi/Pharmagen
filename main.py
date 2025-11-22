@@ -17,13 +17,33 @@
 #!/usr/bin/env python3
 # coding=utf-8
 """
-Software: pharmagen_pmodel
-Versión: 
-Autor: Astordna / Aderfi / Adrim Hamed Outmani
-Fecha: 2024-06-15
-Descripción: Punto de entrada principal del software Pharmagen. 
-             Orquesta el flujo entre procesamiento de datos, 
-             entrenamiento (Standard/Optuna) y predicción (Inferencia).
+Pharmagen - Punto de Entrada Principal (CLI & Orquestador).
+
+Este script actúa como la interfaz principal de ejecución para el software Pharmagen.
+Su responsabilidad es inicializar el entorno, configurar el sistema de logging global
+y enrutar la solicitud del usuario hacia el módulo correspondiente (Entrenamiento,
+Predicción o Interfaz Interactiva).
+
+Uso:
+    El script puede ejecutarse en dos modalidades:
+    1. Interactivo (Por defecto): Lanza un menú visual.
+    2. Headless (CLI): Ejecuta tareas específicas mediante argumentos.
+
+Ejemplos:
+    # 1. Iniciar menú interactivo
+    $ python main.py
+
+    # 2. Entrenar un modelo específico automáticamente
+    $ python main.py --mode train --model Phenotype_Effect_Outcome --input data/train.tsv
+
+    # 3. Realizar predicciones sobre un archivo nuevo
+    $ python main.py --mode predict --model Phenotype_Effect_Outcome --input data/pacientes.csv
+
+Author:
+    Adrim Hamed Outmani (@Aderfi)
+
+Copyright:
+    (C) 2025 Adrim Hamed Outmani. Licensed under GNU GPLv3.
 """
 
 import argparse
@@ -49,7 +69,6 @@ from src.utils.logger import setup_logging
 
 # Constantes
 DATE_STAMP = datetime.now().strftime('%Y-%m-%d')
-
 
 # ==============================================================================
 # MAIN ENTRY POINT

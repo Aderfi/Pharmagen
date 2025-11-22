@@ -92,8 +92,8 @@ def drugs_to_atc(
         for token in tokens:
             if token in atc_dict_rev:
                 codes.append(atc_dict_rev[token])
-            elif process: # Fuzzy match solo si rapidfuzz está instalado
-                result = process.extractOne(token, atc_keys, scorer=fuzz.WRatio, score_cutoff=92)
+            elif process: 
+                result = process.extractOne(token, atc_keys, score_cutoff=92)
                 if result:
                     codes.append(atc_dict_rev[result[0]])
                 else:
@@ -110,36 +110,117 @@ def drugs_to_atc(
     df[atc_col] = df[drug_col].map(get_atc_codes).astype("string")
     return df
 
-def normalize_dataframe(
-    df: pd.DataFrame,
+def load_and_prep_dataset(
+    csv_path: Union[str, Path],
     all_cols: List[str],
-    multi_label_cols: Optional[List[str]] = None
+    target_cols: List[str],
+    multi_label_targets: Optional[List[str]] = None,
+    stratify_cols: Union[List[str], str, None] = None,
 ) -> pd.DataFrame:
-    """Limpieza y normalización estándar del DataFrame."""
-    multi_label_cols = multi_label_cols or []
+    """
+    Carga, limpia, normaliza y filtra el dataset en un solo paso robusto.
+    """
+    csv_path = Path(csv_path)
+    multi_label_targets = multi_label_targets or []
     
-    # Normalizar nombres de columnas
-    df.columns = df.columns.str.lower().str.strip()
-    
+    # Normalizamos inputs de configuración a minúsculas para evitar errores
     all_cols_lower = [c.lower() for c in all_cols]
-    multi_label_lower = [c.lower() for c in multi_label_cols]
+    multi_label_lower = [c.lower() for c in multi_label_targets]
     
-    cols_present = set(df.columns)
-    single_label_cols = [c for c in cols_present if c in all_cols_lower and c not in multi_label_lower]
+    logger.info(f"Cargando y procesando datos desde {csv_path}...")
 
-    # Limpieza Single Label
+    # -------------------------------------------------------
+    # 1. CARGA (LOAD)
+    # -------------------------------------------------------
+    try:
+        # Intentamos cargar solo lo necesario.
+        # Nota: usecols funciona sobre los nombres ORIGINALES del CSV.
+        # Si no estamos seguros del case del CSV, mejor leer todo y filtrar después.
+        # Aquí asumo un intento optimista.
+        df = pd.read_csv(
+            csv_path, 
+            sep="\t", 
+            usecols=[lambda c: c.lower() in all_cols_lower], 
+            dtype=str
+        )
+    except ValueError:
+        logger.warning("Error filtrando columnas en carga. Leyendo archivo completo...")
+        df = pd.read_csv(csv_path, sep="\t", dtype=str)
+
+    # -------------------------------------------------------
+    # 2. ESTANDARIZACIÓN INICIAL (Initial Setup)
+    # -------------------------------------------------------
+    # Forzamos minúsculas y sin espacios en los nombres de las columnas YA MISMO
+    df.columns = df.columns.str.lower().str.strip()
+
+    # -------------------------------------------------------
+    # 3. LIMPIEZA DE CONTENIDO (Cleaning)
+    # -------------------------------------------------------
+    # A. Features y Single Labels
+    # Identificamos qué columnas tenemos realmente tras la carga
+    existing_cols = set(df.columns)
+    
+    # Calculamos single labels: están en 'all_cols' pero NO son multilabel
+    single_label_cols = [
+        c for c in all_cols_lower 
+        if c in existing_cols and c not in multi_label_lower
+    ]
+
     if single_label_cols:
+        # Relleno masivo de nulos y conversión a string
         df[single_label_cols] = df[single_label_cols].fillna("UNKNOWN").astype(str)
+        
+        # Limpieza vectorizada
         for col in single_label_cols:
             df[col] = (
-                df[col].str.replace(RE_SPLITTERS, "|", regex=True)
-                       .str.replace(" ", "_", regex=False)
-                       .str.strip().str.lower()
+                df[col]
+                .str.replace(r"[,;]+", "|", regex=True) # Unificar separadores
+                .str.replace(" ", "_", regex=False)     # Espacios a guiones bajos
+                .str.strip()
+                .str.lower()
             )
 
-    # Limpieza Multi Label
+    # B. Features Multi Label
     for col in multi_label_lower:
-        if col in cols_present:
+        if col in existing_cols:
+            # Asumimos que serialize_multi_labelcols maneja nulos
             df[col] = df[col].apply(serialize_multi_labelcols).str.lower()
+
+    # -------------------------------------------------------
+    # 4. LÓGICA DE DOMINIO (Domain Logic)
+    # -------------------------------------------------------
+    # Ejemplo: Generación de códigos ATC si tenemos fármacos
+    if "drug" in df.columns and "atc" not in df.columns:
+        # df = drugs_to_atc(df, drug_col="drug", atc_col="atc")
+        # logger.info("Columna ATC generada.")
+        pass
+
+    # -------------------------------------------------------
+    # 5. ESTRATIFICACIÓN Y FILTRADO (Stratify & Filter)
+    # -------------------------------------------------------
+    if stratify_cols:
+        s_cols = [stratify_cols] if isinstance(stratify_cols, str) else stratify_cols
+        # Normalizamos nombres de config a minúsculas
+        s_cols = [s.lower() for s in s_cols]
+        
+        existing_strat_cols = [c for c in s_cols if c in df.columns]
+
+        if existing_strat_cols:
+            # Crear la columna combinada
+            df["stratify_col"] = df[existing_strat_cols].astype(str).agg("|".join, axis=1)
             
+            # Filtrar clases con solo 1 muestra (rompen el split train/test)
+            counts = df["stratify_col"].value_counts()
+            valid_strata = counts[counts > 1].index
+            initial_len = len(df)
+            df = df[df["stratify_col"].isin(valid_strata)].reset_index(drop=True)
+            
+            if len(df) < initial_len:
+                logger.info(f"Se eliminaron {initial_len - len(df)} filas por estratificación única.")
+        else:
+            logger.warning(f"Columnas de estratificación {s_cols} no encontradas. Usando default.")
+            df["stratify_col"] = "default"
+    else:
+        df["stratify_col"] = "default"
+
     return df

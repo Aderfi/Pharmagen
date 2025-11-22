@@ -26,7 +26,7 @@ import namex
 
 
 ### Importación de configuraciones y rutas desde el archivo config.py ###
-from src.config.config import *
+from src.cfg.config import *
 
 
 def increase_csv_field_limit():

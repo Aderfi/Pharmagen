@@ -48,6 +48,7 @@ from src.data import PGenDataset, PGenDataProcess
 from src.model import DeepFM_PGenModel
 from src.cfg.model_configs import get_model_config
 from src.train import train_model, save_model
+from src.utils.data import load_and_prep_dataset
 from src.utils.training import (
     create_optimizer,
     create_scheduler,
@@ -102,15 +103,18 @@ def train_pipeline(
 
     # 3. Procesamiento de Datos
     logger.info("Cargando y procesando datos...")
-    processor = PGenDataProcess()
+    processor = PGenDataProcess(
+        feature_cols=feature_cols,
+        target_cols=eff_target_cols,
+        multi_label_cols=list(MULTI_LABEL_COLUMN_NAMES)
+    )
     
     # Lista total de columnas a cargar
     cols_to_load = list(set(config["cols"] + config.get("features", []) + config.get("targets", [])))
 
-    df = processor.load_data(
+    df = load_and_prep_dataset(
         csv_path=csv_path,
         all_cols=cols_to_load,
-        input_cols=feature_cols,
         target_cols=eff_target_cols,
         multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
         stratify_cols=config.get("stratify"),
@@ -182,14 +186,14 @@ def train_pipeline(
         uncertainty_module = MultiTaskUncertaintyLoss(eff_target_cols).to(device)
 
     # C. Optimizador (debe conocer los params del modelo Y de la incertidumbre)
-    optimizer = create_optimizer(model, params, uncertainty_loss_module=uncertainty_module)
+    optimizer = create_optimizer(model, params, uncertainty_module)
 
     # D. Scheduler
     scheduler = create_scheduler(optimizer, params)
 
     # E. Preparar lista para legacy train_model: [Loss1, Loss2, ..., Optimizer]
     # IMPORTANTE: El orden debe coincidir exactamente con eff_target_cols
-    criterions_list = [loss_fns_dict[col] for col in eff_target_cols]
+    criterions_list: List[Any] = [loss_fns_dict[col] for col in eff_target_cols]
     criterions_list.append(optimizer)
 
     # F. Pesos manuales (si no se usa incertidumbre automática)
