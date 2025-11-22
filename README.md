@@ -41,6 +41,6 @@ Pharmagen incluye un asistente de configuración automatizado.
 ### 1. Clonar el repositorio
 
 ```bash
-git clone [Pharmagen](https://github.com/Aderfi/pharmagen_pmodel)
+git clone [Pharmagen](https://github.com/Aderfi/Pharmagen)
 cd pharmagen
 ```
