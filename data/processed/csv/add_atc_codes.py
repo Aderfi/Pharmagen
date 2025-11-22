@@ -1,10 +1,10 @@
-import json
 import csv
-import pandas as pd
-import numpy as np
+import json
 import os
 import sys
 
+import numpy as np
+import pandas as pd
 
 # Configura tus rutas
 name = "var_pheno_ann"

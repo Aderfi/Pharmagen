@@ -14,13 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-import tomli
-import logging
+from typing import Any, Dict, List, Optional
 
-from .config import PROJECT_ROOT
+import tomli
+
+#from .config import PROJECT_ROOT
 
 logger = logging.getLogger(__name__)
 
@@ -128,3 +129,11 @@ def select_model(prompt: str = "Selecciona el modelo a entrenar:") -> str:
                 print(f"Selected: {selected}")
                 return selected
         print("❌ Selección inválida.")
+
+if __name__ == "__main__":
+
+    PROJECT_ROOT = Path(__file__).parent.parent.parent
+    for model in get_model_names():
+        cfg = get_model_config(model)
+        print(f"Modelo: {model} | \n Features: {cfg['features']} | \n Targets: {cfg['targets']}")
+        print(f" Parámetros: { {k: v for k, v in cfg.items() if k not in ['features', 'targets', 'cols']} }")

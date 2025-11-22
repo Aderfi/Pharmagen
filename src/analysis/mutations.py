@@ -14,16 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import Bio
-from pathlib import Path
-from Bio import SeqIO
-import pandas as pd
 import csv
-import sys
-import os
 import glob
-import namex
+import os
+import sys
+from pathlib import Path
 
+import Bio
+import namex
+import pandas as pd
+from Bio import SeqIO
 
 ### Importación de configuraciones y rutas desde el archivo config.py ###
 from src.cfg.config import *

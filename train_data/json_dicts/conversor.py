@@ -1,6 +1,7 @@
-import pandas as pd
 import json
+
 import numpy as np  # Es buena práctica importarlo
+import pandas as pd
 
 # 1. Cargar los datos
 df = pd.read_csv("train.csv", sep=";")

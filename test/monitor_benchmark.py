@@ -15,8 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import torch
+
 from src.model import DeepFM_PGenModel  # Asumiendo tu estructura
-from src.performance_monitor import estimate_optimal_batch_size # Asumiendo nombre del archivo
+from src.performance_monitor import estimate_optimal_batch_size  # Asumiendo nombre del archivo
+
 
 def test_hardware_capacity():
     n_features = {"drug": 100, "gene": 50, "allele": 120, "genalle": 200} 

@@ -47,11 +47,12 @@ Copyright:
 """
 
 import argparse
-from datetime import datetime
-import sys
 import logging
-import pandas as pd
+import sys
+from datetime import datetime
 from pathlib import Path
+
+import pandas as pd
 
 # --- Setup de Rutas ---
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -60,12 +61,11 @@ sys.path.append(str(PROJECT_ROOT))
 # --- Imports del Proyecto ---
 from src.cfg.config import LOGS_DIR
 from src.interface.cli import main_menu_loop
-from src.pipeline import train_pipeline
 from src.optuna_tuner import run_optuna_study
+from src.pipeline import train_pipeline
 from src.predict import PGenPredictor
-
-from src.utils.system import check_environment_and_setup
 from src.utils.logger import setup_logging
+from src.utils.system import check_environment_and_setup
 
 # Constantes
 DATE_STAMP = datetime.now().strftime('%Y-%m-%d')
@@ -111,7 +111,7 @@ def main():
                 print("❌ Error: --model y --input son obligatorios en modo 'predict'")
                 sys.exit(1)
             
-            logger.info(f"Iniciando predicción headless: {args.model}")
+            logger.info("Iniciando predicción headless: {}".format(args.model))
             predictor = PGenPredictor(args.model)
             results = predictor.predict_file(args.input)
             

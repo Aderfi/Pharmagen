@@ -137,14 +137,15 @@ fig4.show()
 """
 
 import glob
-import optuna
-import optuna.study
-from optuna.study import StudyDirection
+
 import matplotlib.pyplot as plt
 import numpy as np
+import optuna
+import optuna.study
 import pandas as pd
-from optuna.visualization import plot_param_importances, plot_slice, plot_contour
 import statsmodels.api as sm
+from optuna.study import StudyDirection
+from optuna.visualization import plot_contour, plot_param_importances, plot_slice
 
 # --- Funciones de Carga y Selección ---
 

@@ -78,6 +78,7 @@ reports/train_reports/
 # --- Configuración de Estado Local ---
 # Ignorar el flag que indica si el setup ya corrió en ESTA máquina
 src/cfg/venv_setup_true
+.code-workspace
 
 # --- Logs ---
 *.log

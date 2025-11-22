@@ -35,10 +35,10 @@ Uso:
 Author:
     Adrim Hamed Outmani (@Aderfi)
 """
-import sys
-import subprocess
-import shutil
 import logging
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 from typing import Literal
 

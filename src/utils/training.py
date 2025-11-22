@@ -15,13 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import Any, Dict, List, Optional, Set, Type
 
 import torch
 import torch.nn as nn
-from typing import Dict, List, Any, Optional, Set, Type
 from sklearn.metrics import f1_score, precision_score, recall_score
 
-from src.loss_functions import FocalLoss, AdaptiveFocalLoss
+from src.loss_functions import AdaptiveFocalLoss, FocalLoss
 
 logger = logging.getLogger(__name__)
 

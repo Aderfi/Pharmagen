@@ -15,9 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any
+from pathlib import Path
+
 import tomli  # Requiere: pip install tomli Python <= 3.10 | pip install tomllib Python >= 3.11
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

@@ -1,11 +1,11 @@
-import pandas as pd
-import re
-import json
-import numpy as np
 import itertools
+import json
+import re
 import sys
-from tabulate import tabulate  
-import itertools 
+
+import numpy as np
+import pandas as pd
+from tabulate import tabulate
 
 df = pd.read_csv('relationships_associated_corrected.tsv', sep='\t', dtype=str)
 

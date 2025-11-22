@@ -1,8 +1,9 @@
-import joblib
-
-from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
-import numpy as np
 from pathlib import Path
+
+import joblib
+import numpy as np
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+
 from src.cfg.config import MODEL_ENCODERS_DIR
 
 file_name = "f"

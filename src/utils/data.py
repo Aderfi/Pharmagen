@@ -15,16 +15,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
-import re
 import logging
+import re
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-from typing import List, Optional, Union, Set, Dict, Any, Tuple
 
 # Intento de importación segura para rapidfuzz
 try:
-    from rapidfuzz import process, fuzz
+    from rapidfuzz import fuzz, process
 except ImportError:
     process = None
     fuzz = None

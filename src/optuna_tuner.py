@@ -41,32 +41,30 @@ Refactorizado para eficiencia de memoria:
 3. Soporta optimización mono y multi-objetivo.
 """
 
+import datetime
 import json
 import logging
-import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+import matplotlib.pyplot as plt
 import optuna
 import torch
-import matplotlib.pyplot as plt
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-# Importaciones locales
+from src.cfg.config import PROJECT_ROOT
+from src.cfg.model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
+
 from src.data import PGenDataProcess, PGenDataset
+from src.loss_functions import MultiTaskUncertaintyLoss
 from src.model import DeepFM_PGenModel
 from src.train import train_model
-
 from src.utils.data import load_and_prep_dataset
-from src.utils.training import create_optimizer, create_task_criterions, create_scheduler
-from src.loss_functions import MultiTaskUncertaintyLoss 
-
-from src.cfg.model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
-from src.cfg.config import PROJECT_ROOT
+from src.utils.training import create_optimizer, create_scheduler, create_task_criterions
 
 # Configuración Global
 logger = logging.getLogger(__name__)
@@ -287,7 +285,7 @@ class OptunaTuner:
 
         # 5. Entrenar
         try:
-            best_loss, best_accs, _ = train_model(
+            best_loss, best_accs = train_model(
                 train_loader=train_loader,
                 val_loader=val_loader,
                 model=model,
@@ -416,7 +414,8 @@ class OptunaTuner:
         """Wrapper seguro para Matplotlib."""
         try:
             from optuna.visualization.matplotlib import (
-                plot_optimization_history, plot_param_importances
+                plot_optimization_history,
+                plot_param_importances,
             )
             
             base_path = OPTUNA_FIGS / f"{self.model_name}_{timestamp}"

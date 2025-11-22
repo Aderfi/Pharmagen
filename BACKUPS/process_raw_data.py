@@ -1,10 +1,11 @@
-from pathlib import Path
-import pandas as pd
 import csv
-import sys
 import os
+import sys
+from pathlib import Path
 
-from src.config.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, CACHE_DIR
+import pandas as pd
+
+from src.config.config import CACHE_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 
 
 def increase_csv_field_limit():

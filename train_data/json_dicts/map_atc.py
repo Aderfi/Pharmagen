@@ -1,7 +1,8 @@
-import pandas as pd
 import json
-from rapidfuzz import process
+
 import numpy as np
+import pandas as pd
+from rapidfuzz import process
 
 
 def normaliza(text, dict=None):

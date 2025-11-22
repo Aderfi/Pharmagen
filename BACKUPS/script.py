@@ -30,8 +30,8 @@ with open('ATC_drugs_en.json', 'w', encoding='utf-8') as f:
 print("Translation complete. Output saved to ATC_drugs_en.json.")
 """
 
-import json
 import csv
+import json
 
 with open("ATC_completo_ESP.csv", "r", encoding="utf-8") as f:
     ATC_farmaco = csv.reader(f, delimiter=";")
