@@ -32,8 +32,9 @@ References:
 
 import logging
 import sys
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Optional, Set, Union, overload
+from typing import Any, Dict, List, Tuple, Optional, Set, Literal, overload
 
 import optuna
 import torch
@@ -175,11 +176,11 @@ def _run_epoch(
                     if t_col in multi_label_cols:
                         # Hamming simple (Threshold 0.5)
                         pred_bin = (torch.sigmoid(pred) > 0.5).long()
-                        correct_counts[t_col] += (pred_bin == t_true).sum().item()
+                        correct_counts[t_col] += int((pred_bin == t_true).sum().item())
                         total_counts[t_col] += t_true.numel() # Total elementos (Batch * N_Labels)
                     else:
                         pred_cls = torch.argmax(pred, dim=1)
-                        correct_counts[t_col] += (pred_cls == t_true).sum().item()
+                        correct_counts[t_col] += int((pred_cls == t_true).sum().item())
                         total_counts[t_col] += t_true.size(0)
 
     avg_loss = total_loss_accum / len(loader)
@@ -196,21 +197,21 @@ def _run_epoch(
 def train_model(
     train_loader: Any, val_loader: Any, model: DeepFM_PGenModel, criterions: List[Any],
     epochs: int, patience: int, model_name: str, feature_cols: List[str], target_cols: List[str],
-    device: torch.device, scheduler: Optional[Any] = None, multi_label_cols: Optional[set] = None,
+    device: torch.device, return_per_task_losses: Literal[False] = False, scheduler: Optional[Any] = None, multi_label_cols: Optional[set] = None,
     task_priorities: Optional[Dict[str, float]] = None, trial: Optional[optuna.Trial] = None,
-    params_to_txt: dict | None = None, return_per_task_losses: bool = True,
+    params_to_txt: dict | None = None,
     progress_bar: bool = False, **kwargs
-) -> Tuple[float, List[float], List[float]]: ...
+) -> Tuple[float, List[float]]: ...
 
 @overload
 def train_model(
     train_loader: Any, val_loader: Any, model: DeepFM_PGenModel, criterions: List[Any],
     epochs: int, patience: int, model_name: str, feature_cols: List[str], target_cols: List[str],
-    device: torch.device, scheduler: Optional[Any] = None, multi_label_cols: Optional[set] = None,
-    task_priorities: Optional[Dict[str, float]] = None, trial: Optional[optuna.Trial] = None,
-    params_to_txt: dict | None = None, return_per_task_losses: bool = False,
-    progress_bar: bool = False, **kwargs
-) -> Tuple[float, List[float]]: ...
+    device: torch.device, return_per_task_losses: Literal[True], scheduler: Optional[Any] = None, 
+    multi_label_cols: Optional[set] = None, task_priorities: Optional[Dict[str, float]] = None, 
+    trial: Optional[optuna.Trial] = None, params_to_txt: dict | None = None, progress_bar: bool = False, 
+    **kwargs
+) -> Tuple[float, List[float], List[float]]: ...
 
 def train_model(
     train_loader,
@@ -223,12 +224,12 @@ def train_model(
     feature_cols: List[str],
     target_cols: List[str],
     device: torch.device,
+    return_per_task_losses: bool = False,
     scheduler: Optional[Any] = None,
     multi_label_cols: Optional[set] = None,
     task_priorities: Optional[Dict[str, float]] = None,
     trial: Optional[optuna.Trial] = None,
     params_to_txt: dict | None = None,
-    return_per_task_losses: bool = False,
     progress_bar: bool = False,
     **kwargs,
 ):

@@ -14,10 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pysam
+import pysam #type: ignore      # Biblioteca solo disponible en Linux/Unix        
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Generator
-import src.config.config as cfg
+import src.cfg.config as cfg
 
 # Rutas constantes
 RUTA_FASTA = cfg.REF_GENOME_FASTA

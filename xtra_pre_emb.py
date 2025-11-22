@@ -5,14 +5,6 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 import sys
@@ -21,7 +13,7 @@ import multiprocessing
 import warnings
 from itertools import product
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple, Union
 
 import pandas as pd
 import networkx as nx
@@ -35,14 +27,14 @@ from rapidfuzz import process, fuzz
 
 # Imports condicionales para el método BioBERT
 try:
-    from transformers import AutoTokenizer, AutoModel
+    from transformers import AutoTokenizer, AutoModel # type: ignore
 except ImportError:
     AutoTokenizer = None
     AutoModel = None
 
 # Imports condicionales para Graph/PecanPy
 try:
-    from pecanpy import pecanpy
+    from pecanpy import pecanpy # type: ignore
 except ImportError:
     pecanpy = None
 
@@ -60,12 +52,11 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # ==============================================================================
 
 # --- SELECCIÓN DEL MÉTODO ---
-# Opciones: 'GRAPH' (Node2Vec + Gensim) o 'BIOBERT' (Pre-trained LM)
 EMBEDDING_METHOD = 'GRAPH' 
 
 # --- Rutas ---
 BASE_DIR = Path('.')
-DATA_DIR = BASE_DIR / 'data' # Ajusta según tu estructura
+DATA_DIR = BASE_DIR / 'data'
 MODEL_DIR = BASE_DIR / 'models'
 ENCODER_DIR = BASE_DIR / 'encoders'
 
@@ -73,9 +64,9 @@ SNP_DATA_FILE = DATA_DIR / 'snp_summary.tsv'
 DRUG_DATA_FILE = DATA_DIR / 'drug_gene_edges.tsv'
 ENCODER_FILE = ENCODER_DIR / 'encoders_Phenotype_Effect_Outcome.pkl'
 
-# Salidas Intermedias y Finales
-KGE_FILE = ENCODER_DIR / 'pgx_embeddings.kv' # Salida intermedia del Grafo
-OUTPUT_WEIGHTS_FILE = MODEL_DIR / 'pretrained_weights.pth' # Salida final para PyTorch
+# Salidas
+KGE_FILE = ENCODER_DIR / 'pgx_embeddings.kv'
+OUTPUT_WEIGHTS_FILE = MODEL_DIR / 'pretrained_weights.pth'
 
 # --- Parámetros Graph/Word2Vec ---
 ENTITY_COLUMNS = ['snp', 'gene', 'Alt_Allele', 'chr', 'clin_sig']
@@ -87,7 +78,7 @@ MIN_COUNT = 1
 WORKERS = max(1, min(multiprocessing.cpu_count() - 2, 8))
 
 # --- Parámetros BioBERT ---
-BIOBERT_MODEL_ID = "dmis-lab/biobert-v1.2" # o "dmis-lab/biobert-base-cased-v1.2"
+BIOBERT_MODEL_ID = "dmis-lab/biobert-v1.2"
 
 # --- Parámetros de Mapeo ---
 FUZZY_THRESHOLD = 90
@@ -102,7 +93,6 @@ class PGxEmbeddingManager:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._check_dependencies()
         
-        # Crear directorios si no existen
         for d in [MODEL_DIR, ENCODER_DIR]:
             d.mkdir(parents=True, exist_ok=True)
 
@@ -125,46 +115,46 @@ class PGxEmbeddingManager:
         if not SNP_DATA_FILE.exists() or not DRUG_DATA_FILE.exists():
             raise FileNotFoundError(f"Faltan archivos de datos en {DATA_DIR}")
 
-        # Cargar DataFrames
         logger.info("Cargando DataFrames...")
-        snp_df = pd.read_csv(SNP_DATA_FILE, sep='\t', usecols=ENTITY_COLUMNS)
-        snp_df.columns = snp_df.columns.str.strip()
+        snp_df = pd.read_csv(SNP_DATA_FILE, sep='\t', usecols=ENTITY_COLUMNS) # type: ignore
+        snp_df.columns = snp_df.columns.str.strip() # type: ignore
         
-        drug_df = pd.read_csv(DRUG_DATA_FILE, sep='\t')
+        drug_df = pd.read_csv(DRUG_DATA_FILE, sep='\t') # type: ignore
 
-        # Construcción Vectorizada del Grafo
         G = nx.Graph()
         
-        # Pre-procesamiento de strings
+        # Pre-procesamiento
         for col in ['gene', 'Alt_Allele', 'clin_sig']:
             snp_df[col] = snp_df[col].fillna('').astype(str).str.split(r'[;,]')
 
-        # Función auxiliar para añadir bordes masivamente
         def add_exploded_edges(df, col_source, col_target, rel_name):
             exploded = df[[col_source, col_target]].explode(col_target).dropna()
-            # Filtrar vacíos
             exploded = exploded[exploded[col_target].str.len() > 0]
+            
             if not exploded.empty:
-                G.add_edges_from(exploded.itertuples(index=False), relationship=rel_name)
-                logger.info(f"Añadidos {len(exploded)} bordes: {rel_name}")
+                # Usamos zip para crear tuplas explícitas (u, v)
+                edges = list(zip(exploded[col_source], exploded[col_target]))
+                G.add_edges_from(edges, relationship=rel_name)
+                logger.info(f"Añadidos {len(edges)} bordes: {rel_name}")
 
         add_exploded_edges(snp_df, 'snp', 'gene', 'snp_to_gene')
         add_exploded_edges(snp_df, 'snp', 'Alt_Allele', 'snp_to_allele')
         add_exploded_edges(snp_df, 'snp', 'clin_sig', 'snp_to_clin_sig')
 
         # Bordes Drug-Gene
-        drug_edges = drug_df[['drug', 'gene']].dropna()
-        G.add_edges_from(drug_edges.itertuples(index=False), relationship='drug_to_gene')
+        drug_edges_df = drug_df[['drug', 'gene']].dropna()
+        drug_edges = list(zip(drug_edges_df['drug'], drug_edges_df['gene']))
+        G.add_edges_from(drug_edges, relationship='drug_to_gene')
         logger.info(f"Añadidos {len(drug_edges)} bordes: drug_to_gene")
 
-        # Bordes complejos Gene-ClinSig (Producto Cartesiano)
+        # Bordes complejos Gene-ClinSig
         logger.info("Procesando bordes Gene-ClinSig (puede tardar)...")
         gene_clinsig_df = snp_df[['gene', 'clin_sig']].dropna()
         edges_complex = []
-        for row in tqdm(gene_clinsig_df.itertuples(index=False), total=len(gene_clinsig_df)):
-            # Filter empty strings
-            genes = [g for g in row.gene if g]
-            sigs = [s for s in row.clin_sig if s]
+        
+        for genes_raw, sigs_raw in tqdm(zip(gene_clinsig_df['gene'], gene_clinsig_df['clin_sig']), total=len(gene_clinsig_df)):
+            genes = [g for g in genes_raw if g]  
+            sigs = [s for s in sigs_raw if s]
             if genes and sigs:
                 edges_complex.extend(product(genes, sigs))
         
@@ -177,29 +167,32 @@ class PGxEmbeddingManager:
         """Entrena Node2Vec usando PecanPy y Gensim."""
         logger.info("--- [GRAPH] Entrenando Node2Vec ---")
         
-        # Mapeo String -> Int para PecanPy (C++)
+        # --- FIX: Asegurar a Pylance que pecanpy existe ---
+        assert pecanpy is not None, "PecanPy no está instalado"
+
         nodes = list(G.nodes())
+        # Mapa de String -> Int
         node_map = {node: i for i, node in enumerate(nodes)}
-        reverse_map = {i: node for node, i in node_map.items()}
+        # Mapa de Int -> String
+        reverse_map: Dict[int, str] = {i: node for node, i in node_map.items()}
+        
         G_int = nx.relabel_nodes(G, node_map)
 
         temp_edg = "temp_graph.edg"
         try:
             nx.write_edgelist(G_int, temp_edg, data=False, delimiter=' ', encoding='utf-8')
             
-            # Inicializar PecanPy
             g_pecan = pecanpy.SparseOTF(p=1, q=1, workers=WORKERS, verbose=False)
             g_pecan.read_edg(temp_edg, weighted=False, directed=False, delimiter=' ')
             
-            # Generar Caminos
             logger.info("Simulando caminatas aleatorias...")
+            # Simulate walks devuelve lista de lista de enteros (IDs de nodos)
             walks_int = g_pecan.simulate_walks(num_walks=NUM_WALKS, walk_length=WALK_LENGTH)
-            
-            # Traducir Int -> String
+
             logger.info("Traduciendo caminatas...")
-            walks_str = [[reverse_map[n] for n in walk] for walk in walks_int]
+            # --- FIX: List comprehension explícita para tipos ---
+            walks_str = [[reverse_map[int(n)] for n in walk] for walk in walks_int]
             
-            # Word2Vec
             logger.info("Entrenando Word2Vec...")
             model = Word2Vec(
                 walks_str, 
@@ -210,7 +203,6 @@ class PGxEmbeddingManager:
                 sg=1
             )
             
-            # Guardar KeyedVectors
             model.wv.save_word2vec_format(str(KGE_FILE))
             return model.wv
 
@@ -224,22 +216,21 @@ class PGxEmbeddingManager:
 
     def _get_biobert_embedding(self, text: str, tokenizer, model) -> torch.Tensor:
         """Genera embedding para un texto usando BioBERT."""
-        # Tokenización
         inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
         
         with torch.no_grad():
             outputs = model(**inputs)
         
-        # Estrategia: Mean Pooling de la última capa oculta
-        # outputs.last_hidden_state: [batch, seq_len, hidden_dim]
-        # Promediamos sobre seq_len (dim 1) ignorando padding si quisiéramos ser estrictos,
-        # pero para palabras cortas/entidades el mean simple suele funcionar bien.
+        # Mean Pooling
         embedding = outputs.last_hidden_state.mean(dim=1).squeeze()
         return embedding.cpu()
 
     def _process_biobert_layers(self, encoders: Dict) -> Dict[str, torch.Tensor]:
         """Genera embeddings directamente desde el vocabulario de los encoders."""
+        # --- FIX: Asegurar a Pylance que transformers existe ---
+        assert AutoTokenizer is not None and AutoModel is not None, "Transformers no está instalado"
+
         logger.info(f"--- [BIOBERT] Cargando modelo {BIOBERT_MODEL_ID} ---")
         tokenizer = AutoTokenizer.from_pretrained(BIOBERT_MODEL_ID)
         model = AutoModel.from_pretrained(BIOBERT_MODEL_ID).to(self.device)
@@ -253,16 +244,13 @@ class PGxEmbeddingManager:
 
             vocab = encoders[layer_name].classes_
             vocab_size = len(vocab)
-            # Dimensión de BioBERT base suele ser 768
             bert_dim = model.config.hidden_size 
             
             logger.info(f"Generando embeddings BioBERT para capa: {layer_name} ({vocab_size} items)")
             
-            # Matriz contenedora
             matrix = torch.zeros((vocab_size, bert_dim), dtype=torch.float32)
 
             for i, entity in tqdm(enumerate(vocab), total=vocab_size, desc=layer_name):
-                # Limpieza básica de entidad (ej: quitar prefijos si es necesario)
                 clean_text = str(entity).replace("_", " ") 
                 emb = self._get_biobert_embedding(clean_text, tokenizer, model)
                 matrix[i] = emb
@@ -291,7 +279,6 @@ class PGxEmbeddingManager:
             vocab = encoders[layer_name].classes_
             vocab_size = len(vocab)
             
-            # Inicializar con ruido pequeño
             matrix = torch.randn(vocab_size, embedding_dim) * 0.01
             hits = 0
 
@@ -321,7 +308,6 @@ class PGxEmbeddingManager:
     def run(self):
         """Ejecuta el pipeline completo según la configuración."""
         
-        # 1. Cargar Encoders (Necesarios para ambos métodos)
         if not ENCODER_FILE.exists():
             logger.error(f"No se encuentra el archivo de encoders: {ENCODER_FILE}")
             return
@@ -332,7 +318,6 @@ class PGxEmbeddingManager:
         final_weights = {}
 
         if self.method == 'GRAPH':
-            # A. Construir y Entrenar Grafo
             if KGE_FILE.exists():
                 logger.info(f"Cargando embeddings de grafo existentes: {KGE_FILE}")
                 kge_wv = gensim.models.KeyedVectors.load_word2vec_format(str(KGE_FILE))
@@ -343,23 +328,19 @@ class PGxEmbeddingManager:
                     return
                 kge_wv = self._train_node2vec(G)
             
-            # B. Mapear
             final_weights = self._map_graph_embeddings(kge_wv, encoders)
 
         elif self.method == 'BIOBERT':
-            # A. Generar Directamente
             final_weights = self._process_biobert_layers(encoders)
 
         else:
             logger.error(f"Método desconocido: {self.method}")
             return
 
-        # 3. Guardar Resultado Final
         if final_weights:
             logger.info(f"Guardando pesos finales en: {OUTPUT_WEIGHTS_FILE}")
             torch.save(final_weights, OUTPUT_WEIGHTS_FILE)
             
-            # Verificación rápida de dimensiones
             for k, v in final_weights.items():
                 logger.info(f"Tensor guardado -> {k}: {v.shape}")
         else:

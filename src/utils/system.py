@@ -16,6 +16,7 @@
 
 import json
 import os
+import time
 import sys
 import logging
 
@@ -24,6 +25,8 @@ from pathlib import Path
 from typing import Dict, Any
 
 from src.cfg.config import VERSION, LOGS_DIR, PROJECT_ROOT, METADATA
+
+CONFIG_FILE = Path("asaver")
 
 def welcome_message():
     msg = f"""
@@ -39,7 +42,7 @@ def welcome_message():
 
 def check_system_config() -> Dict[str, Any]:
     """Carga o crea el archivo de estado del sistema."""
-    CONFIG_FILE = "asaver"
+    CONFIG_FILE = Path("asaver")
     if CONFIG_FILE.exists():
         try:
             with open(CONFIG_FILE, "r") as f:
@@ -65,7 +68,7 @@ def is_venv_active() -> bool:
     # Check standard venv
     is_base = (sys.prefix == sys.base_prefix)
     # Check Conda
-    is_conda = 'CONDA_DEFAULT_ENV' in sys.modules.get('os').environ
+    is_conda = 'CONDA_DEFAULT_ENV' in sys.modules.get('os').environ # type: ignore
     
     return (not is_base) or is_conda
 

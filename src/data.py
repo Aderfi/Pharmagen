@@ -26,7 +26,7 @@ from torch.utils.data import Dataset
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from src.utils.data import normalize_dataframe, drugs_to_atc, UNKNOWN_TOKEN
+from src.utils.data import load_and_prep_dataset, drugs_to_atc, UNKNOWN_TOKEN
 
 logger = logging.getLogger(__name__)
 
@@ -155,11 +155,31 @@ class PGenDataProcess(BaseEstimator, TransformerMixin):
 
 class PGenDataset(Dataset):
     """
-    PyTorch Dataset Class.
+    Dataset personalizado de PyTorch optimizado para la ingesta eficiente de datos tabulares heterogéneos.
 
-    Separa internamente escalares y matrices para eliminar condicionales en el ciclo de entrenamiento.
+    Esta clase procesa un DataFrame de Pandas separando internamente las características en dos flujos 
+    de memoria contigua: datos escalares (índices/categorías) y datos matriciales (embeddings/multi-label). 
+    Su diseño minimiza la sobrecarga durante el entrenamiento evitando copias innecesarias de memoria 
+    (zero-copy) y condicionales en tiempo de ejecución.
+
+    Args:
+        df (pd.DataFrame): DataFrame fuente que contiene los datos crudos.
+        feature_cols (List[str]): Lista de nombres de columnas a usar como variables predictoras.
+        target_cols (List[str]): Lista de nombres de columnas a usar como objetivos (labels).
+        multi_label_cols (Set[str]): Conjunto de nombres de columnas que contienen estructuras complejas 
+            (listas, arrays, embeddings) y que deben ser apiladas como matrices `Float32`. 
+            Las columnas no incluidas aquí se tratarán como escalares `Int64`.
+
+    Attributes:
+        _arrays_data (Dict[str, np.ndarray]): Almacenamiento de matrices densas en memoria contigua (float32).
+        _scalars_data (Dict[str, np.ndarray]): Almacenamiento de vectores escalares (int64).
+
+    Yields:
+        Dict[str, torch.Tensor]: Un diccionario donde cada clave es el nombre de la columna y el valor 
+        es el tensor correspondiente para el índice dado.
+            - Columnas Multi-label: Retornan tensores Float32.
+            - Columnas Escalares: Retornan tensores Long (Int64).
     """
-
     def __init__(
         self,
         df: pd.DataFrame,
@@ -212,8 +232,8 @@ class PGenDataset(Dataset):
     def _process_single_label(self, col: str, series: pd.Series):
         """Maneja columnas de valores simples (Single Label)."""
         # Para single labels (índices de clase), PyTorch usa Long (int64).
-        # Si la memoria es crítica, usar int32.
-        self._scalars_data[col] = series.values.astype(np.int64)
+        # Si memoria crítica -> np.int32
+        self._scalars_data[col] = series.to_numpy(dtype=np.int64)
 
     def __len__(self) -> int:
         return self.length

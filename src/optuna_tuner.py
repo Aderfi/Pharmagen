@@ -45,7 +45,7 @@ import json
 import logging
 import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, Callable
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import optuna
 import torch
@@ -60,6 +60,8 @@ from tqdm.auto import tqdm
 from src.data import PGenDataProcess, PGenDataset
 from src.model import DeepFM_PGenModel
 from src.train import train_model
+
+from src.utils.data import load_and_prep_dataset
 from src.utils.training import create_optimizer, create_task_criterions, create_scheduler
 from src.loss_functions import MultiTaskUncertaintyLoss 
 
@@ -112,9 +114,9 @@ class OptunaTuner:
         self.target_cols = [t.lower() for t in self.config["targets"]]
         
         # Validar que existe configuración de optimización
-        self.optuna_space = MODEL_REGISTRY[model_name].get("params_optuna")
+        self.optuna_space: Dict[str, List[Any]] = self.config.get("params_optuna", {})
         if not self.optuna_space:
-            raise ValueError(f"No se encontró configuración 'params_optuna' para {model_name}")
+            raise ValueError(f"No Optuna search space defined for model '{model_name}'")
 
         # Inicialización diferida de datos
         self.train_dataset: Optional[PGenDataset] = None
@@ -128,22 +130,32 @@ class OptunaTuner:
         """Carga, procesa y cachea los datasets en memoria (One-time setup)."""
         logger.info(f"Preparando datos para {self.model_name}...")
         
+        # Definir columnas necesarias
         cols_to_load = list(set(self.config["cols"] + self.config["targets"] + self.config["features"]))
         
-        processor = PGenDataProcess()
-        df = processor.load_data(
+        # 1. Cargar y Limpiar Datos 
+        df = load_and_prep_dataset(
             csv_path=self.csv_path,
             all_cols=cols_to_load,
-            input_cols=self.feature_cols,
             target_cols=self.target_cols,
             multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
-            stratify_cols=self.config.get("stratify"),
+            stratify_cols=self.config.get("stratify_col") or self.config.get("stratify"),
         )
 
+        # 2. Split
         train_df, val_df = train_test_split(
             df, test_size=0.2, stratify=df.get("stratify_col"), random_state=self.seed
         )
 
+        # 3. Configurar Procesador (Clase)
+        # AHORA: Se pasan las columnas en el __init__
+        processor = PGenDataProcess(
+            feature_cols=self.feature_cols,
+            target_cols=self.target_cols,
+            multi_label_cols=list(MULTI_LABEL_COLUMN_NAMES)
+        )
+
+        # 4. Ajustar y Transformar
         processor.fit(train_df)
         
         # Crear Datasets
@@ -223,11 +235,11 @@ class OptunaTuner:
 
         # 2. DataLoaders Eficientes
         train_loader = DataLoader(
-            self.train_dataset, batch_size=params.get("batch_size", 64), 
+            cast(PGenDataset, self.train_dataset), batch_size=params.get("batch_size", 64), 
             shuffle=True, num_workers=0, pin_memory=True
         )
         val_loader = DataLoader(
-            self.val_dataset, batch_size=params.get("batch_size", 64), 
+            cast(PGenDataset, self.val_dataset), batch_size=params.get("batch_size", 64), 
             shuffle=False, num_workers=0, pin_memory=True
         )
 
@@ -244,7 +256,13 @@ class OptunaTuner:
             n_layers=params["n_layers"],
             activation_function=params.get("activation_function", "gelu"),
             fm_hidden_dim=params.get("fm_hidden_dim", 64),
-            # ... pasar el resto de params con .get() ...
+            # ... 
+            attention_dim_feedforward=params.get("attention_dim_feedforward"),
+            attention_dropout=params.get("attention_dropout", 0.1),
+            num_attention_layers=params.get("num_attention_layers", 1),
+            use_batch_norm=params.get("use_batch_norm", False),
+            use_layer_norm=params.get("use_layer_norm", False),
+            embedding_dropout=params.get("embedding_dropout", 0.0),
         ).to(self.device)
 
         # 4. Configurar Training Components
@@ -258,21 +276,18 @@ class OptunaTuner:
         if params.get("use_uncertainty_loss", False):
             uncertainty_module = MultiTaskUncertaintyLoss(self.target_cols).to(self.device)
 
-        # c) Optimizer (Pasamos el uncertainty module para que registre sus params)
-        optimizer = create_optimizer(model, params, uncertainty_loss_module=uncertainty_module)
-        
-        # d) Scheduler
+        # c) Optimizer y Scheduler
+        optimizer = create_optimizer(model, params, uncertainty_module)
         scheduler = create_scheduler(optimizer, params)
 
         # e) Empaquetar criterions como lista para compatibilidad con train_model antiguo
-        # Orden: [Loss_Target1, Loss_Target2, ..., Optimizer]
-        # NOTA: Es preferible refactorizar train_model para aceptar dicts, pero mantenemos contrato.
-        criterions_list = [loss_fns_dict[t] for t in self.target_cols]
+
+        criterions_list: List[Any] = [loss_fns_dict[t] for t in self.target_cols]
         criterions_list.append(optimizer)
 
         # 5. Entrenar
         try:
-            best_loss, best_accs = train_model(
+            best_loss, best_accs, _ = train_model(
                 train_loader=train_loader,
                 val_loader=val_loader,
                 model=model,

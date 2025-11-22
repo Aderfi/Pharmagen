@@ -16,6 +16,7 @@
 
 import sys
 from pathlib import Path
+from datetime import datetime
 from typing import Dict, Any
 import tomli  # Requiere: pip install tomli Python <= 3.10 | pip install tomllib Python >= 3.11
 
@@ -71,6 +72,8 @@ REF_GENOME_FASTA = REF_GENOME_DIR / "HSapiens_GChr38.fa"
 LOG_FILE = LOGS_DIR / "pharmagen_runtime.log"
 
 MULTI_LABEL_COLUMN_NAMES = _PATHS_CONFIG.get("multi_label_column_names", {})
+DATE_STAMP = datetime.now().strftime("%Y_%m_%d")
+
 
 # Crear directorios si no existen
 for path in [DATA_DIR, LOGS_DIR, RESULTS_DIR, MODELS_DIR, CACHE_DIR]:

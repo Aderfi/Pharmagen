@@ -17,13 +17,13 @@
 # src/interface/cli.py
 # Control de interfaz de usuario
 import sys
+import time
 import logging
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
 
 # Proyecto
-from src.cfg.config import DATA_DIR #, DATE_STAMP
+from src.cfg.config import DATA_DIR, DATE_STAMP
 from src.cfg.model_configs import select_model
 from src.pipeline import train_pipeline
 from src.optuna_tuner import run_optuna_study
@@ -32,7 +32,9 @@ from src.predict import PGenPredictor
 # UI
 from src.interface.utils import Spinner, input_path, print_header, print_success, print_error
 from src.utils.system import print_gnu_notice, print_conditions_details, print_warranty_details
+
 logger = logging.getLogger(__name__)
+
 
 # ==============================================================================
 # FLUJOS DE TRABAJO (Workflows)
@@ -42,11 +44,11 @@ def run_genomic_processing():
     """Simulación del flujo de ETL genómico."""
     print_header("Módulo de Procesamiento Genómico")
     logger.info("Iniciando módulo genómico interactivo.")
-    
     # Aquí iría la llamada real a src/data_handle/...
     with Spinner("Analizando archivos VCF y mapeando variantes..."):
-        time.sleep(2) # Simulación
+       time.sleep(2) # Simulación
         
+    print_success("Procesamiento completado (Simulado).")
     print_success("Procesamiento completado (Simulado).")
 
 

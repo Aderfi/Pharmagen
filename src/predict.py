@@ -21,7 +21,7 @@ import torch
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Any, Union, Optional
+from typing import Dict, List, Any, Union, Optional, cast
 
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 
@@ -125,12 +125,16 @@ class PGenPredictor:
         """Transforma un único valor escalar."""
         enc = self.encoders[col]
         val_str = str(val)
+        if isinstance(enc, MultiLabelBinarizer):
+            raise ValueError(f"Columna '{col}' es multilabel, no se puede usar en _transform_scalar")
         
         if val_str not in enc.classes_:
-            # logger.debug(f"Valor desconocido '{val}' en '{col}'. Usando token.")
+            logger.debug(f"Valor desconocido '{val}' en '{col}'. Usando token.")
             val_str = UNKNOWN_TOKEN
-            
-        idx = enc.transform([val_str])[0]
+
+        encoded_arr = cast(np.ndarray, enc.transform([val_str]))
+        idx = int(encoded_arr.item())
+        
         return torch.tensor([idx], dtype=torch.long, device=self.device)
 
     def _transform_vectorized(self, col: str, series: pd.Series) -> torch.Tensor:
@@ -244,7 +248,7 @@ class PGenPredictor:
         results_df = pd.DataFrame(results_list)
         final_df = pd.concat([df.reset_index(drop=True), results_df], axis=1)
         
-        return final_df.to_dict(orient="records")
+        return final_df.to_dict(orient="records", into=dict)
 
     def _decode_outputs(self, outputs: Dict[str, torch.Tensor], is_batch: bool) -> List[Dict[str, Any]]:
         """

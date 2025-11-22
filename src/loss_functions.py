@@ -17,7 +17,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, cast
 
 
 class FocalLoss(nn.Module):
@@ -48,7 +48,7 @@ class FocalLoss(nn.Module):
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         # Mover alpha al dispositivo correcto si es necesario (manejado por register_buffer usualmente)
-        weight = self.alpha
+        weight = cast(Optional[torch.Tensor], self.alpha)
         
         # Cross Entropy con Label Smoothing
         ce_loss = F.cross_entropy(
