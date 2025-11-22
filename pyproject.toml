@@ -8,25 +8,61 @@ version = "0.7"
 description = "Software de predicción farmacogenética y eficacia terapéutica mediante Deep Learning."
 readme = "README.md"
 requires-python = ">=3.10, <3.11"
-license = { text = "Proprietary" }
+license = { file = "LICENSE" }
 authors = [{ name = "Adrim Hamed Outmani", email = "adrimh.outmani@gmail.com" }]
 
 keywords = [
+  # Dominio Médico/Farmacéutico
   "pharmacogenetics",
-  "deep-learning",
-  "bioinformatics",
-  "pytorch",
-  "pharmacy",
   "pharmacogenomics",
+  "precision-medicine",
+  "drug-response-prediction",
+  "clinical-decision-support",
+  "pharmacy",
+  "adverse-drug-events",
+
+  # Tecnología / IA
+  "deep-learning",
+  "pytorch",
+  "deepfm",
+  "neural-networks",
+  "artificial-intelligence",
+  "optuna",
+
+  # Bioinformática / Datos
+  "bioinformatics",
+  "genomics",
+  "vcf-processing",
+  "variant-analysis"
 ]
 
 classifiers = [
+  # Estado del proyecto
   "Development Status :: 4 - Beta",
+
   "Intended Audience :: Healthcare Industry",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+
+  # Licencia 
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+
+  # Lenguaje
+  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: C++",
+  "Programming Language :: Unix Shell",
+
+  # Temáticas Científicas
   "Topic :: Scientific/Engineering :: Bio-Informatics",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
-  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Medical Science Apps.",  # <--- Muy importante para ti
+
+  # Entorno de Ejecución
+  "Environment :: Console",  
+  "Environment :: GPU :: NVIDIA CUDA",
+  "Operating System :: OS Independent", # Preference Linux but also works on Windows. OSX not tested.
 ]
 
 dependencies = [

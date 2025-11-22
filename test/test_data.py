@@ -30,6 +30,9 @@ def multi_label_cols():
 
 class TestPGenDataProcess:
     def test_fit_transform(self, sample_data, feature_cols, target_cols, multi_label_cols):
+
+        target_cols = target_cols + ["side_effects"]
+
         processor = PGenDataProcess(
             feature_cols=feature_cols,
             target_cols=target_cols,
@@ -46,8 +49,8 @@ class TestPGenDataProcess:
         transformed_df = processor.transform(sample_data)
         
         # Check if columns are transformed
-        assert transformed_df["gene_id"].dtype == int or np.issubdtype(transformed_df["gene_id"].dtype, np.integer)
-        assert transformed_df["drug_id"].dtype == int or np.issubdtype(transformed_df["drug_id"].dtype, np.integer)
+        assert isinstance(transformed_df["gene_id"].iloc[0], (int, np.integer))
+        assert isinstance(transformed_df["drug_id"].iloc[0], (int, np.integer))
         
         # Check MultiLabel column (should be object/list of arrays or similar structure depending on implementation)
         # based on code: df_out[col] = pd.Series(list(encoded_data), ...)
