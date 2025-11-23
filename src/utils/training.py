@@ -15,11 +15,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any, Dict, List, Optional, Set, Type, Union
 
 import torch
 import torch.nn as nn
+import numpy as np
+
 from sklearn.metrics import f1_score, precision_score, recall_score
+from torch.utils.data import DataLoader
 
 from src.loss_functions import AdaptiveFocalLoss, FocalLoss
 
@@ -48,19 +51,26 @@ def create_optimizer(model: nn.Module, params: Dict[str, Any], uncertainty_modul
         param_groups.append({'params': uncertainty_module.parameters(), 'weight_decay': 0.0, 'lr': params.get("loss_learning_rate", lr)})
 
     optimizer_cls = OPTIMIZER_MAP.get(opt_name, torch.optim.Adam)
-    kwargs = {"momentum": 0.9} if opt_name == "sgd" else {}
+    kwargs = {}
+    if opt_name == "sgd":
+        kwargs["momentum"] = 0.9
+        
     return optimizer_cls(param_groups, **kwargs)
 
 def create_scheduler(optimizer: torch.optim.Optimizer, params: Dict[str, Any]):
     stype = params.get("scheduler_type", "plateau").lower()
     if stype == "plateau":
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="min", factor=params.get("scheduler_factor", 0.5),
-            patience=params.get("scheduler_patience", 3), verbose=True
+            optimizer, 
+            mode="min", 
+            factor=params.get("scheduler_factor", 0.5),
+            patience=params.get("scheduler_patience", 3),
         )
     elif stype == "cosine":
         return torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, T_max=params.get("epochs", 50), eta_min=1e-6
+            optimizer, 
+            T_max=params.get("epochs", 50), 
+            eta_min=1e-6
         )
     return None
 
@@ -85,21 +95,25 @@ def create_task_criterions(target_cols: List[str], multi_label_cols: Set[str], p
 
 # --- MÉTRICAS ---
 
-def _compute_metrics(y_true, y_pred, is_multilabel: bool) -> Dict[str, float]:
+def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, is_multilabel: bool) -> Dict[str, float]:
     if is_multilabel:
         return {
-            "f1_macro": f1_score(y_true, y_pred, average="macro", zero_division=0),
-            "f1_samples": f1_score(y_true, y_pred, average="samples", zero_division=0)
+            "f1_macro": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
+            "f1_samples": float(f1_score(y_true, y_pred, average="samples", zero_division=0))
         }
     return {
-        "f1_macro": f1_score(y_true, y_pred, average="macro", zero_division=0),
+        "f1_macro": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
         "acc": float((y_pred == y_true).mean())
     }
 
-def calculate_task_metrics(model, data_loader, feature_cols, target_cols, multi_label_cols, device, threshold=0.5):
+def calculate_task_metrics(model: nn.Module, data_loader: torch.utils.data.DataLoader, 
+                           feature_cols: List[str], target_cols: List[str], 
+                           multi_label_cols: Set[str], device: torch.device, 
+                           threshold=0.5
+                        ) -> Dict[str, Dict[str, float]]:
     model.eval()
-    all_preds = {c: [] for c in target_cols}
-    all_targets = {c: [] for c in target_cols}
+    all_preds: Dict[str, List[torch.Tensor]] = {c: [] for c in target_cols}
+    all_targets: Dict[str, List[torch.Tensor]] = {c: [] for c in target_cols}
 
     with torch.no_grad():
         for batch in data_loader:

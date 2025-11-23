@@ -25,7 +25,7 @@ from pathlib import Path
 import pandas as pd
 
 # Proyecto
-from src.cfg.config import DATA_DIR, DATE_STAMP
+from src.cfg.config import DATA_DIR, DATE_STAMP, PROJECT_ROOT
 from src.cfg.model_configs import select_model
 
 # UI
@@ -63,7 +63,8 @@ def run_training_flow():
     
     # 2. Selección de Datos
     # Sugerimos una ruta por defecto si existe
-    default_data = DATA_DIR / "processed" / "training_data.tsv"
+    #default_data = DATA_DIR / "processed" / "training_data.tsv"
+    default_data = Path(PROJECT_ROOT / "train_data" / "final_enriched_data.tsv")
     if not default_data.exists(): default_data = None
     
     csv_path = input_path("Ruta del archivo de entrenamiento (CSV/TSV)", default=default_data)

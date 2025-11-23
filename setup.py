@@ -121,14 +121,24 @@ class ProjectSetup:
             subprocess.run(pip_cmd + ["install", "--upgrade", "pip"], check=True)
             
             # 2. Instalar requirements
-            logger.info("📦 Descargando e instalando librerías (esto puede tardar)...")
+            logger.info("\t Descargando e instalando librerías (esto puede tardar)...")
             subprocess.run(pip_cmd + ["install", "-r", str(REQUIREMENTS_FILE)], check=True)
             
-            logger.info("✅ Dependencias instaladas correctamente.")
+            logger.info("\t Dependencias instaladas correctamente.")
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Error instalando dependencias: {e}")
+            logger.error(f"\n\t Error instalando dependencias: {e}")
             sys.exit(1)
+    
+    def download_reference_data(self):
+        """Descarga e indexa el genoma de referencia."""
+        try:
+            from src.analysis.ref_genome import ReferenceGenomeManager
+            print("\n🧬 Preparando Genoma de Referencia...")
+            manager = ReferenceGenomeManager()
+            manager.run()
+        except ImportError:
+            print("⚠️ No se pudo importar el gestor de referencia (¿faltan dependencias?).")
 
     def create_flag_file(self):
         """Crea el archivo bandera para indicar que el setup finalizó."""
