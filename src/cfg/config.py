@@ -73,7 +73,7 @@ FIGURES_DIR = _resolve_path(_reports.get("figures", "reports/figures"))
 REF_GENOME_FASTA = REF_GENOME_DIR / "HSapiens_GChr38.fa"
 LOG_FILE = LOGS_DIR / "pharmagen_runtime.log"
 
-MULTI_LABEL_COLUMN_NAMES = _PATHS_CONFIG.get("multi_label_column_names", {})
+MULTI_LABEL_COLUMN_NAMES = _PATHS_CONFIG.get("multi_label_column_names", ["Phenotype_outcome"])
 DATE_STAMP = datetime.now().strftime("%Y_%m_%d")
 
 

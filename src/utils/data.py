@@ -35,7 +35,7 @@ from src.cfg.config import DICTS_DATA_DIR
 logger = logging.getLogger(__name__)
 
 # Pre-compilación de Regex
-RE_SPLITTERS = re.compile(r"[,;|/]+")
+RE_SPLITTERS = re.compile(r"[,;|]+")
 RE_SPACES = re.compile(r"\s+")
 UNKNOWN_TOKEN = "__UNKNOWN__"
 
@@ -134,14 +134,10 @@ def load_and_prep_dataset(
     # 1. CARGA (LOAD)
     # -------------------------------------------------------
     try:
-        # Intentamos cargar solo lo necesario.
-        # Nota: usecols funciona sobre los nombres ORIGINALES del CSV.
-        # Si no estamos seguros del case del CSV, mejor leer todo y filtrar después.
-        # Aquí asumo un intento optimista.
         df = pd.read_csv(
             csv_path, 
             sep="\t", 
-            usecols=[lambda c: c.lower() in all_cols_lower], 
+            usecols=all_cols, 
             dtype=str
         )
     except ValueError:
@@ -175,6 +171,7 @@ def load_and_prep_dataset(
         for col in single_label_cols:
             df[col] = (
                 df[col]
+                .str.replace(", ", ",")
                 .str.replace(r"[,;]+", "|", regex=True) # Unificar separadores
                 .str.replace(" ", "_", regex=False)     # Espacios a guiones bajos
                 .str.strip()

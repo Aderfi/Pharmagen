@@ -29,11 +29,38 @@ logger = logging.getLogger(__name__)
 CONFIG_DIR = Path(__file__).parent
 GLOBAL_CONFIG_FILE = CONFIG_DIR / "config.toml"
 MODELS_FILE = CONFIG_DIR / "models.toml"
+# =============================================================================
+# UTILIDAD DE CONVERSIÓN (TOML -> OPTUNA TYPES)
+# =============================================================================
+def _parse_optuna_value(val: Any) -> Any:
+    """
+    Convierte las listas de TOML en los tipos que OptunaTuner espera.
+    - [0.1, 0.5] (2 floats/ints) -> tuple (0.1, 0.5) -> Para suggest_float
+    - ["int", 1, 10] -> list (se queda igual) -> Para suggest_int
+    - [128, 256, 512] (>2 elementos) -> list (se queda igual) -> Para suggest_categorical
+    """
+    if isinstance(val, list):
+        # Caso 1: Definición explícita de entero ["int", min, max...]
+        if len(val) > 0 and isinstance(val[0], str) and val[0] == "int":
+            return val
+        
+        # Caso 2: Rango Flotante Implícito [min, max]
+        # Heurística: Si tiene exactamente 2 elementos y ambos son números
+        if len(val) == 2 and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in val):
+            return tuple(val)  # <--- LA CLAVE: Convertir a tupla
+            
+        # Caso 3: Categorical (Cualquier otra lista)
+        return val
+        
+    return val
+
+def _parse_optuna_section(optuna_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Aplica la conversión a todo el diccionario de optuna."""
+    return {k: _parse_optuna_value(v) for k, v in optuna_dict.items()}
 
 # =============================================================================
 # LECTURA Y FUSIÓN DE CONFIGURACIÓN
 # =============================================================================
-
 def _load_toml(path: Path) -> Dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
@@ -52,45 +79,42 @@ def get_model_names() -> List[str]:
 
 def get_model_config(model_name: str) -> Dict[str, Any]:
     """
-    Genera la configuración FINAL del modelo aplicando herencia:
-    Defaults (config.toml) <--- Sobreescrituras (models.toml)
+    Genera la configuración FINAL del modelo aplicando herencia y parseo de tipos.
     """
-    # 1. Cargar Defaults Globales
+    # 1. Cargar Configs
     global_conf = _load_toml(GLOBAL_CONFIG_FILE)
-    defaults = global_conf.get("defaults", {}).get("params")
-    project_conf = global_conf.get("project", {}) and global_conf.get("metadata", {})
-    
-    # 2. Cargar Configuración del Modelo
     models_data = _load_toml(MODELS_FILE)
+    
     if model_name not in models_data:
         raise ValueError(f"Model '{model_name}' not defined in models.toml")
     
+    defaults = global_conf.get("params", {})
+    project_conf = global_conf.get("project", {})
     specific_model_data = models_data[model_name]
     
+    # 2. Fusión (Merge)
     final_config = defaults.copy()
-    
-    # Añadimos configuraciones de proyecto (ej: multi_label_cols)
     final_config.update(project_conf)
     
-    # Extraemos subsecciones especiales antes de aplanar
-    optuna_params = specific_model_data.pop("optuna")
+    # Extraer subsecciones
+    optuna_params_raw = specific_model_data.pop("optuna", {})
     weights = specific_model_data.pop("weights", None)
     specific_params = specific_model_data.pop("params", {})
     
-    # A. Actualizamos con parámetros directos del modelo (features, targets, cols)
-    final_config.update(specific_model_data)
+    # Actualizar configs
+    final_config.update(specific_model_data) # Claves raíz (features, targets)
+    final_config.update(specific_params)     # Sobreescrituras de params
     
-    # B. Actualizamos con 'params' específicos del modelo (sobrescribe defaults)
-    final_config.update(specific_params)
+    # 3. PROCESAMIENTO CRÍTICO DE OPTUNA
+    # Convertimos las listas [min, max] de TOML a tuplas (min, max) de Python
+    final_config["params_optuna"] = _parse_optuna_section(optuna_params_raw)
     
-    # C. Reinsertamos diccionarios especiales
-    final_config["params_optuna"] = optuna_params
     if weights:
         final_config["manual_task_weights_dict"] = weights
 
     # Validación básica
     if "features" not in final_config or "targets" not in final_config:
-        raise ValueError(f"Model '{model_name}' missing 'features' or 'targets' definition.")
+        raise ValueError(f"Model '{model_name}' missing 'features' or 'targets'.")
 
     return final_config
 
@@ -101,6 +125,7 @@ def get_model_config(model_name: str) -> Dict[str, Any]:
 # Cargamos configuración global para exportar constantes comunes si se necesitan
 _global = _load_toml(GLOBAL_CONFIG_FILE)
 MULTI_LABEL_COLUMN_NAMES = set(_global.get("project", {}).get("multi_label_cols", []))
+MODEL_REGISTRY = _load_toml(MODELS_FILE) # Exportamos el raw por si acaso
 
 # Registro de modelos (Lazy loading para no leer disco al importar si no se usa)
 # Se accede vía get_model_config(name)
@@ -109,7 +134,7 @@ MULTI_LABEL_COLUMN_NAMES = set(_global.get("project", {}).get("multi_label_cols"
 # CLI SELECTION
 # =============================================================================
 
-def select_model(prompt: str = "Selecciona el modelo a entrenar:", default_choice: Optional[int] = 2) -> str:
+def select_model(prompt: str = "Selecciona el modelo a entrenar:", default_choice: Optional[int] = None) -> str:
     """CLI interactiva para elegir modelo."""
     options = get_model_names()
     if default_choice is not None and 1 <= default_choice <= len(options):

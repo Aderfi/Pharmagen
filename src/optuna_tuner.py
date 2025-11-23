@@ -129,7 +129,7 @@ class OptunaTuner:
         logger.info(f"Preparando datos para {self.model_name}...")
         
         # Definir columnas necesarias
-        cols_to_load = list(set(self.config["cols"] + self.config["targets"] + self.config["features"]))
+        cols_to_load = list(set(self.feature_cols + self.target_cols))
         
         # 1. Cargar y Limpiar Datos 
         df = load_and_prep_dataset(
@@ -191,21 +191,34 @@ class OptunaTuner:
         # args: (low, high)
         low, high = args
         # Heurística: si el nombre implica tasa o probabilidad pequeña, usar log
-        is_log = any(x in name for x in ["rate", "decay", "dropout", "alpha", "gamma"])
+        is_log = any(x in name for x in ["learning_rate", "weight_decay"])
+        
         return trial.suggest_float(name, low, high, log=is_log)
 
     def _suggest_categorical(self, trial: optuna.Trial, name: str, choices: List[Any]) -> Any:
         return trial.suggest_categorical(name, choices)
 
     def _get_trial_params(self, trial: optuna.Trial) -> Dict[str, Any]:
-        """Analiza el espacio de búsqueda y sugiere valores para este trial."""
         params = {}
         for name, space in self.optuna_space.items():
             try:
                 if isinstance(space, list):
-                    # Protocolo: ["int", ...] o lista categórica
-                    if space and space[0] == "int":
+                    # CASO 1: Lista vacía (error)
+                    if not space:
+                        continue
+
+                    # CASO 2: Definición de Entero ["int", min, max, step]
+                    if space[0] == "int":
                         params[name] = self._suggest_int(trial, name, space[1:])
+                    
+                    # CASO 3: Valor Fijo (Lista de 1 elemento)
+                    # Optuna explota si le pides sugerir de una lista de 1 solo valor repetidamente
+                    elif len(space) == 1:
+                        params[name] = space[0]
+                        # Opcional: Guardarlo como atributo fijo para que conste en el log
+                        trial.set_user_attr(f"fixed_{name}", space[0])
+
+                    # CASO 4: Categórico Real (Más de 1 opción)
                     else:
                         params[name] = self._suggest_categorical(trial, name, space)
                 
@@ -213,13 +226,12 @@ class OptunaTuner:
                     params[name] = self._suggest_float(trial, name, space)
                 
                 else:
-                    # Fallback constante
+                    # Fallback constante (si en el TOML pusiste un valor directo sin lista)
                     params[name] = space
             
             except Exception as e:
                 logger.error(f"Error sugiriendo parámetro '{name}': {e}")
                 raise
-        
         return params
 
     # ==========================================================================
@@ -272,6 +284,7 @@ class OptunaTuner:
         # b) Uncertainty Loss Wrapper (Opcional según params)
         uncertainty_module = None
         if params.get("use_uncertainty_loss", False):
+            logger.info("Activando MultiTaskUncertaintyLoss (Kendall & Gal)") if trial.number == 0 else None
             uncertainty_module = MultiTaskUncertaintyLoss(self.target_cols).to(self.device)
 
         # c) Optimizer y Scheduler
@@ -324,7 +337,7 @@ class OptunaTuner:
 
     def run(self):
         """Ejecuta el estudio de Optuna completo."""
-        timestamp = datetime.datetime.now().strftime("%Y_%m_%d")
+        timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M")
         study_name = f"OPT_{self.model_name}_{timestamp}"
         storage_url = f"sqlite:///{OPTUNA_DBS}/{study_name}.db"
 
@@ -357,7 +370,7 @@ class OptunaTuner:
             )
 
         # Barra de progreso externa
-        with tqdm(total=self.n_trials, desc="Optuna Trials", colour="green") as pbar:
+        with tqdm(total=self.n_trials, desc="Optuna Trials", colour="blue") as pbar:
             def progress_callback(study, trial):
                 pbar.update(1)
                 if study.best_trials:

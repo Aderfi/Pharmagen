@@ -7,17 +7,28 @@
 # ==========================================
 # MODELO 1: Phenotype_Effect_Outcome
 # ==========================================
+#Drug	Variant/Haplotypes	Gene_Symbol	Allele	Phenotype_outcome	Effect_direction	Effect_type	Previous_Condition_Term	Metabolizer_status	ATC	Variant_Normalized
+
 [Phenotype_Effect_Outcome]
 targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
-features = ["Drug", "Genalle", "Gene", "Allele"]
+features = [
+    "ATC",          
+    "Drug",             
+    "Gene_Symbol",             
+    "Variant_Normalized",        
+    "Genotype", 
+    "Previous_Condition_Term"      
+]
 cols_to_load = [
-    "Drug",
-    "Genalle",
-    "Gene",
-    "Allele",
-    "Phenotype_outcome",
-    "Effect_direction",
-    "Effect_type",
+    "ATC",          
+    "Drug",             
+    "Gene_Symbol",             
+    "Variant_Normalized",        
+    "Genotype", 
+    "Previous_Condition_Term",
+    "Phenotype_outcome", 
+    "Effect_direction", 
+    "Effect_type"
 ]
 
 [Phenotype_Effect_Outcome.params]
@@ -28,27 +39,50 @@ hidden_dim = 2176
 dropout_rate = 0.68
 learning_rate = 2e-4
 batch_size = 64
-optimizer_type = "rmsprop"
+optimizer_type = "adamw"
 use_batch_norm = true
 use_layer_norm = true
-manual_task_weights = true
+manual_task_weights = false
+use_uncertainty_loss = true
+label_smoothing = 0.1
 # Parámetros de arquitectura extendida
 attention_dim_feedforward = 3840
 attention_dropout = 0.48
 num_attention_layers = 2
 focal_gamma = 1.16
 focal_alpha_weight = 1.34
-fm_hidden_layers = 2
+#fm_hidden_layers = 2
 fm_hidden_dim = 384
 
 [Phenotype_Effect_Outcome.optuna]
-# Espacio de búsqueda
-embedding_dim = [128, 256, 384, 512]
-n_layers = ["int", 2, 8, 1]
-hidden_dim = ["int", 512, 4096, 128]
-learning_rate = [1e-5, 1e-3]
-dropout_rate = [0.1, 0.7]
-optimizer_type = ["adamw", "adam", "rmsprop"]
+# Espacios de búsqueda
+embedding_dim = [64, 128, 256, 512]
+hidden_dim = ["int", 256, 2048, 128]
+n_layers = ["int", 2, 5, 1]
+activation_function = ["gelu", "relu"]
+learning_rate = [1e-5, 5e-3]
+batch_size = [64, 128, 256]
+optimizer_type = ["adamw"]
+
+dropout_rate = [0.2, 0.6]
+embedding_dropout = [0.1, 0.4]
+weight_decay = [1e-6, 1e-3]
+label_smoothing = [0.0, 0.15]
+gradient_clip_norm = [0.5, 5.0]
+
+num_attention_layers = [1, 2, 3]
+attention_dim_feedforward = ["int", 256, 1024, 128]
+attention_dropout = [0.1, 0.5]
+
+fm_hidden_dim = ["int", 32, 256, 32]
+fm_dropout = [0.1, 0.5]
+
+focal_gamma = [1.0, 4.0]
+manual_task_weights = [false]
+use_uncertainty_loss = [true]
+use_batch_norm = [true]
+use_layer_norm = [false]
+
 
 
 # ==========================================

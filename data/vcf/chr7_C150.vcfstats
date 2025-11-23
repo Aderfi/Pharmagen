@@ -1,0 +1,18 @@
+Location                     : chr7_C150.vcf
+Failed Filters               : 0
+Passed Filters               : 69
+SNPs                         : 59
+MNPs                         : 6
+Insertions                   : 2
+Deletions                    : 1
+Indels                       : 0
+Same as reference            : 1
+SNP Transitions/Transversions: 2.00 (44/22)
+Total Het/Hom ratio          : 8.71 (61/7)
+SNP Het/Hom ratio            : 8.83 (53/6)
+MNP Het/Hom ratio            : - (6/0)
+Insertion Het/Hom ratio      : 1.00 (1/1)
+Deletion Het/Hom ratio       : - (1/0)
+Indel Het/Hom ratio          : - (0/0)
+Insertion/Deletion ratio     : 2.00 (2/1)
+Indel/SNP+MNP ratio          : 0.05 (3/65)

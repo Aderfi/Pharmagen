@@ -32,3 +32,7 @@ vocabs = "src/pgen_model/labels_vocabs"
 figures = "reports/figures"
 optuna = "reports/optuna_reports"
 training = "reports/train_reports"
+
+[genome_references]
+ref_genome_dir = "data/ref_genome"
+ref_genome_fasta = "data/ref_genome/HSapiens_GChr38.fa"

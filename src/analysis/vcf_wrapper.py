@@ -19,11 +19,11 @@ def ejecutar_analisis_cpp(vcf_path: Path, fasta_path: Path):
 
     # Leer salida en tiempo real (Streaming)
     while True:
-        line = process.stdout.readline()
+        line = process.stdout.readline() if process.stdout else ''
         if not line and process.poll() is not None:
             break
         if line:
             print(line.strip()) # O procesar/guardar en base de datos
 
     if process.returncode != 0:
-        print(f"Error en C++: {process.stderr.read()}")
+        print(f"Error en C++: {process.stderr.read() if process.stderr else 'No se obtuvo mensaje de error.'}")
