@@ -1,49 +1,11 @@
-# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
-# Copyright (C) 2025 Adrim Hamed Outmani
+# Pharmagen - Optuna Hyperparameter Optimization
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Implements a comprehensive hyperparameter optimization pipeline using Optuna.
+# Supports multi-objective optimization and clean architecture.
 
-"""
-Optuna Hyperparameter Optimization with Multi-Objective Support.
-
-This module implements a comprehensive hyperparameter optimization pipeline using Optuna
-with support for multi-objective optimization. Key features:
-
-- Multi-objective optimization (loss + F1 for critical tasks)
-- Per-task metric tracking (F1, precision, recall)
-- Proper handling of class imbalance with weighted loss
-- Clinical priority weighting for task balancing
-- Comprehensive reporting with JSON and visualization
-
-References:
-    - Optuna: https://optuna.readthedocs.io/
-    - Multi-objective optimization: Deb et al., 2002
-"""
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Optuna Hyperparameter Optimization Pipeline.
-
-Refactorizado para eficiencia de memoria:
-1. Carga datos y crea Datasets una sola vez (evita Data Leakage y overhead IO).
-2. Pasa referencias de los datasets a la función objetivo.
-3. Soporta optimización mono y multi-objetivo.
-"""
-
-import datetime
-import json
 import logging
+import json
+import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
@@ -56,34 +18,20 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from src.cfg.config import PROJECT_ROOT
-from src.cfg.model_configs import MULTI_LABEL_COLUMN_NAMES, get_model_config
+# Project Imports
+from src.cfg.manager import get_model_config, MULTI_LABEL_COLS, DIRS
+from src.data_handler import load_dataset, PGenProcessor, PGenDataset
+from src.modeling import create_model
+from src.losses import MultiTaskUncertaintyLoss
+from src.trainer import PGenTrainer
 
-from src.data import PGenDataProcess, PGenDataset
-from src.loss_functions import MultiTaskUncertaintyLoss
-from src.model import DeepFM_PGenModel
-from src.train import train_model
-from src.utils.data import load_and_prep_dataset
-from src.utils.training import create_optimizer, create_scheduler, create_task_criterions
-
-# Configuración Global
 logger = logging.getLogger(__name__)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-# Constantes de Rutas
-OPTUNA_OUTPUTS = Path(PROJECT_ROOT) / "reports" /"optuna_reports"
-OPTUNA_FIGS = Path(PROJECT_ROOT) / "reports" / "figures"
-OPTUNA_DBS = OPTUNA_OUTPUTS / "study_DBs"
-
-# Asegurar existencia de directorios
-for d in [OPTUNA_FIGS, OPTUNA_DBS]:
-    d.mkdir(parents=True, exist_ok=True)
-
-
 class OptunaTuner:
     """
-    Clase orquestadora para la optimización de hiperparámetros.
-    Encapsula datos, configuración y ciclo de vida de Optuna.
+    Orchestrator class for hyperparameter optimization.
+    Encapsulates data, configuration, and Optuna lifecycle.
     """
 
     def __init__(
@@ -106,78 +54,75 @@ class OptunaTuner:
         self.use_multi_objective = use_multi_objective
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Cargar configuración del modelo
+        # Load Model Configuration
         self.config = get_model_config(model_name)
         self.feature_cols = [c.lower() for c in self.config["features"]]
         self.target_cols = [t.lower() for t in self.config["targets"]]
         
-        # Validar que existe configuración de optimización
+        # Validate Optuna space
         self.optuna_space: Dict[str, List[Any]] = self.config.get("params_optuna", {})
         if not self.optuna_space:
             raise ValueError(f"No Optuna search space defined for model '{model_name}'")
 
-        # Inicialización diferida de datos
+        # Deferred Data Initialization
         self.train_dataset: Optional[PGenDataset] = None
         self.val_dataset: Optional[PGenDataset] = None
         self.encoder_dims: Dict[str, int] = {}
 
-        # Preparar datos al instanciar
+        # Prepare data immediately
         self._prepare_data()
 
     def _prepare_data(self):
-        """Carga, procesa y cachea los datasets en memoria (One-time setup)."""
-        logger.info(f"Preparando datos para {self.model_name}...")
+        """Loads, processes, and caches datasets in memory (One-time setup)."""
+        logger.info(f"Preparing data for {self.model_name}...")
         
-        # Definir columnas necesarias
+        # Define necessary columns
         cols_to_load = list(set(self.feature_cols + self.target_cols))
         
-        # 1. Cargar y Limpiar Datos 
-        df = load_and_prep_dataset(
+        # 1. Load & Clean
+        df = load_dataset(
             csv_path=self.csv_path,
-            all_cols=cols_to_load,
-            target_cols=self.target_cols,
-            multi_label_targets=list(MULTI_LABEL_COLUMN_NAMES),
-            stratify_cols=self.config.get("stratify_col") or self.config.get("stratify"),
+            cols_to_load=cols_to_load,
+            stratify_col=self.config.get("stratify_col")
         )
 
         # 2. Split
+        # Using _stratify helper column from load_dataset if available
+        stratify = df["_stratify"] if "_stratify" in df.columns else None
         train_df, val_df = train_test_split(
-            df, test_size=0.2, stratify=df.get("stratify_col"), random_state=self.seed
+            df, test_size=0.2, stratify=stratify, random_state=self.seed
         )
 
-        # 3. Configurar Procesador (Clase)
-        # AHORA: Se pasan las columnas en el __init__
-        processor = PGenDataProcess(
+        # 3. Fit Processor
+        processor = PGenProcessor(
             feature_cols=self.feature_cols,
             target_cols=self.target_cols,
-            multi_label_cols=list(MULTI_LABEL_COLUMN_NAMES)
+            multi_label_cols=list(MULTI_LABEL_COLS)
         )
-
-        # 4. Ajustar y Transformar
         processor.fit(train_df)
         
-        # Crear Datasets
+        # 4. Create Datasets
         self.train_dataset = PGenDataset(
             processor.transform(train_df), 
             self.feature_cols, 
             self.target_cols, 
-            MULTI_LABEL_COLUMN_NAMES
+            MULTI_LABEL_COLS
         )
         self.val_dataset = PGenDataset(
             processor.transform(val_df), 
             self.feature_cols, 
             self.target_cols, 
-            MULTI_LABEL_COLUMN_NAMES
+            MULTI_LABEL_COLS
         )
 
-        # Guardar dimensiones para instanciar el modelo luego
+        # Store encoder dims for model instantiation
         self.encoder_dims = {
             col: len(enc.classes_) for col, enc in processor.encoders.items()
         }
-        logger.info(f"Datos listos. Train: {len(train_df)}, Val: {len(val_df)}")
+        logger.info(f"Data ready. Train: {len(train_df)}, Val: {len(val_df)}")
 
     # ==========================================================================
-    # PARSING DE PARÁMETROS (Clean Code: Separación de responsabilidades)
+    # PARAMETER PARSING
     # ==========================================================================
 
     def _suggest_int(self, trial: optuna.Trial, name: str, args: List[Any]) -> int:
@@ -190,60 +135,48 @@ class OptunaTuner:
     def _suggest_float(self, trial: optuna.Trial, name: str, args: Tuple[float, float]) -> float:
         # args: (low, high)
         low, high = args
-        # Heurística: si el nombre implica tasa o probabilidad pequeña, usar log
         is_log = any(x in name for x in ["learning_rate", "weight_decay"])
-        
         return trial.suggest_float(name, low, high, log=is_log)
 
     def _suggest_categorical(self, trial: optuna.Trial, name: str, choices: List[Any]) -> Any:
         return trial.suggest_categorical(name, choices)
 
     def _get_trial_params(self, trial: optuna.Trial) -> Dict[str, Any]:
-        params = {}
+        params = self.config.get("params", {}).copy() # Start with defaults
+        
         for name, space in self.optuna_space.items():
             try:
                 if isinstance(space, list):
-                    # CASO 1: Lista vacía (error)
-                    if not space:
-                        continue
-
-                    # CASO 2: Definición de Entero ["int", min, max, step]
+                    if not space: continue
+                    
                     if space[0] == "int":
                         params[name] = self._suggest_int(trial, name, space[1:])
-                    
-                    # CASO 3: Valor Fijo (Lista de 1 elemento)
-                    # Optuna explota si le pides sugerir de una lista de 1 solo valor repetidamente
                     elif len(space) == 1:
-                        params[name] = space[0]
-                        # Opcional: Guardarlo como atributo fijo para que conste en el log
-                        trial.set_user_attr(f"fixed_{name}", space[0])
-
-                    # CASO 4: Categórico Real (Más de 1 opción)
+                        params[name] = space[0] # Constant
                     else:
                         params[name] = self._suggest_categorical(trial, name, space)
                 
                 elif isinstance(space, tuple):
                     params[name] = self._suggest_float(trial, name, space)
-                
                 else:
-                    # Fallback constante (si en el TOML pusiste un valor directo sin lista)
                     params[name] = space
             
             except Exception as e:
-                logger.error(f"Error sugiriendo parámetro '{name}': {e}")
+                logger.error(f"Error suggesting param '{name}': {e}")
                 raise
         return params
 
     # ==========================================================================
-    # LOOP DE ENTRENAMIENTO (Objective)
+    # TRAINING LOOP (Objective)
     # ==========================================================================
 
     def objective(self, trial: optuna.Trial) -> Union[float, Tuple[float, float]]:
-        # 1. Sugerir Hiperparámetros
+        # 1. Suggest Hyperparameters
         params = self._get_trial_params(trial)
         trial.set_user_attr("params", params)
 
-        # 2. DataLoaders Eficientes
+        # 2. Efficient DataLoaders
+        # Using pin_memory=True for faster GPU transfer if available
         train_loader = DataLoader(
             cast(PGenDataset, self.train_dataset), batch_size=params.get("batch_size", 64), 
             shuffle=True, num_workers=0, pin_memory=True
@@ -253,123 +186,96 @@ class OptunaTuner:
             shuffle=False, num_workers=0, pin_memory=True
         )
 
-        # 3. Instanciar Modelo
+        # 3. Instantiate Model (Using Factory)
         curr_n_feats = {k: v for k, v in self.encoder_dims.items() if k in self.feature_cols}
         curr_n_targets = {k: v for k, v in self.encoder_dims.items() if k in self.target_cols}
 
-        model = DeepFM_PGenModel(
-            n_features=curr_n_feats,
-            target_dims=curr_n_targets,
-            embedding_dim=params["embedding_dim"],
-            hidden_dim=params["hidden_dim"],
-            dropout_rate=params["dropout_rate"],
-            n_layers=params["n_layers"],
-            activation_function=params.get("activation_function", "gelu"),
-            fm_hidden_dim=params.get("fm_hidden_dim", 64),
-            # ... 
-            attention_dim_feedforward=params.get("attention_dim_feedforward"),
-            attention_dropout=params.get("attention_dropout", 0.1),
-            num_attention_layers=params.get("num_attention_layers", 1),
-            use_batch_norm=params.get("use_batch_norm", False),
-            use_layer_norm=params.get("use_layer_norm", False),
-            embedding_dropout=params.get("embedding_dropout", 0.0),
-        ).to(self.device)
+        model = create_model(self.model_name, curr_n_feats, curr_n_targets, params).to(self.device)
 
-        # 4. Configurar Training Components
-        # a) Loss Functions (diccionario de losses individuales)
-        loss_fns_dict = create_task_criterions(
-            self.target_cols, MULTI_LABEL_COLUMN_NAMES, params, self.device
-        )
+        # 4. Setup Training Components
         
-        # b) Uncertainty Loss Wrapper (Opcional según params)
+        # A) Uncertainty Loss (Optional)
         uncertainty_module = None
         if params.get("use_uncertainty_loss", False):
-            logger.info("Activando MultiTaskUncertaintyLoss (Kendall & Gal)") if trial.number == 0 else None
+            if trial.number == 0: logger.info("Active: MultiTaskUncertaintyLoss")
             uncertainty_module = MultiTaskUncertaintyLoss(self.target_cols).to(self.device)
 
-        # c) Optimizer y Scheduler
-        optimizer = create_optimizer(model, params, uncertainty_module)
-        scheduler = create_scheduler(optimizer, params)
+        # B) Optimizer & Scheduler
+        trainable_params = list(model.parameters()) + (list(uncertainty_module.parameters()) if uncertainty_module else [])
+        
+        optimizer_name = params.get("optimizer_type", "adamw").lower()
+        if optimizer_name == "sgd":
+            optimizer = torch.optim.SGD(trainable_params, lr=params["learning_rate"], weight_decay=params["weight_decay"])
+        else:
+            optimizer = torch.optim.AdamW(trainable_params, lr=params["learning_rate"], weight_decay=params["weight_decay"])
 
-        # e) Empaquetar criterions como lista para compatibilidad con train_model antiguo
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=3)
 
-        criterions_list: List[Any] = [loss_fns_dict[t] for t in self.target_cols]
-        criterions_list.append(optimizer)
+        # 5. Train
+        trainer = PGenTrainer(
+            model=model,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            device=self.device,
+            target_cols=self.target_cols,
+            multi_label_cols=MULTI_LABEL_COLS,
+            params=params,
+            uncertainty_module=uncertainty_module
+        )
 
-        # 5. Entrenar
         try:
-            best_loss, best_accs = train_model(
+            best_loss = trainer.fit(
                 train_loader=train_loader,
                 val_loader=val_loader,
-                model=model,
-                criterions=criterions_list,
                 epochs=self.epochs,
                 patience=self.patience,
-                model_name=self.model_name,
-                feature_cols=self.feature_cols,
-                target_cols=self.target_cols,
-                device=self.device,
-                scheduler=scheduler,
-                multi_label_cols=MULTI_LABEL_COLUMN_NAMES,
-                trial=trial,
-                return_per_task_losses=False,
-                progress_bar=False,
-                uncertainty_loss_module=uncertainty_module 
+                trial=trial
             )
         except optuna.TrialPruned:
             raise
         except Exception as e:
-            logger.error(f"Trial {trial.number} falló con params {params}: {e}")
+            logger.error(f"Trial {trial.number} failed with params {params}: {e}")
             raise e
 
-        # Reportar métricas extra
-        avg_acc = sum(best_accs) / len(best_accs) if best_accs else 0.0
-        trial.set_user_attr("avg_accuracy", avg_acc)
-
-        if self.use_multi_objective:
-            return best_loss, -avg_acc
-        
+        # Multi-objective support placeholder (e.g., minimize loss, maximize accuracy)
+        # Currently just returning loss as primary objective.
         return best_loss
 
     # ==========================================================================
-    # EJECUCIÓN Y REPORTING
+    # EXECUTION & REPORTING
     # ==========================================================================
 
     def run(self):
-        """Ejecuta el estudio de Optuna completo."""
+        """Executes the full Optuna study."""
         timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M")
         study_name = f"OPT_{self.model_name}_{timestamp}"
-        storage_url = f"sqlite:///{OPTUNA_DBS}/{study_name}.db"
+        storage_url = f"sqlite:///{DIRS['reports']}/optuna_reports/study_DBs/{study_name}.db"
 
-        logger.info(f"Iniciando estudio: {study_name}")
+        logger.info(f"Starting study: {study_name}")
 
-        # Configurar Sampler y Pruner
         sampler = TPESampler(seed=self.seed, multivariate=True)
         
         if self.use_multi_objective:
             directions = ["minimize", "minimize"]
-            pruner = None
             study = optuna.create_study(
                 study_name=study_name,
                 storage=storage_url,
                 directions=directions,
                 sampler=sampler,
-                pruner=pruner,
                 load_if_exists=True
             )
         else:
-            direction = "minimize"
             pruner = MedianPruner(n_startup_trials=10, n_warmup_steps=5)
             study = optuna.create_study(
                 study_name=study_name,
                 storage=storage_url,
-                direction=direction,
+                direction="minimize",
                 sampler=sampler,
                 pruner=pruner,
                 load_if_exists=True
             )
 
-        # Barra de progreso externa
+        # External Progress Bar
         with tqdm(total=self.n_trials, desc="Optuna Trials", colour="blue") as pbar:
             def progress_callback(study, trial):
                 pbar.update(1)
@@ -384,22 +290,20 @@ class OptunaTuner:
                 gc_after_trial=True
             )
 
-        # Guardar resultados
         self._save_results(study, timestamp)
         return study
 
     def _save_results(self, study: optuna.Study, timestamp: str):
-        """Genera gráficos y reportes JSON/TXT."""
-        logger.info("Generando reportes...")
+        """Generates JSON reports and plots."""
+        logger.info("Generating reports...")
         
-        # 1. Gráficos
+        # 1. Plots
         self._generate_plots(study, timestamp)
 
-        # 2. Texto y JSON
-        best_trials = self._get_pareto_front(study)
+        # 2. JSON Report
+        best_trials = study.best_trials
         base_name = f"report_{self.model_name}_{timestamp}"
         
-        # JSON Data
         report_data = {
             "model": self.model_name,
             "best_trials": [
@@ -412,26 +316,21 @@ class OptunaTuner:
             ]
         }
         
-        with open(OPTUNA_OUTPUTS / f"{base_name}.json", "w") as f:
+        out_path = DIRS["reports"] / "optuna_reports" / f"{base_name}.json"
+        with open(out_path, "w") as f:
             json.dump(report_data, f, indent=2)
             
-        logger.info(f"Reportes guardados en {OPTUNA_OUTPUTS}")
-
-    def _get_pareto_front(self, study: optuna.Study, n: int = 5):
-        valid = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
-        if not valid: return []
-        # En multi-obj devuelve frente pareto, en single devuelve best trial
-        return study.best_trials[:n]
+        logger.info(f"Report saved to {out_path}")
 
     def _generate_plots(self, study, timestamp):
-        """Wrapper seguro para Matplotlib."""
+        """Safe wrapper for Optuna visualization."""
         try:
             from optuna.visualization.matplotlib import (
                 plot_optimization_history,
                 plot_param_importances,
             )
             
-            base_path = OPTUNA_FIGS / f"{self.model_name}_{timestamp}"
+            base_path = DIRS["reports"] / "figures" / f"{self.model_name}_{timestamp}"
             
             plt.figure(figsize=(10, 6))
             plot_optimization_history(study)
@@ -447,7 +346,7 @@ class OptunaTuner:
                 plt.close()
                 
         except Exception as e:
-            logger.warning(f"No se pudieron generar gráficos: {e}")
+            logger.warning(f"Could not generate plots: {e}")
 
 
 # ============================================================================
@@ -463,10 +362,5 @@ def run_optuna_study(
     study = tuner.run()
     
     print("\n" + "="*50)
-    print(f"Mejor Trial Params: {study.best_trials[0].params}")
+    print(f"Best Trial Params: {study.best_trials[0].params}")
     print("="*50 + "\n")
-
-if __name__ == "__main__":
-    # Ejemplo
-    # run_optuna_study("DeepFM_V1", "data/processed.tsv")
-    pass

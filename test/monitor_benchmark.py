@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import torch
+import torch.nn
 
 from src.model import DeepFM_PGenModel  # Asumiendo tu estructura
 from src.performance_monitor import estimate_optimal_batch_size  # Asumiendo nombre del archivo
@@ -54,4 +54,5 @@ def test_hardware_capacity():
     print(f"--> Configura tu 'batch_size' en config.toml a: {optimal_bs}")
 
 if __name__ == "__main__":
+    
     test_hardware_capacity()

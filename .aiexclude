@@ -17,9 +17,7 @@ results/**
 # =======================================================
 # ARTEFACTOS DE MACHINE LEARNING Y BINARIOS
 # =======================================================
-src/pgen_model/models/**
-src/pgen_model/encoders/**
-src/pgen_model/labels_vocabs/**
+src/pgen_model/
 
 # Extensiones de modelos y serialización
 *.pth
@@ -33,7 +31,7 @@ src/pgen_model/labels_vocabs/**
 # =======================================================
 # BASES DE DATOS Y REPORTES
 # =======================================================
-reports/optuna_reports/study_DBs/**
+reports/
 *.db
 *.sqlite3
 
@@ -49,7 +47,7 @@ reports/train_reports/**
 BACKUPS/**
 cache/**
 logs/**
-src/pgen_model/labels_vocabs/logs/**
+s
 *.log
 
 # Caches de Python y compilados

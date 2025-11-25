@@ -26,11 +26,13 @@ import torch
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 
 # Imports del proyecto
-from src.cfg.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES
-from src.cfg.model_configs import get_model_config
-from src.model import DeepFM_PGenModel
+from src.cfg.manager import get_model_config, DIRS, MULTI_LABEL_COLS
+from src.modeling import create_model, DeepFM_PGenModel
 
 logger = logging.getLogger(__name__)
+MODEL_ENCODERS_DIR = DIRS["model_encoders"]
+MODELS_DIR = DIRS["models"]
+
 
 UNKNOWN_TOKEN = "__UNKNOWN__"
 
@@ -265,7 +267,7 @@ class PGenPredictor:
             enc = self.encoders[col]
             logits = outputs[col] # [Batch, Classes]
 
-            if col in MULTI_LABEL_COLUMN_NAMES:
+            if col in MULTI_LABEL_COLS:
                 # Multi-label
                 probs = torch.sigmoid(logits)
                 preds_bin = (probs > 0.5).int().numpy()
