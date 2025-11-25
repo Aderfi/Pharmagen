@@ -83,3 +83,6 @@ src/cfg/venv_setup_true
 # --- Logs ---
 *.log
 npm-debug.log*
+
+GEMINI.md
+gemini*.json

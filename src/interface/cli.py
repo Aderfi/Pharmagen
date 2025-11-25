@@ -1,129 +1,129 @@
-# Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
-# Copyright (C) 2025 Adrim Hamed Outmani
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Pharmagen - Command Line Interface
+# Interactive Menu and Workflows
 
-import logging
-
-# src/interface/cli.py
-# Control de interfaz de usuario
 import sys
+import logging
+import datetime
 import time
 from pathlib import Path
 
 import pandas as pd
 
-# Proyecto
-from src.cfg.config import DATA_DIR, DATE_STAMP, PROJECT_ROOT
-from src.cfg.model_configs import select_model
-
-# UI
+# Project Imports
+from src.cfg.manager import get_available_models, DIRS, PROJECT_ROOT
 from src.interface.utils import Spinner, input_path, print_error, print_header, print_success
 from src.optuna_tuner import run_optuna_study
 from src.pipeline import train_pipeline
 from src.predict import PGenPredictor
-from src.utils.system import print_conditions_details, print_gnu_notice, print_warranty_details
+from src.utils.io import print_conditions_details, print_gnu_notice, print_warranty_details
 
 logger = logging.getLogger(__name__)
-
+DATE_STAMP = datetime.datetime.now().strftime("%Y_%m_%d")
 
 # ==============================================================================
-# FLUJOS DE TRABAJO (Workflows)
+# UTILS
+# ==============================================================================
+
+def _select_model() -> str:
+    """Interactively select a model from configuration."""
+    models = get_available_models()
+    if not models:
+        print_error("No models found in models.toml")
+        sys.exit(1)
+        
+    print("\nAvailable Models:")
+    for i, m in enumerate(models, 1):
+        print(f"  {i}. {m}")
+        
+    while True:
+        choice = input("\nSelect model (number): ").strip()
+        if choice.isdigit():
+            idx = int(choice) - 1
+            if 0 <= idx < len(models):
+                return models[idx]
+        print_error("Invalid selection.")
+
+# ==============================================================================
+# WORKFLOWS
 # ==============================================================================
 
 def run_genomic_processing():
-    """Simulación del flujo de ETL genómico."""
-    print_header("Módulo de Procesamiento Genómico")
-    logger.info("Iniciando módulo genómico interactivo.")
-    # Aquí iría la llamada real a src/data_handle/...
-    with Spinner("Analizando archivos VCF y mapeando variantes..."):
-       time.sleep(2) # Simulación
+    """Simulation of Genomic ETL."""
+    print_header("Genomic Processing Module")
+    logger.info("Starting interactive genomic module.")
+    
+    with Spinner("Analyzing VCF files..."):
+       time.sleep(2) 
         
-    print_success("Procesamiento completado (Simulado).")
-    print_success("Procesamiento completado (Simulado).")
-
+    print_success("Processing completed (Simulated).")
 
 def run_training_flow():
-    """Flujo interactivo para entrenar modelos."""
-    print_header("Módulo de Entrenamiento")
+    """Interactive Training Workflow."""
+    print_header("Training Module")
     
-    # 1. Selección de Modelo
-    model_name = select_model("Selecciona el modelo a entrenar:")
+    # 1. Select Model
+    model_name = _select_model()
     
-    # 2. Selección de Datos
-    # Sugerimos una ruta por defecto si existe
-    #default_data = DATA_DIR / "processed" / "training_data.tsv"
-    default_data = Path(PROJECT_ROOT / "train_data" / "final_enriched_data.tsv")
-    if not default_data.exists(): default_data = None
+    # 2. Select Data
+    default_data = DIRS["data"] / "processed" / "train_data.tsv"
+    if not default_data.exists():
+        # Fallback to project root default if exists
+        fallback = PROJECT_ROOT / "train_data" / "final_enriched_data.tsv"
+        if fallback.exists():
+            default_data = fallback
+        else:
+            default_data = None
     
-    csv_path = input_path("Ruta del archivo de entrenamiento (CSV/TSV)", default=default_data)
+    csv_path = input_path("Training Data Path (CSV/TSV)", default=default_data)
 
-    # 3. Selección de Modo
-    print("\nModo de entrenamiento:")
-    print("  1. Entrenamiento Estándar (Un solo ciclo)")
-    print("  2. Optimización de Hiperparámetros (Optuna)")
+    # 3. Select Mode
+    print("\nTraining Mode:")
+    print("  1. Standard Training (Single Run)")
+    print("  2. Hyperparameter Optimization (Optuna)")
     
-    mode = input("Selecciona (1-2): ").strip()
+    mode = input("Select (1-2): ").strip()
     
     if mode == "1":
         _run_standard_training(model_name, csv_path)
     elif mode == "2":
         _run_optuna_training(model_name, csv_path)
     else:
-        print_error("Opción inválida.")
+        print_error("Invalid option.")
 
 def _run_standard_training(model_name: str, csv_path: Path):
-    epochs_str = input("Número de épocas [default -> 100]: ").strip() 
+    epochs_str = input("Epochs [default -> 100]: ").strip() 
     epochs = int(epochs_str) if epochs_str.isdigit() else 100
     
-    print(f"\nIniciando entrenamiento estándar para '{model_name}'...")
-    with Spinner("Configurando pipeline y cargando datos..."):
-        # La configuración es rápida, el entrenamiento real mostrará su propia barra
-        pass
-        
-    train_pipeline(csv_path=csv_path, model_name=model_name, epochs=epochs)
-    print_success("Entrenamiento finalizado.")
+    print(f"\nStarting Standard Training: '{model_name}'")
+    train_pipeline(model_name=model_name, csv_path=str(csv_path), epochs=epochs)
+    print_success("Training finished.")
 
 def _run_optuna_training(model_name: str, csv_path: Path):
-    trials_str = input("Número de trials [default -> 50]: ").strip()
+    trials_str = input("Number of Trials [default -> 50]: ").strip()
     n_trials = int(trials_str) if trials_str.isdigit() else 50
     
-    print(f"\nIniciando Optuna para '{model_name}' ({n_trials} trials)...")
-    # Optuna manejará su propia barra de progreso
+    print(f"\nStarting Optuna Optimization: '{model_name}' ({n_trials} trials)")
     run_optuna_study(model_name=model_name, csv_path=csv_path, n_trials=n_trials)
-    print_success("Estudio de optimización finalizado.")
-
+    print_success("Optimization finished.")
 
 def run_prediction_flow():
-    """Flujo interactivo para inferencia."""
-    print_header("Módulo de Predicción")
+    """Interactive Prediction Workflow."""
+    print_header("Prediction Module")
     
-    model_name = select_model("Selecciona el modelo para predecir:")
+    model_name = _select_model()
     
     try:
-        # Instancia única del predictor (Singleton-like scope)
-        with Spinner("Cargando modelo y encoders en memoria..."):
+        with Spinner("Loading model..."):
             predictor = PGenPredictor(model_name)
-        print_success("Modelo cargado correctamente.")
+        print_success("Model loaded.")
 
         while True:
-            print("\n--- Menú Predicción ---")
-            print("  1. Predicción Interactiva (Single)")
-            print("  2. Predicción por Lotes (Archivo)")
-            print("  3. Volver al menú principal")
+            print("\n--- Prediction Menu ---")
+            print("  1. Interactive (Single)")
+            print("  2. Batch (File)")
+            print("  3. Back to Main Menu")
             
-            sub_choice = input("Opción: ").strip()
+            sub_choice = input("Option: ").strip()
 
             if sub_choice == "1":
                 _interactive_predict_loop(predictor)
@@ -133,84 +133,77 @@ def run_prediction_flow():
                 break
                 
     except FileNotFoundError as e:
-        logger.error(f"Error cargando modelo: {e}")
-        print_error(f"No se encontró el modelo o encoders: {e}")
-        print("Tip: Entrena el modelo primero.")
+        logger.error(f"Model loading failed: {e}")
+        print_error(f"Could not load model: {e}")
+        print("Tip: Train the model first.")
     except Exception as e:
-        logger.error(f"Error crítico en predicción: {e}", exc_info=True)
-        print_error(f"Error inesperado: {e}")
-
+        logger.error(f"Critical prediction error: {e}", exc_info=True)
+        print_error(f"Unexpected error: {e}")
 
 def _interactive_predict_loop(predictor: PGenPredictor):
-    print("\n(Escribe 'q' para cancelar en cualquier momento)")
+    print("\n(Type 'q' to cancel)")
     inputs = {}
     
-    # Solicitud dinámica basada en los features que el modelo necesita
     for feature in predictor.feature_cols:
-        val = input(f"Ingrese valor para '{feature}': ").strip()
+        val = input(f"Value for '{feature}': ").strip()
         if val.lower() == 'q': return
         inputs[feature] = val
     
-    print("\nCalculando...")
+    print("\nCalculating...")
     result = predictor.predict_single(inputs)
     
-    print("\n--- Resultados ---")
+    print("\n--- Result ---")
     if result:
         for k, v in result.items():
             print(f"  🔹 {k}: {v}")
     else:
-        print_error("Error en la predicción.")
-
+        print_error("Prediction failed.")
 
 def _batch_predict_flow(predictor: PGenPredictor):
-    path = input_path("Ruta del archivo CSV/TSV de entrada")
+    path = input_path("Input CSV/TSV Path")
     
-    with Spinner(f"Procesando {path.name}..."):
+    with Spinner(f"Processing {path.name}..."):
         results = predictor.predict_file(path)
     
     if not results:
-        print("⚠️ No se generaron resultados.")
+        print("⚠️ No results generated.")
         return
 
     out_path = path.parent / f"{path.stem}_predictions_{DATE_STAMP}.csv"
     pd.DataFrame(results).to_csv(out_path, index=False)
-    print_success(f"Predicciones guardadas en: {out_path}")
+    print_success(f"Predictions saved to: {out_path}")
 
 def run_advanced_analysis():
-    print_header("Análisis Avanzado")
-    print("Generando reportes de interpretabilidad...")
-    print("Funcionalidad en construcción.")
+    print_header("Advanced Analysis")
+    print("Generating interpretability reports...")
+    print("(Under Construction)")
 
 # ==============================================================================
-# MENÚ PRINCIPAL LOOP
+# MAIN MENU LOOP
 # ==============================================================================
 
 def main_menu_loop():
-    logger.info("Iniciando menú interactivo.")
-    
-    # 1. Imprimir el aviso legal al arrancar el modo interactivo
+    logger.info("Starting interactive menu.")
     print_gnu_notice()
     
     while True:
-        print_header(f"Pharmagen v0.667 - Menú Principal")
-        print("  1. Procesar Datos Genómicos (ETL)")
-        print("  2. Entrenar Modelos (Deep Learning)")
-        print("  3. Realizar Predicciones (Inferencia)")
-        print("  4. Análisis Avanzado")
-        print("  5. Salir")
+        print_header(f"Pharmagen - Main Menu")
+        print("  1. Genomic Processing (ETL)")
+        print("  2. Train Models (Deep Learning)")
+        print("  3. Predict (Inference)")
+        print("  4. Advanced Analysis")
+        print("  5. Exit")
         print("="*60)
         
-        choice = input("Selecciona opción (1-5): ").strip()
+        choice = input("Select option (1-5): ").strip()
         
-        # --- 2. INTERCEPTAR COMANDOS LEGALES ---
         if choice == "show w":
             print_warranty_details()
-            continue # Volver a pintar el menú
+            continue
             
         if choice == "show c":
             print_conditions_details()
-            continue # Volver a pintar el menú
-        # ---------------------------------------
+            continue
 
         if choice == "1":
             run_genomic_processing()
@@ -221,11 +214,11 @@ def main_menu_loop():
         elif choice == "4":
             run_advanced_analysis()
         elif choice == "5":
-            logger.info("Salida del sistema por el usuario.")
-            print("\n¡Hasta luego!")
+            logger.info("User exit.")
+            print("\nGoodbye!")
             sys.exit(0)
         else:
-            print("Opción no válida.")
+            print("Invalid option.")
 
 if __name__ == "__main__":
     main_menu_loop()

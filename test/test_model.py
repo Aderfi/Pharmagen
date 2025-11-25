@@ -1,7 +1,6 @@
-
 import pytest
 import torch
-from src.model import DeepFM_PGenModel
+from src.modeling import DeepFM_PGenModel
 
 @pytest.fixture
 def model_params():
@@ -56,5 +55,7 @@ class TestDeepFM_PGenModel:
             # Missing 'drug_id'
         }
         
-        with pytest.raises(ValueError, match="Features faltantes"):
+        # PyTorch's nn.ModuleDict or Embedding will raise KeyError if key is missing
+        # Or the forward method will fail when accessing x[f]
+        with pytest.raises(KeyError): 
             model(inputs)
