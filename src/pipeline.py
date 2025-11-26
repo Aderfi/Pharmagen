@@ -5,16 +5,18 @@ import logging
 import torch
 import joblib
 from torch.utils.data import DataLoader
+from pathlib import Path
 
 from src.cfg.manager import get_model_config, DIRS, MULTI_LABEL_COLS
 from src.data_handler import load_dataset, PGenProcessor, PGenDataset
-from src.modeling import create_model, MultiTaskUncertaintyLoss
+from src.modeling import create_model
+from src.losses import MultiTaskUncertaintyLoss
 from src.trainer import PGenTrainer
-from src.utils.io import save_json
+from src.utils.io_utils import save_json
 
 logger = logging.getLogger(__name__)
 
-def train_pipeline(model_name: str, csv_path: str, epochs: int = 50):
+def train_pipeline(model_name: str, csv_path: str|Path, epochs: int = 50):
     """
     Main training workflow.
     1. Config & Data Loading

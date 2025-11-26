@@ -49,3 +49,44 @@ pip install -e ".[train]"
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+
+
+
+
+
+2. RxNorm (vía API o librerías)
+  Si tus datos tienen muchas "formulaciones" clínicas (ej. "Metformin 500mg Oral Tablet"),
+  RxNorm es el estándar de oro (usado por la Biblioteca Nacional de Medicina de EE. UU.)
+  para extraer el Ingrediente Activo.
+   * Para qué sirve: Mapear "Marcas" -> "Ingrediente Genérico". Es fundamental para
+     limpiar datos clínicos sucios.
+   * Cómo usarlo en Python: No hay una librería "pip install rxnorm" oficial simple, pero
+     se suele consultar su API REST gratuita.
+
+    1 import requests
+    2 
+    3 def get_active_ingredient(drug_text):
+    4     # API de RxNav (NIH)
+    5     url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={drug_text}"
+    6     response = requests.get(url)
+    7     data = response.json()
+    8     try:
+    9         # Obtener RxCUI (ID único del concepto)
+   10         id_group = data['idGroup']['rxnormId'][0]
+   11         
+   12         # Buscar propiedades (ingrediente) usando el RxCUI
+   13         prop_url = f"https://rxnav.nlm.nih.gov/REST/rxcui/{id_group}/allrelated.json
+   14         prop_resp = requests.get(prop_url)
+   15         prop_data = prop_resp.json()
+   16         
+   17         # Extraer el nombre del ingrediente (TTY=IN)
+   18         all_related = prop_data['allRelatedGroup']['conceptGroup']
+   19         for group in all_related:
+   20             if group['tty'] == 'IN' or group['tty'] == 'MIN': # IN = Ingredient
+   21                 return group['conceptProperties'][0]['name']
+   22     except:
+   23         return "Unknown"
+   24 
+   25 print(get_active_ingredient("Tylenol"))  # Debería devolver "acetaminophen"

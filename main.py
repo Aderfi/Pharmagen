@@ -59,17 +59,17 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.append(str(PROJECT_ROOT))
 
 # --- Imports del Proyecto ---
-from src.cfg.config import LOGS_DIR
+from src.cfg.manager import DIRS
 from src.interface.cli import main_menu_loop
 from src.optuna_tuner import run_optuna_study
 from src.pipeline import train_pipeline
 from src.predict import PGenPredictor
-from src.utils.logger import setup_logging
-from src.utils.system import check_environment_and_setup
+from src.utils.logger_setup import setup_logging
+from src.utils.sys_utils import check_environment_and_setup
 
 # Constantes
 DATE_STAMP = datetime.now().strftime('%Y-%m-%d')
-
+LOGS_DIR = DIRS["logs"]
 # ==============================================================================
 # MAIN ENTRY POINT
 # ==============================================================================
@@ -103,7 +103,7 @@ def main():
             if args.optuna:
                 run_optuna_study(args.model, args.input)
             else:
-                train_pipeline(Path(args.input), args.model)
+                train_pipeline(model_name=args.model, csv_path=Path(args.input))
                 
         # Modo Predicción (Headless/Automatizado)
         elif args.mode == "predict":

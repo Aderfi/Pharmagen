@@ -15,7 +15,7 @@ from src.interface.utils import Spinner, input_path, print_error, print_header, 
 from src.optuna_tuner import run_optuna_study
 from src.pipeline import train_pipeline
 from src.predict import PGenPredictor
-from src.utils.io import print_conditions_details, print_gnu_notice, print_warranty_details
+from src.utils.io_utils import print_conditions_details, print_gnu_notice, print_warranty_details
 
 logger = logging.getLogger(__name__)
 DATE_STAMP = datetime.datetime.now().strftime("%Y_%m_%d")
