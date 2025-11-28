@@ -90,3 +90,125 @@ pip install -e ".[train]"
    23         return "Unknown"
    24 
    25 print(get_active_ingredient("Tylenol"))  # Debería devolver "acetaminophen"
+
+
+    ################################
+    NEXT APROACHES
+    ################################
+
+    import torch
+    from torch.utils.data import Dataset, DataLoader
+    import pandas as pd
+    import random
+
+    class PharmagenDataset(Dataset):
+        def __init__(self, df_positivos, df_negativos, target_size=None):
+            """
+            df_positivos: DataFrame con pares que SÍ interactúan.
+            df_negativos: DataFrame con pares que NO interactúan.
+            target_size: Cuántos pares queremos por época (para balancear).
+                        Si es None, usamos len(positivos) * 2.
+            """
+            self.pos_data = df_positivos.reset_index(drop=True)
+            self.neg_data = df_negativos.reset_index(drop=True)
+            
+            # Lista de todos los fármacos y genes únicos para generar ruido aleatorio
+            self.all_smiles = list(set(self.pos_data['SMILES'].tolist() + self.neg_data['SMILES'].tolist()))
+            self.all_dna = list(set(self.pos_data['DNA_SEQ'].tolist() + self.neg_data['DNA_SEQ'].tolist()))
+            
+            # Calculamos cuánto relleno sintético necesitamos
+            n_pos = len(self.pos_data)
+            n_neg_real = len(self.neg_data)
+            
+            # Objetivo: Igualar la cantidad de positivos
+            self.n_synthetic_needed = max(0, n_pos - n_neg_real)
+            
+            self.total_size = n_pos + n_neg_real + self.n_synthetic_needed
+            print(f"--- DATASET BALANCEADO ---")
+            print(f"Positivos Reales: {n_pos}")
+            print(f"Negativos Reales: {n_neg_real}")
+            print(f"Negativos Sintéticos (Relleno): {self.n_synthetic_needed}")
+            print(f"Total por Época: {self.total_size} (50% Pos / 50% Neg)")
+
+        def __len__(self):
+            return self.total_size
+
+        def __getitem__(self, idx):
+            # Lógica de distribución:
+            # 0 ... N_Pos-1  -> Devolvemos un Positivo Real
+            # N_Pos ... N_Pos+N_Neg-1 -> Devolvemos un Negativo Real
+            # El resto -> Generamos un Negativo Sintético al vuelo
+            
+            n_pos = len(self.pos_data)
+            n_neg = len(self.neg_data)
+            
+            label = 0.0 # 1.0 para Positivo, -1.0 para Negativo (Para CosineLoss)
+            
+            if idx < n_pos:
+                # CASO 1: POSITIVO REAL
+                row = self.pos_data.iloc[idx]
+                smiles, dna = row['SMILES'], row['DNA_SEQ']
+                label = 1.0 # Interactúan
+                
+            elif idx < (n_pos + n_neg):
+                # CASO 2: NEGATIVO REAL (GOLDEN)
+                # Ajustamos el índice para buscar en el df negativo
+                real_neg_idx = idx - n_pos
+                row = self.neg_data.iloc[real_neg_idx]
+                smiles, dna = row['SMILES'], row['DNA_SEQ']
+                label = -1.0 # No interactúan (CosineLoss usa -1 para negativos)
+                
+            else:
+                # CASO 3: NEGATIVO SINTÉTICO (Random Pairing)
+                # Tomamos un fármaco al azar y un gen al azar
+                # (Estadísticamente es muy probable que no interactúen)
+                smiles = random.choice(self.all_smiles)
+                dna = random.choice(self.all_dna)
+                label = -1.0
+            
+            # Nota: Aquí deberías devolver ya el Grafo procesado o el string para procesar en el collate_fn
+            # Para simplificar, devuelvo strings y asumo que tienes una función 'collate' que tokeniza.
+            return smiles, dna, torch.tensor(label, dtype=torch.float)
+##################################
+CAMBIAR A USO DE COSINE EMBEDDING LOSS
+###################################
+import torch.nn.functional as F
+
+# Instanciamos el modelo de Dos Torres (del mensaje anterior)
+# model = PharmagenTwoTowers(drug_encoder, dna_encoder)
+
+# Definimos la Loss Function
+# margin=0.5 significa: "Aléjalos hasta que su similitud sea menor a 0.5".
+# Si ya son muy distintos, no te esfuerces más (evita outliers).
+criterion = torch.nn.CosineEmbeddingLoss(margin=0.2) 
+
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+
+# Bucle
+for epoch in range(10):
+    total_loss = 0
+    
+    for batch in dataloader:
+        # batch es: (lista_smiles, lista_dnas, etiquetas)
+        # Asumimos que aquí procesas los grafos y dnas (o lo haces en el collate_fn)
+        # grafos = graph_processor(batch[0])
+        # dnas = dna_tokenizer(batch[1])
+        # labels = batch[2].to(device)
+        
+        # 1. Forward Pass (Obtener Vectores)
+        # Las torres devuelven vectores NORMALIZADOS (importante para CosineLoss)
+        vec_f, vec_g = model(grafos, dnas)
+        
+        # 2. Calcular Pérdida
+        # target debe ser 1 (acercar) o -1 (alejar)
+        loss = criterion(vec_f, vec_g, target=labels)
+        
+        # 3. Optimización
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        total_loss += loss.item()
+        
+    print(f"Epoch {epoch}: Loss media = {total_loss / len(dataloader)}")
+    

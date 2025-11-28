@@ -8,6 +8,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import TransformerEncoderLayer
+from d_graphs.graph_encoder import GraphEncoder
+from d_graphs.gen_tokenizer import DNAEncoder
+
+dna_model_name = "zhihan1996/DNABERT-2-117M"  # Puedes parametrizar esto si quieres
 
 # =============================================================================
 # 1. ARCHITECTURE: DEEPFM (Deep Factorization Machine)
@@ -16,8 +20,9 @@ from torch.nn import TransformerEncoderLayer
 class DeepFM_PGenModel(nn.Module):
     def __init__(
         self,
-        n_features: Dict[str, int],
+        n_features: Dict[str, int], # Quitar drugs de aquí
         target_dims: Dict[str, int],
+        n_graph_features: int,
         embedding_dim: int,
         hidden_dim: int,
         dropout_rate: float,
@@ -34,7 +39,7 @@ class DeepFM_PGenModel(nn.Module):
         embedding_dropout: float = 0.1,
     ):
         super().__init__()
-        self.feature_names = list(n_features.keys())
+        self.categorical_names = list(n_features.keys())
         self.target_names = list(target_dims.keys())
         
         # 1. Embeddings
@@ -42,6 +47,22 @@ class DeepFM_PGenModel(nn.Module):
             feat: nn.Embedding(num, embedding_dim) 
             for feat, num in n_features.items()
         })
+
+        # 1.5 Graph Encoder & DNA Encoder
+        #################################################################
+        self.drug_encoder = GraphEncoder(
+            num_node_features=n_graph_features,
+            output_dim=embedding_dim, 
+            hidden_dim=hidden_dim
+        )
+
+        self.dna_encoder = DNAEncoder(
+            output_dim=embedding_dim,  # Aquí pasas el 256, 512, o 768
+            model_name=dna_model_name,
+            freeze_backbone=True
+        )
+        #################################################################   
+
         self.emb_dropout = nn.Dropout(embedding_dropout)
 
         # 2. Deep Component (Transformer + MLP)
@@ -56,7 +77,11 @@ class DeepFM_PGenModel(nn.Module):
         )
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_attention_layers)
         
-        deep_input_dim = len(n_features) * embedding_dim
+        #############################
+        total_features_count = len(n_features) + 1 
+        deep_input_dim = total_features_count * embedding_dim
+        #############################
+
         self.deep_mlp = self._make_mlp(
             deep_input_dim, hidden_dim, n_layers, dropout_rate, 
             use_batch_norm, use_layer_norm, activation_function
@@ -103,9 +128,15 @@ class DeepFM_PGenModel(nn.Module):
         elif isinstance(m, nn.Embedding):
             nn.init.xavier_normal_(m.weight)
 
-    def forward(self, x: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    def forward(self, x_cat: Dict[str, torch.Tensor], x_graph: Any) -> Dict[str, torch.Tensor]:
         # Stack embeddings: [Batch, N_Feats, Emb_Dim]
-        emb_list = [self.embeddings[f](x[f]) for f in self.feature_names]
+        #emb_list = [self.embeddings[f](x_cat[f]) for f in self.feature_names]
+        #emb_stack = torch.stack(emb_list, dim=1)
+        #emb_stack = self.emb_dropout(emb_stack)
+        emb_list = [self.embeddings[f](x_cat[f]) for f in self.categorical_names]
+        drug_embedding = self.drug_encoder(x_graph)
+        emb_list.append(drug_embedding)
+
         emb_stack = torch.stack(emb_list, dim=1)
         emb_stack = self.emb_dropout(emb_stack)
 
@@ -130,7 +161,12 @@ class DeepFM_PGenModel(nn.Module):
 # 2. MODEL FACTORY
 # =============================================================================
 
-def create_model(model_name: str, n_features: Dict[str, int], target_dims: Dict[str, int], params: Dict[str, Any]) -> nn.Module:
+def create_model(
+        model_name: str, 
+        n_features: Dict[str, int], 
+        target_dims: Dict[str, int],
+        n_graph_features: int,
+        params: Dict[str, Any]) -> nn.Module:
     """
     Factory function to instantiate models based on configuration.
     Decouples architecture selection from the training pipeline.
@@ -149,6 +185,7 @@ def create_model(model_name: str, n_features: Dict[str, int], target_dims: Dict[
     return DeepFM_PGenModel(
         n_features=n_features,
         target_dims=target_dims,
+        n_graph_features=n_graph_features,
         **model_kwargs
     )
 
