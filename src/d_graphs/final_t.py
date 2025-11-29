@@ -13,7 +13,7 @@ lista_smiles = [
     "CC(C)Cc1ccc(cc1)C(C)C(=O)O"  # Ibuprofeno
 ]
 lista_grafos = [smiles_to_graph_complete(s) for s in lista_smiles if smiles_to_graph_complete(s)]
-loader = DataLoader(lista_grafos, batch_size=3, shuffle=False)
+loader = DataLoader(lista_grafos, batch_size=3, shuffle=False) # type: ignore
 
 # 2. DEFINIR LA RED NEURONAL (con Pooling)
 class FarmacoNetCompleta(torch.nn.Module):
