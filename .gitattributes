@@ -2,6 +2,8 @@
 # 1. GIT LFS (Large File Storage) - Archivos Binarios
 # =======================================================
 
+Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
+
 # Modelos de Deep Learning (PyTorch, TensorFlow, ONNX)
 *.pth       filter=lfs diff=lfs merge=lfs -text
 *.pt        filter=lfs diff=lfs merge=lfs -text
