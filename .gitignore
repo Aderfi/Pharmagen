@@ -49,7 +49,7 @@ Thumbs.db
 # Queremos ignorar su contenido, pero quizás mantener la estructura si usas .gitkeep
 #data/raw/*
 #data/processed/*
-#data/ref_genome/*
+data/ref_genome/*
 #cache/*
 #results/*
 #logs/*

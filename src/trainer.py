@@ -102,13 +102,44 @@ class PGenTrainer:
             
         return criterions
 
-    def _compute_step(self, batch: Dict[str, torch.Tensor]) -> Tuple[torch.Tensor, Dict[str, float]]:
-        """Computes forward pass, loss, and basic accuracy metrics for a batch."""
-        inputs = {k: v.to(self.device) for k, v in batch.items() if k in self.model.feature_names} # type: ignore
+    def _compute_step(self, batch: Any) -> Tuple[torch.Tensor, Dict[str, float]]:
+        """
+        Computes forward pass, loss, and basic accuracy metrics for a batch.
+        Handles both Tabular (Dict of Tensors) and Graph (Dict with specific keys) batches.
+        """
+        # 1. Dispatch based on Batch Structure (Duck Typing)
+        if isinstance(batch, dict) and "drug_data" in batch and "gene_input" in batch:
+            return self._step_graph(batch)
+        else:
+            return self._step_tabular(batch)
+
+    def _step_tabular(self, batch: Dict[str, torch.Tensor]) -> Tuple[torch.Tensor, Dict[str, float]]:
+        """Step logic for Tabular DeepFM."""
+        # Filter inputs based on model feature names
+        # Note: Requires model to have 'feature_names' attribute (DeepFM has it)
+        feature_names = getattr(self.model, "categorical_names", getattr(self.model, "feature_names", []))
+        
+        inputs = {k: v.to(self.device) for k, v in batch.items() if k in feature_names}
         targets = {k: v.to(self.device) for k, v in batch.items() if k in self.target_cols}
         
-        outputs:Dict[str, torch.Tensor] = self.model(inputs)
+        # Tabular model expects a single dict argument
+        outputs = self.model(inputs)
+        return self._calculate_loss_and_metrics(outputs, targets)
+
+    def _step_graph(self, batch: Dict[str, Any]) -> Tuple[torch.Tensor, Dict[str, float]]:
+        """Step logic for Graph Model."""
+        drug_data = batch["drug_data"].to(self.device)
+        gene_input = batch["gene_input"].to(self.device)
         
+        targets_raw = batch["targets"]
+        targets = {k: v.to(self.device) for k, v in targets_raw.items() if k in self.target_cols}
+        
+        # Graph model expects (drug_data, gene_input)
+        outputs = self.model(drug_data, gene_input)
+        return self._calculate_loss_and_metrics(outputs, targets)
+
+    def _calculate_loss_and_metrics(self, outputs: Dict[str, torch.Tensor], targets: Dict[str, torch.Tensor]):
+        """Shared loss and metric calculation."""
         # 1. Compute Losses
         losses_per_task = {}
         for t_col, t_true in targets.items():
@@ -122,25 +153,22 @@ class PGenTrainer:
         else:
             total_loss = sum(losses_per_task.values())
 
-        # 2. Compute Basic Accuracy (Monitoring only)
-        # KISS: Simple accuracy average across tasks to see if model is learning
+        # 2. Compute Basic Accuracy
         accuracies = []
         with torch.no_grad():
             for t_col, t_true in targets.items():
                 pred = outputs[t_col]
                 if t_col in self.ml_cols:
-                    # Multi-label accuracy (exact match is harsh, using subset accuracy proxy)
                     probs = torch.sigmoid(pred)
                     preds_bin = (probs > 0.5).float()
                     acc = (preds_bin == t_true.float()).float().mean()
                 else:
-                    # Multi-class accuracy
                     acc = (pred.argmax(1) == t_true).float().mean()
                 accuracies.append(acc.item())
         
         avg_acc = sum(accuracies) / len(accuracies) if accuracies else 0.0
         
-        return total_loss, {"loss": total_loss.item(), "acc": avg_acc} # type: ignore
+        return total_loss, {"loss": total_loss.item(), "acc": avg_acc}
 
     def train_epoch(self, loader: DataLoader) -> Dict[str, float]:
         self.model.train()
