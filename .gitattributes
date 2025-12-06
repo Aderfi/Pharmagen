@@ -1,9 +1,7 @@
 # =======================================================
 # 1. GIT LFS (Large File Storage) - Archivos Binarios
 # =======================================================
-
 Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
-
 # Modelos de Deep Learning (PyTorch, TensorFlow, ONNX)
 *.pth       filter=lfs diff=lfs merge=lfs -text
 *.pt        filter=lfs diff=lfs merge=lfs -text
@@ -11,16 +9,13 @@ Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
 *.h5        filter=lfs diff=lfs merge=lfs -text
 *.onnx      filter=lfs diff=lfs merge=lfs -text
 *.safetensors filter=lfs diff=lfs merge=lfs -text
-
 # Serialización de Python (Pickle, Joblib)
 *.pkl       filter=lfs diff=lfs merge=lfs -text
 *.joblib    filter=lfs diff=lfs merge=lfs -text
 *.kv        filter=lfs diff=lfs merge=lfs -text
-
 # Bases de Datos (Optuna)
 *.db        filter=lfs diff=lfs merge=lfs -text
 *.sqlite3   filter=lfs diff=lfs merge=lfs -text
-
 # Datos Comprimidos y Bioinformáticos
 *.gz        filter=lfs diff=lfs merge=lfs -text
 *.zip       filter=lfs diff=lfs merge=lfs -text
@@ -30,13 +25,11 @@ Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
 *.vcf       filter=lfs diff=lfs merge=lfs -text
 *.fa        filter=lfs diff=lfs merge=lfs -text
 *.fasta     filter=lfs diff=lfs merge=lfs -text
-
 # =======================================================
 # 2. NORMALIZACIÓN DE FINALES DE LÍNEA (CRLF vs LF)
 # =======================================================
 # Esto es vital si desarrollas en Windows pero despliegas en Linux.
 # Fuerza a que todo el código use 'LF' (estándar Unix/Python) al subirse a Git.
-
 # Archivos de texto explícitos
 *.py        text eol=lf
 *.toml      text eol=lf
@@ -48,11 +41,9 @@ Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
 *.sh        text eol=lf
 .gitignore  text eol=lf
 .gitattributes text eol=lf
-
 # Scripts de Windows (mantener CRLF)
 *.bat       text eol=crlf
 *.ps1       text eol=crlf
-
 # =======================================================
 # 3. LINGUIST (Estadísticas de GitHub)
 # =======================================================
@@ -60,3 +51,4 @@ Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
 *.json      linguist-generated
 *.lock      linguist-generated
 docs/* linguist-documentation
+Drug_ filter=lfs diff=lfs merge=lfs -text

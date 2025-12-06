@@ -7,9 +7,8 @@
 # ==========================================
 # MODELO 1: Phenotype_Effect_Outcome
 # ==========================================
-#Drug	Variant/Haplotypes	Gene_Symbol	Allele	Phenotype_outcome	Effect_direction	Effect_type	Previous_Condition_Term	Metabolizer_status	ATC	Variant_Normalized
-
 [Phenotype_Effect_Outcome]
+model_type = "tabular" # Explicit default
 targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
 features = [
     "ATC",          
@@ -89,6 +88,7 @@ use_layer_norm = [false]
 # MODELO 2: Features-Phenotype
 # ==========================================
 [Features-Phenotype]
+model_type = "tabular"
 targets = ["Phenotype_outcome"]
 features = ["atc", "Genalle", "Gene", "Allele"]
 stratify_col = "Phenotype_outcome"
@@ -108,3 +108,23 @@ phenotype_outcome = 1.0
 [Features-Phenotype.optuna]
 embedding_dim = [128, 256, 512]
 n_layers = ["int", 1, 4, 1]
+
+# ==========================================
+# MODELO 3: Graph-Phenotype (EXAMPLE)
+# ==========================================
+[Graph-Phenotype-Example]
+model_type = "graph"
+targets = ["Phenotype_outcome"]
+# For Graph models, 'features' might just imply the input columns expected in CSV
+features = ["drug", "chromosome", "position"] 
+cols_to_load = ["drug", "chromosome", "position", "Phenotype_outcome"]
+
+[Graph-Phenotype-Example.params]
+batch_size = 32
+learning_rate = 1e-4
+embedding_dim = 128
+hidden_dim = 256
+n_gnn_layers = 3
+dropout_rate = 0.2
+dna_model = "zhihan1996/DNABERT-2-117M"
+use_uncertainty_loss = false
