@@ -1,4 +1,4 @@
-# 💊 Pharmagen
+# 💊 Pharmagen (./cache/dna.gif)
 
 Autor: Adrim Hamed Outmani (@Aderfi)
 
