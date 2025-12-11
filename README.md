@@ -1,5 +1,5 @@
 # 💊 Pharmagen 
-[DNA_Helix](./cache/dna.gif)
+![DNA_Helix](./cache/dna.gif)
 
 Autor: Adrim Hamed Outmani (@Aderfi)
 
