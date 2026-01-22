@@ -25,7 +25,7 @@ from pathlib import Path
 import pandas as pd
 
 # Proyecto
-from src.cfg.config import DATA_DIR, DATE_STAMP, PROJECT_ROOT
+from src.cfg.config import DATA_DIR, DATE_STAMP, PROJECT_ROOT #noqa
 from src.cfg.model_configs import select_model
 
 # UI
@@ -65,7 +65,8 @@ def run_training_flow():
     # Sugerimos una ruta por defecto si existe
     #default_data = DATA_DIR / "processed" / "training_data.tsv"
     default_data = Path(PROJECT_ROOT / "train_data" / "final_enriched_data.tsv")
-    if not default_data.exists(): default_data = None
+    if not default_data.exists(): 
+        default_data = None
     
     csv_path = input_path("Ruta del archivo de entrenamiento (CSV/TSV)", default=default_data)
 
@@ -148,7 +149,8 @@ def _interactive_predict_loop(predictor: PGenPredictor):
     # Solicitud dinámica basada en los features que el modelo necesita
     for feature in predictor.feature_cols:
         val = input(f"Ingrese valor para '{feature}': ").strip()
-        if val.lower() == 'q': return
+        if val.lower() == 'q': 
+            return
         inputs[feature] = val
     
     print("\nCalculando...")
@@ -192,7 +194,7 @@ def main_menu_loop():
     print_gnu_notice()
     
     while True:
-        print_header(f"Pharmagen v0.667 - Menú Principal")
+        print_header("Pharmagen v0.667 - Menú Principal")
         print("  1. Procesar Datos Genómicos (ETL)")
         print("  2. Entrenar Modelos (Deep Learning)")
         print("  3. Realizar Predicciones (Inferencia)")

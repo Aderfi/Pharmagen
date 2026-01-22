@@ -54,10 +54,6 @@ from pathlib import Path
 
 import pandas as pd
 
-# --- Setup de Rutas ---
-PROJECT_ROOT = Path(__file__).resolve().parent
-sys.path.append(str(PROJECT_ROOT))
-
 # --- Imports del Proyecto ---
 from src.cfg.config import LOGS_DIR
 from src.interface.cli import main_menu_loop
@@ -66,6 +62,10 @@ from src.pipeline import train_pipeline
 from src.predict import PGenPredictor
 from src.utils.logger import setup_logging
 from src.utils.system import check_environment_and_setup
+
+# --- Setup de Rutas ---
+PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.append(str(PROJECT_ROOT))
 
 # Constantes
 DATE_STAMP = datetime.now().strftime('%Y-%m-%d')

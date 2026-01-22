@@ -11,7 +11,6 @@ import subprocess
 import shutil
 import sys
 from pathlib import Path
-from typing import List, Dict, Optional
 
 # Imports de configuración
 from src.cfg.config import REF_GENOME_FASTA, DATA_DIR, PROJECT_ROOT
@@ -78,7 +77,7 @@ class ProcessRawGenome(BioToolExecutor):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_fastqc(self, fastq_files: List[Path], step_name: str = "pre_qc"):
+    def run_fastqc(self, fastq_files: list[Path], step_name: str = "pre_qc"):
         """Ejecuta FastQC para análisis de calidad."""
         out_dir = self.output_dir / step_name
         out_dir.mkdir(exist_ok=True)
@@ -89,7 +88,7 @@ class ProcessRawGenome(BioToolExecutor):
         self._run_cmd(cmd, f"FastQC ({step_name})")
         return out_dir
 
-    def run_fastp(self, r1: Path, r2: Path, sample_name: str) -> Dict[str, Path]:
+    def run_fastp(self, r1: Path, r2: Path, sample_name: str) -> dict[str, Path]:
         """Ejecuta FastP para limpieza de adaptadores y calidad."""
         clean_dir = self.output_dir / "clean_reads"
         clean_dir.mkdir(exist_ok=True)
@@ -291,7 +290,7 @@ def run_full_ngs_pipeline(r1: Path, r2: Path, sample_name: str):
         step4 = VariantAnnotator(base_results / "04_annotation")
         final_vcf = step4.annotate_variants(filtered_vcf, sample_name)
 
-        print(f"\n✅ Pipeline completado exitosamente.")
+        print("\n✅ Pipeline completado exitosamente.")
         print(f"📂 VCF Anotado Final: {final_vcf}")
         print(f"📊 Reporte VEP: {base_results / '04_annotation' / f'{sample_name}_vep_summary.html'}")
 

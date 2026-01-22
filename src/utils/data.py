@@ -18,8 +18,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
+from typing import Any
 import numpy as np
 import pandas as pd
 
@@ -30,7 +29,7 @@ except ImportError:
     process = None
     fuzz = None
 
-from src.cfg.config import DICTS_DATA_DIR
+from src.cfg.config import DICTS_DATA_DIR #noqa
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ def serialize_multi_labelcols(label_input: Any) -> str:
     if label_input is None or (isinstance(label_input, float) and np.isnan(label_input)) or label_input == "":
         return ""
 
-    parts: Set[str] = set()
+    parts: set[str] = set()
     if isinstance(label_input, str):
         parts = {s.strip() for s in RE_SPLITTERS.split(label_input) if s.strip()}
     elif isinstance(label_input, (list, tuple, np.ndarray)):
@@ -52,7 +51,7 @@ def serialize_multi_labelcols(label_input: Any) -> str:
     
     return "|".join(sorted(parts))
 
-def load_atc_dictionary(json_path: Union[str, Path], lang_idx: int = 1) -> Dict[str, str]:
+def load_atc_dictionary(json_path: str | Path, lang_idx: int = 1) -> dict[str, str]:
     """Carga diccionario ATC."""
     path = Path(json_path)
     if not path.exists():
@@ -70,7 +69,7 @@ def load_atc_dictionary(json_path: Union[str, Path], lang_idx: int = 1) -> Dict[
 def drugs_to_atc(
     df: pd.DataFrame, 
     drug_col: str, 
-    atc_dict_rev: Dict[str, str],
+    atc_dict_rev: dict[str, str],
     atc_col: str = "atc"
 ) -> pd.DataFrame:
     """Mapea fármacos a ATC con fuzzy matching."""
@@ -79,13 +78,15 @@ def drugs_to_atc(
         return df
 
     atc_keys = list(atc_dict_rev.keys())
-    memoization: Dict[str, str] = {}
+    memoization: dict[str, str] = {}
 
     def get_atc_codes(text: Any) -> str:
-        if not isinstance(text, str) or not text: return "No_ATC"
+        if not isinstance(text, str) or not text: 
+            return "No_ATC"
         text_lower = text.lower().strip()
         
-        if text_lower in memoization: return memoization[text_lower]
+        if text_lower in memoization: 
+            return memoization[text_lower]
 
         tokens = [t.strip() for t in RE_SPLITTERS.split(text_lower) if t.strip()]
         codes = []
@@ -112,11 +113,11 @@ def drugs_to_atc(
     return df
 
 def load_and_prep_dataset(
-    csv_path: Union[str, Path],
-    all_cols: List[str],
-    target_cols: List[str],
-    multi_label_targets: Optional[List[str]] = None,
-    stratify_cols: Union[List[str], str, None] = None,
+    csv_path: str | Path,
+    all_cols: list[str],
+    target_cols: list[str],
+    multi_label_targets: list[str] | None = None,
+    stratify_cols: list[str] | str | None = None,
 ) -> pd.DataFrame:
     """
     Carga, limpia, normaliza y filtra el dataset en un solo paso robusto.

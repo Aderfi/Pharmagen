@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, List, Optional, cast
+from typing import cast
 
 import torch
 import torch.nn as nn
@@ -34,7 +34,7 @@ class FocalLoss(nn.Module):
     """
     def __init__(
         self,
-        alpha: Optional[torch.Tensor] = None,
+        alpha: torch.Tensor | None = None,
         gamma: float = 2.0,
         reduction: str = "mean",
         label_smoothing: float = 0.0,
@@ -49,7 +49,7 @@ class FocalLoss(nn.Module):
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         # Mover alpha al dispositivo correcto si es necesario (manejado por register_buffer usualmente)
-        weight = cast(Optional[torch.Tensor], self.alpha)
+        weight = cast(torch.Tensor | None, self.alpha)
         
         # Cross Entropy con Label Smoothing
         ce_loss = F.cross_entropy(
@@ -77,7 +77,7 @@ class AdaptiveFocalLoss(FocalLoss):
     """
     def __init__(
         self,
-        alpha: Optional[torch.Tensor] = None,
+        alpha: torch.Tensor | None = None,
         gamma: float = 2.0,
         gamma_min: float = 1.0,
         gamma_max: float = 3.0,
@@ -113,7 +113,7 @@ class GeometricLoss(nn.Module): # Opuesto de Uncertainty Loss
     def __init__(self):
         super().__init__()
 
-    def forward(self, losses: Dict[str, torch.Tensor]) -> torch.Tensor:
+    def forward(self, losses: dict[str, torch.Tensor]) -> torch.Tensor:
         if not losses:
             return torch.tensor(0.0, requires_grad=True)
 
@@ -140,7 +140,7 @@ class MultiTaskUncertaintyLoss(nn.Module):
     Mantiene parámetros entrenables (log_sigma) para cada tarea.
     Aprende a 'confiar menos' (sigma alto) en tareas difíciles o ruidosas.
     """
-    def __init__(self, task_names: List[str], priorities: Optional[Dict[str, float]] = None):
+    def __init__(self, task_names: list[str], priorities: dict[str, float] | None = None):
         super().__init__()
         self.task_names = task_names
         self.priorities = priorities or {}
@@ -150,7 +150,7 @@ class MultiTaskUncertaintyLoss(nn.Module):
             task: nn.Parameter(torch.zeros(1)) for task in task_names
         })
 
-    def forward(self, losses: Dict[str, torch.Tensor]) -> torch.Tensor:
+    def forward(self, losses: dict[str, torch.Tensor]) -> torch.Tensor:
         total_loss = torch.tensor(0.0, device=next(iter(losses.values())).device)
         
         for task, loss in losses.items():
@@ -169,6 +169,6 @@ class MultiTaskUncertaintyLoss(nn.Module):
 
         return total_loss
 
-    def get_sigmas(self) -> Dict[str, float]:
+    def get_sigmas(self) -> dict[str, float]:
         """Retorna los valores actuales de incertidumbre (interpretables)."""
         return {k: float(torch.exp(v).item()) for k, v in self.log_sigmas.items()}

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -29,19 +29,19 @@ from src.loss_functions import AdaptiveFocalLoss, FocalLoss
 logger = logging.getLogger(__name__)
 
 # --- MAPEOS ---
-OPTIMIZER_MAP: Dict[str, Type[torch.optim.Optimizer]] = {
+OPTIMIZER_MAP: dict[str, type[torch.optim.Optimizer]] = {
     "adamw": torch.optim.AdamW, "adam": torch.optim.Adam,
     "sgd": torch.optim.SGD, "rmsprop": torch.optim.RMSprop,
 }
 
-SCHEDULER_MAP: Dict[str, Type[torch.optim.lr_scheduler.LRScheduler]] = {
+SCHEDULER_MAP: dict[str, type[torch.optim.lr_scheduler.LRScheduler]] = {
     "plateau": torch.optim.lr_scheduler.ReduceLROnPlateau,
     "cosine": torch.optim.lr_scheduler.CosineAnnealingLR,
 }
 
 # --- CREACIÓN DE COMPONENTES ---
 
-def create_optimizer(model: nn.Module, params: Dict[str, Any], uncertainty_module: Optional[nn.Module] = None) -> torch.optim.Optimizer:
+def create_optimizer(model: nn.Module, params: dict[str, Any], uncertainty_module: nn.Module | None = None) -> torch.optim.Optimizer:
     lr = params.get("learning_rate", 1e-3)
     wd = params.get("weight_decay", 1e-4)
     opt_name = params.get("optimizer_type", "adamw").lower()
@@ -57,7 +57,7 @@ def create_optimizer(model: nn.Module, params: Dict[str, Any], uncertainty_modul
         
     return optimizer_cls(param_groups, **kwargs)
 
-def create_scheduler(optimizer: torch.optim.Optimizer, params: Dict[str, Any]):
+def create_scheduler(optimizer: torch.optim.Optimizer, params: dict[str, Any]):
     stype = params.get("scheduler_type", "plateau").lower()
     if stype == "plateau":
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -74,7 +74,7 @@ def create_scheduler(optimizer: torch.optim.Optimizer, params: Dict[str, Any]):
         )
     return None
 
-def create_task_criterions(target_cols: List[str], multi_label_cols: Set[str], params: Dict[str, Any], device: torch.device) -> Dict[str, nn.Module]:
+def create_task_criterions(target_cols: list[str], multi_label_cols: set[str], params: dict[str, Any], device: torch.device) -> dict[str, nn.Module]:
     criterions = {}
     gamma = params.get("focal_gamma", 2.0)
     smoothing = params.get("label_smoothing", 0.0)
@@ -95,7 +95,7 @@ def create_task_criterions(target_cols: List[str], multi_label_cols: Set[str], p
 
 # --- MÉTRICAS ---
 
-def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, is_multilabel: bool) -> Dict[str, float]:
+def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, is_multilabel: bool) -> dict[str, float]:
     if is_multilabel:
         return {
             "f1_macro": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
@@ -107,13 +107,13 @@ def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, is_multilabel: bool
     }
 
 def calculate_task_metrics(model: nn.Module, data_loader: torch.utils.data.DataLoader, 
-                           feature_cols: List[str], target_cols: List[str], 
-                           multi_label_cols: Set[str], device: torch.device, 
+                           feature_cols: list[str], target_cols: list[str], 
+                           multi_label_cols: set[str], device: torch.device, 
                            threshold=0.5
-                        ) -> Dict[str, Dict[str, float]]:
+                        ) -> dict[str, dict[str, float]]:
     model.eval()
-    all_preds: Dict[str, List[torch.Tensor]] = {c: [] for c in target_cols}
-    all_targets: Dict[str, List[torch.Tensor]] = {c: [] for c in target_cols}
+    all_preds: dict[str, list[torch.Tensor]] = {c: [] for c in target_cols}
+    all_targets: dict[str, list[torch.Tensor]] = {c: [] for c in target_cols}
 
     with torch.no_grad():
         for batch in data_loader:

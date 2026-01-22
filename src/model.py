@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -32,13 +31,13 @@ class DeepFM_PGenModel(nn.Module):
 
     def __init__(
         self,
-        n_features: Dict[str, int],
-        target_dims: Dict[str, int],
+        n_features: dict[str, int],
+        target_dims: dict[str, int],
         embedding_dim: int,
         hidden_dim: int,
         dropout_rate: float,
         n_layers: int,
-        attention_dim_feedforward: Optional[int] = None,
+        attention_dim_feedforward: int | None = None,
         attention_dropout: float = 0.1,
         num_attention_layers: int = 1,
         use_batch_norm: bool = False,
@@ -176,8 +175,8 @@ class DeepFM_PGenModel(nn.Module):
         return 1
 
     def forward(
-        self, inputs: Dict[str, torch.Tensor], **kwargs
-    ) -> Dict[str, torch.Tensor]:
+        self, inputs: dict[str, torch.Tensor], **kwargs
+    ) -> dict[str, torch.Tensor]:
         
         if kwargs:
             inputs = {**inputs, **kwargs}

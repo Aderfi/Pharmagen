@@ -16,8 +16,7 @@
 
 import logging
 import re
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Union
+from pathlib import Path # noqa
 
 import numpy as np
 import pandas as pd
@@ -26,7 +25,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 from torch.utils.data import Dataset
 
-from src.utils.data import UNKNOWN_TOKEN, drugs_to_atc, load_and_prep_dataset
+from src.utils.data import UNKNOWN_TOKEN, drugs_to_atc, load_and_prep_dataset #noqa
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +33,9 @@ logger = logging.getLogger(__name__)
 class PGenDataProcess(BaseEstimator, TransformerMixin):
     def __init__(
             self, 
-            feature_cols: List[str], 
-            target_cols: List[str], 
-            multi_label_cols: Optional[List[str]] = None
+            feature_cols: list[str], 
+            target_cols: list[str], 
+            multi_label_cols: list[str] | None = None
         ):
         """
         Inicializa el procesador con la configuración FINAL de columnas.
@@ -48,10 +47,10 @@ class PGenDataProcess(BaseEstimator, TransformerMixin):
         
         # Calculamos qué columnas procesar desde el inicio
         self.cols_to_process = list(set(self.feature_cols + self.target_cols))
-        self.encoders: Dict = {}
+        self.encoders: dict = {}
 
     @staticmethod
-    def _split_labels(label_str: Union[str, float]) -> List[str]:
+    def _split_labels(label_str: str | float) -> list[str]:
         if not isinstance(label_str, str) or not label_str:
             return []
         return [s.strip() for s in re.split(r"[|;,]", label_str) if s.strip()]
@@ -164,18 +163,18 @@ class PGenDataset(Dataset):
 
     Args:
         df (pd.DataFrame): DataFrame fuente que contiene los datos crudos.
-        feature_cols (List[str]): Lista de nombres de columnas a usar como variables predictoras.
-        target_cols (List[str]): Lista de nombres de columnas a usar como objetivos (labels).
+        feature_cols (list[str]): Lista de nombres de columnas a usar como variables predictoras.
+        target_cols (list[str]): Lista de nombres de columnas a usar como objetivos (labels).
         multi_label_cols (Set[str]): Conjunto de nombres de columnas que contienen estructuras complejas 
             (listas, arrays, embeddings) y que deben ser apiladas como matrices `Float32`. 
             Las columnas no incluidas aquí se tratarán como escalares `Int64`.
 
     Attributes:
-        _arrays_data (Dict[str, np.ndarray]): Almacenamiento de matrices densas en memoria contigua (float32).
-        _scalars_data (Dict[str, np.ndarray]): Almacenamiento de vectores escalares (int64).
+        _arrays_data (dict[str, np.ndarray]): Almacenamiento de matrices densas en memoria contigua (float32).
+        _scalars_data (dict[str, np.ndarray]): Almacenamiento de vectores escalares (int64).
 
     Yields:
-        Dict[str, torch.Tensor]: Un diccionario donde cada clave es el nombre de la columna y el valor 
+        dict[str, torch.Tensor]: Un diccionario donde cada clave es el nombre de la columna y el valor 
         es el tensor correspondiente para el índice dado.
             - Columnas Multi-label: Retornan tensores Float32.
             - Columnas Escalares: Retornan tensores Long (Int64).
@@ -183,17 +182,17 @@ class PGenDataset(Dataset):
     def __init__(
         self,
         df: pd.DataFrame,
-        feature_cols: List[str],
-        target_cols: List[str],
-        multi_label_cols: Set[str],
+        feature_cols: list[str],
+        target_cols: list[str],
+        multi_label_cols: set[str],
     ):
         # 1. Normalización de columnas
         self.feature_cols = [f.lower() for f in feature_cols]
         self.target_cols = [t.lower() for t in target_cols]
         self.multi_label_cols = {c.lower() for c in multi_label_cols}
         
-        self._arrays_data: Dict[str, np.ndarray] = {} # multilabel/embeddings (matrices 2D)
-        self._scalars_data: Dict[str, np.ndarray] = {} # single label/índices (arrays 1D)
+        self._arrays_data: dict[str, np.ndarray] = {} # multilabel/embeddings (matrices 2D)
+        self._scalars_data: dict[str, np.ndarray] = {} # single label/índices (arrays 1D)
 
         cols_to_process = [
             c for c in (self.feature_cols + self.target_cols) if c in df.columns
@@ -238,7 +237,7 @@ class PGenDataset(Dataset):
     def __len__(self) -> int:
         return self.length
 
-    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
         # 3. Acceso Optimizado
         batch = {}
 

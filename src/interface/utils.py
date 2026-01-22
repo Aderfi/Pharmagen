@@ -21,7 +21,6 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import Optional
 
 
 class Spinner:
@@ -52,7 +51,7 @@ class Spinner:
         self.stop_running = True
         self.thread.join()
 
-def input_path(prompt: str, default: Optional[Path] = None, must_exist: bool = True) -> Path:
+def input_path(prompt: str, default: Path | None = None, must_exist: bool = True) -> Path:
     """
     Solicita una ruta al usuario con validación.
     """

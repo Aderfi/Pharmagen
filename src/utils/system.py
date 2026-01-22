@@ -15,13 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
-import logging
 import os
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from src.cfg.config import LOGS_DIR, METADATA, PROJECT_ROOT, VERSION
 
@@ -39,7 +38,7 @@ def welcome_message():
     """
     print(msg)
 
-def check_system_config() -> Dict[str, Any]:
+def check_system_config() -> dict[str, Any]:
     """Carga o crea el archivo de estado del sistema."""
     CONFIG_FILE = Path("asaver")
     if CONFIG_FILE.exists():
@@ -58,7 +57,7 @@ def check_system_config() -> Dict[str, Any]:
     save_system_config(config)
     return config
 
-def save_system_config(config: Dict[str, Any]):
+def save_system_config(config: dict[str, Any]):
     with open(CONFIG_FILE, "w") as f:
         json.dump(config, f, indent=4)
 

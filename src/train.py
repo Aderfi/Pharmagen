@@ -34,7 +34,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, overload
+from typing import Any, Literal, overload
 
 import optuna
 import torch
@@ -53,10 +53,10 @@ logger = logging.getLogger(__name__)
 # ==============================================================================
 
 def _move_batch_to_device(
-    batch: Dict[str, Any], 
-    cols: List[str], 
+    batch: dict[str, Any], 
+    cols: list[str], 
     device: torch.device
-) -> Dict[str, torch.Tensor]:
+) -> dict[str, torch.Tensor]:
     """Mueve selectivamente columnas del batch al dispositivo."""
     return {
         k: v.to(device, non_blocking=True)
@@ -65,9 +65,9 @@ def _move_batch_to_device(
     }
 
 def _compute_total_loss(
-    losses: Dict[str, torch.Tensor],
-    priorities: Optional[Dict[str, float]],
-    uncertainty_module: Optional[nn.Module] = None
+    losses: dict[str, torch.Tensor],
+    priorities: dict[str, float] | None = None,
+    uncertainty_module: nn.Module | None = None
 ) -> torch.Tensor:
     """
     Calcula la pérdida total. 
@@ -90,19 +90,19 @@ def _compute_total_loss(
 def _run_epoch(
     model: DeepFM_PGenModel,
     loader: Any,
-    feature_cols: List[str],
-    target_cols: List[str],
-    loss_fns: Dict[str, nn.Module],
+    feature_cols: list[str],
+    target_cols: list[str],
+    loss_fns: dict[str, nn.Module],
     device: torch.device,
-    optimizer: Optional[torch.optim.Optimizer] = None,
-    scaler: Optional[GradScaler] = None,
-    multi_label_cols: Set[str] = set(),
-    task_priorities: Optional[Dict[str, float]] = None,
-    uncertainty_module: Optional[nn.Module] = None,
+    optimizer: torch.optim.Optimizer | None = None,
+    scaler: GradScaler | None = None,
+    multi_label_cols: set[str] = set(),
+    task_priorities: dict[str, float] | None = None,
+    uncertainty_module: nn.Module | None = None,
     is_train: bool = True,
     progress_bar: bool = False,
     desc: str = ""
-) -> Tuple[float, Dict[str, float], Dict[str, int], Dict[str, int]]:
+) -> tuple[float, dict[str, float], dict[str, int], dict[str, int]]:
     """
     Ejecuta una época completa (entrenamiento o validación).
     Retorna: (loss_promedio, dict_losses_por_tarea, correct_counts, total_counts)
@@ -195,40 +195,39 @@ def _run_epoch(
 
 @overload
 def train_model(
-    train_loader: Any, val_loader: Any, model: DeepFM_PGenModel, criterions: List[Any],
-    epochs: int, patience: int, model_name: str, feature_cols: List[str], target_cols: List[str],
-    device: torch.device, return_per_task_losses: Literal[False] = False, scheduler: Optional[Any] = None, multi_label_cols: Optional[set] = None,
-    task_priorities: Optional[Dict[str, float]] = None, trial: Optional[optuna.Trial] = None,
+    train_loader: Any, val_loader: Any, model: DeepFM_PGenModel, criterions: list[Any],
+    epochs: int, patience: int, model_name: str, feature_cols: list[str], target_cols: list[str],
+    device: torch.device, return_per_task_losses: Literal[False] = False, scheduler: Any | None = None, multi_label_cols: set[str] | None = None,
+    task_priorities: dict[str, float] | None = None, trial: optuna.Trial | None = None,
     params_to_txt: dict | None = None,
     progress_bar: bool = False, **kwargs
-) -> Tuple[float, List[float]]: ...
+) -> tuple[float, list[float]]: ...
 
 @overload
 def train_model(
-    train_loader: Any, val_loader: Any, model: DeepFM_PGenModel, criterions: List[Any],
-    epochs: int, patience: int, model_name: str, feature_cols: List[str], target_cols: List[str],
-    device: torch.device, return_per_task_losses: Literal[True], scheduler: Optional[Any] = None, 
-    multi_label_cols: Optional[set] = None, task_priorities: Optional[Dict[str, float]] = None, 
-    trial: Optional[optuna.Trial] = None, params_to_txt: dict | None = None, progress_bar: bool = False, 
+    train_loader: Any, val_loader: Any, model: DeepFM_PGenModel, criterions: list[Any],
+    epochs: int, patience: int, model_name: str, feature_cols: list[str], target_cols: list[str],
+    device: torch.device, return_per_task_losses: Literal[True], scheduler: Any | None = None, 
+    multi_label_cols: set[str] | None = None, task_priorities: dict[str, float] | None = None, 
+    trial: optuna.Trial | None = None, params_to_txt: dict | None = None, progress_bar: bool = False, 
     **kwargs
-) -> Tuple[float, List[float], List[float]]: ...
-
+) -> tuple[float, list[float], list[float]]: ...
 def train_model(
     train_loader,
     val_loader,
     model: DeepFM_PGenModel,
-    criterions: List[Any],
+    criterions: list[Any],
     epochs: int,
     patience: int,
     model_name: str,
-    feature_cols: List[str],
-    target_cols: List[str],
+    feature_cols: list[str],
+    target_cols: list[str],
     device: torch.device,
     return_per_task_losses: bool = False,
-    scheduler: Optional[Any] = None,
-    multi_label_cols: Optional[set] = None,
-    task_priorities: Optional[Dict[str, float]] = None,
-    trial: Optional[optuna.Trial] = None,
+    scheduler: Any | None = None,
+    multi_label_cols: set[str] | None = None,
+    task_priorities: dict[str, float] | None = None,
+    trial: optuna.Trial | None = None,
     params_to_txt: dict | None = None,
     progress_bar: bool = False,
     **kwargs,
@@ -355,12 +354,12 @@ def train_model(
 
 def save_model(
     model: DeepFM_PGenModel,
-    target_cols: List[str],
+    target_cols: list[str],
     best_loss: float,
-    best_accuracies: List[float],
+    best_accuracies: list[float],
     model_name: str,
-    avg_per_task_losses: List[float],
-    params_to_txt: Optional[Dict[str, Any]] = None,
+    avg_per_task_losses: list[float],
+    params_to_txt: dict[str, Any] | None = None,
 ) -> None:
     """Guarda el modelo (state_dict y pickle completo) y genera un reporte."""
     try:

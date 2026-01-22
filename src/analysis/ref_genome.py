@@ -6,7 +6,6 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-import os
 import gzip
 import shutil
 import logging

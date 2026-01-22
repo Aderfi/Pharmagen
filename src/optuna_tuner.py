@@ -26,19 +26,14 @@ with support for multi-objective optimization. Key features:
 - Clinical priority weighting for task balancing
 - Comprehensive reporting with JSON and visualization
 
-References:
-    - Optuna: https://optuna.readthedocs.io/
-    - Multi-objective optimization: Deb et al., 2002
-"""
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Optuna Hyperparameter Optimization Pipeline.
-
 Refactorizado para eficiencia de memoria:
 1. Carga datos y crea Datasets una sola vez (evita Data Leakage y overhead IO).
 2. Pasa referencias de los datasets a la función objetivo.
 3. Soporta optimización mono y multi-objetivo.
+
+References:
+    - Optuna: https://optuna.readthedocs.io/
+    - Multi-objective optimization: Deb et al., 2002
 """
 
 import datetime
@@ -47,7 +42,6 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-import matplotlib.pyplot as plt
 import optuna
 import torch
 from optuna.pruners import MedianPruner
@@ -65,7 +59,6 @@ from src.model import DeepFM_PGenModel
 from src.train import train_model
 from src.utils.data import load_and_prep_dataset
 from src.utils.training import create_optimizer, create_scheduler, create_task_criterions
-
 # Configuración Global
 logger = logging.getLogger(__name__)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -419,7 +412,8 @@ class OptunaTuner:
 
     def _get_pareto_front(self, study: optuna.Study, n: int = 5):
         valid = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
-        if not valid: return []
+        if not valid: 
+            return []
         # En multi-obj devuelve frente pareto, en single devuelve best trial
         return study.best_trials[:n]
 
@@ -430,7 +424,17 @@ class OptunaTuner:
                 plot_optimization_history,
                 plot_param_importances,
             )
-            
+        except Exception as e:
+            logger.warning(f"No se pudieron importar utilidades de optuna para gráficos: {e}")
+            return
+
+        try:
+            import matplotlib.pyplot as plt
+        except Exception as e:
+            logger.warning(f"No se pudo importar matplotlib: {e}")
+            return
+
+        try:
             base_path = OPTUNA_FIGS / f"{self.model_name}_{timestamp}"
             
             plt.figure(figsize=(10, 6))
@@ -445,10 +449,8 @@ class OptunaTuner:
                 plt.tight_layout()
                 plt.savefig(f"{base_path}_importance.png")
                 plt.close()
-                
         except Exception as e:
             logger.warning(f"No se pudieron generar gráficos: {e}")
-
 
 # ============================================================================
 # ENTRY POINT

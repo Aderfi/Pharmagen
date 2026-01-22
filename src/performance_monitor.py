@@ -23,7 +23,6 @@ including GPU memory usage, data loading throughput, and training speed.
 
 import logging
 import time
-from typing import Dict, Optional
 
 import psutil
 import torch
@@ -101,7 +100,7 @@ class PerformanceMonitor:
                 torch.cuda.memory_reserved() / 1024**3  # GB
             )
 
-    def get_summary(self) -> Dict[str, float]:
+    def get_summary(self) -> dict[str, float]:
         """
         Get summary statistics of monitored metrics.
 
@@ -161,9 +160,9 @@ class PerformanceMonitor:
 
 def estimate_optimal_batch_size(
     model: torch.nn.Module,
-    sample_input: Dict[str, torch.Tensor],
+    sample_input: dict[str, torch.Tensor],
     max_batch_size: int = 512,
-    device: Optional[torch.device] = None,
+    device: torch.device | None = None,
 ) -> int:
     """
     Estimate optimal batch size for given model and GPU memory.

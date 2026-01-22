@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os, sys
 import logging
+import os #noqa
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import tomli
 
@@ -54,14 +54,14 @@ def _parse_optuna_value(val: Any) -> Any:
         
     return val
 
-def _parse_optuna_section(optuna_dict: Dict[str, Any]) -> Dict[str, Any]:
+def _parse_optuna_section(optuna_dict: dict[str, Any]) -> dict[str, Any]:
     """Aplica la conversión a todo el diccionario de optuna."""
     return {k: _parse_optuna_value(v) for k, v in optuna_dict.items()}
 
 # =============================================================================
 # LECTURA Y FUSIÓN DE CONFIGURACIÓN
 # =============================================================================
-def _load_toml(path: Path) -> Dict[str, Any]:
+def _load_toml(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
     if sys.version_info >= (3, 11):
@@ -72,12 +72,12 @@ def _load_toml(path: Path) -> Dict[str, Any]:
         with open(path, "rb") as f:
             return tomli.load(f)
 
-def get_model_names() -> List[str]:
+def get_model_names() -> list[str]:
     """Devuelve lista de modelos disponibles en models.toml."""
     models_data = _load_toml(MODELS_FILE)
     return list(models_data.keys())
 
-def get_model_config(model_name: str) -> Dict[str, Any]:
+def get_model_config(model_name: str) -> dict[str, Any]:
     """
     Genera la configuración FINAL del modelo aplicando herencia y parseo de tipos.
     """
@@ -134,7 +134,7 @@ MODEL_REGISTRY = _load_toml(MODELS_FILE) # Exportamos el raw por si acaso
 # CLI SELECTION
 # =============================================================================
 
-def select_model(prompt: str = "Selecciona el modelo a entrenar:", default_choice: Optional[int] = None) -> str:
+def select_model(prompt: str = "Selecciona el modelo a entrenar:", default_choice: int | None = None) -> str:
     """CLI interactiva para elegir modelo."""
     options = get_model_names()
     if default_choice is not None and 1 <= default_choice <= len(options):

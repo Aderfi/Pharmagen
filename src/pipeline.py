@@ -30,7 +30,7 @@ Orquesta el flujo completo:
 import logging
 import random
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any
 
 import joblib
 import numpy as np
@@ -39,7 +39,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 # --- Imports del Proyecto ---
-from src.cfg.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES
+from src.cfg.config import MODEL_ENCODERS_DIR, MODELS_DIR, MULTI_LABEL_COLUMN_NAMES #noqa
 from src.cfg.model_configs import get_model_config
 from src.data import PGenDataProcess, PGenDataset
 from src.loss_functions import MultiTaskUncertaintyLoss
@@ -58,9 +58,9 @@ logger = logging.getLogger(__name__)
 def train_pipeline(
     csv_path: Path,
     model_name: str,
-    target_cols: Optional[List[str]] = None,
-    patience: Optional[int] = None,
-    epochs: Optional[int] = None,
+    target_cols: list[str] | None = None,
+    patience: int | None = None,
+    epochs: int | None = None,
     random_seed: int = 711
 ) -> None:
     """
@@ -189,7 +189,7 @@ def train_pipeline(
 
     # E. Preparar lista para legacy train_model: [Loss1, Loss2, ..., Optimizer]
     # IMPORTANTE: El orden debe coincidir exactamente con eff_target_cols
-    criterions_list: List[Any] = [loss_fns_dict[col] for col in eff_target_cols]
+    criterions_list: list[Any] = [loss_fns_dict[col] for col in eff_target_cols]
     criterions_list.append(optimizer)
 
     # F. Pesos manuales (si no se usa incertidumbre automática)
