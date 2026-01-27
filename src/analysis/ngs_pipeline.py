@@ -20,11 +20,11 @@ from pathlib import Path
 
 import requests
 
-# Intenta importar PROJECT_ROOT, si falla (ej. ejecución aislada), usa el directorio actual
 try:
     from src.cfg.manager import PROJECT_ROOT
 except ImportError:
     PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+from src.interface.ui import ConsoleIO, ProgressBar
 
 # Configuración de Logging
 logging.basicConfig(
@@ -33,6 +33,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S"
 )
 logger = logging.getLogger("Pharmagen-NGS")
+cli = ConsoleIO()
 
 # ==============================================================================
 # CONSTANTES Y CONFIGURACIÓN GLOBAL
@@ -67,7 +68,7 @@ class GenomeManager:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def prepare_genome(self):
-        """Método maestro que asegura que el genoma está listo para usarse."""
+        """Verificación y preparación del genoma de referencia."""
         logger.info("🔍 Verificando estado del genoma de referencia...")
         self._download_if_needed()
         self._decompress_if_needed()
@@ -91,19 +92,19 @@ class GenomeManager:
 
         if not self.local_gz.exists():
             should_download = True
-            logger.info("📥 El genoma no existe localmente. Iniciando descarga...")
+            ConsoleIO.print_warning("📥 El genoma no existe localmente. Iniciando descarga...")
         elif remote_mtime > self.local_gz.stat().st_mtime:
             should_download = True
-            logger.info("🔄 Nueva versión detectada en servidor.")
-        
+            cli.print_info("Nueva versión detectada en servidor.")
+
         if should_download:
             try:
                 with requests.get(self.url, stream=True) as r:
                     r.raise_for_status()
                     total_size = int(r.headers.get('content-length', 0))
                     downloaded = 0
-                    
-                    logger.info(f"Descargando {self.url}...")
+
+                    cli.print_info(f"Descargando {self.url}...")
                     with open(self.local_gz, 'wb') as f:
                         for chunk in r.iter_content(chunk_size=8192):
                             f.write(chunk)
@@ -123,29 +124,29 @@ class GenomeManager:
     def _decompress_if_needed(self):
         # Descomprimir si falta el .fa o si el .gz es más nuevo
         if not self.local_fa.exists() or (self.local_gz.exists() and self.local_gz.stat().st_mtime > self.local_fa.stat().st_mtime):
-            logger.info("📦 Descomprimiendo genoma (esto puede tardar)...")
+            cli.print_info("Descomprimiendo genoma (esto puede tardar)...")
             try:
                 with gzip.open(self.local_gz, 'rb') as f_in:
                     with open(self.local_fa, 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                logger.info("✅ Descompresión finalizada.")
+                cli.print_success("Descompresión finalizada.")
             except Exception as e:
-                logger.error(f"❌ Error descomprimiendo: {e}")
+                cli.print_error(f"Error descomprimiendo: {e}")
                 sys.exit(1)
 
     def _index_genome(self):
         # Indexar si falta el .fai o si el .fa es más nuevo
         if not self.index_fai.exists() or self.local_fa.stat().st_mtime > self.index_fai.stat().st_mtime:
-            logger.info("📑 Generando índice FAI con samtools...")
+            cli.print_info("Generando índice FAI con samtools...")
             if not shutil.which("samtools"):
-                logger.error("❌ 'samtools' no encontrado. Instálalo: sudo apt install samtools")
+                cli.print_error("'samtools' no encontrado. Instálalo: sudo apt install samtools")
                 sys.exit(1)
-            
+
             try:
                 subprocess.run(["samtools", "faidx", str(self.local_fa)], check=True)
-                logger.info("✅ Índice creado.")
+                cli.print_success("Índice creado.")
             except subprocess.CalledProcessError as e:
-                logger.error(f"❌ Fallo al indexar: {e}")
+                cli.print_error(f"Fallo al indexar: {e}")
                 sys.exit(1)
 
 # ==============================================================================
@@ -158,13 +159,13 @@ class BioToolExecutor:
         self.threads = str(threads)
 
     def _run_cmd(self, command: str, description: str):
-        logger.info(f"🚀 Ejecutando: {description}")
+        cli.print_info(f"Ejecutando: {description}", "🔥")
         logger.debug(f"CMD: {command}")
 
         try:
             # Usamos executable='/bin/bash' en Linux para soportar pipes (|) correctamente
             shell_exec = '/bin/bash' if platform.system() != 'Windows' else None
-            
+
             process = subprocess.run(
                 command,
                 shell=True,
@@ -177,7 +178,7 @@ class BioToolExecutor:
             return process
 
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Error en {description}")
+            cli.print_error(f"Error en {description}")
             logger.error(f"Exit Code: {e.returncode}")
             if e.stderr:
                 logger.error(f"STDERR: {e.stderr.strip()[-1000:]}") # Últimos 1000 caracteres
@@ -196,7 +197,7 @@ class ProcessRawGenome(BioToolExecutor):
     def run_fastqc(self, fastq_files: list[Path], step_name: str = "pre_qc"):
         out_dir = self.output_dir / step_name
         out_dir.mkdir(exist_ok=True)
-        
+
         # Validar existencia de archivos
         files_str = " ".join([str(f) for f in fastq_files if f.exists()])
         if not files_str:
