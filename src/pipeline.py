@@ -52,32 +52,16 @@ def train_pipeline(model_name: str, csv_path: str|Path, epochs: int = 50):
     )
     
     # 3. Preprocessing & Loaders (Via Factory)
-    processor = None
-    dims = {}
+    logger.info(" fitting Tabular Processor...")
+    processor = PGenProcessor(cfg["features"], cfg["targets"], list(MULTI_LABEL_COLS))
+    processor.fit(train_df)
     
-    if model_type == "tabular":
-        logger.info(" fitting Tabular Processor...")
-        processor = PGenProcessor(cfg["features"], cfg["targets"], list(MULTI_LABEL_COLS))
-        processor.fit(train_df)
-        
-        # Dimensions for Tabular Model
-        dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
-        dims = {
-            "n_features": {k: v for k,v in dims.items() if k in cfg["features"]},
-            "target_dims": {k: v for k,v in dims.items() if k in cfg["targets"]}
-        }
-    else:
-        # Dimensions for Graph Model
-        # Default dimensions or read from params
-        # In a real scenario, we might verify target dimensions from data
-        dims = {
-            "target_dims": {col: 1 for col in cfg["targets"]}, # Simplified: Reg/Binary=1. Multiclass needs logic.
-            # If Multiclass, we need to calculate classes from df
-            "drug_node_features": 9, # Default RDKit
-            "gene_input_dim": 768 # DNABERT default
-        }
-        # Correct target dims for multiclass if needed
-        # (This logic is a bit simplified for Refactor, but follows the pattern)
+    # Dimensions for Tabular Model
+    dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
+    dims = {
+        "n_features": {k: v for k,v in dims.items() if k in cfg["features"]},
+        "target_dims": {k: v for k,v in dims.items() if k in cfg["targets"]}
+    }
     
     train_loader, val_loader = create_data_loaders(
         config=cfg,
