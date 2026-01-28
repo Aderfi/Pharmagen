@@ -96,7 +96,7 @@ class GenomeManager:
             ConsoleIO.print_info("El genoma no existe localmente. Iniciando descarga...")
         elif remote_mtime > self.local_gz.stat().st_mtime:
             should_download = True
-            ConsoleIO.print_info("Nueva versión detectada en servidor.")
+            ConsoleIO.print_info(" - Nueva versión detectada en servidor.")
 
         if should_download:
             try:
@@ -244,7 +244,7 @@ class MappingAlignmentAnalysis(BioToolExecutor):
     def _check_bwa_index(self):
         if not Path(str(self.ref_genome) + ".bwt").exists():
             ConsoleIO.print_info("Índice BWA no encontrado. Generando...")
-            self._run_cmd(f"bwa index {self.ref_genome}", "Indexado BWA")
+            self._run_cmd(f"bwa index {self.ref_genome}", "Indexado del genoma con BWA...")
 
     def map_reads(self, r1: Path, r2: Path, sample_name: str) -> Path:
         bam_dir = self.output_dir / "bams"
@@ -266,7 +266,7 @@ class MappingAlignmentAnalysis(BioToolExecutor):
         metrics = self.output_dir / "bams" / f"{sample_name}_dedup_metrics.txt"
 
         cmd = (
-            f"picard MarkDuplicates I={input_bam} O={dedup_bam} M={metrics} "
+            f"java -jar $PICARD_PATH MarkDuplicates I={input_bam} O={dedup_bam} M={metrics} "
             "REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=LENIENT"
         )
         self._run_cmd(cmd, "Picard MarkDuplicates")
@@ -393,7 +393,7 @@ def main():
     parser.add_argument("-r1", "--read1", required=True, type=Path, help="Ruta al archivo FASTQ R1")
     parser.add_argument("-r2", "--read2", required=True, type=Path, help="Ruta al archivo FASTQ R2")
     parser.add_argument("-n", "--name", required=True, type=str, help="ID de la muestra")
-    parser.add_argument("-t", "--threads", type=int, default=4, help="Nº de hilos")
+    parser.add_argument("-t", "--threads", type=int, required=False, help="Nº de hilos")
 
     args = parser.parse_args()
 
@@ -401,6 +401,9 @@ def main():
         ConsoleIO.print_error("No se encuentran los archivos de entrada.")
         sys.exit(1)
 
+    if not args.threads:
+        args.threads = max(1, os.cpu_count() - 1) if isinstance(os.cpu_count(), int) else 1 # type: ignore (Linter issue)
+    
     run_pipeline(args.read1, args.read2, args.name, args.threads)
 
 if __name__ == "__main__":

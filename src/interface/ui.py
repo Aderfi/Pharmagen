@@ -16,8 +16,10 @@ from collections.abc import Mapping
 from enum import Enum
 from pathlib import Path
 from typing import Any, Literal
-
-from typing_extensions import Self
+try:
+	from typing_extensions import Self
+except:
+	from typing import Self
 
 
 class MessageType(Enum):
