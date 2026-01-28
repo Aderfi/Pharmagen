@@ -16,19 +16,18 @@ import subprocess
 import sys
 import time
 from email.utils import parsedate_to_datetime
-from pathlib import Path    
+from pathlib import Path
 
 import requests
 
-# Intenta importar PROJECT_ROOT, si falla (ej. ejecución aislada), usa el directorio actual
 try:
-    from src.cfg.manager import PROJECT_ROOT
-    from src.interface.ui import ConsoleIO, Spinner 
+    from src.cfg.manager import PROJECT_ROOT #noqa
+    from src.interface.ui import ConsoleIO, ProgressBar, Spinner
 except ImportError:
     # Fallback para desarrollo sin instalar paquete
     sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
     from src.cfg.manager import PROJECT_ROOT
-    from src.interface.ui import ConsoleIO, Spinner
+    from src.interface.ui import ConsoleIO, ProgressBar, Spinner
 
 # Configuración de Logging (Solo a archivo si se desea, o stderr para debug)
 logging.basicConfig(
@@ -98,38 +97,44 @@ class GenomeManager:
         elif remote_mtime > self.local_gz.stat().st_mtime:
             should_download = True
             ConsoleIO.print_info("Nueva versión detectada en servidor.")
-        
+
         if should_download:
             try:
                 with requests.get(self.url, stream=True) as r:
                     r.raise_for_status()
-                    total_size = int(r.headers.get('content-length', 0))
-                    downloaded = 0
-                    
+                    total_bytes = int(r.headers.get('content-length', 0))
+                    total_mb = round((total_bytes / (1024 * 1024)), 2)
                     ConsoleIO.print_info(f"Descargando desde: {self.url}")
-                    with open(self.local_gz, 'wb') as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                            downloaded += len(chunk)
-                            # Simple feedback
-                            if total_size > 0 and downloaded % (10 * 1024 * 1024) == 0:
-                                print(f"Descargado: {downloaded / (1024*1024):.1f} MB", end='\r')
-                    print() 
+
+                    with ProgressBar(total_mb, desc="Descargando genoma", width=50) as pbar:
+                        with open(self.local_gz, 'wb') as f:
+                            for chunk in r.iter_content(chunk_size=8192):
+                                if chunk:
+                                    f.write(chunk)
+                                    chunk_mb = (len(chunk) / (1024 * 1024))
+                                    pbar.update(chunk_mb)
+                        print()
 
                 os.utime(self.local_gz, (time.time(), remote_mtime))
                 ConsoleIO.print_success("Descarga completada.")
             except Exception as e:
+                ConsoleIO.print_error(f"Error descargando genoma: {e}")
+                os.remove(self.local_gz) if self.local_gz.exists() else None
+                sys.exit(1)
+            except KeyboardInterrupt as e:
                 ConsoleIO.print_error(f"Error crítico descargando genoma: {e}")
+                os.remove(self.local_gz) if self.local_gz.exists() else None
                 sys.exit(1)
 
     def _decompress_if_needed(self):
         if not self.local_fa.exists() or (self.local_gz.exists() and self.local_gz.stat().st_mtime > self.local_fa.stat().st_mtime):
             # Usamos Spinner para operaciones largas
-            with Spinner("Descomprimiendo genoma (esto puede tardar)..."):
+            with Spinner("Descomprimiendo genoma (Puede tomar un tiempo)..."):
                 try:
-                    with gzip.open(self.local_gz, 'rb') as f_in:
-                        with open(self.local_fa, 'wb') as f_out:
-                            shutil.copyfileobj(f_in, f_out)
+                    #with gzip.open(self.local_gz, 'rb') as f_in, open(self.local_fa, 'wb') as f_out:
+                    #    shutil.copyfileobj(f_in, f_out)
+                    with gzip.open(self.local_gz, 'rt') as f_in, open(self.local_fa, 'w') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
                 except Exception as e:
                     ConsoleIO.print_error(f"Error descomprimiendo: {e}")
                     sys.exit(1)
@@ -140,7 +145,7 @@ class GenomeManager:
             if not shutil.which("samtools"):
                 ConsoleIO.print_error("'samtools' no encontrado. Instálalo: sudo apt install samtools")
                 sys.exit(1)
-            
+
             with Spinner("Generando índice FAI con samtools..."):
                 try:
                     subprocess.run(["samtools", "faidx", str(self.local_fa)], check=True)
@@ -195,7 +200,7 @@ class ProcessRawGenome(BioToolExecutor):
     def run_fastqc(self, fastq_files: list[Path], step_name: str = "pre_qc"):
         out_dir = self.output_dir / step_name
         out_dir.mkdir(exist_ok=True)
-        
+
         files_str = " ".join([str(f) for f in fastq_files if f.exists()])
         if not files_str:
             ConsoleIO.print_warning(f"No hay archivos para FastQC ({step_name})")
@@ -265,7 +270,7 @@ class MappingAlignmentAnalysis(BioToolExecutor):
             "REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=LENIENT"
         )
         self._run_cmd(cmd, "Picard MarkDuplicates")
-        
+
         # Indexar final
         self._run_cmd(f"samtools index {dedup_bam}", "Indexado BAM final")
         return dedup_bam
@@ -337,8 +342,8 @@ class VariantAnnotator(BioToolExecutor):
 # ==============================================================================
 
 def run_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
-    ConsoleIO.print_header(f"PHARMAGEN PIPELINE - {sample_name}")
-    
+    ConsoleIO.print_header(f"PGen - Pipeline-NGS {sample_name}")
+
     # 0. Preparar Genoma
     genome_mgr = GenomeManager(REF_GENOME_DIR, GENOME_CONFIG)
     ref_genome_path = genome_mgr.prepare_genome()

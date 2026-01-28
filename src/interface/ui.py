@@ -15,7 +15,10 @@ import time
 from collections.abc import Mapping
 from enum import Enum
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Any, Literal
+
+from typing_extensions import Self
+
 
 class MessageType(Enum):
     """Console messages with associated symbols."""
@@ -49,7 +52,7 @@ class Spinner:
         self.message = message
         self.stop_running = False
         self.color = color and self._supports_color()
-        
+
         spinner_map = {
             "dots": SPINNER_DOTS,
             "braille": SPINNER_BRAILLE,
@@ -71,11 +74,11 @@ class Spinner:
                 output = f"\r\033[36m{char}\033[0m {self.message}"
             else:
                 output = f"\r{char} {self.message}"
-            
+
             sys.stdout.write(output)
             sys.stdout.flush()
             time.sleep(0.1)
-        
+
         # Clear line
         cols = shutil.get_terminal_size((80, 24)).columns
         sys.stdout.write("\r" + " " * cols + "\r")
@@ -100,7 +103,7 @@ class Spinner:
 class ProgressBar:
     """Simple progress bar for console."""
 
-    def __init__(self, total: int, desc: str = "", width: int = 40, xtra_info: Any | None = None):
+    def __init__(self, total: int | float, desc: str = "", width: int = 40, xtra_info: Any | None = None):
         self.total = total
         self.current = 0
         self.desc = desc
@@ -109,13 +112,16 @@ class ProgressBar:
         self.xtra_info = xtra_info
         self.bar_color = "\033[94m" # Blue default
 
-    def update(self, n: int = 1):
+    def update(self, n: int | float = 1):
         self.current = min(self.current + n, self.total)
+        if isinstance(n, float):
+            self.current = round(self.current, 2)
         self._render()
 
     def _render(self):
-        if self.total == 0: return
-        
+        if self.total == 0:
+            return
+
         percent = self.current / self.total
         filled = int(self.width * percent)
         # Unicode block chars for smoother bar
@@ -123,7 +129,7 @@ class ProgressBar:
 
         elapsed = time.time() - self.start_time
         rate = self.current / elapsed if elapsed > 0 else 0
-        
+
         # Avoid division by zero
         if rate > 0:
             eta = (self.total - self.current) / rate
@@ -182,7 +188,7 @@ class ConsoleIO:
     @staticmethod
     def print_info(msg: str):
         print(f"{MessageType.INFO.value}  {msg}")
-    
+
     @staticmethod
     def print_dna(msg: str):
         """Special format for genomic operations."""
@@ -195,7 +201,7 @@ class ConsoleIO:
             if not val:
                 ConsoleIO.print_error("Path required.")
                 continue
-            
+
             path = Path(val).expanduser().resolve()
             if must_exist and not path.exists():
                 ConsoleIO.print_error(f"Path not found: {path}")
