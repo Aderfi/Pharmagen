@@ -24,7 +24,7 @@ Thumbs.db
 
 # --- Datos Sensibles & Bioinformática (CRÍTICO) ---
 # Evita subir datos genómicos por error
-*.vcf
+#*.vcf
 *.vcf.gz
 *.tbi
 *.fa
