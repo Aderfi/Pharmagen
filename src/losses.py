@@ -9,13 +9,14 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+
 class FocalLoss(nn.Module):
     """
     Focal Loss for addressing class imbalance.
-    
+
     Down-weights well-classified examples to focus training on hard negatives.
     Formula: FL(p_t) = -alpha * (1 - p_t)^gamma * log(p_t)
-    
+
     Args:
         gamma (float): Focusing parameter. Higher values reduce the loss for easy examples.
         label_smoothing (float): Label smoothing factor [0.0, 1.0].
@@ -36,10 +37,10 @@ class FocalLoss(nn.Module):
 class AdaptiveFocalLoss(FocalLoss):
     """
     Dynamically adjusts Gamma based on batch-wise accuracy.
-    
+
     If accuracy is high, gamma decreases (standard CE behavior).
     If accuracy is low, gamma increases (hard mining behavior).
-    
+
     Note: strictly for Single-Label Multi-Class tasks.
     """
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
@@ -52,10 +53,10 @@ class AdaptiveFocalLoss(FocalLoss):
 class AsymmetricLoss(nn.Module):
     """
     Asymmetric Loss (ASL) for Multi-Label Classification.
-    
+
     Decouples the focusing mechanisms for positive and negative examples.
     Reference: Ben-Baruch et al. "Asymmetric Loss for Multi-Label Classification" (ICCV 2021).
-    
+
     Args:
         gamma_neg (float): Focusing parameter for negative examples (usually high, e.g. 4.0).
         gamma_pos (float): Focusing parameter for positive examples (usually low, e.g. 1.0).
@@ -71,10 +72,10 @@ class AsymmetricLoss(nn.Module):
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         # Targets must be float for multi-label BCE context
         targets = targets.float()
-        
+
         # Sigmoid to get probabilities
         probs = torch.sigmoid(logits)
-        
+
         # Probabilities for Positive and Negative cases
         xs_pos = probs
         xs_neg = 1 - probs
@@ -86,21 +87,21 @@ class AsymmetricLoss(nn.Module):
         # Positive term: -y * log(p) * (1-p)^gamma_pos
         p_pos = xs_pos.clamp(min=self.eps)
         loss_pos = -targets * torch.log(p_pos) * ((1 - xs_pos) ** self.gamma_pos)
-        
+
         # Negative term: -(1-y) * log(1-p_clipped) * (p_clipped)^gamma_neg
         p_neg = xs_neg.clamp(min=self.eps)
         loss_neg = -(1 - targets) * torch.log(p_neg) * ((1 - xs_neg) ** self.gamma_neg)
-        
+
         loss = loss_pos + loss_neg
         return loss.mean()
 
 class PolyLoss(nn.Module):
     """
     PolyLoss: Polynomial Expansion of Cross Entropy.
-    
+
     Framework: Poly-1 (L_CE + epsilon * (1-Pt))
     Reference: Leng et al. (ICLR 2022).
-    
+
     Args:
         epsilon (float): Coefficient for the polynomial term.
     """
@@ -115,10 +116,10 @@ class PolyLoss(nn.Module):
             logits, targets, reduction='none', label_smoothing=self.smoothing
         )
         pt = torch.exp(-ce_loss)
-        
+
         # Poly-1 formulation
         poly_loss = ce_loss + self.epsilon * (1 - pt)
-        
+
         if self.reduction == 'mean':
             return poly_loss.mean()
         elif self.reduction == 'sum':
@@ -128,10 +129,10 @@ class PolyLoss(nn.Module):
 class MultiTaskUncertaintyLoss(nn.Module):
     """
     Homoscedastic Uncertainty Weighting for Multi-Task Learning.
-    
+
     Learns the relative weights of multiple loss functions automatically.
     Reference: Kendall & Gal (CVPR 2018).
-    
+
     Formula: Loss = Sum( Loss_i * exp(-sigma_i) + sigma_i )
     """
     def __init__(self, tasks: list[str]):

@@ -1,8 +1,9 @@
 # Pharmagen - IO Utilities
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-from datetime import datetime
+
 from src.cfg.manager import DIRS, METADATA, VERSION
 
 LOGS_DIR = DIRS["logs"]
@@ -28,14 +29,14 @@ def json_serial_adapter(obj: Any) -> Any:
     if isinstance(obj, (set, tuple)):
         return list(obj)
     raise TypeError(f"Type {type(obj)} not serializable by custom adapter")
-    
+
 def welcome_message():
     msg = f"""
     ============================================
             PHARMAGEN v{VERSION}
     ============================================
     Software para farmacogenética y deep learning.
-    
+
     Logs: {LOGS_DIR}
     ============================================
     """
@@ -43,23 +44,19 @@ def welcome_message():
 
 def print_gnu_notice():
     """Imprime el aviso legal"""
-    
-    # Lógica inteligente de años
     start_year = 2025
     current_year = datetime.now().year
-    
+
     if current_year > start_year:
-        # Si estamos en 2026 o futuro, muestra "2025-2026"
         year_str = f"{start_year}-{current_year}"
     else:
-        # Si estamos en 2025, muestra solo "2025"
         year_str = str(start_year)
 
     author = "Adrim Hamed Outmani (@Aderfi)"
     program = METADATA.get("project_name", "Pharmagen")
-    
+
     notice = f"""
-    {program} Copyright (C) {year_str} {author}
+    {program} Copyright (C) {year_str} {author}\n
     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
     This is free software, and you are welcome to redistribute it
     under certain conditions; type `show c' for details.

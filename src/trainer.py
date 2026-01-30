@@ -19,7 +19,6 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from src.cfg.manager import DIRS
-from src.utils.reporting import generate_training_report
 from src.losses import (
     AdaptiveFocalLoss,
     AsymmetricLoss,
@@ -27,6 +26,7 @@ from src.losses import (
     MultiTaskUncertaintyLoss,
     PolyLoss,
 )
+from src.utils.reporting import generate_training_report
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +38,8 @@ logger = logging.getLogger(__name__)
 class TrainerConfig:
     """
     Hyperparameter configuration for the Training Loop.
-    
-    Acts as a parameter object for the Trainer, ensuring all settings 
+
+    Acts as a parameter object for the Trainer, ensuring all settings
     (epochs, LR, device) are passed in a structured way.
     """
     # General
@@ -88,7 +88,7 @@ class LossRegistry:
             nn.Module: Configured loss module.
         """
         name = name.lower()
-        
+
         # Mapping: Name -> [Class, ParamsDict]
         LOSS_FUNCS = {
             "bce": [nn.BCEWithLogitsLoss, {}],
@@ -103,7 +103,7 @@ class LossRegistry:
             "poly": [PolyLoss,
                         {"epsilon": self.cfg.poly_epsilon, "label_smoothing": self.smoothing}]
         }
-        
+
         if name in LOSS_FUNCS:
             cls, params = LOSS_FUNCS[name]
             return cls(**params)
@@ -140,7 +140,7 @@ class MetricTracker:
         metrics = {
             "loss": self.running_loss / self.n_batches if self.n_batches > 0 else 0.0
         }
-        
+
         macro_acc = 0.0
         valid_tasks = 0
 
@@ -151,7 +151,7 @@ class MetricTracker:
             if total > 0:
                 macro_acc += acc
                 valid_tasks += 1
-        
+
         metrics["acc_macro"] = macro_acc / valid_tasks if valid_tasks > 0 else 0.0
         return metrics
 
@@ -162,10 +162,10 @@ class MetricTracker:
 class PGenTrainer:
     """
     Main Training Engine.
-    
+
     Encapsulates the training state (Model, Optimizer, Scheduler) and execution
     logic (Train Step, Validation Step, Checkpointing).
-    
+
     Args:
         model (nn.Module): The Pharmagen model.
         optimizer (Optimizer): PyTorch optimizer.
@@ -260,9 +260,9 @@ class PGenTrainer:
                 if t_col in self.ml_cols:
                     # Multi-label (Bitwise Match)
                     probs = torch.sigmoid(pred)
-                    predicted = (probs > 0.5).float()
+                    predicted = (probs > (1/2)).float()
                     batch_corrects[t_col] = (predicted == target).float().sum().item()
-                    batch_totals[t_col] = target.numel() 
+                    batch_totals[t_col] = target.numel()
                 else:
                     # Multi-class
                     predicted = pred.argmax(dim=1)
@@ -290,7 +290,7 @@ class PGenTrainer:
             self.scaler.update()
 
             tracker.update(loss.item(), corrects, totals)
-            
+
             # Live Update
             metrics = tracker.compute()
             loop.set_postfix(loss=f"{metrics['loss']:.4f}", acc=f"{metrics['acc_macro']:.2%}")

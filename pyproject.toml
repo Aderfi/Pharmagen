@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Pharmagen"
-version = "0.7"
+version = "1.0-rc1"
 description = "Software de predicción farmacogenética y eficacia terapéutica mediante Deep Learning."
 readme = "README.md"
 requires-python = ">=3.10, <3.11"
@@ -102,20 +102,20 @@ include = ["*"] # Incluye todos los paquetes encontrados dentro de src
 # CONFIGURACIÓN DE HERRAMIENTAS DE CALIDAD DE CÓDIGO
 # =============================================================================
 
-# Configuración para Black (Formateador de código)
+# Configuración para Black
 [tool.black]
 line-length = 100
 target-version = ['py310']
 include = '\.pyi?$'
 
-# Configuración para Isort (Ordenador de importaciones)
+# Configuración para Isort
 [tool.isort]
 profile = "black"
 multi_line_output = 3
 line_length = 100
 known_first_party = ["src"]
 
-# Configuración para Mypy (Chequeo de tipos estáticos)
+# Configuración para Mypy 
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true

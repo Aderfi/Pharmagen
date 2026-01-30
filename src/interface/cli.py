@@ -5,13 +5,12 @@ import sys
 from pathlib import Path
 
 # Project Imports
-from src.cfg.manager import DIRS, get_available_models
+from src.cfg.manager import DIRS, METADATA, get_available_models
 from src.interface.ui import ConsoleIO, Spinner
-from src.optuna_tuner import OptunaOrchestrator
 from src.pipeline import train_pipeline
 from src.utils.io_utils import (
-    print_conditions_details, 
-    print_gnu_notice, 
+    print_conditions_details,
+    print_gnu_notice,
     print_warranty_details,
 )
 
@@ -77,7 +76,6 @@ def _run_training_flow():
     model_name = _select_model()
 
     # 2. Select Data
-    # Try to find a sensible default
     default_data = DIRS["data"] / "processed" / "train_data.tsv"
     if not default_data.exists():
         default_data = None
@@ -97,7 +95,7 @@ def _run_training_flow():
         _run_optuna_training(model_name, csv_path)
 
 def _run_standard_training(model_name: str, csv_path: Path):
-    epochs_str = input("Epochs [default -> 50]: ").strip() 
+    epochs_str = input("Epochs [default -> 50]: ").strip()
     epochs = int(epochs_str) if epochs_str.isdigit() else 50
 
     ConsoleIO.print_step(f"Starting Standard Training: '{model_name}'")
@@ -111,22 +109,22 @@ def _run_standard_training(model_name: str, csv_path: Path):
         ConsoleIO.print_error(f"Training failed. Check logs. Error: {e}")
 
 def _run_optuna_training(model_name: str, csv_path: Path):
+    from src.cfg.manager import MULTI_LABEL_COLS, get_model_config
+    from src.data_handler import DataConfig
+    from src.optuna_tuner import OptunaOrchestrator, TunerConfig
+
+
     trials_str = input("Number of Trials [default -> 20]: ").strip()
     n_trials = int(trials_str) if trials_str.isdigit() else 20
 
     ConsoleIO.print_step(f"Starting Optuna Optimization: '{model_name}' ({n_trials} trials)")
 
     try:
-        # Lazy Import to avoid loading heavy deps until needed
-        from src.optuna_tuner import TunerConfig, OptunaOrchestrator
-        from src.data_handler import DataConfig
-        from src.cfg.manager import get_model_config, MULTI_LABEL_COLS, DIRS
-        
         # 1. Fetch Configuration
         raw_cfg = get_model_config(model_name)
         data_dict = raw_cfg["data"]
         search_space = raw_cfg.get("optuna", {})
-        
+
         if not search_space:
             ConsoleIO.print_error(f"No [optuna] configuration found for {model_name}.")
             return
@@ -150,7 +148,7 @@ def _run_optuna_training(model_name: str, csv_path: Path):
         # 3. Launch Orchestrator
         orchestrator = OptunaOrchestrator(tuner_cfg, data_cfg, search_space)
         study = orchestrator.run()
-        
+
         ConsoleIO.print_success(f"Optimization finished. Best Value: {study.best_value:.4f}")
         ConsoleIO.print_info(f"Best Params: {study.best_params}")
 
@@ -165,7 +163,6 @@ def _run_prediction_flow():
     model_name = _select_model()
 
     try:
-        # Lazy import to prevent errors if predict.py is not yet refactored
         from src.predict import PGenPredictor
 
         with Spinner("Loading model into memory..."):
@@ -202,14 +199,12 @@ def _interactive_predict_loop(predictor):
     print("\n(Type 'q' to cancel)")
     inputs = {}
 
-    # Assuming predictor has 'feature_cols' or similar from config
-    # If not, we might need to load config here. 
-    # For now, let's assume predictor exposes required features.
-    features = getattr(predictor, "feature_cols", ["drug_id", "gene_id"]) 
+    features = getattr(predictor, "feature_cols", ["drug_id", "gene_id"])
 
     for feature in features:
         val = input(f"Value for '{feature}': ").strip()
-        if val.lower() == 'q': return
+        if val.lower() == 'q':
+            return
         inputs[feature] = val
 
     ConsoleIO.print_step("Calculating probabilities...")
@@ -229,7 +224,7 @@ def _batch_predict_flow(predictor):
     with Spinner(f"Processing {path.name}..."):
         results = predictor.predict_file(path)
 
-    if results is None: 
+    if results is None:
         return # Error already handled in predict_file likely
 
     out_name = f"{path.stem}_preds_{DATE_STAMP}.csv"
@@ -248,9 +243,11 @@ def main_menu_loop():
     """Main interactive menu loop."""
     logger.info("Starting interactive menu")
     print_gnu_notice()
-
+    ConsoleIO.print_header("Pharmagen - Main Menu")
+    ConsoleIO.print_info(f" Version: {METADATA.get('version', 'Not Available')}", metadata=True)
+    ConsoleIO.print_info(f" Authors: {METADATA.get('authors', 'Not Available')}", metadata=True)
+    ConsoleIO.print_divider("=")
     while True:
-        ConsoleIO.print_header("Pharmagen - Main Menu")
         print("  1. Genomic Processing (ETL)")
         print("  2. Train Models (Deep Learning)")
         print("  3. Predict (Inference)")

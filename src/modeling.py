@@ -2,9 +2,11 @@
 # Copyright (C) 2025 Adrim Hamed Outmani
 
 from dataclasses import dataclass
+
 import torch
 from torch import nn
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
+
 
 @dataclass(frozen=True)
 class ModelConfig:
@@ -55,7 +57,7 @@ class ModelConfig:
 class MLP(nn.Module):
     """
     Generic Multi-Layer Perceptron generator.
-    
+
     Constructs a sequence of Linear -> [Norm] -> Activation -> Dropout.
     """
     def __init__( # noqa
@@ -92,8 +94,8 @@ class MLP(nn.Module):
 class FactorizationMachine(nn.Module):
     """
     Vectorized Factorization Machine Layer (2nd order interactions).
-    
-    Implements the formula: 
+
+    Implements the formula:
     0.5 * ( (sum(x))^2 - sum(x^2) )
     """
     def __init__(self, reduce_sum: bool = True):
@@ -118,16 +120,16 @@ class FactorizationMachine(nn.Module):
 class PharmagenDeepFM(nn.Module):
     """
     Hybrid DeepFM Architecture extended with Transformer Encoders.
-    
+
     Combines:
     1. Embedding Layer (Categorical Features)
     2. Transformer Encoder (Feature Cross-Attention)
     3. Deep Component (MLP)
     4. Wide Component (Factorization Machine)
-    
+
     Args:
         config (ModelConfig): Configuration object containing architecture specs.
-    
+
     Example:
         >>> cfg = ModelConfig(n_features={'a': 10}, target_dims={'b': 1})
         >>> model = PharmagenDeepFM(cfg)
@@ -213,10 +215,10 @@ class PharmagenDeepFM(nn.Module):
     def forward(self, x_cat: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
         """
         Forward pass.
-        
+
         Args:
             x_cat (dict): Dictionary of input tensors {feature_name: (Batch,)}.
-            
+
         Returns:
             dict: Dictionary of output logits {target_name: (Batch, Dim)}.
         """

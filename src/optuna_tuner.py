@@ -2,7 +2,7 @@
 optuna_tuner.py
 
 Manages Hyperparameter Optimization (HPO) using Optuna.
-Implements a clean 'Orchestrator' pattern to separate the search logic 
+Implements a clean 'Orchestrator' pattern to separate the search logic
 from the model training loop.
 """
 
@@ -60,7 +60,7 @@ class OptunaOrchestrator:
     """
     Bridges the gap between Optuna's Search Space and the System's Config Objects.
     Manages the lifecycle of Data -> Config -> Training -> Cleanup.
-    
+
     Attributes:
         tuner_cfg (TunerConfig): Configuration for the study (storage, trials).
         base_data_cfg (DataConfig): Configuration for data loading.
@@ -329,7 +329,7 @@ class OptunaOrchestrator:
             from optuna.visualization.matplotlib import plot_optimization_history, plot_param_importances #noqa
 
             fig_path = DIRS["reports"] / "figures"
-            
+
             # Use non-interactive backend
             plt.switch_backend('Agg')
 

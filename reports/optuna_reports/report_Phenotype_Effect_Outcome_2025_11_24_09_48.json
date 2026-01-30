@@ -1,0 +1,62 @@
+{
+  "model": "Phenotype_Effect_Outcome",
+  "best_trials": [
+    {
+      "number": 37,
+      "values": [
+        -2.2522688614470616
+      ],
+      "params": {
+        "embedding_dim": 512,
+        "hidden_dim": 384,
+        "n_layers": 4,
+        "activation_function": "gelu",
+        "learning_rate": 0.0016788402936917652,
+        "batch_size": 64,
+        "dropout_rate": 0.5081912019456709,
+        "embedding_dropout": 0.28160124818428767,
+        "weight_decay": 4.2276896369478276e-05,
+        "label_smoothing": 0.008323955134797547,
+        "gradient_clip_norm": 3.8269431741722157,
+        "num_attention_layers": 2,
+        "attention_dim_feedforward": 512,
+        "attention_dropout": 0.24906893576527284,
+        "fm_hidden_dim": 96,
+        "fm_dropout": 0.4431537116774716,
+        "focal_gamma": 3.8537474974715487
+      },
+      "metrics": {
+        "avg_accuracy": 0.7910240640867947,
+        "fixed_manual_task_weights": false,
+        "fixed_optimizer_type": "adamw",
+        "fixed_use_batch_norm": true,
+        "fixed_use_layer_norm": false,
+        "fixed_use_uncertainty_loss": true,
+        "params": {
+          "embedding_dim": 512,
+          "hidden_dim": 384,
+          "n_layers": 4,
+          "activation_function": "gelu",
+          "learning_rate": 0.0016788402936917652,
+          "batch_size": 64,
+          "optimizer_type": "adamw",
+          "dropout_rate": 0.5081912019456709,
+          "embedding_dropout": 0.28160124818428767,
+          "weight_decay": 4.2276896369478276e-05,
+          "label_smoothing": 0.008323955134797547,
+          "gradient_clip_norm": 3.8269431741722157,
+          "num_attention_layers": 2,
+          "attention_dim_feedforward": 512,
+          "attention_dropout": 0.24906893576527284,
+          "fm_hidden_dim": 96,
+          "fm_dropout": 0.4431537116774716,
+          "focal_gamma": 3.8537474974715487,
+          "manual_task_weights": false,
+          "use_uncertainty_loss": true,
+          "use_batch_norm": true,
+          "use_layer_norm": false
+        }
+      }
+    }
+  ]
+}

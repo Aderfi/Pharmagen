@@ -23,14 +23,15 @@ from src.interface.ui import ProgressBar
 from src.modeling import ModelConfig, PharmagenDeepFM
 
 logger = logging.getLogger(__name__)
+MIN_SIZE_PBAR = 2000  # Minimum samples to show progress bar
 
 class PGenPredictor:
     """
     Stateful Inference Engine.
-    
+
     Loads trained artifacts (Encoders, Weights, Config) into memory
     to provide a unified interface for prediction.
-    
+
     Args:
         model_name (str): Identifier of the model to load.
         device (str, optional): Computation device ('cpu', 'cuda').
@@ -106,7 +107,7 @@ class PGenPredictor:
         # 2. Build Config Object
         full_cfg = self.config_snapshot.get("full_config", {})
         arch_params = full_cfg.get("architecture", {})
-        
+
         # If empty (legacy snapshot), try 'model_config'
         if not arch_params:
             arch_params = self.config_snapshot.get("model_config", {})
@@ -131,10 +132,10 @@ class PGenPredictor:
 
         # 3. Instantiate & Load Weights
         model = PharmagenDeepFM(config)
-        
+
         # Determine weights path
-        weights_path = DIRS["models"] / f"model_best.pt" # Default name
-        
+        weights_path = DIRS["models"] / "model_best.pt" # Default name
+
         if not weights_path.exists():
             weights_path = DIRS["models"] / f"pmodel_{self.model_name}.pt"
 
@@ -157,7 +158,7 @@ class PGenPredictor:
         for col, enc in self.encoders.items():
             if isinstance(enc, LabelEncoder):
                 if self.unknown_token in enc.classes_:
-                    indices[col] = int(enc.transform([self.unknown_token])[0])
+                    indices[col] = int(enc.transform([self.unknown_token])[0]) # type: ignore
                 else:
                     indices[col] = 0
         return indices
@@ -169,10 +170,10 @@ class PGenPredictor:
     def predict_single(self, input_dict: dict[str, Any]) -> dict[str, Any] | None:
         """
         Predicts a single dictionary sample.
-        
+
         Args:
             input_dict: {'drug': 'Aspirin', 'gene': 'CYP2D6'}
-            
+
         Returns:
             dict: Decoded predictions or None on failure.
         """
@@ -206,23 +207,23 @@ class PGenPredictor:
     def predict_dataframe(self, df: pd.DataFrame, batch_size: int = 512) -> list[dict[str, Any]]:
         """
         Predicts efficiently on a Pandas DataFrame in chunks.
-        
+
         Handles:
         - Column case normalization
         - Efficient batching (Tensor movement to GPU inside loop)
         - Memory safety for large DataFrames
-        
+
         Args:
             df (pd.DataFrame): Input data.
             batch_size (int): Inference batch size.
-            
+
         Returns:
             list[dict]: List of prediction dictionaries.
         """
         # 1. Normalize columns
         df_clean = df.copy()
         df_clean.columns = df_clean.columns.str.lower().str.strip()
-        
+
         # 2. Validate Schema
         missing = [col for col in self.feature_cols if col not in df_clean.columns]
         if missing:
@@ -239,10 +240,10 @@ class PGenPredictor:
         # 4. Batch Loop
         num_samples = len(df_clean)
         all_results = []
-        
+
         # Iteration Strategy
         iterator = range(0, num_samples, batch_size)
-        use_pbar = num_samples > 2000
+        use_pbar = num_samples > MIN_SIZE_PBAR
 
         with torch.inference_mode():
             if use_pbar:
@@ -254,10 +255,10 @@ class PGenPredictor:
                 for i in iterator:
                     end = min(i + batch_size, num_samples)
                     current_batch_size = end - i
-                    
+
                     # Create Batch & Move to Device
                     batch_inputs = {
-                        k: v[i:end].to(self.device, non_blocking=True) 
+                        k: v[i:end].to(self.device, non_blocking=True)
                         for k, v in tensor_dict.items()
                     }
 
@@ -267,13 +268,13 @@ class PGenPredictor:
                     # Decode (CPU side)
                     decoded_batch = self._decode(outputs)
                     all_results.extend(decoded_batch)
-                    
+
                     if use_pbar:
                         pbar.update(current_batch_size) # type: ignore
             finally:
                 if use_pbar:
                     pbar.__exit__(None, None, None) # type: ignore
-                
+
         return all_results
 
     def predict_file(self, file_path: str | Path, batch_size: int = 512) -> list[dict[str, Any]]:
@@ -285,15 +286,15 @@ class PGenPredictor:
         if not path.exists():
             logger.error(f"File not found: {path}")
             return []
-            
+
         try:
             logger.info(f"Reading {path.name}...")
             # Detect separator
             sep = '\t' if path.suffix == '.tsv' else ','
             df = pd.read_csv(path, sep=sep)
-            
+
             return self.predict_dataframe(df, batch_size)
-            
+
         except Exception as e:
             logger.error(f"Failed to process file {path}: {e}")
             return []
@@ -319,13 +320,13 @@ class PGenPredictor:
         enc = self.encoders[col]
         # Robust string conversion handling NaNs
         vals = series.fillna(self.unknown_token).astype(str).to_numpy()
-        
+
         # Identify knowns
         mask = np.isin(vals, enc.classes_)
-        
+
         # Replace unknowns
         vals[~mask] = self.unknown_token
-        
+
         # Safety fallback if unknown token itself is missing in encoder
         if self.unknown_token not in enc.classes_:
             encoded = np.zeros(len(vals), dtype=int) # All to 0
@@ -334,7 +335,7 @@ class PGenPredictor:
                  encoded[mask] = enc.transform(known_vals)
         else:
             encoded = enc.transform(vals)
-            
+
         # Return CPU tensor
         return torch.from_numpy(encoded).long()
 
@@ -351,7 +352,7 @@ class PGenPredictor:
             if col in MULTI_LABEL_COLS:
                 # Multi-label
                 probs = torch.sigmoid(logits)
-                preds = (probs > 0.5).numpy()
+                preds = (probs > (1/2)).numpy()
                 labels = enc.inverse_transform(preds)
                 decoded_cols[col] = [list(x) for x in labels]
             else:

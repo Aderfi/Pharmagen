@@ -45,7 +45,7 @@ class DataConfig:
 class PGenProcessor(BaseEstimator, TransformerMixin):
     """
     Stateful processor that converts Pandas DataFrame -> Dictionary of Tensors.
-    
+
     Decouples Pandas overhead from the training loop by pre-computing
     encodings and transforming data into pure PyTorch tensors before
     Dataset instantiation.
@@ -54,15 +54,15 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
         self.cfg = config
         self.encoders: dict[str, Any] = {}
         self.multi_label_cols = set(c.lower() for c in (multi_label_cols or []))
-        
+
         # Identify columns
         all_cols = config.get("features", []) + config.get("targets", [])
         self.target_cols = [c.lower() for c in config.get("targets", [])]
         self.scalar_cols = [
-            c.lower() for c in all_cols 
+            c.lower() for c in all_cols
             if c.lower() not in self.multi_label_cols and c.lower() not in self.target_cols
         ]
-        
+
         self.unknown_token = "__UNKNOWN__"
 
     def fit(self, df: pd.DataFrame, y=None):
@@ -103,9 +103,9 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
                 continue
             enc = self.encoders[col]
             vals = df[col].fillna(self.unknown_token).to_numpy()
-            
+
             unknown_idx = np.searchsorted(enc.classes_, self.unknown_token) # noqa
-            
+
             valid_mask = np.isin(vals, enc.classes_)
             vals[~valid_mask] = self.unknown_token
 
@@ -142,7 +142,7 @@ class PGenDataset(Dataset):
     Zero-copy PyTorch Dataset.
     """
     def __init__(
-        self, 
+        self,
         data_payload: dict[str, torch.Tensor],
         features: list[str],
         targets: list[str],
@@ -152,10 +152,10 @@ class PGenDataset(Dataset):
         self.features = [f.lower() for f in features]
         self.targets = [t.lower() for t in targets]
         self.ml_cols = set(c.lower() for c in multi_label_cols)
-        
+
         if not self.data:
             raise ValueError("Empty data payload provided to Dataset.")
-            
+
         first_key = next(iter(self.data))
         self.length = len(self.data[first_key])
 
@@ -164,17 +164,17 @@ class PGenDataset(Dataset):
 
     def __getitem__(self, idx):
         x = {
-            k: self.data[k][idx] 
-            for k in self.features 
+            k: self.data[k][idx]
+            for k in self.features
             if k in self.data
         }
-        
+
         y = {}
         for k in self.targets:
             if k in self.data:
                 val = self.data[k][idx]
                 y[k] = val.float() if k in self.ml_cols else val
-                
+
         return x, y
 
 def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
@@ -194,5 +194,5 @@ def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
 
     # Clean content (strip, lower, etc)
     df = clean_dataset_content(df, config.multi_label_cols)
-    
+
     return df

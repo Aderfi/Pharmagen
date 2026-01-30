@@ -6,7 +6,9 @@
 [metadata]
 project_name = "Pharmagen"
 version = "1.0-rc1"
-author = "Adrim Hamed Outmani"
+authors = "Adrim Hamed Outmani"
+build_date = "2025"
+description = "A pharmacogenetic prediction tool leveraging deep learning for therapeutic efficacy."
 
 [project]
 multi_label_cols = ["phenotype_outcome"]

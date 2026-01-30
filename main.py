@@ -6,6 +6,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 import torch
@@ -49,47 +50,48 @@ def _parse_arguments() -> argparse.Namespace:
     # --- Core Arguments ---
     core_group = parser.add_argument_group("Core Execution")
     core_group.add_argument(
-        "--mode", 
-        choices=["menu", "train", "predict"], 
-        default="menu", 
+        "--mode",
+        type=str,
+        choices=["menu", "train", "predict"],
+        default="menu",
         help="Execution mode (default: menu)"
     )
-    core_group.add_argument("--model", 
-        type=str, 
+    core_group.add_argument("--model",
+        type=str,
         help="Model name identifier (Required for train/predict modes)"
     )
     core_group.add_argument(
-        "--input", 
-        type=str, 
+        "--input",
+        type=str,
         help="Path to input dataset (CSV/TSV)"
     )
     core_group.add_argument(
-        "--output", 
-        type=str, 
+        "--output",
+        type=str,
         help="Path to output directory/file (For predictions)"
     )
     core_group.add_argument(
-        "--verbose", 
-        action="store_true", 
+        "--verbose",
+        action="store_true",
         help="Enable debug logging level"
     )
 
     # --- Training Configuration ---
     train_group = parser.add_argument_group("Training Configuration")
     train_group.add_argument(
-        "--epochs", 
-        type=int, 
-        default=50, 
+        "--epochs",
+        type=int,
+        default=50,
         help="Number of training epochs (default: 50)"
     )
     train_group.add_argument(
-        "--batch-size", 
-        type=int, 
+        "--batch-size",
+        type=int,
         help="Override config batch size"
     )
     train_group.add_argument(
-        "--device", 
-        type=str, 
+        "--device",
+        type=str,
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="Compute device (cuda/cpu)"
     )
@@ -97,14 +99,14 @@ def _parse_arguments() -> argparse.Namespace:
     # --- Optuna Optimization ---
     opt_group = parser.add_argument_group("Hyperparameter Optimization")
     opt_group.add_argument(
-        "--optuna", 
-        action="store_true", 
+        "--optuna",
+        action="store_true",
         help="Enable Optuna HPO mode"
     )
     opt_group.add_argument(
-        "--trials", 
-        type=int, 
-        default=20, 
+        "--trials",
+        type=int,
+        default=20,
         help="Number of HPO trials to run (default: 20)"
     )
 
@@ -114,13 +116,94 @@ def _parse_arguments() -> argparse.Namespace:
 # MAIN ENTRY POINT
 # ==============================================================================
 
+def _prediction_pipeline(args: argparse.Namespace, logger: logging.Logger):
+    if not args.model or not args.input:
+        logger.error("Missing required args for prediction: --model and --input")
+        sys.exit(1)
+
+    logger.info(f"Starting Inference: {args.model}")
+    from src.predict import PGenPredictor
+
+    predictor = PGenPredictor(args.model, device=args.device)
+    if args.infer == "single":
+        results = predictor.predict_single(args.input)
+    elif args.infer == "file":
+        results = predictor.predict_file(Path(args.input))
+    else:
+        logger.error("Invalid inference type specified.")
+        sys.exit(1)
+    if results:
+        in_path = Path(args.input)
+        if args.output:
+            out_path = Path(args.output)
+            if out_path.is_dir():
+                out_path = out_path / f"{in_path.stem}_preds.tsv"
+        else:
+            out_path = PROJECT_ROOT / "reports" / f"{in_path.stem}_preds.tsv"
+
+        pd.DataFrame(results).to_csv(out_path, index=False, sep="\t", encoding="utf-8")
+        logger.info(f"Predictions saved to {out_path}")
+    else:
+        logger.warning("No predictions generated (check input file format).")
+
+def _optuna_pipeline(args: argparse.Namespace, logger: logging.Logger):
+    from src.cfg.manager import MULTI_LABEL_COLS, get_model_config
+    from src.data_handler import DataConfig
+    from src.optuna_tuner import OptunaOrchestrator, TunerConfig
+
+    logger.info("Initializing Optuna HyperParam Optimization...")
+
+    # 1. Load Config
+    raw_cfg = get_model_config(args.model)
+    data_dict = raw_cfg["data"]
+    search_space = raw_cfg.get("optuna", {})
+
+    if not search_space:
+        logger.error(f"Model '{args.model}' has no [optuna] section in models.toml")
+        sys.exit(1)
+
+    # 2. Setup DataConfig
+    data_cfg = DataConfig(
+        dataset_path=Path(args.input),
+        feature_cols=data_dict["features"],
+        target_cols=data_dict["targets"],
+        multi_label_cols=list(MULTI_LABEL_COLS),
+        stratify_col=data_dict.get("stratify_col"),
+        num_workers=4
+    )
+
+    # 3. Setup TunerConfig
+    tuner_cfg = TunerConfig(
+        study_name=f"{args.model}_study",
+        n_trials=args.trials,
+        storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}"
+    )
+
+    # 4. Run Optimization
+    orchestrator = OptunaOrchestrator(
+        tuner_cfg,
+        data_cfg,
+        search_space,
+        device=args.device
+    )
+    orchestrator.run()
+
+def _training_pipeline(args: argparse.Namespace, logger: logging.Logger):
+    from src.pipeline import train_pipeline
+    train_pipeline(
+        args.model,
+        Path(args.input),
+        epochs=args.epochs,
+        batch_size=args.batch_size
+    )
+
 def main():
     args = _parse_arguments()
 
     # 1. Setup Logging
     setup_logging()
     logger = logging.getLogger("Pharmagen.Main")
-    
+
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
         logger.debug("Debug mode enabled.")
@@ -134,7 +217,6 @@ def main():
         # --- HEADLESS TRAIN ---
         elif args.mode == "train":
             if not args.model or not args.input:
-                parser = argparse.ArgumentParser() # Dummy to print help
                 logger.error("Missing required args for training: --model and --input")
                 print("\nError: --model and --input are required for 'train' mode.\n")
                 sys.exit(1)
@@ -143,87 +225,14 @@ def main():
             logger.info(f"Device: {args.device} | Epochs: {args.epochs}")
 
             if args.optuna:
-                from src.optuna_tuner import TunerConfig, OptunaOrchestrator
-                from src.data_handler import DataConfig
-                from src.cfg.manager import get_model_config, MULTI_LABEL_COLS, DIRS
-                
-                logger.info("Initializing Optuna HPO...")
-                
-                # 1. Load Config
-                raw_cfg = get_model_config(args.model)
-                data_dict = raw_cfg["data"]
-                search_space = raw_cfg.get("optuna", {})
-                
-                if not search_space:
-                    logger.error(f"Model '{args.model}' has no [optuna] section in models.toml")
-                    sys.exit(1)
+                _optuna_pipeline(args, logger)
 
-                # 2. Setup DataConfig
-                data_cfg = DataConfig(
-                    dataset_path=Path(args.input),
-                    feature_cols=data_dict["features"],
-                    target_cols=data_dict["targets"],
-                    multi_label_cols=list(MULTI_LABEL_COLS),
-                    stratify_col=data_dict.get("stratify_col"),
-                    num_workers=4
-                )
-
-                # 3. Setup TunerConfig
-                tuner_cfg = TunerConfig(
-                    study_name=f"{args.model}_study",
-                    n_trials=args.trials,
-                    storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}"
-                )
-
-                # 4. Run Optimization
-                orchestrator = OptunaOrchestrator(
-                    tuner_cfg, 
-                    data_cfg, 
-                    search_space, 
-                    device=args.device
-                )
-                orchestrator.run()
-                
             else:
-                from src.pipeline import train_pipeline
-                train_pipeline(
-                    args.model, 
-                    Path(args.input), 
-                    epochs=args.epochs,
-                    batch_size=args.batch_size
-                )
+                _training_pipeline(args, logger)
 
         # --- HEADLESS PREDICT ---
         elif args.mode == "predict":
-            if not args.model or not args.input:
-                logger.error("Missing required args for prediction: --model and --input")
-                sys.exit(1)
-
-            logger.info(f"Starting Inference: {args.model}")
-            from src.predict import PGenPredictor
-
-            predictor = PGenPredictor(args.model, device=args.device)
-            if args.infer == "single":
-                results = predictor.predict_single(args.input)
-            elif args.infer == "file":
-                results = predictor.predict_file(Path(args.input))
-            else:
-                logger.error("Invalid inference type specified.")
-                sys.exit(1)
-            if results:
-                in_path = Path(args.input)
-                if args.output:
-                    out_path = Path(args.output)
-                    if out_path.is_dir():
-                        out_path = out_path / f"{in_path.stem}_preds.tsv"
-                else:
-                    out_path = PROJECT_ROOT / "reports" / f"{in_path.stem}_preds.tsv"
-                
-                pd.DataFrame(results).to_csv(out_path, index=False, sep="\t", encoding="utf-8")
-                logger.info(f"Predictions saved to {out_path}")
-            else:
-                logger.warning("No predictions generated (check input file format).")
-
+            _prediction_pipeline(args, logger)
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
         sys.exit(0)

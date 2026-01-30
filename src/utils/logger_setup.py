@@ -16,24 +16,25 @@
 
 import logging
 from datetime import datetime
+
 from src.cfg.manager import DIRS
 
 
-def setup_logging(name="Pharmagen"):
+def setup_logging(name="Pharmagen", level=logging.INFO) -> None:
     log_file = DIRS["logs"] / f"{name}_{datetime.now():%Y-%m-%d}.log"
-    
+
     logging.basicConfig(
         filename=log_file,
         filemode="a",
-        level=logging.INFO,
+        level=level,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
-    
+
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
+    console.setLevel(level)
     console.setFormatter(logging.Formatter('%(message)s'))
     logging.getLogger('').addHandler(console)
-    
+
     # Silence noise
     for lib in ["matplotlib", "optuna", "numba"]:
         logging.getLogger(lib).setLevel(logging.WARNING)

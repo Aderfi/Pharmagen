@@ -1,0 +1,50 @@
+{
+  "model": "Phenotype_Effect_Outcome",
+  "best_trials": [
+    {
+      "number": 39,
+      "values": [
+        -3.7692732531745157
+      ],
+      "params": {
+        "embedding_dim": 512,
+        "n_layers": 5,
+        "hidden_dim": 512,
+        "learning_rate": 0.0017328736719051743,
+        "batch_size": 32,
+        "dropout_rate": 0.5388290991820363,
+        "embedding_dropout": 0.29179632489341656,
+        "weight_decay": 2.7935421438995612e-05,
+        "label_smoothing": 0.0003925552093576529,
+        "focal_gamma": 5.975709827046388
+      },
+      "metrics": {
+        "avg_accuracy": 0.7787712492509541,
+        "fixed_activation_function": "gelu",
+        "fixed_manual_task_weights": false,
+        "fixed_optimizer_type": "adamw",
+        "fixed_use_batch_norm": true,
+        "fixed_use_layer_norm": false,
+        "fixed_use_uncertainty_loss": true,
+        "params": {
+          "embedding_dim": 512,
+          "n_layers": 5,
+          "hidden_dim": 512,
+          "activation_function": "gelu",
+          "learning_rate": 0.0017328736719051743,
+          "batch_size": 32,
+          "optimizer_type": "adamw",
+          "dropout_rate": 0.5388290991820363,
+          "embedding_dropout": 0.29179632489341656,
+          "weight_decay": 2.7935421438995612e-05,
+          "label_smoothing": 0.0003925552093576529,
+          "use_batch_norm": true,
+          "use_layer_norm": false,
+          "focal_gamma": 5.975709827046388,
+          "manual_task_weights": false,
+          "use_uncertainty_loss": true
+        }
+      }
+    }
+  ]
+}

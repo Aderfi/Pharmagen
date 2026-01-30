@@ -346,9 +346,9 @@ def run_ngs_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
     ConsoleIO.print_step("Pre-vuelo: Verificando herramientas")
     required_tools = ["fastqc", "fastp", "bwa", "samtools", "java", "freebayes", "vcftools", "vep"]
     missing = [tool for tool in required_tools if not shutil.which(tool)]
-    
+
     if missing:
-        ConsoleIO.print_error(f"Faltan herramientas requeridas: {', '.join(missing)}")
+        logger.error(ConsoleIO.print_error(f"Faltan herramientas requeridas: {', '.join(missing)}"))
         ConsoleIO.print_info("Por favor instálalas antes de continuar (conda install ...)")
         sys.exit(1)
     ConsoleIO.print_success("Todas las herramientas encontradas.")
@@ -406,8 +406,8 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.read1.exists() or not args.read2.exists():
-        ConsoleIO.print_error("No se encuentran los archivos de entrada.")
+    if not args.read1 or not args.read2:
+        ConsoleIO.print_error("No se encuentran los archivos de entrada o no existen.")
         sys.exit(1)
 
     if not args.threads:

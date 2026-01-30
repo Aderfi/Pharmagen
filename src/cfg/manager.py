@@ -1,8 +1,9 @@
+# src/cfg/manager.py
 # Pharmagen - Configuration Manager
 # Copyright (C) 2025 Adrim Hamed Outmani
 
-import sys
 import logging
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -32,14 +33,14 @@ def _load_toml(filename: str) -> dict[str, Any]:
 def _resolve_paths(raw_paths: dict[str, Any]) -> dict[str, Path]:
     """Recursively resolves string paths in TOML to absolute Path objects."""
     resolved = {}
-    base_section = raw_paths.get("base", {})
-    
+    base_section = raw_paths.get("base", {}) # noqa
+
     for section, paths in raw_paths.items():
         if not isinstance(paths, dict):
             continue
         for key, relative_path in paths.items():
             resolved[key] = PROJECT_ROOT / str(relative_path)
-            
+
     resolved["base"] = PROJECT_ROOT
     return resolved
 
@@ -100,7 +101,7 @@ def get_model_config(model_name: str) -> dict[str, Any]:
 
     # 1. Global Defaults
     config = _GLOBAL_RAW.get("defaults", {}).copy()
-    
+
     # 2. Project Settings
     config["project"] = _GLOBAL_RAW.get("project", {})
 
@@ -121,7 +122,7 @@ def _parse_optuna_section(raw: dict[str, Any]) -> dict[str, Any]:
     """Parses Optuna ranges from TOML lists to Python tuples."""
     parsed = {}
     for k, v in raw.items():
-        if isinstance(v, list) and len(v) == 2 and all(isinstance(x, (int, float)) for x in v):
+        if isinstance(v, list) and len(v) == 2 and all(isinstance(x, (int, float)) for x in v):  # noqa: PLR2004
             parsed[k] = tuple(v)
         else:
             parsed[k] = v
@@ -131,7 +132,7 @@ def _validate_config(cfg: dict[str, Any], name: str):
     """Ensures critical keys exist in the configuration."""
     if "data" not in cfg:
          raise ValueError(f"Model '{name}' missing [data] section.")
-         
+
     missing = [k for k in ["features", "targets"] if k not in cfg["data"]]
     if missing:
         raise ValueError(f"Model '{name}' [data] section missing: {missing}")

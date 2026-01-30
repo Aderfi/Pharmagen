@@ -13,52 +13,55 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any
 
-import pysam  # type: ignore      # Biblioteca solo disponible en Linux/Unix
+import pysam  # type: ignore || Solo en GNU/Linux
 
-import src.cfg.config as cfg
+from src.analysis.ngs_pipeline import PROJECT_ROOT, REF_GENOME_FASTA
+from src.interface.ui import ConsoleIO
 
 # Rutas constantes
-RUTA_FASTA = cfg.REF_GENOME_FASTA
-RUTA_VCF_DIR = Path(cfg.DATA_DIR, "raw")
+RUTA_FASTA = REF_GENOME_FASTA
+RUTA_VCF_DIR = PROJECT_ROOT / "data"
 
-def seleccionar_vcf(vcf_path: Path = RUTA_VCF_DIR) -> Optional[Path]:
+
+def seleccionar_vcf(vcf_path: Path = RUTA_VCF_DIR) -> str | Path | None:
     """
     Lista y permite seleccionar un archivo VCF.gz del directorio.
     """
     # Usamos list(path.glob) que es más moderno que glob.glob
     vcf_files = list(vcf_path.glob("*.vcf.gz"))
-    
+
     if not vcf_files:
-        print(f"❌ No se encontraron archivos .vcf.gz en {vcf_path}")
+        ConsoleIO.print_error(f"No se encontraron archivos .vcf.gz en {vcf_path}")
         return None
 
-    print("\n📂 Pacientes disponibles:")
+    ConsoleIO.print_info("\n Pacientes disponibles:")
     for i, vcf_file in enumerate(vcf_files):
-        print(f"  {i + 1}. {vcf_file.name.replace('.vcf.gz', '')}")
+        print(f" -- {i + 1}. {vcf_file.name.replace('.vcf.gz', '')}")
 
     while True:
         try:
             entrada = input("\nSelecciona el número del paciente (o 'q' para salir): ")
-            if entrada.lower() == 'q': return None
-            
+            if entrada.lower() == 'q':
+                return None
+
             seleccion = int(entrada) - 1
             if 0 <= seleccion < len(vcf_files):
                 return vcf_files[seleccion]
-            print("⚠️ Selección fuera de rango.")
+            ConsoleIO.print_warning("Selección fuera de rango.")
         except ValueError:
-            print("⚠️ Por favor, introduce un número válido.")
+            ConsoleIO.print_warning("Por favor, introduce un número válido.")
 
-def decodificar_genotipo(record, sample_id: str) -> Dict[str, Any]:
+def decodificar_genotipo(record, sample_id: str) -> dict[str, Any]:
     """
     Interpreta dinámicamente el genotipo, manejando multialélicos y nulos.
     """
     # Obtener llamada de genotipo (ej: (0, 1) o (None, None))
     gt_tuple = record.samples[sample_id]['GT']
-    
+
     # Caso: Dato faltante (./.)
     if None in gt_tuple:
         return {"tipo": "No Llamado/Missing", "alelos": "./."}
@@ -76,28 +79,26 @@ def decodificar_genotipo(record, sample_id: str) -> Dict[str, Any]:
             tipo = "Homocigoto Referencia (WT)"
         else:
             tipo = "Homocigoto Alternativo"
-    else:
+    elif 0 in gt_tuple:
         # Índices distintos (0/1, 1/2)
-        if 0 in gt_tuple:
-            tipo = "Heterocigoto"
-        else:
-            tipo = "Heterocigoto Compuesto (Alt1/Alt2)"
+        tipo = "Heterocigoto"
+    else:
+        tipo = "Heterocigoto Compuesto (Alt1/Alt2)"
 
     return {"tipo": tipo, "alelos": alelos_str}
 
-def procesar_paciente(vcf_path: Path, fasta_path: Path, region: Optional[str] = None) -> Generator[Dict, None, None]:
+def procesar_paciente(vcf_path: Path | str, fasta_path: Path, region: str | None = None) -> Generator[dict, None, None]:
     """
     Generador que procesa variantes. Usa 'yield' para eficiencia de memoria.
     Permite filtrar por región (ej: 'chr1:1000-2000').
     """
-    if not vcf_path.exists():
+    if not Path(vcf_path).exists():
         raise FileNotFoundError(f"No existe el VCF: {vcf_path}")
 
     # Uso de Context Managers (with) para cierre automático de archivos
     with pysam.FastaFile(str(fasta_path)) as genome, pysam.VariantFile(str(vcf_path)) as vcf:
-        
         sample_id = list(vcf.header.samples)[0]
-        print(f"\n🔬 Analizando: {sample_id} | Archivo: {vcf_path.name}")
+        print(f"\n🔬 Analizando: {sample_id} | Archivo: {Path(vcf_path).name}")
         print("-" * 60)
 
         # fetch permite ir directo a una región si se especifica, o iterar todo si es None
@@ -105,7 +106,7 @@ def procesar_paciente(vcf_path: Path, fasta_path: Path, region: Optional[str] = 
 
         for record in iterator:
             # Saltar variantes sin ALT (bloques homocigotos de referencia típicos en gVCF)
-            if not record.alts: 
+            if not record.alts:
                 continue
 
             # --- VALIDACIÓN DE INTEGRIDAD (Tu lógica original mejorada) ---
@@ -133,24 +134,21 @@ def procesar_paciente(vcf_path: Path, fasta_path: Path, region: Optional[str] = 
                 "genotype": info_gt["alelos"],
                 "zygosity": info_gt["tipo"]
             }
-            
+
             yield variant_data
 
 if __name__ == "__main__":
-    
-    
     archivo_seleccionado = seleccionar_vcf()
 
     if archivo_seleccionado:
-        # Ejemplo: Procesar y guardar en una lista (o podrías volcarlo a CSV/Pandas)
-        # Pasamos el PATH COMPLETO, no solo el nombre
+        # Ejemplo: Procesar y guardar en una lista
         procesador = procesar_paciente(archivo_seleccionado, RUTA_FASTA)
-        
+
         try:
             for variante in procesador:
                 # Aquí puedes filtrar solo lo que te interesa imprimir
                 if "Homocigoto Referencia" not in variante["zygosity"]:
-                    print(f"📍 {variante['chrom']}:{variante['pos']} ({variante['ref']}->{variante['alts']})")
+                    ConsoleIO.print_dna(f" {variante['chrom']}:{variante['pos']} ({variante['ref']}->{variante['alts']})")
                     print(f"   └── {variante['zygosity']} [{variante['genotype']}]")
         except Exception as e:
-            print(f"❌ Error durante el procesamiento: {e}")
+            ConsoleIO.print_error(f"Error durante el procesamiento: {e}")

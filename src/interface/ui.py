@@ -33,6 +33,7 @@ class MessageType(Enum):
     ROCKET = "\U0001f680"       # 🚀
     FIRE = "\U0001f525"         # 🔥
     DNA = "\U0001f9ec"          # 🧬
+    META = "\U0001f539"         # 🔹
 
 SPINNER_DOTS = ["\u25cb", "\u25d1", "\u25d0", "\u25e5", "\u25e4", "\u25e3", "\u25e2", "\u25e1", "\u25e0", "\u25ef"]
 SPINNER_BRAILLE = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
@@ -209,13 +210,16 @@ class ConsoleIO:
         print(f"{MessageType.WARNING.value}  {msg}")
 
     @staticmethod
-    def print_info(msg: Any):
+    def print_info(msg: Any, metadata: bool = False):
         """Print info message with ℹ️."""
-        print(f"{MessageType.INFO.value} {msg}")
+        if metadata:
+            print(f"{MessageType.META.value}  {msg}")
+        else:
+            print(f"{MessageType.INFO.value} {msg}")
 
     @staticmethod
     def print_step(msg: Any):
-        """Print info message with ."""
+        """Print info message with 🚀."""
         print(f"{MessageType.ROCKET.value} {msg}")
 
     @staticmethod
@@ -225,7 +229,7 @@ class ConsoleIO:
 
     @staticmethod
     def print_dna(msg: str):
-        """Special format for genomic operations."""
+        """Special format for genomic operations. Prints with 🧬."""
         print(f"{MessageType.DNA.value}  \033[36m{msg}\033[0m") # Cyan
 
     # -------------------------------------------------------------------------
