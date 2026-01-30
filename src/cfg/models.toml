@@ -8,123 +8,109 @@
 # MODELO 1: Phenotype_Effect_Outcome
 # ==========================================
 [Phenotype_Effect_Outcome]
-model_type = "tabular" # Explicit default
-targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
-features = [
-    "ATC",          
-    "Drug",             
-    "Gene_Symbol",             
-    "Variant_Normalized",        
-    "Genotype", 
-    "Previous_Condition_Term"      
-]
-cols_to_load = [
-    "ATC",          
-    "Drug",             
-    "Gene_Symbol",             
-    "Variant_Normalized",        
-    "Genotype", 
-    "Previous_Condition_Term",
-    "Phenotype_outcome", 
-    "Effect_direction", 
-    "Effect_type"
-]
 
-[Phenotype_Effect_Outcome.params]
-# Sobreescrituras específicas
-embedding_dim = 256
-n_layers = 2
-hidden_dim = 2176
-dropout_rate = 0.68
-learning_rate = 2e-4
-batch_size = 64
-optimizer_type = "adamw"
-use_batch_norm = true
-use_layer_norm = true
-manual_task_weights = false
-use_uncertainty_loss = true
-label_smoothing = 0.1
-# Parámetros de arquitectura extendida
-attention_dim_feedforward = 3840
-attention_dropout = 0.48
-num_attention_layers = 2
-focal_gamma = 1.16
-focal_alpha_weight = 1.34
-#fm_hidden_layers = 2
-fm_hidden_dim = 384
+    [Phenotype_Effect_Outcome.data]
+    features = [
+        "ATC",          
+        "Drug",             
+        "Gene_Symbol",             
+        "Variant_Normalized",        
+        "Genotype", 
+        "Previous_Condition_Term"      
+    ]
+    targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
+    cols_to_load = [
+        "ATC", "Drug", "Gene_Symbol", "Variant_Normalized", "Genotype", 
+        "Previous_Condition_Term", "Phenotype_outcome", "Effect_direction", "Effect_type"
+    ]
+    stratify_col = "Phenotype_outcome"
 
-[Phenotype_Effect_Outcome.optuna]
-# Espacios de búsqueda
-embedding_dim = [64, 128, 256, 512]
-hidden_dim = ["int", 256, 2048, 128]
-n_layers = ["int", 2, 5, 1]
-activation_function = ["gelu", "relu"]
-learning_rate = [1e-5, 5e-3]
-batch_size = [64, 128, 256]
-optimizer_type = ["adamw"]
+    [Phenotype_Effect_Outcome.architecture]
+    # Model Structure
+    model_type = "tabular"
+    embedding_dim = 256
+    n_layers = 2
+    hidden_dim = 2176
+    dropout_rate = 0.68
+    activation = "gelu"
+    use_batch_norm = true
+    use_layer_norm = true
+    
+    # Advanced Components
+    use_transformer = true
+    attn_dim_feedforward = 3840
+    attn_dropout = 0.48
+    num_attn_layers = 2
+    fm_hidden_dim = 384
+    # fm_hidden_layers = 2 (Commented out in original)
 
-dropout_rate = [0.2, 0.6]
-embedding_dropout = [0.1, 0.4]
-weight_decay = [1e-6, 1e-3]
-label_smoothing = [0.0, 0.15]
-gradient_clip_norm = [0.5, 5.0]
+    [Phenotype_Effect_Outcome.training]
+    # Training Loop Hyperparams
+    learning_rate = 2e-4
+    batch_size = 64
+    optimizer_type = "adamw"
+    
+    [Phenotype_Effect_Outcome.loss]
+    # Loss Function Configuration
+    focal_gamma = 1.16
+    focal_alpha_weight = 1.34
+    label_smoothing = 0.1
+    use_uncertainty_loss = true
+    manual_task_weights = false
 
-num_attention_layers = [1, 2, 3]
-attention_dim_feedforward = ["int", 256, 1024, 128]
-attention_dropout = [0.1, 0.5]
-
-fm_hidden_dim = ["int", 32, 256, 32]
-fm_dropout = [0.1, 0.5]
-
-focal_gamma = [1.0, 4.0]
-manual_task_weights = [false]
-use_uncertainty_loss = [true]
-use_batch_norm = [true]
-use_layer_norm = [false]
-
-
+    [Phenotype_Effect_Outcome.optuna]
+    # Search Spaces
+    embedding_dim = [64, 128, 256, 512]
+    hidden_dim = ["int", 256, 2048, 128]
+    n_layers = ["int", 2, 5, 1]
+    activation_function = ["gelu", "relu"]
+    learning_rate = [1e-5, 5e-3]
+    batch_size = [64, 128, 256]
+    optimizer_type = ["adamw"]
+    dropout_rate = [0.2, 0.6]
+    embedding_dropout = [0.1, 0.4]
+    weight_decay = [1e-6, 1e-3]
+    label_smoothing = [0.0, 0.15]
+    num_attention_layers = [1, 2, 3]
+    attention_dim_feedforward = ["int", 256, 1024, 128]
+    attention_dropout = [0.1, 0.5]
+    fm_hidden_dim = ["int", 32, 256, 32]
+    fm_dropout = [0.1, 0.5]
+    focal_gamma = [1.0, 4.0]
+    manual_task_weights = [false]
+    use_uncertainty_loss = [true]
+    use_batch_norm = [true]
+    use_layer_norm = [false]
 
 # ==========================================
 # MODELO 2: Features-Phenotype
 # ==========================================
 [Features-Phenotype]
-model_type = "tabular"
-targets = ["Phenotype_outcome"]
-features = ["atc", "Genalle", "Gene", "Allele"]
-stratify_col = "Phenotype_outcome"
-cols_to_load = ["Drug", "Genalle", "Gene", "Allele", "Phenotype_outcome", "atc"]
+    
+    [Features-Phenotype.data]
+    features = ["atc", "Genalle", "Gene", "Allele"]
+    targets = ["Phenotype_outcome"]
+    stratify_col = "Phenotype_outcome"
+    cols_to_load = ["Drug", "Genalle", "Gene", "Allele", "Phenotype_outcome", "atc"]
 
-[Features-Phenotype.params]
-batch_size = 512
-embedding_dim = 192
-n_layers = 1
-hidden_dim = 1024
-dropout_rate = 0.7
-learning_rate = 1e-4
+    [Features-Phenotype.architecture]
+    model_type = "tabular"
+    embedding_dim = 192
+    n_layers = 1
+    hidden_dim = 1024
+    dropout_rate = 0.7
 
-[Features-Phenotype.weights]
-phenotype_outcome = 1.0
+    [Features-Phenotype.training]
+    batch_size = 512
+    learning_rate = 1e-4
 
-[Features-Phenotype.optuna]
-embedding_dim = [128, 256, 512]
-n_layers = ["int", 1, 4, 1]
+    [Features-Phenotype.loss]
+    # Custom weight section kept here or moved to loss
+    # Keeping clean
+    
+    [Features-Phenotype.weights]
+    phenotype_outcome = 1.0
 
-# ==========================================
-# MODELO 3: Graph-Phenotype (EXAMPLE)
-# ==========================================
-[Graph-Phenotype-Example]
-model_type = "graph"
-targets = ["Phenotype_outcome"]
-# For Graph models, 'features' might just imply the input columns expected in CSV
-features = ["drug", "chromosome", "position"] 
-cols_to_load = ["drug", "chromosome", "position", "Phenotype_outcome"]
-
-[Graph-Phenotype-Example.params]
-batch_size = 32
-learning_rate = 1e-4
-embedding_dim = 128
-hidden_dim = 256
-n_gnn_layers = 3
-dropout_rate = 0.2
-dna_model = "zhihan1996/DNABERT-2-117M"
-use_uncertainty_loss = false
+    [Features-Phenotype.optuna]
+    embedding_dim = [128, 256, 512]
+    n_layers = ["int", 1, 4, 1]

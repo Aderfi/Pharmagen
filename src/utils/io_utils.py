@@ -1,22 +1,33 @@
 # Pharmagen - IO Utilities
 import json
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Any
 from datetime import datetime
-from src.cfg.manager import DIRS, METADATA, PROJECT_ROOT, VERSION
+from src.cfg.manager import DIRS, METADATA, VERSION
 
 LOGS_DIR = DIRS["logs"]
 
 
-def save_json(data: Dict[str, Any], path: Union[str, Path]):
+def save_json(data: dict[str, Any], path: str | Path):
     """Saves a dictionary to a JSON file."""
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
-def load_json(path: Union[str, Path]) -> Dict[str, Any]:
+def load_json(path: str | Path) -> dict[str, Any]:
     """Loads a JSON file into a dictionary."""
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+def json_serial_adapter(obj: Any) -> Any:
+    """
+    JSON serialization adapter for non-standard types (Path, sets, etc).
+    Usage: json.dump(..., default=json_serial_adapter)
+    """
+    if isinstance(obj, (Path)):
+        return str(obj)
+    if isinstance(obj, (set, tuple)):
+        return list(obj)
+    raise TypeError(f"Type {type(obj)} not serializable by custom adapter")
     
 def welcome_message():
     msg = f"""

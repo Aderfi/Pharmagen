@@ -1,10 +1,16 @@
+"""
+optuna_tuner.py
+
+Manages Hyperparameter Optimization (HPO) using Optuna.
+Implements a clean 'Orchestrator' pattern to separate the search logic 
+from the model training loop.
+"""
+
 import gc
 import json
 import logging
-import sys
-from dataclasses import asdict, dataclass
-from pathlib import Path
-from typing import Any, cast
+from dataclasses import dataclass
+from typing import Any
 
 import matplotlib.pyplot as plt
 import optuna
@@ -23,7 +29,7 @@ from src.data_handler import (
 from src.modeling import ModelConfig, PharmagenDeepFM
 from src.trainer import PGenTrainer, TrainerConfig
 
-logger = logging.getLogger("Pharmagen.Tuner")
+logger = logging.getLogger(__name__)
 optuna.logging.set_verbosity(optuna.logging.INFO)
 
 # =============================================================================
@@ -54,6 +60,11 @@ class OptunaOrchestrator:
     """
     Bridges the gap between Optuna's Search Space and the System's Config Objects.
     Manages the lifecycle of Data -> Config -> Training -> Cleanup.
+    
+    Attributes:
+        tuner_cfg (TunerConfig): Configuration for the study (storage, trials).
+        base_data_cfg (DataConfig): Configuration for data loading.
+        search_space (dict): Definition of hyperparameter ranges.
     """
     def __init__(
         self,
@@ -93,19 +104,28 @@ class OptunaOrchestrator:
         val_df = df.loc[val_mask]
 
         # 3. Fit Processor
-        processor = PGenProcessor(self.base_data_cfg)
+        processor = PGenProcessor(
+            config={"features": self.base_data_cfg.feature_cols, "targets": self.base_data_cfg.target_cols},
+            multi_label_cols=self.base_data_cfg.multi_label_cols
+        )
         processor.fit(train_df)
 
-
         # 4. Transform to Tensors
-        self.train_dataset = PGenDataset(processor.transform(train_df))
-        self.val_dataset = PGenDataset(processor.transform(val_df))
+        self.train_dataset = PGenDataset(
+            processor.transform(train_df),
+            self.base_data_cfg.feature_cols,
+            self.base_data_cfg.target_cols,
+            set(self.base_data_cfg.multi_label_cols)
+        )
+        self.val_dataset = PGenDataset(
+            processor.transform(val_df),
+            self.base_data_cfg.feature_cols,
+            self.base_data_cfg.target_cols,
+            set(self.base_data_cfg.multi_label_cols)
+        )
 
         # 5. Extract Dimensions for Model Config
-        all_dims = {
-            col: len(enc.classes_)
-            for col, enc in processor.encoders.items()
-        }
+        all_dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
         self.feature_dims = {k: v for k, v in all_dims.items() if k in self.base_data_cfg.feature_cols}
         self.target_dims = {k: v for k, v in all_dims.items() if k in self.base_data_cfg.target_cols}
 
@@ -144,9 +164,7 @@ class OptunaOrchestrator:
             return trial.suggest_categorical(name, spec)
 
     def _build_configs(self, trial: optuna.Trial) -> tuple[ModelConfig, TrainerConfig, int]:
-        """
-        Constructs strict ModelConfig and TrainerConfig objects from Trial suggestions.
-        """
+        """Constructs strict configuration objects from Trial suggestions."""
         # 1. Parse all params
         params = {}
         for key, spec in self.search_space.items():
@@ -195,7 +213,8 @@ class OptunaOrchestrator:
     # ==========================================================================
 
     def objective(self, trial: optuna.Trial) -> float:
-        # Garbage Collection before allocation to prevent OOM fragmentation
+        """Core Optimization Loop for a single trial."""
+        # Garbage Collection before allocation
         gc.collect()
         torch.cuda.empty_cache()
 
@@ -207,7 +226,7 @@ class OptunaOrchestrator:
             self.train_dataset, # type: ignore
             batch_size=batch_size,
             shuffle=True,
-            num_workers=0, # Use 0 for Optuna to avoid multiprocessing locks in SQLite
+            num_workers=0, # Optuna + SQLite + Multi-process = Deadlock. Use 0.
             pin_memory=True
         )
         val_loader = DataLoader(
@@ -251,11 +270,9 @@ class OptunaOrchestrator:
             return best_loss
 
         except optuna.TrialPruned:
-            # Re-raise to let Optuna handle the status
             raise
         except Exception as e:
             logger.error(f"Trial {trial.number} failed: {e}")
-            # Return infinity so Optuna learns to avoid this region, rather than crashing
             return float("inf")
 
     # ==========================================================================
@@ -263,13 +280,12 @@ class OptunaOrchestrator:
     # ==========================================================================
 
     def run(self):
-        # Ensure directories exist
+        """Starts the optimization study."""
         (DIRS["reports"] / "optuna_db").mkdir(parents=True, exist_ok=True)
         (DIRS["reports"] / "figures").mkdir(parents=True, exist_ok=True)
 
         logger.info(f"--- Starting Optuna Study: {self.tuner_cfg.study_name} ---")
 
-        # Pruner setup
         pruner = MedianPruner(
             n_startup_trials=self.tuner_cfg.n_startup_trials,
             n_warmup_steps=self.tuner_cfg.n_warmup_steps
@@ -313,6 +329,9 @@ class OptunaOrchestrator:
             from optuna.visualization.matplotlib import plot_optimization_history, plot_param_importances #noqa
 
             fig_path = DIRS["reports"] / "figures"
+            
+            # Use non-interactive backend
+            plt.switch_backend('Agg')
 
             plt.figure(figsize=(10, 6))
             plot_optimization_history(study)

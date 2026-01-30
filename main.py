@@ -1,50 +1,6 @@
 # Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy
 # Copyright (C) 2025 Adrim Hamed Outmani
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-#!/usr/bin/env python3
-# coding=utf-8
-"""
-Pharmagen - Punto de Entrada Principal (CLI & Orquestador).
-
-Este script actúa como la interfaz principal de ejecución para el software Pharmagen.
-Su responsabilidad es inicializar el entorno, configurar el sistema de logging global
-y enrutar la solicitud del usuario hacia el módulo correspondiente (Entrenamiento,
-Predicción o Interfaz Interactiva).
-
-Uso:
-    El script puede ejecutarse en dos modalidades:
-    1. Interactivo (Por defecto): Lanza un menú visual.
-    2. Headless (CLI): Ejecuta tareas específicas mediante argumentos.
-
-Ejemplos:
-    # 1. Iniciar menú interactivo
-    $ python main.py
-
-    # 2. Entrenar un modelo específico automáticamente
-    $ python main.py --mode train --model Phenotype_Effect_Outcome --input data/train.tsv
-
-    # 3. Realizar predicciones sobre un archivo nuevo
-    $ python main.py --mode predict --model Phenotype_Effect_Outcome --input data/pacientes.csv
-
-Author:
-    Adrim Hamed Outmani (@Aderfi)
-
-Copyright:
-    (C) 2025 Adrim Hamed Outmani. Licensed under GNU GPLv3.
-"""
+# Licensed under the GNU GPLv3. See LICENSE file in the project root.
 
 import argparse
 import logging
@@ -52,6 +8,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import torch
 
 # --- Imports del Proyecto ---
 from src.cfg.manager import DIRS
@@ -62,62 +19,210 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.append(str(PROJECT_ROOT))
 
 # ==============================================================================
+# ARGUMENT PARSER
+# ==============================================================================
+
+def _parse_arguments() -> argparse.Namespace:
+    """
+    Defines and parses command-line arguments.
+    Organized into logical groups for better help output.
+    """
+    parser = argparse.ArgumentParser(
+        description="Pharmagen CLI - Pharmacogenetic Deep Learning Pipeline",
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog="""
+    Examples:
+    Interactive Mode:
+        $ python main.py
+
+    Training (Standard):
+        $ python main.py --mode train --model Phenotype_Effect_Outcome --input data/train.tsv --epochs 100
+
+    Training (Optimization):
+        $ python main.py --mode train --model Features-Phenotype --input data/train.tsv --optuna --trials 50
+
+    Prediction:
+        $ python main.py --mode predict --model Phenotype_Effect_Outcome --input data/new_patients.csv --output results/
+            """
+    )
+
+    # --- Core Arguments ---
+    core_group = parser.add_argument_group("Core Execution")
+    core_group.add_argument(
+        "--mode", 
+        choices=["menu", "train", "predict"], 
+        default="menu", 
+        help="Execution mode (default: menu)"
+    )
+    core_group.add_argument("--model", 
+        type=str, 
+        help="Model name identifier (Required for train/predict modes)"
+    )
+    core_group.add_argument(
+        "--input", 
+        type=str, 
+        help="Path to input dataset (CSV/TSV)"
+    )
+    core_group.add_argument(
+        "--output", 
+        type=str, 
+        help="Path to output directory/file (For predictions)"
+    )
+    core_group.add_argument(
+        "--verbose", 
+        action="store_true", 
+        help="Enable debug logging level"
+    )
+
+    # --- Training Configuration ---
+    train_group = parser.add_argument_group("Training Configuration")
+    train_group.add_argument(
+        "--epochs", 
+        type=int, 
+        default=50, 
+        help="Number of training epochs (default: 50)"
+    )
+    train_group.add_argument(
+        "--batch-size", 
+        type=int, 
+        help="Override config batch size"
+    )
+    train_group.add_argument(
+        "--device", 
+        type=str, 
+        default="cuda" if torch.cuda.is_available() else "cpu",
+        help="Compute device (cuda/cpu)"
+    )
+
+    # --- Optuna Optimization ---
+    opt_group = parser.add_argument_group("Hyperparameter Optimization")
+    opt_group.add_argument(
+        "--optuna", 
+        action="store_true", 
+        help="Enable Optuna HPO mode"
+    )
+    opt_group.add_argument(
+        "--trials", 
+        type=int, 
+        default=20, 
+        help="Number of HPO trials to run (default: 20)"
+    )
+
+    return parser.parse_args()
+
+# ==============================================================================
 # MAIN ENTRY POINT
 # ==============================================================================
 
 def main():
-    # 1. Setup Environment
+    args = _parse_arguments()
+
+    # 1. Setup Logging
     setup_logging()
     logger = logging.getLogger("Pharmagen.Main")
-
-    # 2. Argument Parsing
-    parser = argparse.ArgumentParser(description="Pharmagen CLI Manager")
-    parser.add_argument("--mode", choices=["menu", "train", "predict"], default="menu", help="Execution mode")
-    parser.add_argument("--model", type=str, help="Model name (Required for headless modes)")
-    parser.add_argument("--input", type=str, help="Input file path (CSV/TSV)")
-    parser.add_argument("--epochs", type=int, default=50, help="Epochs for training")
-    parser.add_argument("--optuna", action="store_true", help="Enable Optuna optimization (Train mode only)")
-    parser.add_argument("--trials", type=int, default=20, help="Number of Optuna trials")
-
-    args = parser.parse_args()
+    
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logger.debug("Debug mode enabled.")
 
     try:
         # --- INTERACTIVE MODE ---
         if args.mode == "menu":
-            from src.interface.cli import main_menu_loop # noqa
+            from src.interface.cli import main_menu_loop
             main_menu_loop()
 
         # --- HEADLESS TRAIN ---
         elif args.mode == "train":
             if not args.model or not args.input:
-                logger.error("--model and --input are required for headless training.")
+                parser = argparse.ArgumentParser() # Dummy to print help
+                logger.error("Missing required args for training: --model and --input")
+                print("\nError: --model and --input are required for 'train' mode.\n")
                 sys.exit(1)
 
-            logger.info(f"Starting Headless Training: {args.model}")
+            logger.info(f"Starting Training Routine: {args.model}")
+            logger.info(f"Device: {args.device} | Epochs: {args.epochs}")
 
             if args.optuna:
-                from src.optuna_tuner import run_optuna_study # noqa
-                run_optuna_study(args.model, Path(args.input), n_trials=args.trials)
+                from src.optuna_tuner import TunerConfig, OptunaOrchestrator
+                from src.data_handler import DataConfig
+                from src.cfg.manager import get_model_config, MULTI_LABEL_COLS, DIRS
+                
+                logger.info("Initializing Optuna HPO...")
+                
+                # 1. Load Config
+                raw_cfg = get_model_config(args.model)
+                data_dict = raw_cfg["data"]
+                search_space = raw_cfg.get("optuna", {})
+                
+                if not search_space:
+                    logger.error(f"Model '{args.model}' has no [optuna] section in models.toml")
+                    sys.exit(1)
+
+                # 2. Setup DataConfig
+                data_cfg = DataConfig(
+                    dataset_path=Path(args.input),
+                    feature_cols=data_dict["features"],
+                    target_cols=data_dict["targets"],
+                    multi_label_cols=list(MULTI_LABEL_COLS),
+                    stratify_col=data_dict.get("stratify_col"),
+                    num_workers=4
+                )
+
+                # 3. Setup TunerConfig
+                tuner_cfg = TunerConfig(
+                    study_name=f"{args.model}_study",
+                    n_trials=args.trials,
+                    storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}"
+                )
+
+                # 4. Run Optimization
+                orchestrator = OptunaOrchestrator(
+                    tuner_cfg, 
+                    data_cfg, 
+                    search_space, 
+                    device=args.device
+                )
+                orchestrator.run()
+                
             else:
-                from src.pipeline import train_pipeline # noqa
-                train_pipeline(args.model, Path(args.input), epochs=args.epochs)
+                from src.pipeline import train_pipeline
+                train_pipeline(
+                    args.model, 
+                    Path(args.input), 
+                    epochs=args.epochs,
+                    batch_size=args.batch_size
+                )
 
         # --- HEADLESS PREDICT ---
         elif args.mode == "predict":
             if not args.model or not args.input:
-                logger.error("--model and --input are required for headless prediction.")
+                logger.error("Missing required args for prediction: --model and --input")
                 sys.exit(1)
 
-            logger.info(f"Starting Headless Prediction: {args.model}")
-            from src.predict import PGenPredictor # noqa
+            logger.info(f"Starting Inference: {args.model}")
+            from src.predict import PGenPredictor
 
-            predictor = PGenPredictor(args.model)
-            results = predictor.predict_file(Path(args.input))
-
-            # Save results
-            out_path = Path(args.input).parent / f"{Path(args.input).stem}_preds.csv"
-            pd.DataFrame(results).to_csv(out_path, index=False)
-            logger.info(f"Predictions saved to {out_path}")
+            predictor = PGenPredictor(args.model, device=args.device)
+            if args.infer == "single":
+                results = predictor.predict_single(args.input)
+            elif args.infer == "file":
+                results = predictor.predict_file(Path(args.input))
+            else:
+                logger.error("Invalid inference type specified.")
+                sys.exit(1)
+            if results:
+                in_path = Path(args.input)
+                if args.output:
+                    out_path = Path(args.output)
+                    if out_path.is_dir():
+                        out_path = out_path / f"{in_path.stem}_preds.tsv"
+                else:
+                    out_path = PROJECT_ROOT / "reports" / f"{in_path.stem}_preds.tsv"
+                
+                pd.DataFrame(results).to_csv(out_path, index=False, sep="\t", encoding="utf-8")
+                logger.info(f"Predictions saved to {out_path}")
+            else:
+                logger.warning("No predictions generated (check input file format).")
 
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")

@@ -72,8 +72,8 @@ model_*.txt
 
 # --- Optuna & Bases de Datos ---
 *.db
-reports/optuna_reports/
-reports/train_reports/
+#reports/optuna_reports/
+#reports/train_reports/
 
 # --- Configuración de Estado Local ---
 # Ignorar el flag que indica si el setup ya corrió en ESTA máquina

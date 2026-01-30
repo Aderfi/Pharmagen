@@ -5,36 +5,51 @@
 # src/config/config.toml
 [metadata]
 project_name = "Pharmagen"
-version = "0.7"
+version = "1.0-rc1"
 author = "Adrim Hamed Outmani"
 
 [project]
 multi_label_cols = ["phenotype_outcome"]
 seed = 711
 
+# ===============
+# GLOBAL DEFAULTS
+# ===============
+
 [defaults]
-[defaults.params]
-embedding_dim = 128
-n_layers = 2
-hidden_dim = 2048
-dropout_rate = 0.2
-weight_decay = 1e-3
-learning_rate = 1e-4
-batch_size = 128
-optimizer_type = "adamw"
-activation_function = "gelu"
-use_batch_norm = false
-use_layer_norm = false
-early_stopping_patience = 15
-scheduler_type = "plateau"
-#==== Paramétros de arquitectura extendida =========
-attention_dropout = 0.1
-num_attention_layers = 1
-fm_dropout = 0.1
-fm_hidden_layers = 0
-fm_hidden_dim = 256
 
+    [defaults.architecture]
+    # Deep Component (MLP)
+    embedding_dim = 128
+    n_layers = 2
+    hidden_dim = 2048
+    dropout_rate = 0.2
+    activation = "gelu"
+    use_batch_norm = false
+    use_layer_norm = false
+    
+    # Transformer Component
+    use_transformer = true
+    attn_dim_feedforward = 512
+    attn_dropout = 0.1
+    num_attn_layers = 1
+    attn_heads = 4
+    
+    # FM Component
+    fm_hidden_layers = 0
+    fm_hidden_dim = 256
+    fm_dropout = 0.1
 
+    [defaults.training]
+    weight_decay = 1e-3
+    learning_rate = 1e-4
+    batch_size = 128
+    optimizer_type = "adamw"
+    early_stopping_patience = 15
+    scheduler_type = "plateau"
+    epochs = 50
 
-
-
+    [defaults.loss]
+    # Defaults for loss configuration
+    label_smoothing = 0.0
+    use_uncertainty_loss = false

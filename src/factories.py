@@ -3,19 +3,15 @@ factories.py
 
 Centralizes the creation of Models, Datasets, and DataLoaders.
 Implements the Abstract Factory pattern to switch between strategies.
-
-Adheres to: SOLID (Open/Closed), Zen of Python (Explicit is better than implicit).
 """
 
 import logging
 import torch
-from pathlib import Path
-from typing import Dict, Any, Tuple, Optional
+from typing import Any
 
 from torch.utils.data import DataLoader
 
-from src.cfg.manager import DIRS
-from src.modeling import create_model as create_deepfm
+from src.modeling import PharmagenDeepFM, ModelConfig
 from src.data_handler import PGenDataset
 
 logger = logging.getLogger(__name__)
@@ -25,26 +21,40 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 def create_model_instance(
-    config: Dict[str, Any], 
-    dims: Dict[str, Any]
+    config: dict[str, Any], 
+    dims: dict[str, Any]
 ) -> torch.nn.Module:
     """
-    Creates a model instance based on the configuration.
+    Creates a model instance based on the configuration dictionary.
     
+    Extracts the 'architecture' section from the config, injects runtime 
+    dimensions (feature cardinality and target shapes), and instantiates 
+    the model.
+
     Args:
-        config: Model configuration dictionary.
-        dims: Dictionary containing dimension info (n_features, target_dims, etc.)
+        config (Dict): Full configuration dict (must contain 'architecture').
+        dims (Dict): Dimension info (keys: 'n_features', 'target_dims').
+
+    Returns:
+        torch.nn.Module: Instantiated PGenModel ready for training.
+        
+    Example:
+        >>> cfg = {'architecture': {'hidden_dim': 128}}
+        >>> dims = {'n_features': {'drug': 50}, 'target_dims': {'y': 1}}
+        >>> model = create_model_instance(cfg, dims)
     """
-    params = config["params"]
+    # 1. Extract Architecture Params
+    arch_params = config.get("architecture", {}).copy()
     
-    # Tabular DeepFM
-    # dims expected: {'n_features': {...}, 'target_dims': {...}}
-    return create_deepfm(
-        model_name=config.get("name", "DeepFM"), 
-        n_features=dims.get("n_features", {}),
-        target_dims=dims.get("target_dims", {}),
-        params=params
-    )
+    # 2. Inject dimensions (These are dynamic, calculated at runtime)
+    arch_params["n_features"] = dims.get("n_features", {})
+    arch_params["target_dims"] = dims.get("target_dims", {})
+    
+    # 3. Create Configuration Object
+    model_cfg = ModelConfig(**arch_params)
+    
+    # 4. Instantiate Model
+    return PharmagenDeepFM(model_cfg)
         
 
 # =============================================================================
@@ -52,18 +62,31 @@ def create_model_instance(
 # =============================================================================
 
 def create_data_loaders(
-    config: Dict[str, Any],
+    config: dict[str, Any],
     df_train,
     df_val,
     processor=None, 
-    drug_list_path: Optional[str] = None,
-    ref_genome_path: Optional[str] = None
-) -> Tuple[DataLoader, DataLoader]:
+    drug_list_path: str | None = None,
+    ref_genome_path: str | None = None
+) -> tuple[DataLoader, DataLoader]:
     """
-    Creates Train and Val DataLoaders.
+    Creates PyTorch DataLoaders for Training and Validation.
+
+    Args:
+        config (Dict): Config dict (must contain 'training' and 'data').
+        df_train (DataFrame): Training split.
+        df_val (DataFrame): Validation split.
+        processor (DataProcessor): Processor instance for transformation.
+
+    Returns:
+        Tuple[DataLoader, DataLoader]: (Train Loader, Val Loader).
+    
+    Raises:
+        ValueError: If processor is missing.
     """
-    params = config["params"]
-    batch_size = params["batch_size"]
+    # Extract Training Params
+    train_params = config.get("training", {})
+    batch_size = train_params.get("batch_size", 128)
     
     if not processor:
         raise ValueError("Processor required for Tabular data loaders.")
@@ -73,8 +96,9 @@ def create_data_loaders(
     val_data = processor.transform(df_val)
     
     # Create PGenDatasets
-    train_ds = PGenDataset(train_data, config["features"], config["targets"], processor.multi_label_cols)
-    val_ds = PGenDataset(val_data, config["features"], config["targets"], processor.multi_label_cols)
+    data_cfg = config.get("data", {})
+    train_ds = PGenDataset(train_data, data_cfg["features"], data_cfg["targets"], processor.multi_label_cols)
+    val_ds = PGenDataset(val_data, data_cfg["features"], data_cfg["targets"], processor.multi_label_cols)
     
     # Standard Loaders
     return (

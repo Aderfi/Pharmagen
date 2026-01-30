@@ -342,9 +342,18 @@ class VariantAnnotator(BioToolExecutor):
 # ==============================================================================
 
 def run_ngs_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
-    ConsoleIO.print_header(f"PGen - Pipeline-NGS {sample_name}")
+    # 0. Verificar Dependencias
+    ConsoleIO.print_step("Pre-vuelo: Verificando herramientas")
+    required_tools = ["fastqc", "fastp", "bwa", "samtools", "java", "freebayes", "vcftools", "vep"]
+    missing = [tool for tool in required_tools if not shutil.which(tool)]
+    
+    if missing:
+        ConsoleIO.print_error(f"Faltan herramientas requeridas: {', '.join(missing)}")
+        ConsoleIO.print_info("Por favor instálalas antes de continuar (conda install ...)")
+        sys.exit(1)
+    ConsoleIO.print_success("Todas las herramientas encontradas.")
 
-    # 0. Preparar Genoma
+    # 1. Preparar Genoma
     genome_mgr = GenomeManager(REF_GENOME_DIR, GENOME_CONFIG)
     ref_genome_path = genome_mgr.prepare_genome()
 

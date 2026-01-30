@@ -82,14 +82,14 @@ def _run_training_flow():
     if not default_data.exists():
         default_data = None
 
-    csv_path = ConsoleIO.ask_path("Training Data Path (CSV/TSV)", default=default_data)
+    csv_path = ConsoleIO.input_path("Training Data Path (CSV/TSV)", default=default_data)
 
     # 3. Select Mode
     print("\nTraining Mode:")
     print("  1. Standard Training (Single Run)")
     print("  2. Hyperparameter Optimization (Optuna)")
 
-    mode = ConsoleIO.ask_choice("Select (1-2)", ["1", "2"])
+    mode = ConsoleIO.input_choice("Select (1-2)", ["1", "2"])
 
     if mode == "1":
         _run_standard_training(model_name, csv_path)
@@ -117,11 +117,43 @@ def _run_optuna_training(model_name: str, csv_path: Path):
     ConsoleIO.print_step(f"Starting Optuna Optimization: '{model_name}' ({n_trials} trials)")
 
     try:
-        # Calls the Refactored Tuner
-        from src.optuna_tuner import run_optuna_study # Local import to avoid circular dependency risks
-        study = run_optuna_study(model_name=model_name, csv_path=csv_path, n_trials=n_trials)
+        # Lazy Import to avoid loading heavy deps until needed
+        from src.optuna_tuner import TunerConfig, OptunaOrchestrator
+        from src.data_handler import DataConfig
+        from src.cfg.manager import get_model_config, MULTI_LABEL_COLS, DIRS
+        
+        # 1. Fetch Configuration
+        raw_cfg = get_model_config(model_name)
+        data_dict = raw_cfg["data"]
+        search_space = raw_cfg.get("optuna", {})
+        
+        if not search_space:
+            ConsoleIO.print_error(f"No [optuna] configuration found for {model_name}.")
+            return
+
+        # 2. Build Config Objects
+        data_cfg = DataConfig(
+            dataset_path=csv_path,
+            feature_cols=data_dict["features"],
+            target_cols=data_dict["targets"],
+            multi_label_cols=list(MULTI_LABEL_COLS),
+            stratify_col=data_dict.get("stratify_col"),
+            num_workers=4
+        )
+
+        tuner_cfg = TunerConfig(
+            study_name=f"{model_name}_interactive",
+            n_trials=n_trials,
+            storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}"
+        )
+
+        # 3. Launch Orchestrator
+        orchestrator = OptunaOrchestrator(tuner_cfg, data_cfg, search_space)
+        study = orchestrator.run()
+        
         ConsoleIO.print_success(f"Optimization finished. Best Value: {study.best_value:.4f}")
         ConsoleIO.print_info(f"Best Params: {study.best_params}")
+
     except Exception as e:
         logger.error(f"Optimization failed: {e}", exc_info=True)
         ConsoleIO.print_error(f"Optimization failed: {e}")
@@ -192,7 +224,7 @@ def _interactive_predict_loop(predictor):
         ConsoleIO.print_error(f"Prediction logic failed: {e}")
 
 def _batch_predict_flow(predictor):
-    path = ConsoleIO.ask_path("Input CSV/TSV Path")
+    path = ConsoleIO.input_path("Input CSV/TSV Path")
 
     with Spinner(f"Processing {path.name}..."):
         results = predictor.predict_file(path)
