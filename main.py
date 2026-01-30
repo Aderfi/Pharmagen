@@ -49,84 +49,81 @@ Copyright:
 import argparse
 import logging
 import sys
-from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 
 # --- Imports del Proyecto ---
 from src.cfg.manager import DIRS
-from src.interface.cli import main_menu_loop
-from src.optuna_tuner import run_optuna_study
-from src.pipeline import train_pipeline
-from src.predict import PGenPredictor
 from src.utils.logger_setup import setup_logging
-from src.utils.sys_utils import check_environment_and_setup
 
 # --- Setup de Rutas ---
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.append(str(PROJECT_ROOT))
 
-# Constantes
-DATE_STAMP = datetime.now().strftime('%Y-%m-%d')
-LOGS_DIR = DIRS["logs"]
 # ==============================================================================
 # MAIN ENTRY POINT
 # ==============================================================================
 
 def main():
-    check_environment_and_setup()
-    
+    # 1. Setup Environment
     setup_logging()
-    logger = logging.getLogger("Pharmagen")
-    
+    logger = logging.getLogger("Pharmagen.Main")
+
+    # 2. Argument Parsing
     parser = argparse.ArgumentParser(description="Pharmagen CLI Manager")
-    parser.add_argument("--mode", choices=["train", "predict", "menu"], default="menu", help="Modo de ejecución")
-    parser.add_argument("--model", type=str, help="Nombre del modelo (para automatización)")
-    parser.add_argument("--input", type=str, help="Ruta al archivo de entrada (CSV/TSV)")
-    parser.add_argument("--optuna", action="store_true", help="Activar optimización con Optuna (solo modo train)")
-    
+    parser.add_argument("--mode", choices=["menu", "train", "predict"], default="menu", help="Execution mode")
+    parser.add_argument("--model", type=str, help="Model name (Required for headless modes)")
+    parser.add_argument("--input", type=str, help="Input file path (CSV/TSV)")
+    parser.add_argument("--epochs", type=int, default=50, help="Epochs for training")
+    parser.add_argument("--optuna", action="store_true", help="Enable Optuna optimization (Train mode only)")
+    parser.add_argument("--trials", type=int, default=20, help="Number of Optuna trials")
+
     args = parser.parse_args()
 
     try:
-        # Modo Interactivo (Por defecto)
+        # --- INTERACTIVE MODE ---
         if args.mode == "menu":
+            from src.interface.cli import main_menu_loop # noqa
             main_menu_loop()
-            
-        # Modo Entrenamiento (Headless/Automatizado)
+
+        # --- HEADLESS TRAIN ---
         elif args.mode == "train":
             if not args.model or not args.input:
-                print("❌ Error: --model y --input son obligatorios en modo 'train'")
+                logger.error("--model and --input are required for headless training.")
                 sys.exit(1)
-            
-            logger.info(f"Iniciando entrenamiento headless: {args.model}")
+
+            logger.info(f"Starting Headless Training: {args.model}")
+
             if args.optuna:
-                run_optuna_study(args.model, args.input)
+                from src.optuna_tuner import run_optuna_study # noqa
+                run_optuna_study(args.model, Path(args.input), n_trials=args.trials)
             else:
-                train_pipeline(model_name=args.model, csv_path=Path(args.input))
-                
-        # Modo Predicción (Headless/Automatizado)
+                from src.pipeline import train_pipeline # noqa
+                train_pipeline(args.model, Path(args.input), epochs=args.epochs)
+
+        # --- HEADLESS PREDICT ---
         elif args.mode == "predict":
             if not args.model or not args.input:
-                print("❌ Error: --model y --input son obligatorios en modo 'predict'")
+                logger.error("--model and --input are required for headless prediction.")
                 sys.exit(1)
-            
-            logger.info("Iniciando predicción headless: {}".format(args.model))
+
+            logger.info(f"Starting Headless Prediction: {args.model}")
+            from src.predict import PGenPredictor # noqa
+
             predictor = PGenPredictor(args.model)
-            results = predictor.predict_file(args.input)
-            
-            # Guardado automático
-            out_name = f"{Path(args.input).stem}_preds_{DATE_STAMP}.csv"
-            pd.DataFrame(results).to_csv(out_name, index=False)
-            print(f"Predicciones guardadas en: {out_name}")
-            
+            results = predictor.predict_file(Path(args.input))
+
+            # Save results
+            out_path = Path(args.input).parent / f"{Path(args.input).stem}_preds.csv"
+            pd.DataFrame(results).to_csv(out_path, index=False)
+            logger.info(f"Predictions saved to {out_path}")
+
     except KeyboardInterrupt:
-        print("\nOperación cancelada por el usuario.")
+        print("\nOperation cancelled by user.")
         sys.exit(0)
     except Exception as e:
-        logger.critical(f"Error no controlado en Main: {e}", exc_info=True)
-        print(f"\n❌ Error crítico del sistema: {e}")
-        print(f"Consulte el log para más detalles: {LOGS_DIR}")
+        logger.critical(f"Critical System Error: {e}", exc_info=True)
         sys.exit(1)
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ def serialize_multilabel(val: Any) -> str:
     """
     if pd.isna(val) or val == "":
         return ""
-    
+
     if isinstance(val, str):
         parts = {s.strip() for s in RE_SPLITTERS.split(val) if s.strip()}
     elif isinstance(val, (list, tuple, np.ndarray)):

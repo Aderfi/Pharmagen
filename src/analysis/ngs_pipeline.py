@@ -341,7 +341,7 @@ class VariantAnnotator(BioToolExecutor):
 # ORQUESTADOR (PIPELINE RUNNER)
 # ==============================================================================
 
-def run_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
+def run_ngs_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
     ConsoleIO.print_header(f"PGen - Pipeline-NGS {sample_name}")
 
     # 0. Preparar Genoma
@@ -403,8 +403,8 @@ def main():
 
     if not args.threads:
         args.threads = max(1, os.cpu_count() - 1) if isinstance(os.cpu_count(), int) else 1 # type: ignore (Linter issue)
-    
-    run_pipeline(args.read1, args.read2, args.name, args.threads)
+
+    run_ngs_pipeline(args.read1, args.read2, args.name, args.threads)
 
 if __name__ == "__main__":
     main()

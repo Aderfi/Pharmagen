@@ -1,196 +1,239 @@
-# Pharmagen - Data Handler
-# Unified Data Loading, Preprocessing, and Dataset definition.
-# Adheres to Zen of Python: Sparse is better than dense.
-
 import logging
 import re
-import json
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import Dataset
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
-from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset
 
-from src.utils.data_utils import serialize_multilabel
-
-# Optional fuzzy matching
-try:
-    from rapidfuzz import process
-except ImportError:
-    process = None
-
-logger = logging.getLogger(__name__)
-
-UNKNOWN_TOKEN = "__UNKNOWN__"
+# Configuración de Logging
+logger = logging.getLogger("Pharmagen.Data")
 
 # =============================================================================
-# 1. DATA LOADING & CLEANING
+# 1. CONFIGURATION LAYER
 # =============================================================================
 
-def load_dataset(
-    csv_path: Union[str, Path],
-    cols_to_load: List[str],
-    multi_label_cols: Optional[List[str]] = None,
-    stratify_col: Optional[str] = None
-) -> pd.DataFrame:
+@dataclass(frozen=True)
+class DataConfig:
     """
-    Robustly loads, cleans, and standardizes the dataset.
+    Centralized configuration for Data Loading and Processing.
     """
-    path = Path(csv_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Dataset not found: {path}")
+    # File Paths
+    dataset_path: Path
+    separator: str = "\t"
 
-    # Normalize column requests
-    cols_lower = [c.lower() for c in cols_to_load]
-    multi_label_lower = [c.lower() for c in (multi_label_cols or [])]
+    # Schema Definition
+    feature_cols: list[str] = field(default_factory=list)
+    target_cols: list[str] = field(default_factory=list)
+    multi_label_cols: list[str] = field(default_factory=list)
 
-    logger.info(f"Loading dataset from {path.name}...")
-    
-    # Load
-    df = pd.read_csv(path, sep="\t")
+    # Cleaning & Stratification
+    stratify_col: str | None = None
+    min_category_count: int = 1  # Threshold to handle rare categories
+    unknown_token: str = "__UNKNOWN__"
+
+    # Technical
+    num_workers: int = 4
+    pin_memory: bool = True
+
+    @property
+    def all_cols(self) -> list[str]:
+        return self.feature_cols + self.target_cols
+
+# =============================================================================
+# 2. ROBUST DATA LOADING
+# =============================================================================
+
+def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
+    """
+    Loads dataset efficiently, validating schema and performing initial cleanup.
+    """
+    if not config.dataset_path.exists():
+        raise FileNotFoundError(f"Dataset not found at: {config.dataset_path}")
+
+    logger.info(f"Loading dataset from {config.dataset_path.name}...")
+
+    # 1. Load only necessary columns to save memory
+    try:
+        df = pd.read_csv(
+            config.dataset_path,
+            sep=config.separator,
+            usecols=lambda c: c.lower().strip() in [x.lower() for x in config.all_cols] # type: ignore
+        )
+    except ValueError as e:
+        logger.error(f"Column mismatch error. Check config matches CSV headers. Details: {e}")
+        raise
+
+    # Normalize headers
     df.columns = df.columns.str.lower().str.strip()
 
-    # Normalize Columns
-    df.columns = df.columns.str.lower().str.strip()
+    # 2. Vectorized String Cleaning (Avoid loops where possible)
+    # Compiling regex once for performance
+    delimiters_re = re.compile(r"[,;]+")
 
-    # Clean Content
+    multi_label_set = set(c.lower() for c in config.multi_label_cols)
+
     for col in df.columns:
-        if col in multi_label_lower:
-            df[col] = df[col].apply(serialize_multilabel).str.lower()
-        else:
-            # Single label / Feature cleaning
-            df[col] = (
-                df[col].fillna(UNKNOWN_TOKEN)
-                .astype(str)
-                .str.replace(", ", ",")
-                .str.replace(r"[,;]+", "|", regex=True)
-                .str.strip()
-                .str.lower()
-            )
+        # Fast conversion to string and lowercasing
+        series = df[col].fillna(config.unknown_token).astype(str).str.strip().str.lower()
 
-    # Stratification Helper
-    if stratify_col:
-        s_cols = [c.strip() for c in stratify_col.lower().split(",")]
-        valid_s_cols = [c for c in s_cols if c in df.columns]
-        
-        if valid_s_cols:
-            df["_stratify"] = df[valid_s_cols].astype(str).agg("|".join, axis=1)
-            # Filter singletons to allow splitting
-            counts = df["_stratify"].value_counts()
-            df = df[df["_stratify"].isin(counts[counts > 1].index)].reset_index(drop=True)
+        if col in multi_label_set:
+            # Normalize delimiters to pipe '|' for multi-label consistency
+            df[col] = series.apply(lambda x: delimiters_re.sub("|", x))
         else:
-            df["_stratify"] = "default"
-            
+            df[col] = series
+
+    # 3. Stratification Logic (Safe)
+    if config.stratify_col:
+        s_cols = [c.strip().lower() for c in config.stratify_col.split(",")]
+        valid_s_cols = [c for c in s_cols if c in df.columns]
+
+        if valid_s_cols:
+            # Create a stratification key
+            strat_key = df[valid_s_cols].astype(str).agg("|".join, axis=1)
+
+            # Filter singletons efficiently
+            counts = strat_key.value_counts()
+            valid_keys = counts[counts > 1].index
+
+            initial_len = len(df)
+            df = df[strat_key.isin(valid_keys)].reset_index(drop=True)
+            logger.info(f"Stratification dropped {initial_len - len(df)} singleton rows.")
+        else:
+            logger.warning("Stratification columns requested but not found in dataframe.")
+
     return df
 
 # =============================================================================
-# 2. PREPROCESSING (TRANSFORMER)
+# 3. PREPROCESSING ENGINE
 # =============================================================================
 
 class PGenProcessor(BaseEstimator, TransformerMixin):
     """
-    Handles encoding of categorical and multi-label features.
-    Wraps LabelEncoder and MultiLabelBinarizer.
+    Stateful processor that converts DataFrame -> Dictionary of Tensors/Arrays.
+    Decouples Pandas overhead from the training loop.
     """
-    def __init__(self, feature_cols: List[str], target_cols: List[str], multi_label_cols: List[str]):
-        self.feature_cols = [c.lower() for c in feature_cols]
-        self.target_cols = [c.lower() for c in target_cols]
-        self.multi_label_cols = set(c.lower() for c in multi_label_cols)
-        self.encoders: Dict[str, Any] = {}
-        self.cols_to_process = set(self.feature_cols + self.target_cols)
+    def __init__(self, config: DataConfig):
+        self.cfg = config
+        self.encoders: dict[str, Any] = {}
+        # Pre-compute sets for O(1) lookups
+        self.multi_label_set = set(c.lower() for c in config.multi_label_cols)
+        self.scalar_cols = [c.lower() for c in config.feature_cols if c.lower() not in self.multi_label_set]
+        self.target_cols = [c.lower() for c in config.target_cols]
 
     def fit(self, df: pd.DataFrame, y=None):
-        logger.info("Fitting encoders...")
-        for col in self.cols_to_process:
-            if col not in df.columns: continue
+        logger.info("Fitting feature encoders...")
 
-            series = df[col]
-            if col in self.multi_label_cols:
-                # Split strings to lists for MLB
-                parsed = series.apply(lambda x: x.split("|") if x else [])
-                enc = MultiLabelBinarizer()
-                enc.fit(parsed)
-                self.encoders[col] = enc
-            else:
-                # Single label
-                uniques = sorted(list(set(series.unique()) | {UNKNOWN_TOKEN}))
-                enc = LabelEncoder()
-                enc.fit(uniques)
-                self.encoders[col] = enc
+        # Fit Scalars (LabelEncoding)
+        for col in self.scalar_cols + self.target_cols:
+            if col not in df.columns:
+                continue
+
+            # Handle unknown tokens logic
+            uniques = set(df[col].unique())
+            uniques.add(self.cfg.unknown_token)
+
+            enc = LabelEncoder()
+            enc.fit(sorted(list(uniques)))
+            self.encoders[col] = enc
+
+        # Fit Multi-Labels (Binarizer)
+        for col in self.multi_label_set:
+            if col not in df.columns:
+                continue
+
+            # Efficient splitting
+            parsed = df[col].str.split("|").map(lambda x: x if isinstance(x, list) else [])
+            enc = MultiLabelBinarizer()
+            enc.fit(parsed)
+            self.encoders[col] = enc
+
         return self
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        if not self.encoders:
-            raise RuntimeError("Processor not fitted.")
-        
-        df_out = df.copy()
-        for col, enc in self.encoders.items():
-            if col not in df_out.columns: continue
+    def transform(self, df: pd.DataFrame) -> dict[str, torch.Tensor]:
+        """
+        Transforms DataFrame directly into a Dictionary of Tensors ready for PGenDataset.
+        This avoids storing arrays inside Pandas Series.
+        """
+        output_payload = {}
 
-            if isinstance(enc, MultiLabelBinarizer):
-                # String -> List -> Multi-Hot Matrix
-                parsed = df_out[col].apply(lambda x: x.split("|") if isinstance(x, str) and x else [])
-                # Store as object (numpy array inside cell) to keep DataFrame structure
-                encoded = list(enc.transform(parsed))
-                df_out[col] = pd.Series(encoded, index=df_out.index)
-            else:
-                # String -> Int
-                # Handle unknown values safely
-                vals = df_out[col].astype(str).to_numpy()
-                mask_unknown = ~np.isin(vals, enc.classes_)
-                if mask_unknown.any():
-                    vals[mask_unknown] = UNKNOWN_TOKEN
-                df_out[col] = enc.transform(vals)
-        
-        return df_out
+        # 1. Transform Scalars
+        for col in self.scalar_cols:
+            if col not in df.columns:
+                continue
+            enc = self.encoders[col]
+
+            # Safe transform handling unseen labels
+            vals = df[col].to_numpy()
+            # Fast check using numpy set operations is complex, relying on map/apply is safer for strings
+            # Optimization: Use searchsorted if we converted to int codes earlier, but strings strictly need mapping.
+            # We assume fit included UNKNOWN. We map unseen to UNKNOWN index.
+
+            # Robust Transform
+            unknown_idx = np.where(enc.classes_ == self.cfg.unknown_token)[0][0] # noqa
+
+            # Check validity
+            valid_mask = np.isin(vals, enc.classes_)
+            vals[~valid_mask] = self.cfg.unknown_token
+
+            encoded_data = enc.transform(vals)
+            output_payload[col] = torch.tensor(encoded_data, dtype=torch.long)
+
+        # 2. Transform Targets
+        for col in self.target_cols:
+            if col not in df.columns:
+                continue
+            # Targets usually don't have "Unknowns" in training, but safe to handle same way
+            enc = self.encoders[col]
+            encoded_data = enc.transform(df[col].to_numpy())
+            output_payload[col] = torch.tensor(encoded_data, dtype=torch.long) # Or Float if regression
+
+        # 3. Transform Multi-Labels
+        for col in self.multi_label_set:
+            if col not in df.columns:
+                continue
+            enc = self.encoders[col]
+            parsed = df[col].str.split("|").map(lambda x: x if isinstance(x, list) else [])
+
+            # transform returns a dense numpy array (N, Num_Classes)
+            mat = enc.transform(parsed).astype(np.float32)
+            output_payload[col] = torch.from_numpy(mat)
+
+        output_payload = cast(dict[str, torch.Tensor], output_payload)
+        return output_payload
 
 # =============================================================================
-# 3. PYTORCH DATASET
+# 4. MEMORY-OPTIMIZED DATASET
 # =============================================================================
 
 class PGenDataset(Dataset):
     """
-    Optimized Dataset using contiguous memory arrays for speed.
-    Separates scalar features (LongTensor) from dense/multi-hot features (FloatTensor).
+    Zero-copy Dataset.
+    It expects pre-tensed data. It does NOT do any processing in __getitem__.
     """
-    def __init__(
-        self, 
-        df: pd.DataFrame, 
-        feature_cols: List[str], 
-        target_cols: List[str],
-        multi_label_cols: Set[str]
-    ):
-        self.scalar_data = {}
-        self.dense_data = {}
-        self.length = len(df)
-        
-        cols = [c.lower() for c in (feature_cols + target_cols) if c in df.columns]
-        multi_label_cols = {c.lower() for c in multi_label_cols}
-
-        for col in cols:
-            series = df[col]
-            if col in multi_label_cols:
-                # List of arrays -> 2D Matrix -> Float32
-                # Assumes series contains numpy arrays from PGenProcessor
-                matrix = np.stack(series.tolist()).astype(np.float32)
-                self.dense_data[col] = np.ascontiguousarray(matrix)
-            else:
-                # Int array -> Int64 (Long)
-                self.scalar_data[col] = series.to_numpy(dtype=np.int64)
+    def __init__(self, data_payload: dict[str, torch.Tensor]):
+        """
+        Args:
+            data_payload: Dictionary containing full-batch tensors.
+                          { 'gene_id': Tensor(N,), 'fingerprints': Tensor(N, 1024), ... }
+        """
+        self.data = data_payload
+        # Verify alignment
+        lengths = [len(t) for t in self.data.values()]
+        if not all(l == lengths[0] for l in lengths): # noqa
+            raise ValueError(f"Tensor length mismatch in dataset: {lengths}")
+        self.length = lengths[0]
+        self.keys = list(self.data.keys())
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, idx):
-        # Zero-copy conversion to tensors
-        batch = {}
-        for col, data in self.dense_data.items():
-            batch[col] = torch.from_numpy(data[idx])
-        for col, data in self.scalar_data.items():
-            batch[col] = torch.tensor(data[idx], dtype=torch.long)
-        return batch
+        # Extremely fast lookup.
+        # Slicing a tensor is a view, usually very cheap.
+        return {key: self.data[key][idx] for key in self.keys}
