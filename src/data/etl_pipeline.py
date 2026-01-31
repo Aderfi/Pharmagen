@@ -197,7 +197,6 @@ def run_etl():
     # 8. Export
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     # Save as TSV. Note: Lists will be saved as string representations "['A', 'B']".
-    # The DataHandler must be configured to parse these strings back to lists.
     df_grouped.to_csv(OUTPUT_FILE, sep="\t", index=False)
     
     logger.info("==========================================")
