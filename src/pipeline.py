@@ -12,18 +12,18 @@ from pathlib import Path
 
 import joblib
 import torch
+from model.engine.trainer import PGenTrainer, TrainerConfig
+from model.metrics.losses import MultiTaskUncertaintyLoss
 from sklearn.model_selection import train_test_split
 
 from src.cfg.manager import DIRS, MULTI_LABEL_COLS, get_model_config
-from src.data_handler import (
+from src.data.data_handler import (
     DataConfig,
     PGenProcessor,
     load_and_clean_dataset,
 )
 from src.factories import create_data_loaders, create_model_instance
-from src.losses import MultiTaskUncertaintyLoss
-from src.trainer import PGenTrainer, TrainerConfig
-from src.utils.io_utils import json_serial_adapter
+from src.interface.io import json_serial_adapter
 
 logger = logging.getLogger(__name__)
 

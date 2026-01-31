@@ -4,9 +4,8 @@ test_losses.py
 Tests for Custom Loss Functions.
 """
 
-import pytest
 import torch
-from src.losses import AsymmetricLoss, FocalLoss, PolyLoss
+from src.model.metrics.losses import AsymmetricLoss, FocalLoss, PolyLoss
 
 
 def test_focal_loss():

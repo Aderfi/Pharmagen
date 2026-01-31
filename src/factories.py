@@ -9,10 +9,10 @@ import logging
 from typing import Any
 
 import torch
+from model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 from torch.utils.data import DataLoader
 
-from src.data_handler import PGenDataset
-from src.modeling import ModelConfig, PharmagenDeepFM
+from src.data.data_handler import PGenDataset
 
 logger = logging.getLogger(__name__)
 

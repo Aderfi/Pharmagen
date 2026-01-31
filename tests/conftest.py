@@ -5,11 +5,9 @@ Pytest fixtures for Pharmagen.
 Provides shared resources like mock dataframes and configurations.
 """
 
-import numpy as np
 import pandas as pd
 import pytest
-import torch
-from src.modeling import ModelConfig
+from src.model.architecture.deep_fm import ModelConfig
 
 
 @pytest.fixture

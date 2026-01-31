@@ -6,6 +6,8 @@ Designed to handle heterogeneous biological data (scalars, multi-labels).
 """
 
 import logging
+import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -17,9 +19,9 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
 from torch.utils.data import Dataset
 
-from src.utils.data_utils import clean_dataset_content
-
 logger = logging.getLogger(__name__)
+RE_SPLITTERS = re.compile(r"[,;|]+")
+
 
 # =============================================================================
 # 0. CONFIGURATION
@@ -177,6 +179,9 @@ class PGenDataset(Dataset):
 
         return x, y
 
+# =============================================================================
+# 3. DATA LOADING & CLEANING UTILITIES
+# =============================================================================
 def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
     """
     Loads dataset efficiently, validating schema and performing initial cleanup.
@@ -187,7 +192,7 @@ def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
     logger.info(f"Loading dataset from {config.dataset_path.name}...")
 
     try:
-        df = pd.read_csv(config.dataset_path, sep='\t' if config.dataset_path.suffix=='.tsv' else ',')
+        df = pd.read_csv(config.dataset_path, sep='\t'  if config.dataset_path.suffix=='.tsv' else ',')
     except ValueError as e:
         logger.error(f"Read error: {e}")
         raise
@@ -196,3 +201,60 @@ def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
     df = clean_dataset_content(df, config.multi_label_cols)
 
     return df
+
+def clean_dataset_content(
+    df: pd.DataFrame,
+    multi_label_cols: Iterable[str] | None = None,
+    unknown_token: str = "__UNKNOWN__"
+) -> pd.DataFrame:
+    """
+    Performs vectorized cleaning of the DataFrame content:
+    1. Normalizes headers (lowercase, strip).
+    2. Fills NaNs with unknown_token.
+    3. Converts all cells to lowercase string.
+    4. Normalizes multi-label delimiters to pipes '|'.
+
+    Args:
+        df: Input DataFrame.
+        multi_label_cols: List of column names that contain multi-label data.
+        unknown_token: Token to use for missing values.
+
+    Returns:
+        Cleaned DataFrame.
+    """
+    # 1. Normalize headers
+    df.columns = df.columns.str.lower().str.strip()
+
+    # 2. Vectorized String Cleaning
+    # Prepare set for O(1) lookup
+    multi_label_set = set(c.lower() for c in (multi_label_cols or []))
+
+    for col in df.columns:
+        # Fast conversion to string and lowercasing
+        series = df[col].fillna(unknown_token).astype(str).str.strip().str.lower()
+
+        if col in multi_label_set:
+            # Normalize delimiters to pipe '|' for multi-label consistency
+            df[col] = series.apply(lambda x: RE_SPLITTERS.sub("|", x))
+        else:
+            df[col] = series
+
+    return df
+
+def serialize_multilabel(val: Any) -> str:
+    """
+    Standardizes multi-label strings to pipe-separated format.
+    e.g. "A, B; C" -> "A|B|C"
+    """
+    if pd.isna(val) or val == "":
+        return ""
+
+    if isinstance(val, str):
+        parts = {s.strip() for s in RE_SPLITTERS.split(val) if s.strip()}
+    elif isinstance(val, (list, tuple, np.ndarray)):
+        parts = {str(x).strip() for x in val if x}
+    else:
+        return str(val)
+
+    return "|".join(sorted(parts))
+

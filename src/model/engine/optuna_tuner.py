@@ -19,15 +19,15 @@ from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
 from torch.utils.data import DataLoader
 
-from src.cfg.manager import DIRS, MULTI_LABEL_COLS
-from src.data_handler import (
+from src.cfg.manager import DIRS
+from src.data.data_handler import (
     DataConfig,
     PGenDataset,
     PGenProcessor,
     load_and_clean_dataset,
 )
-from src.modeling import ModelConfig, PharmagenDeepFM
-from src.trainer import PGenTrainer, TrainerConfig
+from src.model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
+from src.model.engine.trainer import PGenTrainer, TrainerConfig
 
 logger = logging.getLogger(__name__)
 optuna.logging.set_verbosity(optuna.logging.INFO)

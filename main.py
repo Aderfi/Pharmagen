@@ -6,7 +6,6 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Literal
 
 import pandas as pd
 import torch
@@ -122,7 +121,7 @@ def _prediction_pipeline(args: argparse.Namespace, logger: logging.Logger):
         sys.exit(1)
 
     logger.info(f"Starting Inference: {args.model}")
-    from src.predict import PGenPredictor
+    from src.model.engine.predict import PGenPredictor
 
     predictor = PGenPredictor(args.model, device=args.device)
     if args.infer == "single":
@@ -148,8 +147,8 @@ def _prediction_pipeline(args: argparse.Namespace, logger: logging.Logger):
 
 def _optuna_pipeline(args: argparse.Namespace, logger: logging.Logger):
     from src.cfg.manager import MULTI_LABEL_COLS, get_model_config
-    from src.data_handler import DataConfig
-    from src.optuna_tuner import OptunaOrchestrator, TunerConfig
+    from src.data.data_handler import DataConfig
+    from src.model.engine.optuna_tuner import OptunaOrchestrator, TunerConfig
 
     logger.info("Initializing Optuna HyperParam Optimization...")
 

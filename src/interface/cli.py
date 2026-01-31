@@ -4,15 +4,14 @@ import logging
 import sys
 from pathlib import Path
 
-# Project Imports
 from src.cfg.manager import DIRS, METADATA, get_available_models
-from src.interface.ui import ConsoleIO, Spinner
-from src.pipeline import train_pipeline
-from src.utils.io_utils import (
+from src.interface.io import (
     print_conditions_details,
     print_gnu_notice,
     print_warranty_details,
 )
+from src.interface.ui import ConsoleIO, Spinner
+from src.pipeline import train_pipeline
 
 logger = logging.getLogger(__name__)
 DATE_STAMP = datetime.datetime.now().strftime("%Y_%m_%d")
@@ -109,10 +108,11 @@ def _run_standard_training(model_name: str, csv_path: Path):
         ConsoleIO.print_error(f"Training failed. Check logs. Error: {e}")
 
 def _run_optuna_training(model_name: str, csv_path: Path):
-    from src.cfg.manager import MULTI_LABEL_COLS, get_model_config
-    from src.data_handler import DataConfig
-    from src.optuna_tuner import OptunaOrchestrator, TunerConfig
 
+    from model.engine.optuna_tuner import OptunaOrchestrator, TunerConfig
+
+    from src.cfg.manager import MULTI_LABEL_COLS, get_model_config
+    from src.data.data_handler import DataConfig
 
     trials_str = input("Number of Trials [default -> 20]: ").strip()
     n_trials = int(trials_str) if trials_str.isdigit() else 20
@@ -163,7 +163,7 @@ def _run_prediction_flow():
     model_name = _select_model()
 
     try:
-        from src.predict import PGenPredictor
+        from model.engine.predict import PGenPredictor
 
         with Spinner("Loading model into memory..."):
             predictor = PGenPredictor(model_name)

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-from src.data_handler import DataConfig, PGenDataset, PGenProcessor
+from src.data.data_handler import DataConfig, PGenDataset, PGenProcessor
 
 
 @pytest.fixture

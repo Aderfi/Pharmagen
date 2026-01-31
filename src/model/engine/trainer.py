@@ -12,6 +12,13 @@ from typing import Any, cast
 
 import optuna
 import torch
+from model.metrics.losses import (
+    AdaptiveFocalLoss,
+    AsymmetricLoss,
+    FocalLoss,
+    MultiTaskUncertaintyLoss,
+    PolyLoss,
+)
 from torch import nn
 from torch.amp.autocast_mode import autocast
 from torch.amp.grad_scaler import GradScaler
@@ -19,14 +26,7 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from src.cfg.manager import DIRS
-from src.losses import (
-    AdaptiveFocalLoss,
-    AsymmetricLoss,
-    FocalLoss,
-    MultiTaskUncertaintyLoss,
-    PolyLoss,
-)
-from src.utils.reporting import generate_training_report
+from src.model.metrics.reporting import generate_training_report
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +175,7 @@ class PGenTrainer:
         multi_label_cols (set): Set of multi-label targets.
         uncertainty_module (nn.Module, optional): Kendall&Gal Loss Wrapper.
     """
-    def __init__(
+    def __init__( # noqa
         self,
         model: nn.Module,
         optimizer: torch.optim.Optimizer,

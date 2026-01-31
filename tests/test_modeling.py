@@ -4,9 +4,8 @@ test_modeling.py
 Tests for PharmagenDeepFM Architecture.
 """
 
-import pytest
 import torch
-from src.modeling import PharmagenDeepFM
+from src.model.architecture.deep_fm import PharmagenDeepFM
 
 
 def test_model_initialization(model_config):

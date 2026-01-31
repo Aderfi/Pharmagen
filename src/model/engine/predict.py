@@ -15,12 +15,12 @@ import joblib
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+from sklearn.preprocessing import LabelEncoder
 
 from src.cfg.manager import DIRS, MULTI_LABEL_COLS, get_model_config
-from src.data_handler import DataConfig
+from src.data.data_handler import DataConfig
 from src.interface.ui import ProgressBar
-from src.modeling import ModelConfig, PharmagenDeepFM
+from src.model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 
 logger = logging.getLogger(__name__)
 MIN_SIZE_PBAR = 2000  # Minimum samples to show progress bar
@@ -347,7 +347,7 @@ class PGenPredictor:
 
         for col, logits in outputs.items():
             enc = self.encoders[col]
-            logits = logits.cpu()
+            logits.cpu()
 
             if col in MULTI_LABEL_COLS:
                 # Multi-label

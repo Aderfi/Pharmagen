@@ -15,7 +15,7 @@ else:
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CONFIG_DIR = Path(__file__).parent
+CONFIG_DIR = PROJECT_ROOT / "config"
 
 def _load_toml(filename: str) -> dict[str, Any]:
     """Safe TOML loader helper."""
