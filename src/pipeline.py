@@ -12,9 +12,10 @@ from pathlib import Path
 
 import joblib
 import torch
-from model.engine.trainer import PGenTrainer, TrainerConfig
-from model.metrics.losses import MultiTaskUncertaintyLoss
-from sklearn.model_selection import train_test_split
+import numpy as np
+from src.model.engine.trainer import PGenTrainer, TrainerConfig
+from src.model.metrics.losses import MultiTaskUncertaintyLoss
+from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
 
 from src.cfg.manager import DIRS, MULTI_LABEL_COLS, get_model_config
 from src.data.data_handler import (
@@ -184,3 +185,130 @@ def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batc
         json.dump(config_snapshot, f, indent=4, default=json_serial_adapter)
 
     logger.info(f"Pipeline Finished. Model saved at {DIRS['models']}")
+
+
+def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5, epochs: int = 50, batch_size: int | None = None):
+    """
+    Executes k-Fold Cross Validation Pipeline.
+
+    Args:
+        model_name (str): Model ID.
+        csv_path (Path): Path to data.
+        k_folds (int): Number of folds (default: 5).
+        epochs (int): Epochs per fold.
+        batch_size (int): Batch size override.
+    """
+    csv_path = Path(csv_path)
+    logger.info(f"--- Starting {k_folds}-Fold Cross-Validation: {model_name} ---")
+
+    # 1. Config & Data Loading
+    data_cfg, trainer_cfg, full_config = _parse_configs(model_name, csv_path, epochs, batch_size)
+    df = load_and_clean_dataset(data_cfg)
+
+    # 2. Prepare CV Strategy
+    stratify_col = df["_stratify"] if "_stratify" in df.columns else None
+    
+    if stratify_col is not None:
+        # Check minimal class count for stratification
+        if df[stratify_col].value_counts().min() < k_folds:
+            logger.warning("Some strata have fewer samples than k_folds. Falling back to KFold.")
+            skf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
+            splits = list(skf.split(df))
+        else:
+            skf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=42)
+            splits = list(skf.split(df, df[stratify_col]))
+    else:
+        kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
+        splits = list(kf.split(df))
+
+    fold_metrics = []
+    best_overall_loss = float("inf")
+    
+    # Pre-fit Processor on FULL dataset for consistent vocab
+    processor = PGenProcessor(full_config["data"], list(MULTI_LABEL_COLS))
+    processor.fit(df)
+    
+    # Save global encoders
+    encoder_path = DIRS["encoders"] / f"encoders_{model_name}.pkl"
+    joblib.dump(processor.encoders, encoder_path)
+
+    # 3. Iterate Folds
+    for fold_idx, (train_idx, val_idx) in enumerate(splits):
+        logger.info(f"=== Fold {fold_idx+1}/{k_folds} ===")
+        
+        train_df = df.iloc[train_idx]
+        val_df = df.iloc[val_idx]
+        
+        # Create Loaders
+        train_loader, val_loader = create_data_loaders(
+            config=full_config,
+            df_train=train_df,
+            df_val=val_df,
+            processor=processor
+        )
+        
+        # Init Model (Fresh per fold)
+        all_dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
+        feat_dims = {k: v for k, v in all_dims.items() if k in data_cfg.feature_cols}
+        target_dims = {k: v for k, v in all_dims.items() if k in data_cfg.target_cols}
+        dims_payload = {"n_features": feat_dims, "target_dims": target_dims}
+        
+        model = create_model_instance(full_config, dims_payload)
+        
+        # Loss & Opt
+        unc_module = None
+        loss_params = full_config.get("loss", {})
+        if loss_params.get("use_uncertainty_loss", False):
+            unc_module = MultiTaskUncertaintyLoss(list(target_dims.keys()))
+            
+        params_to_optimize = list(model.parameters()) + (list(unc_module.parameters()) if unc_module else [])
+        optimizer = torch.optim.AdamW(
+            params_to_optimize,
+            lr=trainer_cfg.learning_rate,
+            weight_decay=trainer_cfg.weight_decay
+        )
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3)
+        
+        # Trainer
+        trainer = PGenTrainer(
+            model=model,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            config=trainer_cfg,
+            target_cols=data_cfg.target_cols,
+            multi_label_cols=set(data_cfg.multi_label_cols),
+            model_name=f"{model_name}_fold{fold_idx}",
+            uncertainty_module=unc_module
+        )
+        
+        final_loss = trainer.fit(train_loader, val_loader)
+        fold_metrics.append(final_loss)
+        
+        # Save best model logic
+        if final_loss < best_overall_loss:
+            best_overall_loss = final_loss
+            logger.info(f"New best fold found (Loss: {final_loss:.4f}). Saving as main model.")
+            fold_best_path = DIRS["models"] / "model_best.pt"
+            prod_path = DIRS["models"] / f"pmodel_{model_name}.pt"
+            if fold_best_path.exists():
+                state = torch.load(fold_best_path)
+                torch.save(state, prod_path)
+
+    # 4. Report Results
+    mean_loss = np.mean(fold_metrics)
+    std_loss = np.std(fold_metrics)
+    
+    logger.info("--- Cross-Validation Results ---")
+    logger.info(f"Loss per fold: {[f'{x:.4f}' for x in fold_metrics]}")
+    logger.info(f"Mean Loss: {mean_loss:.4f} ± {std_loss:.4f}")
+    
+    report = {
+        "k_folds": k_folds,
+        "fold_metrics": fold_metrics,
+        "mean_loss": mean_loss,
+        "std_loss": std_loss,
+        "best_loss": best_overall_loss
+    }
+    with open(DIRS["reports"] / f"{model_name}_cv_results.json", "w") as f:
+        json.dump(report, f, indent=4)
+

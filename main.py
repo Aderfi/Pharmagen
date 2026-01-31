@@ -49,7 +49,7 @@ def _parse_arguments() -> argparse.Namespace:
     # --- Core Arguments ---
     core_group = parser.add_argument_group("Core Execution")
     core_group.add_argument(
-        "--mode",
+        "-m", "--mode",
         type=str,
         choices=["menu", "train", "predict"],
         default="menu",
@@ -82,6 +82,12 @@ def _parse_arguments() -> argparse.Namespace:
         type=int,
         default=50,
         help="Number of training epochs (default: 50)"
+    )
+    train_group.add_argument(
+        "--cv",
+        type=int,
+        default=0,
+        help="Enable k-Fold Cross-Validation (e.g., --cv 5). Default: 0 (Disabled)"
     )
     train_group.add_argument(
         "--batch-size",
@@ -188,13 +194,23 @@ def _optuna_pipeline(args: argparse.Namespace, logger: logging.Logger):
     orchestrator.run()
 
 def _training_pipeline(args: argparse.Namespace, logger: logging.Logger):
-    from src.pipeline import train_pipeline
-    train_pipeline(
-        args.model,
-        Path(args.input),
-        epochs=args.epochs,
-        batch_size=args.batch_size
-    )
+    if args.cv > 1:
+        from src.pipeline import train_kfold_pipeline
+        train_kfold_pipeline(
+            args.model,
+            Path(args.input),
+            k_folds=args.cv,
+            epochs=args.epochs,
+            batch_size=args.batch_size
+        )
+    else:
+        from src.pipeline import train_pipeline
+        train_pipeline(
+            args.model,
+            Path(args.input),
+            epochs=args.epochs,
+            batch_size=args.batch_size
+        )
 
 def main():
     args = _parse_arguments()

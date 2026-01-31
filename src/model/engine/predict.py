@@ -18,7 +18,6 @@ import torch
 from sklearn.preprocessing import LabelEncoder
 
 from src.cfg.manager import DIRS, MULTI_LABEL_COLS, get_model_config
-from src.data.data_handler import DataConfig
 from src.interface.ui import ProgressBar
 from src.model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 
