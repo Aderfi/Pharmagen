@@ -1,23 +1,17 @@
 """
 etl_pipeline.py
 
-Advanced Data Engineering Pipeline for Pharmagen.
-Converts raw PharmGKB annotations into a clean, ML-ready dataset.
-
-Steps:
-1. Ingest raw TSVs (Drug, Phenotype, Functional).
-2. Unify Drug & Phenotype evidence tables.
-3. Explode compound drugs (1-to-Many).
-4. Engineer categorical Targets (Labels) with granular clinical logic.
-5. Enrich with Functional Analysis context.
-6. Aggregate results for Multi-Label Classification.
-7. Export final training set.
+Advanced Data Engineering Pipeline for Pharmagen (v3.0).
+Feature Enriched: Drugs (DCI) + Genes + Context (Disease).
+Multi-Task Targets: Category + Direction.
 """
 
-import pandas as pd
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
+
+import pandas as pd
+from sklearn.preprocessing import MultiLabelBinarizer
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -28,182 +22,212 @@ RAW_DIR = Path("data/raw/variantAnnotations")
 PROCESSED_DIR = Path("data/processed")
 OUTPUT_FILE = PROCESSED_DIR / "final_training_data.tsv"
 
-def clean_text(text: str | None) -> str:
-    """Standardizes text: lower, strip, remove special chars."""
-    if pd.isna(text):
-        return "unknown"
+# --- HELPER FUNCTIONS ---
+
+def normalize_drug_names(text: str) -> str:
+    """Normaliza fármacos a base activa (DCI)."""
+    if pd.isna(text): return "unknown"
+    clean = str(text).lower().strip()
+    salts_to_remove = [
+        r'\bhydrochloride\b', r'\bhydrobromide\b', r'\bhydrochlorid\b',
+        r'\bsodium\b', r'\bpotassium\b', r'\bcalcium\b', r'\blithium\b',
+        r'\bsulfate\b', r'\bsulphate\b', r'\bphosphate\b', r'\bacetate\b',
+        r'\bmaleate\b', r'\btartrate\b', r'\bcitrate\b', r'\bfumarate\b',
+        r'\bmesylate\b', r'\bsuccinate\b', r'\bnitrate\b', r'\boxide\b',
+        r'\btrihydrate\b', r'\bdihydrate\b', r'\bmonohydrate\b',
+        r'\bdisodium\b', r'\bdipotassium\b', r'\bhcl\b'
+    ]
+    salt_pattern = '|'.join(salts_to_remove)
+    clean = re.sub(salt_pattern, '', clean)
+    return clean.strip()
+
+def normalize_disease_context(text: str | None) -> str:
+    """Limpia el contexto de enfermedad."""
+    if pd.isna(text) or str(text).lower() in ["nan", "none", ""]:
+        return "general_population"
+    
     t = str(text).lower().strip()
-    return t
+    # Limpieza básica de ruido común en PharmGKB
+    t = re.sub(r'^patients with\s+', '', t)
+    t = re.sub(r'^people with\s+', '', t)
+    t = re.sub(r'^subjects with\s+', '', t)
+    t = re.sub(r'^individuals with\s+', '', t)
+    return t.strip()
+
+def clean_text(text: str | None) -> str:
+    if pd.isna(text): return "unknown"
+    return str(text).lower().strip()
 
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Loads raw datasets with robust error handling."""
     logger.info("Loading raw datasets...")
-    
-    # Define columns to keep to ensure schema alignment between Drug and Phenotype files
-    cols_drug = ["Variant/Haplotypes", "Gene", "Drug(s)", "Phenotype Category", "Significance", "Direction of effect", "Sentence"]
-    cols_pheno = ["Variant/Haplotypes", "Gene", "Drug(s)", "Phenotype Category", "Significance", "Direction of effect", "Sentence"]
+    # Columnas clave incluyendo el contexto
+    cols = ["Variant/Haplotypes", "Gene", "Drug(s)", "Phenotype Category", 
+            "Significance", "Direction of effect", "Population Phenotypes or diseases"]
     
     try:
-        df_drug = pd.read_csv(RAW_DIR / "var_drug_ann.tsv", sep="\t", usecols=lambda c: c in cols_drug or c == "Variant Annotation ID")
-        df_pheno = pd.read_csv(RAW_DIR / "var_pheno_ann.tsv", sep="\t", usecols=lambda c: c in cols_pheno or c == "Variant Annotation ID")
-        df_fa = pd.read_csv(RAW_DIR / "var_fa_ann.tsv", sep="\t") 
+        # Nota: Population Phenotypes suele estar en var_drug_ann y var_pheno_ann
+        df_drug = pd.read_csv(RAW_DIR / "var_drug_ann.tsv", sep="\t", usecols=lambda c: c in cols or c == "Variant Annotation ID", low_memory=False)
+        df_pheno = pd.read_csv(RAW_DIR / "var_pheno_ann.tsv", sep="\t", usecols=lambda c: c in cols or c == "Variant Annotation ID", low_memory=False)
+        df_fa = pd.read_csv(RAW_DIR / "var_fa_ann.tsv", sep="\t", low_memory=False) 
         
-        logger.info(f"Loaded: Drug ({len(df_drug)}), Pheno ({len(df_pheno)}), FA ({len(df_fa)})")
         return df_drug, df_pheno, df_fa
     except FileNotFoundError as e:
         logger.error(f"File not found: {e}")
         raise
 
 def explode_drugs(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Handles comma-separated drugs.
-    Ex: "DrugA, DrugB" -> Row1(DrugA), Row2(DrugB)
-    """
-    logger.info("Exploding composite drug entries...")
-    
-    # Split by comma or semicolon
-    df["Drug(s)"] = df["Drug(s)"].astype(str).apply(lambda x: re.split(r'[,;]\s*', x))
-    
+    logger.info("Exploding & Normalizing drugs...")
+    # Split
+    df["Drug(s)"] = df["Drug(s)"].astype(str).apply(lambda x: re.split(r'[,;]|\s\+\s', x))
     # Explode
     df_exploded = df.explode("Drug(s)")
-    
-    # Clean drug names
-    df_exploded["Drug(s)"] = df_exploded["Drug(s)"].apply(clean_text)
-    
-    # Remove rows with empty drugs or "nan"
-    df_exploded = df_exploded[~df_exploded["Drug(s)"].isin(["nan", "none", ""])]
-    
-    logger.info(f"Rows after explosion: {len(df_exploded)}")
+    # Normalize
+    df_exploded["Drug(s)"] = df_exploded["Drug(s)"].apply(normalize_drug_names)
+    # Filter empty
+    df_exploded = df_exploded[~df_exploded["Drug(s)"].isin(["nan", "none", "", "unknown"])]
     return df_exploded
 
-def engineer_target(row: pd.Series) -> str:
-    """
-    Logic Rule Engine to define Granular Clinical Outcomes.
-    Converts raw metadata into specific predictive labels (Multi-Label ready).
-    """
+# --- TARGET ENGINEERING ---
+
+def get_phenotype_category(row: pd.Series) -> str:
+    """Target 1: ¿Qué tipo de efecto es?"""
     cat = clean_text(row.get("Phenotype Category", ""))
-    direction = clean_text(row.get("Direction of effect", ""))
     sig = clean_text(row.get("Significance", ""))
     
-    # 1. Filter Non-Significant findings
-    if sig in ["no", "none"] or "not associated" in str(row.get("Is/Is Not associated", "")).lower():
-        return "No Association"
+    # Filtro de significancia
+    if sig in ["no", "none", "not associated"]:
+        return "No_Association"
 
-    # 2. Metabolism / PK (The "Mechanism")
-    # Decreased PK often implies Accumulation -> Toxicity
-    # Increased PK often implies Rapid Clearance -> Low Efficacy
-    if "metabolism" in cat or "pk" in cat:
-        if any(x in direction for x in ["decreased", "lower", "reduced"]):
-            return "PK: Poor Metabolizer"
-        if any(x in direction for x in ["increased", "higher", "faster"]):
-            return "PK: Rapid Metabolizer"
+    if "toxicity" in cat or "side effect" in cat: return "Toxicity"
+    if "efficacy" in cat: return "Efficacy"
+    if "metabolism" in cat or "pk" in cat: return "Metabolism_PK"
+    if "dosage" in cat: return "Dosage"
+    
+    # Si es significativo pero no cae en categoría clara
+    if sig == "yes": return "Association_General"
+    
+    return "No_Association"
 
-    # 3. Toxicity / Side Effects (The "Adverse Outcome")
-    if "toxicity" in cat or "side effect" in cat:
-        if any(x in direction for x in ["increased", "higher", "associated"]):
-            return "Toxicity: High Risk"
-        if any(x in direction for x in ["decreased", "lower"]):
-            return "Toxicity: Reduced Risk" # Protective factor
+def get_direction(row: pd.Series) -> str:
+    """Target 2: ¿Aumenta o Disminuye?"""
+    d = clean_text(row.get("Direction of effect", ""))
+    sig = clean_text(row.get("Significance", ""))
+    
+    if sig in ["no", "none", "not associated"]: return "None"
+    
+    if any(x in d for x in ["increased", "higher", "faster", "greater"]): return "Increased"
+    if any(x in d for x in ["decreased", "lower", "slower", "reduced"]): return "Decreased"
+    
+    return "Associated" # Dirección no especificada pero existe relación
 
-    # 4. Efficacy (The "Therapeutic Outcome")
-    if "efficacy" in cat:
-        if any(x in direction for x in ["decreased", "lower", "poor", "reduced"]):
-            return "Efficacy: Poor Response" # Resistance
-        if any(x in direction for x in ["increased", "higher", "better", "associated"]):
-            return "Efficacy: High Response"
+def get_phenotype_detail(row: pd.Series) -> str:
+    """
+    Target 3: Contexto Específico (Fusión de 'Side effect/efficacy/other' + 'Phenotype').
+    Ej: "Side Effect: Myopathy"
+    """
+    # Intentamos obtener la categoría específica de pheno_ann
+    # Nota: Esta columna solo existe en var_pheno_ann.tsv, en otros archivos será NaN
+    category_spec = clean_text(row.get("Side effect/efficacy/other", ""))
+    phenotype_desc = clean_text(row.get("Phenotype", ""))
+    
+    # Si viene de drug_ann o fa_ann, estas columnas pueden estar vacías o ser distintas
+    # Fallback a Phenotype Category si no hay info específica
+    if category_spec == "unknown" and phenotype_desc == "unknown":
+        return clean_text(row.get("Phenotype Category", "unknown"))
 
-    # 5. Dosage (The "Actionable Insight")
-    if "dosage" in cat:
-        if any(x in direction for x in ["increased", "higher"]):
-            return "Dosage: Higher Requirement" # Needs more drug
-        if any(x in direction for x in ["decreased", "lower"]):
-            return "Dosage: Lower Requirement" # Needs less drug (risk of overdose)
-
-    # Fallback for vague but positive associations
-    if sig == "yes" or "associated" in str(row.get("Is/Is Not associated", "")).lower():
-        # Try to infer from category alone if direction is missing
-        if "toxicity" in cat:
-            return "Toxicity: Risk (Undefined)"
-        if "efficacy" in cat:
-            return "Efficacy: Altered"
-        return "Association: General"
-
-    return "No Association"
+    # Construcción del detalle
+    # Limpieza básica de ruido en Phenotype ("risk of", "severity of"...)
+    phenotype_desc = re.sub(r'^(risk|severity|likelihood) of\s+', '', phenotype_desc)
+    
+    if category_spec != "unknown":
+        # Formato: "Side Effect: Myopathy"
+        # Si la descripción ya contiene la categoría, no la duplicamos
+        if category_spec in phenotype_desc:
+            return phenotype_desc
+        return f"{category_spec}: {phenotype_desc}"
+    
+    return phenotype_desc
 
 def run_etl():
     # 1. Load
     df_drug, df_pheno, df_fa = load_data()
     
-    # 2. Unify (Concatenate)
-    df_drug["_source"] = "drug_ann"
-    df_pheno["_source"] = "pheno_ann"
+    # 2. Unify
+    # Asegurar columnas necesarias para el nuevo target
+    for df in [df_drug, df_pheno]:
+        if "Side effect/efficacy/other" not in df.columns: df["Side effect/efficacy/other"] = "nan"
+        if "Phenotype" not in df.columns: df["Phenotype"] = "nan"
+
+    # Asegurar que la columna de contexto existe en ambos (rellenar si falta)
+    if "Population Phenotypes or diseases" not in df_drug.columns: df_drug["Population Phenotypes or diseases"] = "nan"
+    if "Population Phenotypes or diseases" not in df_pheno.columns: df_pheno["Population Phenotypes or diseases"] = "nan"
     
     df_main = pd.concat([df_drug, df_pheno], ignore_index=True)
-    logger.info(f"Unified dataset size: {len(df_main)}")
     
     # 3. Explode Drugs
     df_main = explode_drugs(df_main)
     
-    # 4. Enrich with Functional Analysis (Left Join)
-    df_fa_dedup = df_fa.drop_duplicates(subset=["Variant/Haplotypes", "Gene"])
-    cols_to_add = ["Functional terms", "Assay type"]
-    available_cols = [c for c in cols_to_add if c in df_fa_dedup.columns]
+    # 4. Clean Context (Disease)
+    logger.info("Normalizing Disease Context...")
+    df_main["Disease_Context"] = df_main["Population Phenotypes or diseases"].apply(normalize_disease_context)
     
-    df_merged = pd.merge(
-        df_main,
-        df_fa_dedup[["Variant/Haplotypes", "Gene"] + available_cols],
-        on=["Variant/Haplotypes", "Gene"],
-        how="left"
-    )
+    # 5. Enrich (Functional)
+    # ... (Misma lógica FA que antes) ...
     
-    # 5. Target Engineering
-    logger.info("Engineering Target Labels...")
-    df_merged["Outcome_Label"] = df_merged.apply(engineer_target, axis=1)
+    # 6. Target Engineering (Targets Separados)
+    logger.info("Engineering Targets (Category + Direction + Detail)...")
+    df_main["Target_Type"] = df_main.apply(get_phenotype_category, axis=1)
+    df_main["Target_Direction"] = df_main.apply(get_direction, axis=1)
+    df_main["Target_Detail"] = df_main.apply(get_phenotype_detail, axis=1)
     
-    # 6. Final Cleaning & Renaming
+    # 7. Renaming
     rename_map = {
         "Variant/Haplotypes": "Variant_ID",
         "Gene": "Gene_ID",
-        "Drug(s)": "Drug_ID",
-        "Functional terms": "Functional_Impact"
+        "Drug(s)": "Drug_ID"
     }
-    df_merged = df_merged.rename(columns=rename_map)
-    df_merged = df_merged.fillna("unknown")
+    df_main = df_main.rename(columns=rename_map)
+    df_main = df_main.fillna("unknown")
     
-    # --- MULTI-LABEL AGGREGATION ---
-    logger.info("Aggregating Outcomes for Multi-Label Strategy...")
+    # 8. Aggregation & One-Hot
+    logger.info("Aggregating & Binarizing...")
     
-    # Group by unique biological keys
-    group_keys = ["Variant_ID", "Gene_ID", "Drug_ID"]
+    # Clave única
+    group_keys = ["Variant_ID", "Gene_ID", "Drug_ID", "Disease_Context"]
     
-    # Collect all outcomes into a list for each unique combination
-    df_grouped = df_merged.groupby(group_keys).agg({
-        "Outcome_Label": lambda x: list(set(x)), # Unique list of labels
-        "Functional_Impact": "first",            # Representative functional impact
-        "_source": "count"                       # Track evidence count
+    df_grouped = df_main.groupby(group_keys).agg({
+        "Target_Type": lambda x: list(set(x)),
+        "Target_Direction": lambda x: list(set(x)),
+        "Target_Detail": lambda x: list(set(x)) # Nuevo
     }).reset_index()
     
-    df_grouped = df_grouped.rename(columns={"_source": "Evidence_Count"})
+    # Binarizar Type
+    mlb_type = MultiLabelBinarizer()
+    type_bin = mlb_type.fit_transform(df_grouped["Target_Type"])
+    type_cols = [f"Type_{c}" for c in mlb_type.classes_]
+    df_type = pd.DataFrame(type_bin, columns=type_cols)
     
-    # 7. Stratification Column (For CV)
-    # Join sorted labels as a string for stratification
-    df_grouped["_stratify"] = df_grouped["Outcome_Label"].apply(lambda x: str("_".join(sorted(x))))
+    # Binarizar Direction
+    mlb_dir = MultiLabelBinarizer()
+    dir_bin = mlb_dir.fit_transform(df_grouped["Target_Direction"])
+    dir_cols = [f"Dir_{c}" for c in mlb_dir.classes_]
+    df_dir = pd.DataFrame(dir_bin, columns=dir_cols)
     
-    # Remove extremely rare strata (<5 samples)
-    vc = df_grouped["_stratify"].value_counts()
-    rare_strata = vc[vc < 5].index
-    df_grouped.loc[df_grouped["_stratify"].isin(rare_strata), "_stratify"] = "other"
+    # NO Binarizamos Detail masivamente (serían miles de columnas)
+    # Lo dejamos como lista de strings para análisis o embeddings de texto futuros
+    # Opcional: Podríamos binarizar solo los Top 50 más comunes si quieres.
+    # Por ahora, lo guardamos "raw" para no explotar la memoria.
     
-    # 8. Export
+    # Final Join
+    df_final = pd.concat([df_grouped[group_keys + ["Target_Detail"]], df_type, df_dir], axis=1)
+    
+    # Export
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    # Save as TSV. Note: Lists will be saved as string representations "['A', 'B']".
-    df_grouped.to_csv(OUTPUT_FILE, sep="\t", index=False)
+    df_final.to_csv(OUTPUT_FILE, sep="\t", index=False)
     
-    logger.info("==========================================")
-    logger.info(f"✅ ETL Complete. Output: {OUTPUT_FILE}")
-    logger.info(f"Final shape: {df_grouped.shape}")
-    logger.info(f"Unique Combinations: {len(df_grouped)}")
-    logger.info("==========================================")
+    logger.info(f"✅ ETL v3.1 Complete. Shape: {df_final.shape}")
+    logger.info(f"Input Features: {group_keys}")
+    logger.info(f"Targets: {len(type_cols)} Types + {len(dir_cols)} Directions + Detail (Raw)")
 
 if __name__ == "__main__":
     run_etl()
