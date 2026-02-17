@@ -83,6 +83,7 @@
 
 # Datos y configuración generada
 *.json                  linguist-generated
+*.html                  linguist-generated
 *.lock                  linguist-generated
 uv.lock                 linguist-generated
 
@@ -93,3 +94,4 @@ docs/**                 linguist-documentation
 setup.sh                linguist-other
 setup.ps1               linguist-other
 run_app.sh              linguist-other
+
