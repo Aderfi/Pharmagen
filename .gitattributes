@@ -84,6 +84,8 @@
 # Datos y configuración generada
 *.json                  linguist-generated
 *.html                  linguist-generated
+*.xsl                   linguist-generated
+*.xml                   linguist-generated
 *.lock                  linguist-generated
 uv.lock                 linguist-generated
 
