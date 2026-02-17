@@ -5,6 +5,7 @@ Tests for PharmagenDeepFM Architecture.
 """
 
 import torch
+
 from src.model.architecture.deep_fm import PharmagenDeepFM
 
 

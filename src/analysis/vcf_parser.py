@@ -12,6 +12,7 @@ class VCFParser:
     Bridge component that transforms raw VCF files into structured DataFrames
     ready for the Pharmagen DeepFM inference engine.
     """
+
     def __init__(self, vcf_path: Path):
         self.vcf_path = vcf_path
         if not self.vcf_path.exists():
@@ -36,7 +37,7 @@ class VCFParser:
                 samples = list(vcf.header.samples)
                 if not samples:
                     raise ValueError("No samples found in VCF header.")
-                sample_id = samples[0] # Default to first sample
+                sample_id = samples[0]  # Default to first sample
 
             # Iterate variants
             for record in vcf:
@@ -63,10 +64,10 @@ class VCFParser:
                     "Variant_Normalized": variant_normalized,
                     "Variant/Haplotypes": var_id,
                     "Gene_Symbol": gene_symbol,
-                    "Allele": gt['alelos_slash'],
-                    "Zygosity": gt['tipo'],
+                    "Allele": gt["alelos_slash"],
+                    "Zygosity": gt["tipo"],
                     "Chrom": record.chrom,
-                    "Pos": record.pos
+                    "Pos": record.pos,
                 }
                 data_rows.append(row)
 
@@ -77,7 +78,7 @@ class VCFParser:
         Extracts genotype info safely using Pysam.
         """
         call = record.samples[sample_id]
-        gt_tuple = call['GT']
+        gt_tuple = call["GT"]
 
         if None in gt_tuple:
             return None
@@ -89,11 +90,11 @@ class VCFParser:
                 bases.append(record.ref)
             else:
                 # idx-1 because record.alts is a tuple of alts only
-                bases.append(record.alts[idx-1])
+                bases.append(record.alts[idx - 1])
 
         # Strings
-        alelos_slash = "/".join(bases)      # "A/G"
-        alelos_clean = "".join(bases)       # "AG" (Useful for embeddings)
+        alelos_slash = "/".join(bases)  # "A/G"
+        alelos_clean = "".join(bases)  # "AG" (Useful for embeddings)
 
         # Type logic
         if len(set(gt_tuple)) == 1:
@@ -101,11 +102,7 @@ class VCFParser:
         else:
             tipo = "Heterozygous"
 
-        return {
-            "alelos_slash": alelos_slash,
-            "alelos_clean": alelos_clean,
-            "tipo": tipo
-        }
+        return {"alelos_slash": alelos_slash, "alelos_clean": alelos_clean, "tipo": tipo}
 
     def _extract_gene_symbol(self, record) -> str:
         """
@@ -113,19 +110,21 @@ class VCFParser:
         Falls back to 'Unknown'.
         """
         # Common VEP key is 'CSQ'
-        if 'CSQ' in record.info:
+        if "CSQ" in record.info:
             # CSQ format is defined in header, usually: Allele|Consequence|IMPACT|SYMBOL|...
             # Assuming SYMBOL is often the 3rd or 4th field.
-            csq_entries = record.info['CSQ']
+            csq_entries = record.info["CSQ"]
             if csq_entries:
                 # Take first transcript
-                first_csq = csq_entries[0].split('|') # noqa
+                first_csq = csq_entries[0].split("|")  # noqa
                 pass
 
         return "Unknown"
 
+
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1:
         vcf_in = Path(sys.argv[1])
         parser = VCFParser(vcf_in)
@@ -135,4 +134,3 @@ if __name__ == "__main__":
 
         # Save for inspection
         df.to_csv(vcf_in.with_suffix(".tsv"), sep="\t", index=False)
-

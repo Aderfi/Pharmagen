@@ -6,17 +6,17 @@ Implements a clean 'Orchestrator' pattern to separate the search logic
 from the model training loop.
 """
 
+from dataclasses import dataclass
 import gc
 import json
 import logging
-from dataclasses import dataclass
 from typing import Any
 
 import matplotlib.pyplot as plt
 import optuna
-import torch
 from optuna.pruners import MedianPruner
 from optuna.samplers import TPESampler
+import torch
 from torch.utils.data import DataLoader
 
 from src.cfg.manager import DIRS
@@ -26,6 +26,7 @@ from src.data.data_handler import (
     PGenProcessor,
     load_and_clean_dataset,
 )
+from src.interface.ui import ConsoleIO
 from src.model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 from src.model.engine.trainer import PGenTrainer, TrainerConfig
 
@@ -36,11 +37,13 @@ optuna.logging.set_verbosity(optuna.logging.INFO)
 # 1. OPTUNA CONFIGURATION
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class TunerConfig:
     """
     Configuration specific to the Optimization Orchestration.
     """
+
     study_name: str
     n_trials: int = 50
     storage_url: str = "sqlite:///optuna_study.db"
@@ -52,9 +55,11 @@ class TunerConfig:
     n_startup_trials: int = 10
     n_warmup_steps: int = 5
 
+
 # =============================================================================
 # 2. THE OPTIMIZATION ORCHESTRATOR
 # =============================================================================
+
 
 class OptunaOrchestrator:
     """
@@ -66,12 +71,13 @@ class OptunaOrchestrator:
         base_data_cfg (DataConfig): Configuration for data loading.
         search_space (dict): Definition of hyperparameter ranges.
     """
+
     def __init__(
         self,
         tuner_cfg: TunerConfig,
         data_cfg: DataConfig,
         search_space: dict[str, list[Any]],
-        device: str = "cuda"
+        device: str = "cuda",
     ):
         self.tuner_cfg = tuner_cfg
         self.base_data_cfg = data_cfg
@@ -105,8 +111,11 @@ class OptunaOrchestrator:
 
         # 3. Fit Processor
         processor = PGenProcessor(
-            config={"features": self.base_data_cfg.feature_cols, "targets": self.base_data_cfg.target_cols},
-            multi_label_cols=self.base_data_cfg.multi_label_cols
+            config={
+                "features": self.base_data_cfg.feature_cols,
+                "targets": self.base_data_cfg.target_cols,
+            },
+            multi_label_cols=self.base_data_cfg.multi_label_cols,
         )
         processor.fit(train_df)
 
@@ -115,21 +124,25 @@ class OptunaOrchestrator:
             processor.transform(train_df),
             self.base_data_cfg.feature_cols,
             self.base_data_cfg.target_cols,
-            set(self.base_data_cfg.multi_label_cols)
+            set(self.base_data_cfg.multi_label_cols),
         )
         self.val_dataset = PGenDataset(
             processor.transform(val_df),
             self.base_data_cfg.feature_cols,
             self.base_data_cfg.target_cols,
-            set(self.base_data_cfg.multi_label_cols)
+            set(self.base_data_cfg.multi_label_cols),
         )
 
         # 5. Extract Dimensions for Model Config
         all_dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
-        self.feature_dims = {k: v for k, v in all_dims.items() if k in self.base_data_cfg.feature_cols}
-        self.target_dims = {k: v for k, v in all_dims.items() if k in self.base_data_cfg.target_cols}
+        self.feature_dims = {
+            k: v for k, v in all_dims.items() if k in self.base_data_cfg.feature_cols
+        }
+        self.target_dims = {
+            k: v for k, v in all_dims.items() if k in self.base_data_cfg.target_cols
+        }
 
-        logger.info(f"Data Ready. Train Samples: {len(train_df)} | Val Samples: {len(val_df)}")
+        logger.info("Data Ready. Train Samples: %d | Val Samples: %d", len(train_df), len(val_df))
 
     # ==========================================================================
     # DYNAMIC CONFIGURATION BUILDER
@@ -145,23 +158,20 @@ class OptunaOrchestrator:
         param_type = spec[0]
 
         if param_type == "int":
-            return trial.suggest_int(
-                name, spec[1], spec[2], step=spec[3] if len(spec) > 3 else 1 #noqa
-                )
+            return trial.suggest_int(name, spec[1], spec[2], step=spec[3] if len(spec) > 3 else 1)
 
-        elif param_type == "float":
-            log_scale = spec[3] if len(spec) > 3 else False #noqa
+        if param_type == "float":
+            log_scale = spec[3] if len(spec) > 3 else False
             return trial.suggest_float(name, spec[1], spec[2], log=log_scale)
 
-        elif param_type == "cat":
+        if param_type == "cat":
             return trial.suggest_categorical(name, spec[1:])
 
-        elif param_type == "const":
+        if param_type == "const":
             return spec[1]
 
-        else:
-            # Fallback for direct categorical list shorthand
-            return trial.suggest_categorical(name, spec)
+        # Fallback for direct categorical list shorthand
+        return trial.suggest_categorical(name, spec)
 
     def _build_configs(self, trial: optuna.Trial) -> tuple[ModelConfig, TrainerConfig, int]:
         """Constructs strict configuration objects from Trial suggestions."""
@@ -186,7 +196,7 @@ class OptunaOrchestrator:
             attn_heads=params.get("attn_heads", 4),
             num_attn_layers=params.get("num_attn_layers", 2),
             # FM specific
-            fm_hidden_dim=params.get("fm_hidden_dim", 64)
+            fm_hidden_dim=params.get("fm_hidden_dim", 64),
         )
 
         # 3. Construct Trainer Config
@@ -196,12 +206,12 @@ class OptunaOrchestrator:
             learning_rate=params.get("learning_rate", 1e-3),
             weight_decay=params.get("weight_decay", 1e-4),
             device=self.device,
-            use_amp=True, # Always use AMP for speed
+            use_amp=True,  # Always use AMP for speed
             # Loss config
             ml_loss_type=params.get("ml_loss_type", "bce"),
             mc_loss_type=params.get("mc_loss_type", "focal"),
             label_smoothing=params.get("label_smoothing", 0.0),
-            focal_gamma=params.get("focal_gamma", 2.0)
+            focal_gamma=params.get("focal_gamma", 2.0),
         )
 
         batch_size = params.get("batch_size", 128)
@@ -223,27 +233,25 @@ class OptunaOrchestrator:
 
         # 2. Init DataLoaders (Fast, zero-copy due to Dataset design)
         train_loader = DataLoader(
-            self.train_dataset, # type: ignore
+            self.train_dataset,  # type: ignore
             batch_size=batch_size,
             shuffle=True,
-            num_workers=0, # Optuna + SQLite + Multi-process = Deadlock. Use 0.
-            pin_memory=True
+            num_workers=0,  # Optuna + SQLite + Multi-process = Deadlock. Use 0.
+            pin_memory=True,
         )
         val_loader = DataLoader(
-            self.val_dataset, # type: ignore
+            self.val_dataset,  # type: ignore
             batch_size=batch_size,
             shuffle=False,
             num_workers=0,
-            pin_memory=True
+            pin_memory=True,
         )
 
         # 3. Init Model & Optimization
         model = PharmagenDeepFM(model_cfg)
 
         optimizer = torch.optim.AdamW(
-            model.parameters(),
-            lr=trainer_cfg.learning_rate,
-            weight_decay=trainer_cfg.weight_decay
+            model.parameters(), lr=trainer_cfg.learning_rate, weight_decay=trainer_cfg.weight_decay
         )
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -257,7 +265,7 @@ class OptunaOrchestrator:
             scheduler=scheduler,
             config=trainer_cfg,
             target_cols=self.base_data_cfg.target_cols,
-            multi_label_cols=set(self.base_data_cfg.multi_label_cols)
+            multi_label_cols=set(self.base_data_cfg.multi_label_cols),
         )
 
         # 5. Execute Training
@@ -265,14 +273,14 @@ class OptunaOrchestrator:
             best_loss = trainer.fit(
                 train_loader=train_loader,
                 val_loader=val_loader,
-                trial=trial # Enables pruning inside the trainer loop
+                trial=trial,  # Enables pruning inside the trainer loop
             )
             return best_loss
 
         except optuna.TrialPruned:
             raise
         except Exception as e:
-            logger.error(f"Trial {trial.number} failed: {e}")
+            logger.error("Trial %d failed: %s", trial.number, e)
             return float("inf")
 
     # ==========================================================================
@@ -284,12 +292,16 @@ class OptunaOrchestrator:
         (DIRS["reports"] / "optuna_db").mkdir(parents=True, exist_ok=True)
         (DIRS["reports"] / "figures").mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"--- Starting Optuna Study: {self.tuner_cfg.study_name} ---")
+        logger.info("--- Starting Optuna Study: %s ---", self.tuner_cfg.study_name)
 
-        pruner = MedianPruner(
-            n_startup_trials=self.tuner_cfg.n_startup_trials,
-            n_warmup_steps=self.tuner_cfg.n_warmup_steps
-        ) if self.tuner_cfg.use_pruning else None
+        pruner = (
+            MedianPruner(
+                n_startup_trials=self.tuner_cfg.n_startup_trials,
+                n_warmup_steps=self.tuner_cfg.n_warmup_steps,
+            )
+            if self.tuner_cfg.use_pruning
+            else None
+        )
 
         study = optuna.create_study(
             study_name=self.tuner_cfg.study_name,
@@ -297,14 +309,14 @@ class OptunaOrchestrator:
             direction=self.tuner_cfg.direction,
             sampler=TPESampler(seed=self.tuner_cfg.seed),
             pruner=pruner,
-            load_if_exists=True
+            load_if_exists=True,
         )
 
         study.optimize(
             self.objective,
             n_trials=self.tuner_cfg.n_trials,
             gc_after_trial=True,
-            show_progress_bar=True
+            show_progress_bar=True,
         )
 
         self._export_results(study)
@@ -312,12 +324,12 @@ class OptunaOrchestrator:
 
     def _export_results(self, study: optuna.Study):
         best_trial = study.best_trial
-        logger.info("\n" + "="*40)
-        logger.info(f"Best Value: {best_trial.value:.4f}")
-        logger.info("Best Params:")
+        ConsoleIO.print_divider("=", 40)
+        ConsoleIO.print_info("Best Value: %.4f", best_trial.value)
+        ConsoleIO.print_info("Best Params:")
         for key, value in best_trial.params.items():
-            logger.info(f"  {key}: {value}")
-        logger.info("="*40 + "\n")
+            ConsoleIO.print_info("  %s: %s", key, value)
+        ConsoleIO.print_divider("=", 40)
 
         # Save JSON
         report_path = DIRS["reports"] / f"{self.tuner_cfg.study_name}_best.json"
@@ -326,12 +338,15 @@ class OptunaOrchestrator:
 
         # Plotting (Safe)
         try:
-            from optuna.visualization.matplotlib import plot_optimization_history, plot_param_importances #noqa
+            from optuna.visualization.matplotlib import (
+                plot_optimization_history,
+                plot_param_importances,
+            )
 
             fig_path = DIRS["reports"] / "figures"
 
             # Use non-interactive backend
-            plt.switch_backend('Agg')
+            plt.switch_backend("Agg")
 
             plt.figure(figsize=(10, 6))
             plot_optimization_history(study)
@@ -344,4 +359,4 @@ class OptunaOrchestrator:
             plt.close()
 
         except ImportError:
-            logger.warning("Matplotlib not installed or failed. Skipping plots.")
+            ConsoleIO.print_warning("Matplotlib not installed or failed. Skipping plots.")

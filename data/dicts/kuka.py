@@ -1,5 +1,6 @@
-import pandas as pd 
 import json
+
+import pandas as pd
 import tomlkit
 
 with open('tomli_ATC_drug_med.toml', 'rb') as f:
@@ -9,5 +10,5 @@ with open('tomli_ATC_drug_med.toml', 'rb') as f:
 dict_json = dict(dictio)
 
 with open('drug_list.txt', 'w') as f:
-    for k, v in dict_json.items():
+    for _k, v in dict_json.items():
         f.write(v + '\n')

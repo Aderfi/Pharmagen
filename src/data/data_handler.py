@@ -5,18 +5,18 @@ Implements efficient data loading, cleaning, and preprocessing pipelines.
 Designed to handle heterogeneous biological data (scalars, multi-labels).
 """
 
-import logging
-import re
 from collections.abc import Iterable
 from dataclasses import dataclass
+import logging
 from pathlib import Path
+import re
 from typing import Any
 
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+import torch
 from torch.utils.data import Dataset
 
 logger = logging.getLogger(__name__)
@@ -27,11 +27,13 @@ RE_SPLITTERS = re.compile(r"[,;|]+")
 # 0. CONFIGURATION
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class DataConfig:
     """
     Configuration for Data Loading and Processing.
     """
+
     dataset_path: Path
     feature_cols: list[str]
     target_cols: list[str]
@@ -40,9 +42,11 @@ class DataConfig:
     num_workers: int = 4
     pin_memory: bool = True
 
+
 # =============================================================================
 # 1. PREPROCESSING ENGINE
 # =============================================================================
+
 
 class PGenProcessor(BaseEstimator, TransformerMixin):
     """
@@ -52,16 +56,18 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
     encodings and transforming data into pure PyTorch tensors before
     Dataset instantiation.
     """
+
     def __init__(self, config: dict, multi_label_cols: list[str] | None = None):
         self.cfg = config
         self.encoders: dict[str, Any] = {}
-        self.multi_label_cols = set(c.lower() for c in (multi_label_cols or []))
+        self.multi_label_cols = {c.lower() for c in (multi_label_cols or [])}
 
         # Identify columns
         all_cols = config.get("features", []) + config.get("targets", [])
         self.target_cols = [c.lower() for c in config.get("targets", [])]
         self.scalar_cols = [
-            c.lower() for c in all_cols
+            c.lower()
+            for c in all_cols
             if c.lower() not in self.multi_label_cols and c.lower() not in self.target_cols
         ]
 
@@ -79,7 +85,7 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
             uniques.add(self.unknown_token)
 
             enc = LabelEncoder()
-            enc.fit(sorted(list(uniques)))
+            enc.fit(sorted(uniques))
             self.encoders[col] = enc
 
         # Fit Multi-Labels (Binarizer)
@@ -87,8 +93,11 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
             if col not in df.columns:
                 continue
 
-            parsed = df[col].astype(str).str.split("|").map(
-                lambda x: [i.strip() for i in x if i.strip()] if isinstance(x, list) else []
+            parsed = (
+                df[col]
+                .astype(str)
+                .str.split("|")
+                .map(lambda x: [i.strip() for i in x if i.strip()] if isinstance(x, list) else [])
             )
             enc = MultiLabelBinarizer()
             enc.fit(parsed)
@@ -106,7 +115,7 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
             enc = self.encoders[col]
             vals = df[col].fillna(self.unknown_token).to_numpy()
 
-            unknown_idx = np.searchsorted(enc.classes_, self.unknown_token) # noqa
+            unknown_idx = np.searchsorted(enc.classes_, self.unknown_token)  # noqa
 
             valid_mask = np.isin(vals, enc.classes_)
             vals[~valid_mask] = self.unknown_token
@@ -127,33 +136,39 @@ class PGenProcessor(BaseEstimator, TransformerMixin):
             if col not in df.columns:
                 continue
             enc = self.encoders[col]
-            parsed = df[col].astype(str).str.split("|").map(
-                lambda x: [i.strip() for i in x if i.strip()] if isinstance(x, list) else []
+            parsed = (
+                df[col]
+                .astype(str)
+                .str.split("|")
+                .map(lambda x: [i.strip() for i in x if i.strip()] if isinstance(x, list) else [])
             )
             mat = enc.transform(parsed).astype(np.float32)
             output_payload[col] = torch.from_numpy(mat)
 
         return output_payload
 
+
 # =============================================================================
 # 2. MEMORY-OPTIMIZED DATASET
 # =============================================================================
+
 
 class PGenDataset(Dataset):
     """
     Zero-copy PyTorch Dataset.
     """
+
     def __init__(
         self,
         data_payload: dict[str, torch.Tensor],
         features: list[str],
         targets: list[str],
-        multi_label_cols: set[str]
+        multi_label_cols: set[str],
     ):
         self.data = data_payload
         self.features = [f.lower() for f in features]
         self.targets = [t.lower() for t in targets]
-        self.ml_cols = set(c.lower() for c in multi_label_cols)
+        self.ml_cols = {c.lower() for c in multi_label_cols}
 
         if not self.data:
             raise ValueError("Empty data payload provided to Dataset.")
@@ -165,11 +180,7 @@ class PGenDataset(Dataset):
         return self.length
 
     def __getitem__(self, idx):
-        x = {
-            k: self.data[k][idx]
-            for k in self.features
-            if k in self.data
-        }
+        x = {k: self.data[k][idx] for k in self.features if k in self.data}
 
         y = {}
         for k in self.targets:
@@ -178,6 +189,7 @@ class PGenDataset(Dataset):
                 y[k] = val.float() if k in self.ml_cols else val
 
         return x, y
+
 
 # =============================================================================
 # 3. DATA LOADING & CLEANING UTILITIES
@@ -189,12 +201,14 @@ def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
     if not config.dataset_path.exists():
         raise FileNotFoundError(f"Dataset not found at: {config.dataset_path}")
 
-    logger.info(f"Loading dataset from {config.dataset_path.name}...")
+    logger.info("Loading dataset from %s...", config.dataset_path.name)
 
     try:
-        df = pd.read_csv(config.dataset_path, sep='\t'  if config.dataset_path.suffix=='.tsv' else ',')
+        df = pd.read_csv(
+            config.dataset_path, sep="\t" if config.dataset_path.suffix == ".tsv" else ","
+        )
     except ValueError as e:
-        logger.error(f"Read error: {e}")
+        logger.error("Read error: %s", e)
         raise
 
     # Clean content (strip, lower, etc)
@@ -202,10 +216,11 @@ def load_and_clean_dataset(config: DataConfig) -> pd.DataFrame:
 
     return df
 
+
 def clean_dataset_content(
     df: pd.DataFrame,
     multi_label_cols: Iterable[str] | None = None,
-    unknown_token: str = "__UNKNOWN__"
+    unknown_token: str = "__UNKNOWN__",
 ) -> pd.DataFrame:
     """
     Performs vectorized cleaning of the DataFrame content:
@@ -227,7 +242,7 @@ def clean_dataset_content(
 
     # 2. Vectorized String Cleaning
     # Prepare set for O(1) lookup
-    multi_label_set = set(c.lower() for c in (multi_label_cols or []))
+    multi_label_set = {c.lower() for c in (multi_label_cols or [])}
 
     for col in df.columns:
         # Fast conversion to string and lowercasing
@@ -240,6 +255,7 @@ def clean_dataset_content(
             df[col] = series
 
     return df
+
 
 def serialize_multilabel(val: Any) -> str:
     """
@@ -257,4 +273,3 @@ def serialize_multilabel(val: Any) -> str:
         return str(val)
 
     return "|".join(sorted(parts))
-

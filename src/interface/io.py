@@ -1,6 +1,6 @@
 # Pharmagen - IO Utilities
-import json
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Any
 
@@ -14,10 +14,12 @@ def save_json(data: dict[str, Any], path: str | Path):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
+
 def load_json(path: str | Path) -> dict[str, Any]:
     """Loads a JSON file into a dictionary."""
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
+
 
 def json_serial_adapter(obj: Any) -> Any:
     """
@@ -30,6 +32,7 @@ def json_serial_adapter(obj: Any) -> Any:
         return list(obj)
     raise TypeError(f"Type {type(obj)} not serializable by custom adapter")
 
+
 def welcome_message():
     msg = f"""
     ============================================
@@ -41,6 +44,7 @@ def welcome_message():
     ============================================
     """
     print(msg)
+
 
 def print_gnu_notice():
     """Imprime el aviso legal"""
@@ -63,11 +67,12 @@ def print_gnu_notice():
     """
     print(notice)
 
+
 def print_warranty_details():
     """Texto completo para 'show w'."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("NO WARRANTY")
-    print("="*60)
+    print("=" * 60)
     print("""
     BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
     FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
@@ -81,11 +86,12 @@ def print_warranty_details():
     """)
     input("\nPresione [Enter] para volver...")
 
+
 def print_conditions_details():
     """Texto completo para 'show c'."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("REDISTRIBUTION CONDITIONS")
-    print("="*60)
+    print("=" * 60)
     print("""
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -96,4 +102,3 @@ def print_conditions_details():
     along with this program. If not, see <https://www.gnu.org/licenses/>.
     """)
     input("\nPresione [Enter] para volver...")
-

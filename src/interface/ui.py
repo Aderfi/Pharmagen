@@ -7,14 +7,14 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
+from collections.abc import Mapping
+from enum import Enum
 import itertools
+from pathlib import Path
 import shutil
 import sys
 import threading
 import time
-from collections.abc import Mapping
-from enum import Enum
-from pathlib import Path
 from typing import Any, Literal
 
 if python_version := sys.version_info >= (3, 11):
@@ -25,17 +25,30 @@ else:
 
 class MessageType(Enum):
     """Console messages with associated symbols."""
-    SUCCESS = "\u2705"          # ✅
-    ERROR = "\u274c"            # ❌
-    WARNING = "\u26a0\ufe0f"    # ⚠️
-    INFO = "\u2139\ufe0f"       # ℹ️
-    QUESTION = "\u2753"         # ❓
-    ROCKET = "\U0001f680"       # 🚀
-    FIRE = "\U0001f525"         # 🔥
-    DNA = "\U0001f9ec"          # 🧬
-    META = "\U0001f539"         # 🔹
 
-SPINNER_DOTS = ["\u25cb", "\u25d1", "\u25d0", "\u25e5", "\u25e4", "\u25e3", "\u25e2", "\u25e1", "\u25e0", "\u25ef"]
+    SUCCESS = "\u2705"  # ✅
+    ERROR = "\u274c"  # ❌
+    WARNING = "\u26a0\ufe0f"  # ⚠️
+    INFO = "\u2139\ufe0f"  # ℹ️
+    QUESTION = "\u2753"  # ❓
+    ROCKET = "\U0001f680"  # 🚀
+    FIRE = "\U0001f525"  # 🔥
+    DNA = "\U0001f9ec"  # 🧬
+    META = "\U0001f539"  # 🔹
+
+
+SPINNER_DOTS = [
+    "\u25cb",
+    "\u25d1",
+    "\u25d0",
+    "\u25e5",
+    "\u25e4",
+    "\u25e3",
+    "\u25e2",
+    "\u25e1",
+    "\u25e0",
+    "\u25ef",
+]
 SPINNER_BRAILLE = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 SPINNER_SIMPLE = ["|", "/", "-", "\\"]
 SPINNER_ARROWS = ["←", "↖", "↑", "↗", "→", "↘", "↓", "↙"]
@@ -43,6 +56,7 @@ SPINNER_ARROWS = ["←", "↖", "↑", "↗", "→", "↘", "↓", "↙"]
 # ==============================================================================
 # SPINNER - Loading Animation
 # ==============================================================================
+
 
 class Spinner:
     """Context Manager for console loading animations.
@@ -55,11 +69,12 @@ class Spinner:
     >>> with Spinner("Processing.. .", style="braille"):
     >>>     heavy_computation()
     """
+
     def __init__(
         self,
         message: str = "Processing...",
         style: Literal["dots", "braille", "simple", "arrows"] = "braille",
-        color: bool = True
+        color: bool = True,
     ):
         self.message = message
         self.stop_running = False
@@ -76,7 +91,7 @@ class Spinner:
 
     @staticmethod
     def _supports_color() -> bool:
-        return hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+        return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 
     def _spin(self):
         while not self.stop_running:
@@ -108,9 +123,11 @@ class Spinner:
         # If an exception occurred, let it propagate; otherwise suppress
         return False
 
+
 # ==============================================================================
 # PROGRESS BAR
 # ==============================================================================
+
 
 class ProgressBar:
     """
@@ -124,14 +141,16 @@ class ProgressBar:
     >>>            pbar.update(1)
     """
 
-    def __init__(self, total: int | float, desc: str = "", width: int = 40, xtra_info: Any | None = None):
+    def __init__(
+        self, total: int | float, desc: str = "", width: int = 40, xtra_info: Any | None = None
+    ):
         self.total = total
         self.current = 0
         self.desc = desc
         self.width = width
         self.start_time = time.time()
         self.xtra_info = xtra_info
-        self.bar_color = "\033[94m" # Blue default
+        self.bar_color = "\033[94m"  # Blue default
 
     def update(self, n: int | float = 1):
         self.current = min(self.current + n, self.total)
@@ -159,7 +178,7 @@ class ProgressBar:
 
         info_str = ""
         if isinstance(self.xtra_info, Mapping):
-            info_str = " | " + " ".join(f"{k}={v}" for k,v in self.xtra_info.items())
+            info_str = " | " + " ".join(f"{k}={v}" for k, v in self.xtra_info.items())
         elif self.xtra_info:
             info_str = f" | {self.xtra_info}"
 
@@ -176,9 +195,11 @@ class ProgressBar:
         sys.stdout.write("\n")
         sys.stdout.flush()
 
+
 # ==============================================================================
 # CONSOLE IO
 # ==============================================================================
+
 
 class ConsoleIO:
     """Static helper for Console Input/Output operations."""
@@ -211,7 +232,7 @@ class ConsoleIO:
 
     @staticmethod
     def print_info(msg: Any, metadata: bool = False):
-        """Print info message with ℹ️."""
+        """Print info message with info emoji."""
         if metadata:
             print(f"{MessageType.META.value}  {msg}")
         else:
@@ -230,7 +251,7 @@ class ConsoleIO:
     @staticmethod
     def print_dna(msg: str):
         """Special format for genomic operations. Prints with 🧬."""
-        print(f"{MessageType.DNA.value}  \033[36m{msg}\033[0m") # Cyan
+        print(f"{MessageType.DNA.value}  \033[36m{msg}\033[0m")  # Cyan
 
     # -------------------------------------------------------------------------
     # INPUT METHODS WITH VALIDATION
@@ -238,10 +259,10 @@ class ConsoleIO:
 
     @staticmethod
     def input_path(
-        prompt:  str,
+        prompt: str,
         default: Path | None = None,
         must_exist: bool = True,
-        file_extensions: list[str] | None = None
+        file_extensions: list[str] | None = None,
     ) -> Path:
         """
         Prompt for a file/directory path with validation.
@@ -288,7 +309,7 @@ class ConsoleIO:
         prompt: str,
         default: int | None = None,
         min_val: int | None = None,
-        max_val: int | None = None
+        max_val: int | None = None,
     ) -> int:
         """
         Prompt for an integer with validation.
@@ -331,8 +352,8 @@ class ConsoleIO:
     def input_float(
         prompt: str,
         default: float | None = None,
-        min_val:  float | None = None,
-        max_val: float | None = None
+        min_val: float | None = None,
+        max_val: float | None = None,
     ) -> float:
         """Prompt for a float with validation."""
         while True:
@@ -359,10 +380,7 @@ class ConsoleIO:
 
     @staticmethod
     def input_choice(
-        prompt: str,
-        choices: list[str],
-        default: str | None = None,
-        case_sensitive: bool = False
+        prompt: str, choices: list[str], default: str | None = None, case_sensitive: bool = False
     ) -> str:
         """
         Prompt for a choice from a list. (Enumerated input)
@@ -381,7 +399,7 @@ class ConsoleIO:
             default_str = f" [{default}]" if default else ""
 
             for i, choice in enumerate(choices):
-                print(f"{i+1}.  {choice}")
+                print(f"{i + 1}.  {choice}")
 
             value = input(f"Input the number of your choice. {default_str}: ").strip()
             index = int(value) - 1
@@ -389,8 +407,7 @@ class ConsoleIO:
                 with Spinner(f"Loading: {choices[index]}", style="braille").__enter__():
                     time.sleep(1)  # Simulate loading
                 return choices[index]
-            else:
-                ConsoleIO.print_error(f"Invalid choice.  Options: {choices_str}")
+            ConsoleIO.print_error(f"Invalid choice.  Options: {choices_str}")
 
     @staticmethod
     def confirm(prompt: str, default: bool = False) -> bool:
@@ -411,18 +428,19 @@ class ConsoleIO:
             if not answer:
                 return default
 
-            if answer in ('y', 'yes', 'si', 'sí', 's', '+'):
+            if answer in ("y", "yes", "si", "sí", "s", "+"):
                 return True
-            elif answer in ('n', 'no', '-'):
+            if answer in ("n", "no", "-"):
                 return False
-            else:
-                ConsoleIO.print_error("Please answer 'y' or 'n'.")
+            ConsoleIO.print_error("Please answer 'y' or 'n'.")
 
     @staticmethod
     def clear_screen():
         """Clear the console screen (cross-platform)."""
-        import os #noqa
-        os.system('cls' if os.name == 'nt' else 'clear')
+        import os
+
+        os.system("cls" if os.name == "nt" else "clear")
+
 
 if __name__ == "__main__":
     """
@@ -459,7 +477,7 @@ if __name__ == "__main__":
     print("\nTesting Progress Bar...")
     xtra_info = input("Enter extra info to display in progress bar: ").strip()
     with ProgressBar(total=50, desc="Processing", xtra_info=xtra_info) as pbar:
-        for i in range(50):
+        for _ in range(50):
             time.sleep(0.05)
             pbar.update(1)
 

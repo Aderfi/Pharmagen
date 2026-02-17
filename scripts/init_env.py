@@ -4,11 +4,11 @@ Pharmagen - Environment Initialization Script
 Unifies environment creation (venv/conda), dependency installation, and project scaffolding.
 """
 
-import sys
-import shutil
-import subprocess
 import argparse
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 
 # Constants
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -49,11 +49,11 @@ def setup_conda():
     if not shutil.which("conda"):
         print("❌ Error: 'conda' not found in PATH.")
         return False
-    
+
     print(f"🐍 Creating Conda env: {ENV_NAME}...")
     try:
         subprocess.run(
-            ["conda", "create", "-n", ENV_NAME, f"python={PYTHON_VERSION}", "-y"], 
+            ["conda", "create", "-n", ENV_NAME, f"python={PYTHON_VERSION}", "-y"],
             check=True
         )
         print("📦 Installing project in editable mode...")
@@ -76,19 +76,19 @@ def setup_venv():
     else:
         print(f"🐍 Creating Venv at {venv_dir}...")
         subprocess.run([sys.executable, "-m", "venv", str(venv_dir)], check=True)
-    
+
     # Determine pip path
     if sys.platform == "win32":
         pip_exe = venv_dir / "Scripts" / "pip.exe"
     else:
         pip_exe = venv_dir / "bin" / "pip"
-        
+
     print("📦 Installing project in editable mode...")
     try:
         subprocess.run([str(pip_exe), "install", "--upgrade", "pip"], check=True)
         subprocess.run([str(pip_exe), "install", "-e", ".[train]", "-e", ".[dev]"], check=True, cwd=PROJECT_ROOT)
-        
-        activate_cmd = ".\venv\Scripts\activate" if sys.platform == "win32" else "source ./venv/bin/activate"
+
+        activate_cmd = ".\venv\\Scripts\activate" if sys.platform == "win32" else "source ./venv/bin/activate"
         print(f"✅ Setup Complete! Activate with: {activate_cmd}")
         return True
     except subprocess.CalledProcessError as e:
@@ -97,7 +97,7 @@ def setup_venv():
 
 def main():
     parser = argparse.ArgumentParser(description="Pharmagen Environment Setup")
-    parser.add_argument("--type", choices=["conda", "venv", "dirs-only"], default="venv", 
+    parser.add_argument("--type", choices=["conda", "venv", "dirs-only"], default="venv",
                         help="Type of environment to create")
     args = parser.parse_args()
 
@@ -112,7 +112,7 @@ def main():
         setup_conda()
     elif args.type == "venv":
         setup_venv()
-    
+
     # Create flag file
     (PROJECT_ROOT / "src/cfg/venv_setup_true").touch()
 

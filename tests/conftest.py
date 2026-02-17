@@ -7,6 +7,7 @@ Provides shared resources like mock dataframes and configurations.
 
 import pandas as pd
 import pytest
+
 from src.model.architecture.deep_fm import ModelConfig
 
 

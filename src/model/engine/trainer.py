@@ -5,13 +5,19 @@ Implements the Training Logic (The "Director" in builder terms).
 Handles the Training Loop, Validation, Metric Tracking, and Checkpointing.
 """
 
-import logging
 from dataclasses import asdict, dataclass
+import logging
 from pathlib import Path
 from typing import Any, cast
 
 import optuna
 import torch
+from torch import nn
+from torch.amp.autocast_mode import autocast
+from torch.amp.grad_scaler import GradScaler
+from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
+
 from model.metrics.losses import (
     AdaptiveFocalLoss,
     AsymmetricLoss,
@@ -19,12 +25,6 @@ from model.metrics.losses import (
     MultiTaskUncertaintyLoss,
     PolyLoss,
 )
-from torch import nn
-from torch.amp.autocast_mode import autocast
-from torch.amp.grad_scaler import GradScaler
-from torch.utils.data import DataLoader
-from tqdm.auto import tqdm
-
 from src.cfg.manager import DIRS
 from src.model.metrics.reporting import generate_training_report
 
@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # 1. CONFIGURATION LAYER
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class TrainerConfig:
     """
@@ -42,6 +43,7 @@ class TrainerConfig:
     Acts as a parameter object for the Trainer, ensuring all settings
     (epochs, LR, device) are passed in a structured way.
     """
+
     # General
     n_epochs: int = 50
     patience: int = 5
@@ -55,7 +57,7 @@ class TrainerConfig:
 
     # Loss Strategy
     label_smoothing: float = 0.0
-    ml_loss_type: str = "bce"    # Multi-Label Strategy
+    ml_loss_type: str = "bce"  # Multi-Label Strategy
     mc_loss_type: str = "focal"  # Multi-Class Strategy
 
     # Advanced Loss Params
@@ -64,15 +66,18 @@ class TrainerConfig:
     asl_gamma_pos: float = 1.0
     poly_epsilon: float = 1.0
 
+
 # =============================================================================
 # 2. LOSS FACTORY (Strategy Pattern)
 # =============================================================================
+
 
 class LossRegistry:
     """
     Central factory for instantiating loss functions based on config.
     Decouples loss instantiation logic from the main Trainer loop.
     """
+
     def __init__(self, config: TrainerConfig):
         self.cfg = config
         self.smoothing = config.label_smoothing
@@ -92,31 +97,40 @@ class LossRegistry:
         # Mapping: Name -> [Class, ParamsDict]
         LOSS_FUNCS = {
             "bce": [nn.BCEWithLogitsLoss, {}],
-            "ce": [nn.CrossEntropyLoss,
-                        {"label_smoothing": self.smoothing}],
-            "focal": [FocalLoss,
-                        {"gamma": self.cfg.focal_gamma, "label_smoothing": self.smoothing}],
-            "adaptive_focal": [AdaptiveFocalLoss,
-                        {"gamma": self.cfg.focal_gamma, "label_smoothing": self.smoothing}],
-            "asymmetric": [AsymmetricLoss,
-                        {"gamma_neg": self.cfg.asl_gamma_neg, "gamma_pos": self.cfg.asl_gamma_pos}],
-            "poly": [PolyLoss,
-                        {"epsilon": self.cfg.poly_epsilon, "label_smoothing": self.smoothing}]
+            "ce": [nn.CrossEntropyLoss, {"label_smoothing": self.smoothing}],
+            "focal": [
+                FocalLoss,
+                {"gamma": self.cfg.focal_gamma, "label_smoothing": self.smoothing},
+            ],
+            "adaptive_focal": [
+                AdaptiveFocalLoss,
+                {"gamma": self.cfg.focal_gamma, "label_smoothing": self.smoothing},
+            ],
+            "asymmetric": [
+                AsymmetricLoss,
+                {"gamma_neg": self.cfg.asl_gamma_neg, "gamma_pos": self.cfg.asl_gamma_pos},
+            ],
+            "poly": [
+                PolyLoss,
+                {"epsilon": self.cfg.poly_epsilon, "label_smoothing": self.smoothing},
+            ],
         }
 
         if name in LOSS_FUNCS:
             cls, params = LOSS_FUNCS[name]
             return cls(**params)
-        else:
-            logger.warning(f"Unknown loss '{name}', falling back to BCE.")
-            return nn.BCEWithLogitsLoss()
+        logger.warning("Unknown loss '%s', falling back to BCE.", name)
+        return nn.BCEWithLogitsLoss()
+
 
 # =============================================================================
 # 3. METRICS TRACKER
 # =============================================================================
 
+
 class MetricTracker:
     """Accumulates metrics (Loss/Accuracy) over an epoch per task."""
+
     def __init__(self, tasks: list[str]):
         self.tasks = tasks
         self.reset()
@@ -124,10 +138,12 @@ class MetricTracker:
     def reset(self):
         self.running_loss = 0.0
         self.n_batches = 0
-        self.correct_per_task = {t: 0.0 for t in self.tasks}
-        self.total_per_task = {t: 0 for t in self.tasks}
+        self.correct_per_task = dict.fromkeys(self.tasks, 0.0)
+        self.total_per_task = dict.fromkeys(self.tasks, 0)
 
-    def update(self, loss_val: float, batch_corrects: dict[str, float], batch_totals: dict[str, int]):
+    def update(
+        self, loss_val: float, batch_corrects: dict[str, float], batch_totals: dict[str, int]
+    ):
         self.running_loss += loss_val
         self.n_batches += 1
         for t in self.tasks:
@@ -137,9 +153,7 @@ class MetricTracker:
 
     def compute(self) -> dict[str, float]:
         """Returns averaged metrics dictionary."""
-        metrics = {
-            "loss": self.running_loss / self.n_batches if self.n_batches > 0 else 0.0
-        }
+        metrics = {"loss": self.running_loss / self.n_batches if self.n_batches > 0 else 0.0}
 
         macro_acc = 0.0
         valid_tasks = 0
@@ -155,9 +169,11 @@ class MetricTracker:
         metrics["acc_macro"] = macro_acc / valid_tasks if valid_tasks > 0 else 0.0
         return metrics
 
+
 # =============================================================================
 # 4. ROBUST TRAINER CLASS
 # =============================================================================
+
 
 class PGenTrainer:
     """
@@ -175,7 +191,8 @@ class PGenTrainer:
         multi_label_cols (set): Set of multi-label targets.
         uncertainty_module (nn.Module, optional): Kendall&Gal Loss Wrapper.
     """
-    def __init__( # noqa
+
+    def __init__(
         self,
         model: nn.Module,
         optimizer: torch.optim.Optimizer,
@@ -184,7 +201,7 @@ class PGenTrainer:
         target_cols: list[str],
         multi_label_cols: set[str],
         model_name: str = "PGenModel",
-        uncertainty_module: MultiTaskUncertaintyLoss | None = None
+        uncertainty_module: MultiTaskUncertaintyLoss | None = None,
     ):
         self.model = model.to(config.device)
         self.optimizer = optimizer
@@ -193,7 +210,9 @@ class PGenTrainer:
         self.target_cols = target_cols
         self.ml_cols = multi_label_cols
         self.model_name = model_name
-        self.uncertainty_module = uncertainty_module.to(config.device) if uncertainty_module else None
+        self.uncertainty_module = (
+            uncertainty_module.to(config.device) if uncertainty_module else None
+        )
 
         # State Management
         self.scaler = GradScaler(enabled=config.use_amp)
@@ -215,12 +234,11 @@ class PGenTrainer:
         return losses
 
     def _move_batch_to_device(self, batch: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
-        return {
-            k: v.to(self.cfg.device, non_blocking=True)
-            for k, v in batch.items()
-        }
+        return {k: v.to(self.cfg.device, non_blocking=True) for k, v in batch.items()}
 
-    def _compute_forward_pass(self, batch: dict[str, torch.Tensor]) -> tuple[torch.Tensor, dict, dict]:
+    def _compute_forward_pass(
+        self, batch: dict[str, torch.Tensor]
+    ) -> tuple[torch.Tensor, dict, dict]:
         """Atomic step: Forward -> Loss -> Metrics."""
         batch = self._move_batch_to_device(batch)
 
@@ -260,7 +278,7 @@ class PGenTrainer:
                 if t_col in self.ml_cols:
                     # Multi-label (Bitwise Match)
                     probs = torch.sigmoid(pred)
-                    predicted = (probs > (1/2)).float()
+                    predicted = (probs > (1 / 2)).float()
                     batch_corrects[t_col] = (predicted == target).float().sum().item()
                     batch_totals[t_col] = target.numel()
                 else:
@@ -280,7 +298,9 @@ class PGenTrainer:
         for batch in loop:
             self.optimizer.zero_grad(set_to_none=True)
 
-            with autocast(device_type="cuda" if "cuda" in self.cfg.device else "cpu", enabled=self.cfg.use_amp):
+            with autocast(
+                device_type="cuda" if "cuda" in self.cfg.device else "cpu", enabled=self.cfg.use_amp
+            ):
                 loss, corrects, totals = self._compute_forward_pass(batch)
 
             self.scaler.scale(loss).backward()
@@ -309,11 +329,13 @@ class PGenTrainer:
 
         return tracker.compute()
 
-    def fit(self, train_loader: DataLoader, val_loader: DataLoader, trial: optuna.Trial | None = None) -> float:
+    def fit(
+        self, train_loader: DataLoader, val_loader: DataLoader, trial: optuna.Trial | None = None
+    ) -> float:
         """
         Executes the full training lifecycle (Epochs -> Val -> Early Stopping).
         """
-        logger.info(f"Starting training on {self.cfg.device} | AMP: {self.cfg.use_amp}")
+        logger.info("Starting training on %s | AMP: %s", self.cfg.device, self.cfg.use_amp)
 
         for epoch in range(self.start_epoch, self.cfg.n_epochs + 1):
             t_metrics = self.train_epoch(train_loader)
@@ -321,19 +343,26 @@ class PGenTrainer:
 
             # Record
             v_loss = v_metrics["loss"]
-            self.history.append({
-                "epoch": epoch,
-                "train_loss": t_metrics["loss"],
-                "val_loss": v_loss,
-                **{f"val_{k}": v for k, v in v_metrics.items() if k.startswith("acc")}
-            })
+            self.history.append(
+                {
+                    "epoch": epoch,
+                    "train_loss": t_metrics["loss"],
+                    "val_loss": v_loss,
+                    **{f"val_{k}": v for k, v in v_metrics.items() if k.startswith("acc")},
+                }
+            )
 
             # Logging
-            acc_str = " | ".join([f"{k}: {v:.2%}" for k, v in v_metrics.items() if k.startswith("acc_")])
+            acc_str = " | ".join(
+                [f"{k}: {v:.2%}" for k, v in v_metrics.items() if k.startswith("acc_")]
+            )
             logger.info(
-                f"Epoch {epoch:02d}/{self.cfg.n_epochs} | "
-                f"Train Loss: {t_metrics['loss']:.4f} | "
-                f"Val Loss: {v_loss:.4f} | {acc_str}"
+                "Epoch %02d/%d | Train Loss: %.4f | Val Loss: %.4f | %s",
+                epoch,
+                self.cfg.n_epochs,
+                t_metrics["loss"],
+                v_loss,
+                acc_str,
             )
 
             # Scheduler
@@ -350,14 +379,14 @@ class PGenTrainer:
             else:
                 self.patience_counter += 1
                 if self.patience_counter >= self.cfg.patience:
-                    logger.info(f"Early stopping at epoch {epoch}")
+                    logger.info("Early stopping at epoch %d", epoch)
                     break
 
             # Optuna Pruning Hook
             if trial:
                 trial.report(v_loss, epoch)
                 if trial.should_prune():
-                    raise optuna.TrialPruned()
+                    raise optuna.TrialPruned
 
         # Report Generation
         logger.info("Generating Training Report...")
@@ -371,7 +400,7 @@ class PGenTrainer:
             "model_state": self.model.state_dict(),
             "optimizer_state": self.optimizer.state_dict(),
             "best_loss": self.best_loss,
-            "config": asdict(self.cfg)
+            "config": asdict(self.cfg),
         }
         if self.uncertainty_module:
             state["uncertainty_state"] = self.uncertainty_module.state_dict()
@@ -379,13 +408,13 @@ class PGenTrainer:
         filename = "model_best.pth" if is_best else f"checkpoint_ep{epoch}.pth"
         save_path = DIRS["models"] / filename
         torch.save(state, save_path)
-        logger.debug(f"Checkpoint saved: {save_path}")
+        logger.debug("Checkpoint saved: %s", save_path)
 
     def load_checkpoint(self, path: str | Path):
         """Resumes training state from file."""
         path = Path(path)
         if not path.exists():
-            logger.error(f"Checkpoint not found: {path}")
+            logger.error("Checkpoint not found: %s", path)
             return
 
         checkpoint = torch.load(path, map_location=self.cfg.device)
@@ -396,4 +425,4 @@ class PGenTrainer:
 
         self.start_epoch = checkpoint.get("epoch", 0) + 1
         self.best_loss = checkpoint.get("best_loss", float("inf"))
-        logger.info(f"Resumed training from epoch {self.start_epoch}")
+        logger.info("Resumed training from epoch %d", self.start_epoch)

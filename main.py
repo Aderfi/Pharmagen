@@ -4,8 +4,8 @@
 
 import argparse
 import logging
-import sys
 from pathlib import Path
+import sys
 
 import pandas as pd
 import torch
@@ -126,7 +126,7 @@ def _prediction_pipeline(args: argparse.Namespace, logger: logging.Logger):
         logger.error("Missing required args for prediction: --model and --input")
         sys.exit(1)
 
-    logger.info(f"Starting Inference: {args.model}")
+    logger.info("Starting Inference: %s", args.model)
     from src.model.engine.predict import PGenPredictor
 
     predictor = PGenPredictor(args.model, device=args.device)
@@ -147,7 +147,7 @@ def _prediction_pipeline(args: argparse.Namespace, logger: logging.Logger):
             out_path = PROJECT_ROOT / "reports" / f"{in_path.stem}_preds.tsv"
 
         pd.DataFrame(results).to_csv(out_path, index=False, sep="\t", encoding="utf-8")
-        logger.info(f"Predictions saved to {out_path}")
+        logger.info("Predictions saved to %s", out_path)
     else:
         logger.warning("No predictions generated (check input file format).")
 
@@ -164,7 +164,7 @@ def _optuna_pipeline(args: argparse.Namespace, logger: logging.Logger):
     search_space = raw_cfg.get("optuna", {})
 
     if not search_space:
-        logger.error(f"Model '{args.model}' has no [optuna] section in models.toml")
+        logger.error("Model '%s' has no [optuna] section in models.toml", args.model)
         sys.exit(1)
 
     # 2. Setup DataConfig
@@ -236,8 +236,8 @@ def main():
                 print("\nError: --model and --input are required for 'train' mode.\n")
                 sys.exit(1)
 
-            logger.info(f"Starting Training Routine: {args.model}")
-            logger.info(f"Device: {args.device} | Epochs: {args.epochs}")
+            logger.info("Starting Training Routine: %s", args.model)
+            logger.info("Device: %s | Epochs: %s", args.device, args.epochs)
 
             if args.optuna:
                 _optuna_pipeline(args, logger)
@@ -252,7 +252,7 @@ def main():
         print("\nOperation cancelled by user.")
         sys.exit(0)
     except Exception as e:
-        logger.critical(f"Critical System Error: {e}", exc_info=True)
+        logger.critical("Critical System Error: %s", e, exc_info=True)
         sys.exit(1)
 
 if __name__ == "__main__":

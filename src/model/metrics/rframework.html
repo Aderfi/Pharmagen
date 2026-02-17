@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pharmagen · __MODEL_NAME__</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap');
+
+    :root {
+      --bg:       #080c14;
+      --surface:  #0e1525;
+      --surface2: #151f33;
+      --border:   #1e2d45;
+      --accent:   #00c8ff;
+      --accent2:  #6d28d9;
+      --green:    #10b981;
+      --red:      #f43f5e;
+      --yellow:   #f59e0b;
+      --text:     #dde4f0;
+      --muted:    #4a5a78;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .timestamp {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 6px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      white-space: nowrap;
+      align-self: flex-start;
+    }
+
+    /* STAT CARDS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--card-color, var(--accent));
+    }
+
+    .stat-card:hover { border-color: var(--card-color, var(--accent)); }
+
+    .stat-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--card-color, var(--accent));
+      font-family: var(--mono);
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 5px;
+      font-family: var(--mono);
+    }
+
+    /* CHARTS */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(540px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /* TABLE */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .table-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .ctrl-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .ctrl-input:focus { border-color: var(--accent); }
+    .ctrl-input::placeholder { color: var(--muted); }
+
+    .table-wrapper { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.77rem;
+    }
+
+    thead tr { background: var(--surface2); }
+
+    th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+
+    .epoch-cell { color: var(--muted); }
+
+    .best-val { color: var(--green); font-weight: 600; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.57rem;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-left: 6px;
+      background: rgba(16,185,129,0.15);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="logo-row">
+          <div class="logo-icon">💊</div>
+          <span class="brand">Pharmagen · Training Report</span>
+        </div>
+        <h1>Model: <span>__MODEL_NAME__</span></h1>
+      </div>
+      <div class="timestamp" id="ts"></div>
+    </div>
+    <div class="stats" id="stats-container"></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Loss · Train vs Validation</span>
+      </div>
+      <div id="chart-loss" style="height:320px; padding:4px"></div>
+    </div>
+    <div class="card" id="card-acc" style="display:none">
+      <div class="card-header">
+        <span class="card-title">Accuracy · Validation</span>
+      </div>
+      <div id="chart-acc" style="height:320px; padding:4px"></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <div class="card-header">
+      <span class="card-title">Epoch Log</span>
+    </div>
+    <div class="table-controls">
+      <span class="control-label">Epoch</span>
+      <input class="ctrl-input" id="epoch-filter" type="number" placeholder="filter…" min="1" style="width:90px" />
+      <span class="control-label">Show</span>
+      <select class="ctrl-input" id="row-limit" style="width:100px">
+        <option value="0">All</option>
+        <option value="10">Last 10</option>
+        <option value="25">Last 25</option>
+        <option value="50">Last 50</option>
+      </select>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    PHARMAGEN TRAINING SYSTEM · REPORT GENERATED <span id="footer-ts"></span>
+  </div>
+</div>
+
+<script>
+// ── DATA INJECTED BY PYTHON ──────────────────────────────────────────────────
+const REPORT_DATA = __REPORT_DATA_JSON__;
+// ────────────────────────────────────────────────────────────────────────────
+
+const { model_name, history, acc_cols } = REPORT_DATA;
+
+const epochs    = history.map(r => r.epoch);
+const trainLoss = history.map(r => r.train_loss);
+const valLoss   = history.map(r => r.val_loss);
+const bestIdx   = valLoss.indexOf(Math.min(...valLoss));
+
+// Timestamp
+const now   = new Date();
+const tsStr = now.toISOString().replace('T', ' · ').slice(0, 19) + ' UTC';
+document.getElementById('ts').textContent        = tsStr;
+document.getElementById('footer-ts').textContent = tsStr;
+
+// ── STAT CARDS
+const statDefs = [
+  { label: 'Total Epochs',   value: String(epochs.length),                      sub: 'completed',                color: 'var(--accent)' },
+  { label: 'Best Val Loss',  value: Math.min(...valLoss).toFixed(4),             sub: `epoch ${epochs[bestIdx]}`, color: 'var(--green)' },
+  { label: 'Final Val Loss', value: valLoss[valLoss.length - 1].toFixed(4),      sub: 'last epoch',               color: 'var(--yellow)' },
+];
+
+if (acc_cols.includes('val_acc_macro')) {
+  const macroVals = history.map(r => r['val_acc_macro']);
+  const best      = Math.max(...macroVals);
+  const bestEp    = epochs[macroVals.indexOf(best)];
+  statDefs.push({ label: 'Best Macro Acc', value: (best * 100).toFixed(2) + '%', sub: `epoch ${bestEp}`, color: 'var(--accent2)' });
+}
+
+document.getElementById('stats-container').innerHTML = statDefs.map(s => `
+  <div class="stat-card" style="--card-color:${s.color}">
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-value">${s.value}</div>
+    <div class="stat-sub">${s.sub}</div>
+  </div>
+`).join('');
+
+// ── PLOTLY SHARED CONFIG
+const baseLayout = yTitle => ({
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor:  'rgba(0,0,0,0)',
+  margin: { t: 16, r: 16, b: 44, l: 52 },
+  font:   { family: 'JetBrains Mono, monospace', size: 11, color: '#4a5a78' },
+  xaxis: { title: 'Epoch', gridcolor: '#1e2d45', linecolor: '#1e2d45', tickfont: { color: '#4a5a78' } },
+  yaxis: { title: yTitle,  gridcolor: '#1e2d45', linecolor: '#1e2d45', tickfont: { color: '#4a5a78' } },
+  legend: { bgcolor: 'rgba(0,0,0,0)', font: { color: '#dde4f0', size: 11 } },
+  hovermode: 'x unified',
+  hoverlabel: { bgcolor: '#0e1525', bordercolor: '#1e2d45', font: { color: '#dde4f0', family: 'JetBrains Mono' } },
+});
+
+const plotCfg = { responsive: true, displaylogo: false, displayModeBar: true };
+
+// ── LOSS CHART
+Plotly.newPlot('chart-loss', [
+  { x: epochs, y: trainLoss, name: 'Train Loss', mode: 'lines', line: { color: '#00c8ff', width: 2 } },
+  { x: epochs, y: valLoss,   name: 'Val Loss',   mode: 'lines', line: { color: '#6d28d9', width: 2, dash: 'dot' } },
+  { x: [epochs[bestIdx]], y: [valLoss[bestIdx]], name: 'Best', mode: 'markers',
+    marker: { color: '#10b981', size: 9, symbol: 'circle', line: { color: '#fff', width: 2 } } },
+], baseLayout('Loss'), plotCfg);
+
+// ── ACCURACY CHART
+if (acc_cols.length > 0) {
+  document.getElementById('card-acc').style.display = 'block';
+  const palette = ['#00c8ff','#10b981','#f59e0b','#f43f5e','#6d28d9','#ec4899','#14b8a6','#8b5cf6'];
+  Plotly.newPlot('chart-acc',
+    acc_cols.map((col, i) => ({
+      x: epochs,
+      y: history.map(r => r[col]),
+      name: col.replace('val_acc_', '').replace(/_/g, ' '),
+      mode: 'lines',
+      line: { color: palette[i % palette.length], width: 2 },
+    })),
+    baseLayout('Accuracy'), plotCfg
+  );
+}
+
+// ── TABLE
+const accMeta = acc_cols.map(c => ({ key: c, label: c.replace('val_acc_', '').replace(/_/g, ' ') }));
+document.getElementById('table-head').innerHTML =
+  `<tr>${['Epoch','Train Loss','Val Loss', ...accMeta.map(c => c.label)].map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+function renderTable() {
+  const filterEp = document.getElementById('epoch-filter').value;
+  const limit    = parseInt(document.getElementById('row-limit').value);
+
+  let rows = [...history].reverse();
+  if (filterEp) rows = rows.filter(r => String(r.epoch) === filterEp);
+  if (limit > 0) rows = rows.slice(0, limit);
+
+  document.getElementById('table-body').innerHTML = rows.map(r => {
+    const isBest = r.epoch === epochs[bestIdx];
+    return `<tr>
+      <td class="epoch-cell">${r.epoch}${isBest ? '<span class="badge">best</span>' : ''}</td>
+      <td>${r.train_loss.toFixed(4)}</td>
+      <td class="${isBest ? 'best-val' : ''}">${r.val_loss.toFixed(4)}</td>
+      ${accMeta.map(c => `<td>${(r[c.key] * 100).toFixed(2)}%</td>`).join('')}
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('epoch-filter').addEventListener('input', renderTable);
+document.getElementById('row-limit').addEventListener('change', renderTable);
+renderTable();
+</script>
+</body>
+</html>

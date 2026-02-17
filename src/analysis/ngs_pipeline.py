@@ -7,21 +7,21 @@
 # (at your option) any later version.
 
 import argparse
+from email.utils import parsedate_to_datetime
 import gzip
 import logging
 import os
+from pathlib import Path
 import platform
 import shutil
 import subprocess
 import sys
 import time
-from email.utils import parsedate_to_datetime
-from pathlib import Path
 
 import requests
 
 try:
-    from src.cfg.manager import PROJECT_ROOT #noqa
+    from src.cfg.manager import PROJECT_ROOT
     from src.interface.ui import ConsoleIO, ProgressBar, Spinner
 except ImportError:
     # Fallback para desarrollo sin instalar paquete
@@ -29,11 +29,11 @@ except ImportError:
     from src.cfg.manager import PROJECT_ROOT
     from src.interface.ui import ConsoleIO, ProgressBar, Spinner
 
-# Configuración de Logging (Solo a archivo si se desea, o stderr para debug)
+# Configuración de Logging
 logging.basicConfig(
-    level=logging.WARNING, # Menos ruido en consola, usamos ConsoleIO para info
+    level=logging.WARNING,  # ConsoleIO para info
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%H:%M:%S"
+    datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("Pharmagen-NGS")
 
@@ -48,17 +48,19 @@ REF_GENOME_FASTA = REF_GENOME_DIR / "HSapiens_GChr38.fa"
 GENOME_CONFIG = {
     "url": "https://ftp.ensembl.org/pub/release-114/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz",
     "filename_gz": "Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz",
-    "filename_fa": "HSapiens_GChr38.fa"
+    "filename_fa": "HSapiens_GChr38.fa",
 }
 
 # ==============================================================================
 # GESTOR DE GENOMA DE REFERENCIA (Cross-Platform)
 # ==============================================================================
 
+
 class GenomeManager:
     """
     Controlador para la gestión del ciclo de vida de archivos genómicos.
     """
+
     def __init__(self, output_dir: Path, config: dict):
         self.output_dir = output_dir
         self.url = config["url"]
@@ -79,12 +81,12 @@ class GenomeManager:
     def _get_remote_timestamp(self) -> float:
         try:
             response = requests.head(self.url, allow_redirects=True)
-            if 'Last-Modified' in response.headers:
-                dt = parsedate_to_datetime(response.headers['Last-Modified'])
+            if "Last-Modified" in response.headers:
+                dt = parsedate_to_datetime(response.headers["Last-Modified"])
                 return dt.timestamp()
             return time.time()
         except requests.RequestException as e:
-            logger.warning(f"No se pudo verificar fecha remota: {e}")
+            logger.warning("No se pudo verificar fecha remota: %s", e)
             return time.time()
 
     def _download_if_needed(self):
@@ -102,16 +104,16 @@ class GenomeManager:
             try:
                 with requests.get(self.url, stream=True) as r:
                     r.raise_for_status()
-                    total_bytes = int(r.headers.get('content-length', 0))
+                    total_bytes = int(r.headers.get("content-length", 0))
                     total_mb = round((total_bytes / (1024 * 1024)), 2)
                     ConsoleIO.print_info(f"Descargando desde: {self.url}")
 
                     with ProgressBar(total_mb, desc="Descargando genoma", width=50) as pbar:
-                        with open(self.local_gz, 'wb') as f:
+                        with open(self.local_gz, "wb") as f:
                             for chunk in r.iter_content(chunk_size=8192):
                                 if chunk:
                                     f.write(chunk)
-                                    chunk_mb = (len(chunk) / (1024 * 1024))
+                                    chunk_mb = len(chunk) / (1024 * 1024)
                                     pbar.update(chunk_mb)
                         print()
 
@@ -127,13 +129,15 @@ class GenomeManager:
                 sys.exit(1)
 
     def _decompress_if_needed(self):
-        if not self.local_fa.exists() or (self.local_gz.exists() and self.local_gz.stat().st_mtime > self.local_fa.stat().st_mtime):
+        if not self.local_fa.exists() or (
+            self.local_gz.exists() and self.local_gz.stat().st_mtime > self.local_fa.stat().st_mtime
+        ):
             # Usamos Spinner para operaciones largas
             with Spinner("Descomprimiendo genoma (Puede tomar un tiempo)..."):
                 try:
-                    #with gzip.open(self.local_gz, 'rb') as f_in, open(self.local_fa, 'wb') as f_out:
+                    # with gzip.open(self.local_gz, 'rb') as f_in, open(self.local_fa, 'wb') as f_out:
                     #    shutil.copyfileobj(f_in, f_out)
-                    with gzip.open(self.local_gz, 'rt') as f_in, open(self.local_fa, 'w') as f_out:
+                    with gzip.open(self.local_gz, "rt") as f_in, open(self.local_fa, "w") as f_out:
                         shutil.copyfileobj(f_in, f_out)
                 except Exception as e:
                     ConsoleIO.print_error(f"Error descomprimiendo: {e}")
@@ -141,9 +145,14 @@ class GenomeManager:
             ConsoleIO.print_success("Genoma descomprimido.")
 
     def _index_genome(self):
-        if not self.index_fai.exists() or self.local_fa.stat().st_mtime > self.index_fai.stat().st_mtime:
+        if (
+            not self.index_fai.exists()
+            or self.local_fa.stat().st_mtime > self.index_fai.stat().st_mtime
+        ):
             if not shutil.which("samtools"):
-                ConsoleIO.print_error("'samtools' no encontrado. Instálalo: sudo apt install samtools")
+                ConsoleIO.print_error(
+                    "'samtools' no encontrado. Instálalo: sudo apt install samtools"
+                )
                 sys.exit(1)
 
             with Spinner("Generando índice FAI con samtools..."):
@@ -154,42 +163,43 @@ class GenomeManager:
                     sys.exit(1)
             ConsoleIO.print_success("Genoma indexado.")
 
+
 # ==============================================================================
 # CLASE BASE (WRAPPER DE HERRAMIENTAS)
 # ==============================================================================
 
+
 class BioToolExecutor:
     """Clase base para ejecutar comandos de shell de forma segura."""
+
     def __init__(self, threads: int = 4):
         self.threads = str(threads)
 
     def _run_cmd(self, command: str, description: str):
-        # Usamos Spinner para feedback visual de que algo está pasando
         with Spinner(f"Ejecutando: {description}", style="dots"):
-            logger.debug(f"CMD: {command}")
+            logger.debug("CMD: %s", command)
             try:
-                shell_exec = '/bin/bash' if platform.system() != 'Windows' else None
+                shell_exec = "/bin/bash" if platform.system() != "Windows" else None
                 process = subprocess.run(
                     command,
                     shell=True,
                     check=True,
                     executable=shell_exec,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
+                    capture_output=True,
+                    text=True,
                 )
                 return process
 
             except subprocess.CalledProcessError as e:
-                # Si falla, el spinner termina y mostramos error
-                pass # El raise viene luego
                 error_msg = e.stderr.strip()[-500:] if e.stderr else "Unknown error"
                 ConsoleIO.print_error(f"Fallo en {description}:\n{error_msg}")
-                raise RuntimeError(f"Fallo en paso bioinformático: {description}")
+                raise RuntimeError(f"Fallo en paso bioinformático: {description}") from e
+
 
 # ==============================================================================
 # FASE 1: PROCESAMIENTO DE LECTURAS (QC & TRIMMING)
 # ==============================================================================
+
 
 class ProcessRawGenome(BioToolExecutor):
     def __init__(self, output_dir: Path, threads: int = 4):
@@ -229,9 +239,11 @@ class ProcessRawGenome(BioToolExecutor):
         ConsoleIO.print_success(f"Reads limpiados: {out_r1.name}")
         return {"r1": out_r1, "r2": out_r2}
 
+
 # ==============================================================================
 # FASE 2: ALINEAMIENTO (MAPPING)
 # ==============================================================================
+
 
 class MappingAlignmentAnalysis(BioToolExecutor):
     def __init__(self, output_dir: Path, ref_genome: Path, threads: int = 8):
@@ -254,7 +266,7 @@ class MappingAlignmentAnalysis(BioToolExecutor):
         rg_tag = f"@RG\\tID:{sample_name}\\tSM:{sample_name}\\tPL:ILLUMINA"
 
         cmd = (
-            f"bwa mem -t {self.threads} -R \"{rg_tag}\" {self.ref_genome} {r1} {r2} | "
+            f'bwa mem -t {self.threads} -R "{rg_tag}" {self.ref_genome} {r1} {r2} | '
             f"samtools sort -@ {self.threads} -o {sorted_bam} -"
         )
 
@@ -275,9 +287,11 @@ class MappingAlignmentAnalysis(BioToolExecutor):
         self._run_cmd(f"samtools index {dedup_bam}", "Indexado BAM final")
         return dedup_bam
 
+
 # ==============================================================================
 # FASE 3: VARIANT CALLING
 # ==============================================================================
+
 
 class VariantIdentificationAnalysis(BioToolExecutor):
     def __init__(self, output_dir: Path, ref_genome: Path):
@@ -311,9 +325,11 @@ class VariantIdentificationAnalysis(BioToolExecutor):
 
         return vcf_filtered
 
+
 # ==============================================================================
 # FASE 4: ANOTACIÓN (VEP)
 # ==============================================================================
+
 
 class VariantAnnotator(BioToolExecutor):
     def __init__(self, output_dir: Path, threads: int = 4, assembly: str = "GRCh38"):
@@ -337,9 +353,11 @@ class VariantAnnotator(BioToolExecutor):
         self._run_cmd(cmd, "VEP Annotation")
         return annotated_vcf
 
+
 # ==============================================================================
 # ORQUESTADOR (PIPELINE RUNNER)
 # ==============================================================================
+
 
 def run_ngs_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
     # 0. Verificar Dependencias
@@ -393,9 +411,11 @@ def run_ngs_pipeline(r1: Path, r2: Path, sample_name: str, threads: int):
         ConsoleIO.print_error(f"El pipeline se detuvo inesperadamente:\n{e}")
         sys.exit(1)
 
+
 # ==============================================================================
 # MAIN (CLI)
 # ==============================================================================
+
 
 def main():
     parser = argparse.ArgumentParser(description="Pharmagen NGS Pipeline")
@@ -411,9 +431,10 @@ def main():
         sys.exit(1)
 
     if not args.threads:
-        args.threads = max(1, os.cpu_count() - 1) if isinstance(os.cpu_count(), int) else 1 # type: ignore (Linter issue)
+        args.threads = max(1, os.cpu_count() - 1) if isinstance(os.cpu_count(), int) else 1  # type: ignore (Linter issue)
 
     run_ngs_pipeline(args.read1, args.read2, args.name, args.threads)
+
 
 if __name__ == "__main__":
     main()

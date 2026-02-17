@@ -6,8 +6,8 @@ Includes Focal Loss, Asymmetric Loss, PolyLoss, and Kendall&Gal Uncertainty Weig
 """
 
 import torch
-import torch.nn.functional as F
 from torch import nn
+import torch.nn.functional as F
 
 
 class FocalLoss(nn.Module):
@@ -21,18 +21,18 @@ class FocalLoss(nn.Module):
         gamma (float): Focusing parameter. Higher values reduce the loss for easy examples.
         label_smoothing (float): Label smoothing factor [0.0, 1.0].
     """
+
     def __init__(self, gamma: float = 2.0, label_smoothing: float = 0.0):
         super().__init__()
         self.gamma = gamma
         self.smoothing = label_smoothing
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        ce_loss = F.cross_entropy(
-            logits, targets, reduction="none", label_smoothing=self.smoothing
-        )
+        ce_loss = F.cross_entropy(logits, targets, reduction="none", label_smoothing=self.smoothing)
         pt = torch.exp(-ce_loss)
         focal_loss = ((1 - pt) ** self.gamma) * ce_loss
         return focal_loss.mean()
+
 
 class AdaptiveFocalLoss(FocalLoss):
     """
@@ -43,12 +43,14 @@ class AdaptiveFocalLoss(FocalLoss):
 
     Note: strictly for Single-Label Multi-Class tasks.
     """
+
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
             acc = (logits.argmax(1) == targets).float().mean()
             # Mapping: Acc 1.0 -> Gamma 1.0 | Acc 0.0 -> Gamma 3.0
             self.gamma = float(3.0 - (acc * 2.0))
         return super().forward(logits, targets)
+
 
 class AsymmetricLoss(nn.Module):
     """
@@ -62,7 +64,10 @@ class AsymmetricLoss(nn.Module):
         gamma_pos (float): Focusing parameter for positive examples (usually low, e.g. 1.0).
         clip (float): Probability margin to completely discard easy negatives (Hard Thresholding).
     """
-    def __init__(self, gamma_neg: float = 4.0, gamma_pos: float = 1.0, clip: float = 0.05, eps: float = 1e-8):
+
+    def __init__(
+        self, gamma_neg: float = 4.0, gamma_pos: float = 1.0, clip: float = 0.05, eps: float = 1e-8
+    ):
         super().__init__()
         self.gamma_neg = gamma_neg
         self.gamma_pos = gamma_pos
@@ -95,6 +100,7 @@ class AsymmetricLoss(nn.Module):
         loss = loss_pos + loss_neg
         return loss.mean()
 
+
 class PolyLoss(nn.Module):
     """
     PolyLoss: Polynomial Expansion of Cross Entropy.
@@ -105,26 +111,26 @@ class PolyLoss(nn.Module):
     Args:
         epsilon (float): Coefficient for the polynomial term.
     """
-    def __init__(self, epsilon: float = 1.0, reduction: str = 'mean', label_smoothing: float = 0.0):
+
+    def __init__(self, epsilon: float = 1.0, reduction: str = "mean", label_smoothing: float = 0.0):
         super().__init__()
         self.epsilon = epsilon
         self.reduction = reduction
         self.smoothing = label_smoothing
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        ce_loss = F.cross_entropy(
-            logits, targets, reduction='none', label_smoothing=self.smoothing
-        )
+        ce_loss = F.cross_entropy(logits, targets, reduction="none", label_smoothing=self.smoothing)
         pt = torch.exp(-ce_loss)
 
         # Poly-1 formulation
         poly_loss = ce_loss + self.epsilon * (1 - pt)
 
-        if self.reduction == 'mean':
+        if self.reduction == "mean":
             return poly_loss.mean()
-        elif self.reduction == 'sum':
+        if self.reduction == "sum":
             return poly_loss.sum()
         return poly_loss
+
 
 class MultiTaskUncertaintyLoss(nn.Module):
     """
@@ -135,12 +141,11 @@ class MultiTaskUncertaintyLoss(nn.Module):
 
     Formula: Loss = Sum( Loss_i * exp(-sigma_i) + sigma_i )
     """
+
     def __init__(self, tasks: list[str]):
         super().__init__()
         # Initialize log variance (sigma) to 0
-        self.log_sigmas = nn.ParameterDict({
-            t: nn.Parameter(torch.zeros(1)) for t in tasks
-        })
+        self.log_sigmas = nn.ParameterDict({t: nn.Parameter(torch.zeros(1)) for t in tasks})
 
     def forward(self, losses: dict[str, torch.Tensor]) -> torch.Tensor:
         total_loss = torch.tensor(0.0, device=next(iter(losses.values())).device)

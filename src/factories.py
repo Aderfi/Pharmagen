@@ -9,9 +9,9 @@ import logging
 from typing import Any
 
 import torch
-from model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 from torch.utils.data import DataLoader
 
+from model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 from src.data.data_handler import PGenDataset
 
 logger = logging.getLogger(__name__)
@@ -20,10 +20,8 @@ logger = logging.getLogger(__name__)
 # MODEL FACTORY
 # =============================================================================
 
-def create_model_instance(
-    config: dict[str, Any],
-    dims: dict[str, Any]
-) -> torch.nn.Module:
+
+def create_model_instance(config: dict[str, Any], dims: dict[str, Any]) -> torch.nn.Module:
     """
     Creates a model instance based on the configuration dictionary.
 
@@ -46,7 +44,7 @@ def create_model_instance(
     # 1. Extract Architecture Params
     arch_params = config.get("architecture", {}).copy()
 
-    # 2. Inject dimensions (These are dynamic, calculated at runtime)
+    # 2. Inject dimensions
     arch_params["n_features"] = dims.get("n_features", {})
     arch_params["target_dims"] = dims.get("target_dims", {})
 
@@ -61,13 +59,14 @@ def create_model_instance(
 # DATA LOADER FACTORY
 # =============================================================================
 
+
 def create_data_loaders(
     config: dict[str, Any],
     df_train,
     df_val,
     processor=None,
     drug_list_path: str | None = None,
-    ref_genome_path: str | None = None
+    ref_genome_path: str | None = None,
 ) -> tuple[DataLoader, DataLoader]:
     """
     Creates PyTorch DataLoaders for Training and Validation.
@@ -97,11 +96,15 @@ def create_data_loaders(
 
     # Create PGenDatasets
     data_cfg = config.get("data", {})
-    train_ds = PGenDataset(train_data, data_cfg["features"], data_cfg["targets"], processor.multi_label_cols)
-    val_ds = PGenDataset(val_data, data_cfg["features"], data_cfg["targets"], processor.multi_label_cols)
+    train_ds = PGenDataset(
+        train_data, data_cfg["features"], data_cfg["targets"], processor.multi_label_cols
+    )
+    val_ds = PGenDataset(
+        val_data, data_cfg["features"], data_cfg["targets"], processor.multi_label_cols
+    )
 
     # Standard Loaders
     return (
         DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True),
-        DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
+        DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True),
     )

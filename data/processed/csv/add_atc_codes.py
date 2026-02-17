@@ -19,13 +19,13 @@ dict_json = (
 inversed_dictio = []
 
 
-with open(dict_json, "r") as f:
+with open(dict_json) as f:
     atc_diccionario = json.load(f)
-    atc_diccionario = {str(list(entry.values())[0]): entry for entry in atc_diccionario}
+    atc_diccionario = {str(next(iter(entry.values()))): entry for entry in atc_diccionario}
 
 for i in atc_diccionario:
     values_keys = {}
-    values_keys = dict({v: k for k, v in atc_diccionario[i].items()})
+    values_keys = {v: k for k, v in atc_diccionario[i].items()}
     inversed_dictio.append(values_keys)
 
 pd.DataFrame(inversed_dictio)
@@ -41,7 +41,7 @@ pd.DataFrame(inversed_dictio)
 ################################## Hasta aqui todo funciona perfecto --------------------------------
 # print(inversed_dictio)
 
-with open(csv_input, "r", encoding="utf-8") as infile, open(
+with open(csv_input, encoding="utf-8") as infile, open(
     csv_output, "w", newline="", encoding="utf-8"
 ) as outfile:
     data_df = pd.read_csv(infile, delimiter=";")

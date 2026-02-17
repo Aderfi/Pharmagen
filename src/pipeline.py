@@ -5,17 +5,15 @@ Orchestrates the End-to-End Training Pipeline:
 Config -> Data Loading -> Preprocessing -> Training -> Artifact Saving.
 """
 
+from dataclasses import asdict
 import json
 import logging
-from dataclasses import asdict
 from pathlib import Path
 
 import joblib
-import torch
 import numpy as np
-from src.model.engine.trainer import PGenTrainer, TrainerConfig
-from src.model.metrics.losses import MultiTaskUncertaintyLoss
-from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
+import torch
 
 from src.cfg.manager import DIRS, MULTI_LABEL_COLS, get_model_config
 from src.data.data_handler import (
@@ -25,11 +23,18 @@ from src.data.data_handler import (
 )
 from src.factories import create_data_loaders, create_model_instance
 from src.interface.io import json_serial_adapter
+from src.model.engine.trainer import PGenTrainer, TrainerConfig
+from src.model.metrics.losses import MultiTaskUncertaintyLoss
 
 logger = logging.getLogger(__name__)
 
 
-def _parse_configs(model_name: str, csv_path: Path, epochs_override: int | None = None, batch_size_override: int | None = None):
+def _parse_configs(
+    model_name: str,
+    csv_path: Path,
+    epochs_override: int | None = None,
+    batch_size_override: int | None = None,
+):
     """
     Parses raw TOML configuration into structured Dataclasses.
 
@@ -60,7 +65,7 @@ def _parse_configs(model_name: str, csv_path: Path, epochs_override: int | None 
         multi_label_cols=list(MULTI_LABEL_COLS),
         stratify_col=raw_cfg["data"].get("stratify_col"),
         num_workers=4,
-        pin_memory=True
+        pin_memory=True,
     )
 
     # 2. Trainer Configuration
@@ -73,12 +78,15 @@ def _parse_configs(model_name: str, csv_path: Path, epochs_override: int | None 
         use_amp=True,
         ml_loss_type=loss_params.get("loss_multilabel", "asymmetric"),
         mc_loss_type=loss_params.get("loss_singlelabel", "adaptive_focal"),
-        label_smoothing=loss_params.get("label_smoothing", 0.0)
+        label_smoothing=loss_params.get("label_smoothing", 0.0),
     )
 
     return data_config, trainer_config, raw_cfg
 
-def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batch_size: int | None = None):
+
+def train_pipeline(
+    model_name: str, csv_path: str | Path, epochs: int = 50, batch_size: int | None = None
+):
     """
     Orchestrates the End-to-End Training Pipeline.
 
@@ -98,20 +106,18 @@ def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batc
         batch_size (int, optional): Override config batch size.
     """
     csv_path = Path(csv_path)
-    logger.info(f"--- Starting Pipeline: {model_name} ---")
+    logger.info("--- Starting Pipeline: %s ---", model_name)
 
     # 1. Config Setup
     data_cfg, trainer_cfg, full_config = _parse_configs(model_name, csv_path, epochs, batch_size)
-    logger.info(f"Device: {trainer_cfg.device}")
+    logger.info("Device: %s", trainer_cfg.device)
 
     # 2. Data Loading & Processing
     df = load_and_clean_dataset(data_cfg)
 
     # Split
     stratify = df["_stratify"] if "_stratify" in df.columns else None
-    train_df, val_df = train_test_split(
-        df, test_size=0.2, random_state=42, stratify=stratify
-    )
+    train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, stratify=stratify)
 
     # Process
     processor = PGenProcessor(full_config["data"], list(MULTI_LABEL_COLS))
@@ -119,10 +125,7 @@ def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batc
 
     # 3. Create DataLoaders (Factory)
     train_loader, val_loader = create_data_loaders(
-        config=full_config,
-        df_train=train_df,
-        df_val=val_df,
-        processor=processor
+        config=full_config, df_train=train_df, df_val=val_df, processor=processor
     )
 
     # 4. Model Setup (Factory)
@@ -143,11 +146,11 @@ def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batc
         unc_module = MultiTaskUncertaintyLoss(list(target_dims.keys()))
 
     # Optimization
-    params_to_optimize = list(model.parameters()) + (list(unc_module.parameters()) if unc_module else [])
+    params_to_optimize = list(model.parameters()) + (
+        list(unc_module.parameters()) if unc_module else []
+    )
     optimizer = torch.optim.AdamW(
-        params_to_optimize,
-        lr=trainer_cfg.learning_rate,
-        weight_decay=trainer_cfg.weight_decay
+        params_to_optimize, lr=trainer_cfg.learning_rate, weight_decay=trainer_cfg.weight_decay
     )
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -163,7 +166,7 @@ def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batc
         target_cols=data_cfg.target_cols,
         multi_label_cols=set(data_cfg.multi_label_cols),
         model_name=model_name,
-        uncertainty_module=unc_module
+        uncertainty_module=unc_module,
     )
 
     best_loss = trainer.fit(train_loader, val_loader)
@@ -179,15 +182,21 @@ def train_pipeline(model_name: str, csv_path: str | Path, epochs: int = 50, batc
     config_snapshot = {
         "full_config": full_config,
         "trainer_config": asdict(trainer_cfg),
-        "final_loss": best_loss
+        "final_loss": best_loss,
     }
     with open(DIRS["reports"] / f"{model_name}_final_config.json", "w") as f:
         json.dump(config_snapshot, f, indent=4, default=json_serial_adapter)
 
-    logger.info(f"Pipeline Finished. Model saved at {DIRS['models']}")
+    logger.info("Pipeline Finished. Model saved at %s", DIRS["models"])
 
 
-def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5, epochs: int = 50, batch_size: int | None = None):
+def train_kfold_pipeline(
+    model_name: str,
+    csv_path: str | Path,
+    k_folds: int = 5,
+    epochs: int = 50,
+    batch_size: int | None = None,
+):
     """
     Executes k-Fold Cross Validation Pipeline.
 
@@ -199,7 +208,7 @@ def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5
         batch_size (int): Batch size override.
     """
     csv_path = Path(csv_path)
-    logger.info(f"--- Starting {k_folds}-Fold Cross-Validation: {model_name} ---")
+    logger.info("--- Starting %d-Fold Cross-Validation: %s ---", k_folds, model_name)
 
     # 1. Config & Data Loading
     data_cfg, trainer_cfg, full_config = _parse_configs(model_name, csv_path, epochs, batch_size)
@@ -207,7 +216,7 @@ def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5
 
     # 2. Prepare CV Strategy
     stratify_col = df["_stratify"] if "_stratify" in df.columns else None
-    
+
     if stratify_col is not None:
         # Check minimal class count for stratification
         if df[stratify_col].value_counts().min() < k_folds:
@@ -223,52 +232,51 @@ def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5
 
     fold_metrics = []
     best_overall_loss = float("inf")
-    
+
     # Pre-fit Processor on FULL dataset for consistent vocab
     processor = PGenProcessor(full_config["data"], list(MULTI_LABEL_COLS))
     processor.fit(df)
-    
+
     # Save global encoders
     encoder_path = DIRS["encoders"] / f"encoders_{model_name}.pkl"
     joblib.dump(processor.encoders, encoder_path)
 
     # 3. Iterate Folds
     for fold_idx, (train_idx, val_idx) in enumerate(splits):
-        logger.info(f"=== Fold {fold_idx+1}/{k_folds} ===")
-        
+        logger.info("=== Fold %d/%d ===", fold_idx + 1, k_folds)
+
         train_df = df.iloc[train_idx]
         val_df = df.iloc[val_idx]
-        
+
         # Create Loaders
         train_loader, val_loader = create_data_loaders(
-            config=full_config,
-            df_train=train_df,
-            df_val=val_df,
-            processor=processor
+            config=full_config, df_train=train_df, df_val=val_df, processor=processor
         )
-        
-        # Init Model (Fresh per fold)
+
+        # Init Model
         all_dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
         feat_dims = {k: v for k, v in all_dims.items() if k in data_cfg.feature_cols}
         target_dims = {k: v for k, v in all_dims.items() if k in data_cfg.target_cols}
         dims_payload = {"n_features": feat_dims, "target_dims": target_dims}
-        
+
         model = create_model_instance(full_config, dims_payload)
-        
+
         # Loss & Opt
         unc_module = None
         loss_params = full_config.get("loss", {})
         if loss_params.get("use_uncertainty_loss", False):
             unc_module = MultiTaskUncertaintyLoss(list(target_dims.keys()))
-            
-        params_to_optimize = list(model.parameters()) + (list(unc_module.parameters()) if unc_module else [])
-        optimizer = torch.optim.AdamW(
-            params_to_optimize,
-            lr=trainer_cfg.learning_rate,
-            weight_decay=trainer_cfg.weight_decay
+
+        params_to_optimize = list(model.parameters()) + (
+            list(unc_module.parameters()) if unc_module else []
         )
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3)
-        
+        optimizer = torch.optim.AdamW(
+            params_to_optimize, lr=trainer_cfg.learning_rate, weight_decay=trainer_cfg.weight_decay
+        )
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=3
+        )
+
         # Trainer
         trainer = PGenTrainer(
             model=model,
@@ -278,16 +286,16 @@ def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5
             target_cols=data_cfg.target_cols,
             multi_label_cols=set(data_cfg.multi_label_cols),
             model_name=f"{model_name}_fold{fold_idx}",
-            uncertainty_module=unc_module
+            uncertainty_module=unc_module,
         )
-        
+
         final_loss = trainer.fit(train_loader, val_loader)
         fold_metrics.append(final_loss)
-        
+
         # Save best model logic
         if final_loss < best_overall_loss:
             best_overall_loss = final_loss
-            logger.info(f"New best fold found (Loss: {final_loss:.4f}). Saving as main model.")
+            logger.info("New best fold found (Loss: %.4f). Saving as main model.", final_loss)
             fold_best_path = DIRS["models"] / "model_best.pt"
             prod_path = DIRS["models"] / f"pmodel_{model_name}.pt"
             if fold_best_path.exists():
@@ -297,18 +305,17 @@ def train_kfold_pipeline(model_name: str, csv_path: str | Path, k_folds: int = 5
     # 4. Report Results
     mean_loss = np.mean(fold_metrics)
     std_loss = np.std(fold_metrics)
-    
+
     logger.info("--- Cross-Validation Results ---")
-    logger.info(f"Loss per fold: {[f'{x:.4f}' for x in fold_metrics]}")
-    logger.info(f"Mean Loss: {mean_loss:.4f} ± {std_loss:.4f}")
-    
+    logger.info("Loss per fold: %s", [f"{x:.4f}" for x in fold_metrics])
+    logger.info("Mean Loss: %.4f ± %.4f", mean_loss, std_loss)
+
     report = {
         "k_folds": k_folds,
         "fold_metrics": fold_metrics,
         "mean_loss": mean_loss,
         "std_loss": std_loss,
-        "best_loss": best_overall_loss
+        "best_loss": best_overall_loss,
     }
     with open(DIRS["reports"] / f"{model_name}_cv_results.json", "w") as f:
         json.dump(report, f, indent=4)
-

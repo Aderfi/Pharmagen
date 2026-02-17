@@ -18,7 +18,7 @@ from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
-import pysam  # type: ignore || Solo en GNU/Linux
+import pysam  # type: ignore / GNU/Linux
 
 from src.analysis.ngs_pipeline import PROJECT_ROOT, REF_GENOME_FASTA
 from src.interface.ui import ConsoleIO
@@ -32,7 +32,6 @@ def seleccionar_vcf(vcf_path: Path = RUTA_VCF_DIR) -> str | Path | None:
     """
     Lista y permite seleccionar un archivo VCF.gz del directorio.
     """
-    # Usamos list(path.glob) que es más moderno que glob.glob
     vcf_files = list(vcf_path.glob("*.vcf.gz"))
 
     if not vcf_files:
@@ -46,7 +45,7 @@ def seleccionar_vcf(vcf_path: Path = RUTA_VCF_DIR) -> str | Path | None:
     while True:
         try:
             entrada = input("\nSelecciona el número del paciente (o 'q' para salir): ")
-            if entrada.lower() == 'q':
+            if entrada.lower() == "q":
                 return None
 
             seleccion = int(entrada) - 1
@@ -56,18 +55,19 @@ def seleccionar_vcf(vcf_path: Path = RUTA_VCF_DIR) -> str | Path | None:
         except ValueError:
             ConsoleIO.print_warning("Por favor, introduce un número válido.")
 
+
 def decodificar_genotipo(record, sample_id: str) -> dict[str, Any]:
     """
     Interpreta dinámicamente el genotipo, manejando multialélicos y nulos.
     """
     # Obtener llamada de genotipo (ej: (0, 1) o (None, None))
-    gt_tuple = record.samples[sample_id]['GT']
+    gt_tuple = record.samples[sample_id]["GT"]
 
     # Caso: Dato faltante (./.)
     if None in gt_tuple:
         return {"tipo": "No Llamado/Missing", "alelos": "./."}
 
-    # Mapear índices a bases reales
+    # Mapear índices a bases
     # record.alleles es una tupla con (REF, ALT1, ALT2...)
     # Ej: record.alleles = ('A', 'T', 'G') -> índice 0='A', 1='T', 2='G'
     alelos_decodificados = [record.alleles[idx] for idx in gt_tuple]
@@ -88,7 +88,10 @@ def decodificar_genotipo(record, sample_id: str) -> dict[str, Any]:
 
     return {"tipo": tipo, "alelos": alelos_str}
 
-def procesar_paciente(vcf_path: Path | str, fasta_path: Path, region: str | None = None) -> Generator[dict, None, None]:
+
+def procesar_paciente(
+    vcf_path: Path | str, fasta_path: Path, region: str | None = None
+) -> Generator[dict, None, None]:
     """
     Generador que procesa variantes. Usa 'yield' para eficiencia de memoria.
     Permite filtrar por región (ej: 'chr1:1000-2000').
@@ -96,13 +99,11 @@ def procesar_paciente(vcf_path: Path | str, fasta_path: Path, region: str | None
     if not Path(vcf_path).exists():
         raise FileNotFoundError(f"No existe el VCF: {vcf_path}")
 
-    # Uso de Context Managers (with) para cierre automático de archivos
     with pysam.FastaFile(str(fasta_path)) as genome, pysam.VariantFile(str(vcf_path)) as vcf:
-        sample_id = list(vcf.header.samples)[0]
+        sample_id = next(iter(vcf.header.samples))
         print(f"\n🔬 Analizando: {sample_id} | Archivo: {Path(vcf_path).name}")
         print("-" * 60)
 
-        # fetch permite ir directo a una región si se especifica, o iterar todo si es None
         iterator = vcf.fetch(region=region) if region else vcf
 
         for record in iterator:
@@ -110,7 +111,7 @@ def procesar_paciente(vcf_path: Path | str, fasta_path: Path, region: str | None
             if not record.alts:
                 continue
 
-            # --- VALIDACIÓN DE INTEGRIDAD (Tu lógica original mejorada) ---
+            # --- VALIDACIÓN DE INTEGRIDAD ---
             # start en pysam es 0-based, stop es exclusivo
             try:
                 ref_genome = genome.fetch(record.chrom, record.start, record.stop).upper()
@@ -119,7 +120,9 @@ def procesar_paciente(vcf_path: Path | str, fasta_path: Path, region: str | None
                 continue
 
             if ref_genome != record.ref:
-                print(f"🚨 MISMATCH {record.chrom}:{record.pos}. VCF_REF={record.ref} vs FASTA={ref_genome}")
+                print(
+                    f"🚨 MISMATCH {record.chrom}:{record.pos}. VCF_REF={record.ref} vs FASTA={ref_genome}"
+                )
                 continue
 
             # --- DECODIFICACIÓN ---
@@ -133,10 +136,11 @@ def procesar_paciente(vcf_path: Path | str, fasta_path: Path, region: str | None
                 "alts": record.alts,
                 "quality": record.qual,
                 "genotype": info_gt["alelos"],
-                "zygosity": info_gt["tipo"]
+                "zygosity": info_gt["tipo"],
             }
 
             yield variant_data
+
 
 if __name__ == "__main__":
     archivo_seleccionado = seleccionar_vcf()
@@ -149,7 +153,9 @@ if __name__ == "__main__":
             for variante in procesador:
                 # Aquí puedes filtrar solo lo que te interesa imprimir
                 if "Homocigoto Referencia" not in variante["zygosity"]:
-                    ConsoleIO.print_dna(f" {variante['chrom']}:{variante['pos']} ({variante['ref']}->{variante['alts']})")
+                    ConsoleIO.print_dna(
+                        f" {variante['chrom']}:{variante['pos']} ({variante['ref']}->{variante['alts']})"
+                    )
                     print(f"   └── {variante['zygosity']} [{variante['genotype']}]")
         except Exception as e:
             ConsoleIO.print_error(f"Error durante el procesamiento: {e}")

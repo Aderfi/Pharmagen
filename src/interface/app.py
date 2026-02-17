@@ -1,7 +1,8 @@
-import streamlit as st
-import pandas as pd
-import sys
 from pathlib import Path
+import sys
+
+import pandas as pd
+import streamlit as st
 
 from src.cfg.manager import get_available_models
 from src.model.engine.predict import PGenPredictor
@@ -10,14 +11,11 @@ from src.model.engine.predict import PGenPredictor
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
-    
+
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(
-    page_title="Pharmagen AI",
-    page_icon="💊",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="Pharmagen AI", page_icon="💊", layout="wide", initial_sidebar_state="expanded"
 )
 
 # --- TRADUCCIONES ---
@@ -53,7 +51,7 @@ TR = {
         "footer": "© 2025 Pharmagen Project | Developed by Adrim Hamed Outmani",
         "load_success": "Loaded {model}!",
         "load_error": "Failed to load model: {error}",
-        "detected": "detected"
+        "detected": "detected",
     },
     "es": {
         "sidebar_title": "Control Pharmagen",
@@ -86,12 +84,13 @@ TR = {
         "footer": "© 2025 Proyecto Pharmagen | Desarrollado por Adrim Hamed Outmani",
         "load_success": "¡Modelo {model} cargado!",
         "load_error": "Error al cargar modelo: {error}",
-        "detected": "detectado(s)"
-    }
+        "detected": "detectado(s)",
+    },
 }
 
 # --- ESTILOS CSS ---
-st.markdown("""
+st.markdown(
+    """
 <style>
     .main-header {
         font-size: 2.5rem;
@@ -112,7 +111,9 @@ st.markdown("""
         font-weight: bold;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --- SESSION STATE ---
 if "predictor" not in st.session_state:
@@ -122,9 +123,11 @@ if "current_model" not in st.session_state:
 if "lang" not in st.session_state:
     st.session_state["lang"] = "en"  # Default language
 
+
 def t(key):
     """Helper to get translation."""
     return TR[st.session_state["lang"]].get(key, key)
+
 
 # --- SIDEBAR ---
 with st.sidebar:
@@ -133,26 +136,28 @@ with st.sidebar:
         "🌐 Language / Idioma",
         ["🇬🇧 English", "🇪🇸 Español"],
         index=0 if st.session_state["lang"] == "en" else 1,
-        horizontal=True
+        horizontal=True,
     )
     st.session_state["lang"] = "en" if "English" in lang_option else "es"
-    
+
     st.markdown("---")
     st.image("https://img.icons8.com/color/96/dna-helix.png", width=80)
     st.title(t("sidebar_title"))
-    
+
     available_models = get_available_models()
-    
+
     if not available_models:
         st.error("No models found in models.toml!")
         st.stop()
-        
+
     selected_model = st.selectbox(
-        t("select_model"), 
+        t("select_model"),
         available_models,
-        index=0 if not st.session_state["current_model"] else available_models.index(st.session_state["current_model"])
+        index=0
+        if not st.session_state["current_model"]
+        else available_models.index(st.session_state["current_model"]),
     )
-    
+
     # Load Model Button
     if st.button(t("load_btn"), type="primary"):
         with st.spinner(f"Loading {selected_model}..."):
@@ -193,30 +198,30 @@ tab1, tab2 = st.tabs([t("tab1"), t("tab2")])
 # --- TAB 1: Single Prediction ---
 with tab1:
     st.header(t("single_header"))
-    
+
     with st.form("single_pred_form"):
         col1, col2 = st.columns(2)
-        
+
         inputs = {}
         # Dynamic form generation
         for i, feature in enumerate(predictor.feature_cols):
-            with (col1 if i % 2 == 0 else col2):
+            with col1 if i % 2 == 0 else col2:
                 encoder = predictor.encoders.get(feature)
                 if hasattr(encoder, "classes_") and len(encoder.classes_) < 100:
                     inputs[feature] = st.selectbox(f"{feature}", options=encoder.classes_)
                 else:
                     inputs[feature] = st.text_input(f"{feature}", help=f"Value for {feature}")
-        
+
         submitted = st.form_submit_button(t("predict_btn"))
-        
+
         if submitted:
             with st.spinner(t("analyzing")):
                 result = predictor.predict_single(inputs)
-                
+
             if result:
                 st.success(t("success"))
                 st.markdown(f"### {t('results')}")
-                
+
                 # Display results
                 r_cols = st.columns(len(result))
                 for idx, (k, v) in enumerate(result.items()):
@@ -232,31 +237,31 @@ with tab1:
 # --- TAB 2: Batch Analysis ---
 with tab2:
     st.header(t("batch_header"))
-    
+
     uploaded_file = st.file_uploader(t("upload_label"), type=["csv", "tsv", "txt"])
-    
+
     if uploaded_file:
         try:
-            sep = '\t' if uploaded_file.name.endswith('.tsv') else ','
+            sep = "\t" if uploaded_file.name.endswith(".tsv") else ","
             df = pd.read_csv(uploaded_file, sep=sep)
-            
+
             st.dataframe(df.head(), use_container_width=True)
             st.caption(t("loaded_rows").format(rows=len(df)))
-            
+
             if st.button(t("run_batch_btn")):
                 with st.spinner(t("processing").format(rows=len(df))):
                     results = predictor.predict_dataframe(df)
-                    
+
                 if results:
                     res_df = pd.DataFrame(results)
                     st.success(t("batch_success"))
-                    
+
                     final_df = pd.concat([df.reset_index(drop=True), res_df], axis=1)
-                    
+
                     st.markdown(f"### {t('results_preview')}")
                     st.dataframe(res_df.head(), use_container_width=True)
-                    
-                    csv = final_df.to_csv(index=False).encode('utf-8')
+
+                    csv = final_df.to_csv(index=False).encode("utf-8")
                     st.download_button(
                         label=t("download_btn"),
                         data=csv,

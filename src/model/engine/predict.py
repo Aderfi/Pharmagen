@@ -14,8 +14,8 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.preprocessing import LabelEncoder
+import torch
 
 from src.cfg.manager import DIRS, MULTI_LABEL_COLS, get_model_config
 from src.interface.ui import ProgressBar
@@ -23,6 +23,7 @@ from src.model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 
 logger = logging.getLogger(__name__)
 MIN_SIZE_PBAR = 2000  # Minimum samples to show progress bar
+
 
 class PGenPredictor:
     """
@@ -35,12 +36,15 @@ class PGenPredictor:
         model_name (str): Identifier of the model to load.
         device (str, optional): Computation device ('cpu', 'cuda').
     """
+
     def __init__(self, model_name: str, device: str | None = None):
         self.model_name = model_name
-        self.device = torch.device(device if device else ("cuda" if torch.cuda.is_available() else "cpu"))
+        self.device = torch.device(
+            device if device else ("cuda" if torch.cuda.is_available() else "cpu")
+        )
         self.unknown_token = "__UNKNOWN__"
 
-        logger.info(f"Initializing Predictor for '{model_name}' on {self.device}...")
+        logger.info("Initializing Predictor for %s on %s...", self.model_name, self.device)
 
         # 1. Load Artifacts
         self.config_snapshot = self._load_config_snapshot()
@@ -62,11 +66,11 @@ class PGenPredictor:
         snapshot_path = DIRS["reports"] / f"{self.model_name}_final_config.json"
 
         if snapshot_path.exists():
-            logger.debug(f"Loading config snapshot from {snapshot_path}")
-            with open(snapshot_path, "r") as f:
+            logger.debug("Loading config snapshot from %s", snapshot_path)
+            with open(snapshot_path) as f:
                 return json.load(f)
         else:
-            logger.warning(f"Snapshot not found at {snapshot_path}. Falling back to defaults.")
+            logger.warning("Snapshot not found at %s. Falling back to defaults.", snapshot_path)
             # Partial fallback logic
             return {"model_config": {}}
 
@@ -126,22 +130,22 @@ class PGenPredictor:
             attn_heads=arch_params.get("attn_heads", 4),
             num_attn_layers=arch_params.get("num_attn_layers", 2),
             fm_hidden_dim=arch_params.get("fm_hidden_dim", 64),
-            fm_hidden_layers=arch_params.get("fm_hidden_layers", 1)
+            fm_hidden_layers=arch_params.get("fm_hidden_layers", 1),
         )
 
         # 3. Instantiate & Load Weights
         model = PharmagenDeepFM(config)
 
         # Determine weights path
-        weights_path = DIRS["models"] / "model_best.pt" # Default name
+        weights_path = DIRS["models"] / "model_best.pt"  # Default name
 
         if not weights_path.exists():
             weights_path = DIRS["models"] / f"pmodel_{self.model_name}.pt"
 
         if not weights_path.exists():
-             raise FileNotFoundError(f"Weights not found at {weights_path}")
+            raise FileNotFoundError(f"Weights not found at {weights_path}")
 
-        logger.debug(f"Loading weights from {weights_path}")
+        logger.debug("Loading weights from %s", weights_path)
         state = torch.load(weights_path, map_location=self.device)
 
         if "model_state" in state:
@@ -157,7 +161,7 @@ class PGenPredictor:
         for col, enc in self.encoders.items():
             if isinstance(enc, LabelEncoder):
                 if self.unknown_token in enc.classes_:
-                    indices[col] = int(enc.transform([self.unknown_token])[0]) # type: ignore
+                    indices[col] = int(enc.transform([self.unknown_token])[0])  # type: ignore
                 else:
                     indices[col] = 0
         return indices
@@ -200,7 +204,7 @@ class PGenPredictor:
             return self._decode(outputs)[0]
 
         except Exception as e:
-            logger.error(f"Prediction failed: {e}")
+            logger.error("Prediction failed: %s", e)
             return None
 
     def predict_dataframe(self, df: pd.DataFrame, batch_size: int = 512) -> list[dict[str, Any]]:
@@ -226,12 +230,10 @@ class PGenPredictor:
         # 2. Validate Schema
         missing = [col for col in self.feature_cols if col not in df_clean.columns]
         if missing:
-             logger.error(f"DataFrame missing required columns: {missing}")
-             return []
+            logger.error("DataFrame missing required columns: %s", missing)
+            return []
 
         # 3. Pre-process to CPU Tensors (Vectorized)
-        # We process everything to tensors first (usually fits in CPU RAM),
-        # then stream to GPU in batches.
         tensor_dict = {}
         for col in self.feature_cols:
             tensor_dict[col] = self._prepare_batch_tensor(col, df_clean[col])
@@ -269,10 +271,10 @@ class PGenPredictor:
                     all_results.extend(decoded_batch)
 
                     if use_pbar:
-                        pbar.update(current_batch_size) # type: ignore
+                        pbar.update(current_batch_size)  # type: ignore
             finally:
                 if use_pbar:
-                    pbar.__exit__(None, None, None) # type: ignore
+                    pbar.__exit__(None, None, None)  # type: ignore
 
         return all_results
 
@@ -283,19 +285,19 @@ class PGenPredictor:
         """
         path = Path(file_path)
         if not path.exists():
-            logger.error(f"File not found: {path}")
+            logger.error("File not found: %s", path)
             return []
 
         try:
-            logger.info(f"Reading {path.name}...")
+            logger.info("Reading %s...", path.name)
             # Detect separator
-            sep = '\t' if path.suffix == '.tsv' else ','
+            sep = "\t" if path.suffix == ".tsv" else ","
             df = pd.read_csv(path, sep=sep)
 
             return self.predict_dataframe(df, batch_size)
 
         except Exception as e:
-            logger.error(f"Failed to process file {path}: {e}")
+            logger.error("Failed to process file %s: %s", path, e)
             return []
 
     # ==========================================================================
@@ -328,10 +330,10 @@ class PGenPredictor:
 
         # Safety fallback if unknown token itself is missing in encoder
         if self.unknown_token not in enc.classes_:
-            encoded = np.zeros(len(vals), dtype=int) # All to 0
+            encoded = np.zeros(len(vals), dtype=int)  # All to 0
             known_vals = vals[mask]
             if len(known_vals) > 0:
-                 encoded[mask] = enc.transform(known_vals)
+                encoded[mask] = enc.transform(known_vals)
         else:
             encoded = enc.transform(vals)
 
@@ -351,7 +353,7 @@ class PGenPredictor:
             if col in MULTI_LABEL_COLS:
                 # Multi-label
                 probs = torch.sigmoid(logits)
-                preds = (probs > (1/2)).numpy()
+                preds = (probs > (1 / 2)).numpy()
                 labels = enc.inverse_transform(preds)
                 decoded_cols[col] = [list(x) for x in labels]
             else:

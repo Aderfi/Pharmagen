@@ -26,6 +26,7 @@ class ModelConfig:
         >>> cfg.embedding_dim
         64
     """
+
     # Data Dimensions
     n_features: dict[str, int]
     target_dims: dict[str, int]
@@ -54,20 +55,22 @@ class ModelConfig:
     fm_hidden_dim: int = 128
     fm_dropout: float = 0.1
 
+
 class MLP(nn.Module):
     """
     Generic Multi-Layer Perceptron generator.
 
     Constructs a sequence of Linear -> [Norm] -> Activation -> Dropout.
     """
-    def __init__( # noqa
+
+    def __init__(
         self,
         in_dim: int,
         hidden_dims: list[int],
         dropout: float,
         activation: str,
         use_bn: bool = False,
-        use_ln: bool = False
+        use_ln: bool = False,
     ):
         super().__init__()
         layers = []
@@ -98,6 +101,7 @@ class FactorizationMachine(nn.Module):
     Implements the formula:
     0.5 * ( (sum(x))^2 - sum(x^2) )
     """
+
     def __init__(self, reduce_sum: bool = True):
         super().__init__()
         self.reduce_sum = reduce_sum
@@ -117,6 +121,7 @@ class FactorizationMachine(nn.Module):
         interaction = 0.5 * (square_of_sum - sum_of_squares)
         return interaction
 
+
 class PharmagenDeepFM(nn.Module):
     """
     Hybrid DeepFM Architecture extended with Transformer Encoders.
@@ -135,16 +140,19 @@ class PharmagenDeepFM(nn.Module):
         >>> model = PharmagenDeepFM(cfg)
         >>> out = model(inputs)
     """
+
     def __init__(self, config: ModelConfig):
         super().__init__()
         self.cfg = config
         self.feature_names = list(config.n_features.keys())
 
         # 1. Embeddings
-        self.embeddings = nn.ModuleDict({
-            feat: nn.Embedding(num_embeddings=count, embedding_dim=config.embedding_dim)
-            for feat, count in config.n_features.items()
-        })
+        self.embeddings = nn.ModuleDict(
+            {
+                feat: nn.Embedding(num_embeddings=count, embedding_dim=config.embedding_dim)
+                for feat, count in config.n_features.items()
+            }
+        )
         self.emb_dropout = nn.Dropout(config.embedding_dropout)
 
         # 2. Transformer Feature Extractor
@@ -157,7 +165,7 @@ class PharmagenDeepFM(nn.Module):
                 dropout=config.attn_dropout,
                 activation=config.activation,
                 batch_first=True,
-                norm_first=True
+                norm_first=True,
             )
             self.transformer = TransformerEncoder(encoder_layer, num_layers=config.num_attn_layers)
 
@@ -170,7 +178,7 @@ class PharmagenDeepFM(nn.Module):
             dropout=config.dropout_rate,
             activation=config.activation,
             use_bn=config.use_batch_norm,
-            use_ln=config.use_layer_norm
+            use_ln=config.use_layer_norm,
         )
 
         # 4. FM Path
@@ -187,16 +195,15 @@ class PharmagenDeepFM(nn.Module):
                 hidden_dims=fm_hidden_struct,
                 dropout=config.fm_dropout,
                 activation=config.activation,
-                use_bn=config.use_batch_norm
+                use_bn=config.use_batch_norm,
             )
             fm_out_dim = config.fm_hidden_dim
 
         # 5. Output Heads
         combined_dim = self.deep_mlp.output_dim + fm_out_dim
-        self.heads = nn.ModuleDict({
-            target: nn.Linear(combined_dim, dim)
-            for target, dim in config.target_dims.items()
-        })
+        self.heads = nn.ModuleDict(
+            {target: nn.Linear(combined_dim, dim) for target, dim in config.target_dims.items()}
+        )
 
         self._initialize_weights()
 

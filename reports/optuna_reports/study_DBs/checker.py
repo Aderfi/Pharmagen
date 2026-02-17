@@ -4,7 +4,7 @@ import optuna
 
 # <--- AJUSTA ESTO --->
 # Pon aquí el nombre EXACTO de tu archivo .db
-db_filename = "optuna_Phenotype_Effect_Outcome_10_11_25__15_17.db" 
+db_filename = "optuna_Phenotype_Effect_Outcome_10_11_25__15_17.db"
 
 # Construimos la ruta absoluta para evitar errores de "archivo no encontrado"
 # Asumiendo que el .db está en la misma carpeta que este script
@@ -29,7 +29,7 @@ try:
             print(f"  - Pruebas (trials): {summary.n_trials}")
             print(f"  - Mejor valor: {summary.best_trial.value if summary.best_trial else 'N/A'}")
             print("-" * 20)
-            
+
 except Exception as e:
     print(f"\n❌ Error accediendo a la base de datos: {e}")
     print("Asegúrate de que la ruta al archivo .db es correcta.")

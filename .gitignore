@@ -1,3 +1,8 @@
+# ================================================================
+# .gitignore — Pharmagen
+# Dual-platform: Debian + Windows | Public repository
+# ================================================================
+
 # --- Python & Core ---
 __pycache__/
 *.py[cod]
@@ -6,10 +11,12 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+*.so
 
 # --- Entornos Virtuales ---
 .env/
 .env_pgen/
+.env_*/
 venv/
 env/
 .venv/
@@ -21,10 +28,22 @@ anaconda/
 .idea/
 .DS_Store
 Thumbs.db
+desktop.ini
+*.code-workspace
 
-# --- Datos Sensibles & Bioinformática (CRÍTICO) ---
-# Evita subir datos genómicos por error
-#*.vcf
+# --- Archivos de ruido / temporales ---
+tree.txt
+*.tmp
+*.bak
+*.swp
+*.orig
+
+# ================================================================
+# DATOS — Sensibles o pesados (no subir a repo público)
+# ================================================================
+
+# Datos genómicos / bioinformática
+*.vcf
 *.vcf.gz
 *.tbi
 *.fa
@@ -35,54 +54,61 @@ Thumbs.db
 *.sam
 *.cram
 
-# --- Datos Tabulares y Temporales ---
-# Ignoramos CSV/TSV en general para no subir datos de pacientes
-# Si tienes configs en CSV que SÍ quieres subir, usa 'git add -f archivo.csv'
-#*.csv
-#*.tsv
+# Datos tabulares del proyecto
+# Para subir un archivo específico: git add -f archivo.csv
+*.csv
+*.tsv
 *.xlsx
 *.parquet
 *.feather
 
-# --- Directorios Dinámicos del Proyecto ---
-# Estas carpetas se generan al ejecutar el código/setup
-# Queremos ignorar su contenido, pero quizás mantener la estructura si usas .gitkeep
-#data/raw/*
-#data/processed/*
-data/ref_genome/*
-#cache/*
-#results/*
-#logs/*
-#reports/*
+# Carpeta de datos de entrenamiento completa
+train_data/
 
-# Excepciones: Si usas .gitkeep para mantener la estructura de carpetas vacías
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!results/.gitkeep
-!logs/.gitkeep
+# Carpeta de genomas de referencia
+data/ref_genome/
 
-# --- Modelos & Pesos (Pesados) ---
+# ================================================================
+# MODELOS & PESOS
+# ================================================================
 *.pth
 *.pt
 *.pkl
 *.h5
 *.ckpt
 *.onnx
+*.safetensors
+*.joblib
+*.kv
 model_*.txt
 
-# --- Optuna & Bases de Datos ---
+# Directorio de encoders/modelos entrenados
+src/model/encoders/
+
+# ================================================================
+# REPORTES & ARTEFACTOS GENERADOS
+# ================================================================
 *.db
-#reports/optuna_reports/
-#reports/train_reports/
-
-# --- Configuración de Estado Local ---
-# Ignorar el flag que indica si el setup ya corrió en ESTA máquina
-src/cfg/venv_setup_true
-.code-workspace
-
-# --- Logs ---
+*.sqlite3
 *.log
 npm-debug.log*
+*.html           # reportes generados (ej: rframework.html)
+reports/gi
 
+# ================================================================
+# CONFIGURACIÓN LOCAL DE ESTADO
+# ================================================================
+src/cfg/venv_setup_true
+
+# ================================================================
+# HERRAMIENTAS EXTERNAS
+# ================================================================
 GEMINI.md
 gemini*.json
+.aiexclude
+
+# ================================================================
+# EXCEPCIONES — mantener estructura de carpetas vacías
+# ================================================================
+!.gitkeep
+!**/.gitkeep

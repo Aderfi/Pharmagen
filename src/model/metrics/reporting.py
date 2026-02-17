@@ -1,8 +1,8 @@
 # src/utils/reporting.py
 # Pharmagen - Reporting Module
 import base64
-import json
 from io import BytesIO
+import json
 from pathlib import Path
 from typing import Any
 
@@ -31,8 +31,10 @@ def generate_training_report(history: list[dict[str, Any]], output_dir: Path, mo
     except Exception as e:
         ConsoleIO.print_error(f" Failed to generate HTML report: {e}")
 
+
 def _create_html_report(history: list[dict[str, Any]], output_dir: Path, model_name: str):
     import matplotlib.pyplot as plt
+
     df = pd.DataFrame(history)
 
     # Generate Plots
@@ -40,31 +42,31 @@ def _create_html_report(history: list[dict[str, Any]], output_dir: Path, model_n
 
     # A. Loss Plot
     plt.figure(figsize=(10, 6))
-    plt.plot(df['epoch'], df['train_loss'], label='Train Loss', linewidth=2)
-    plt.plot(df['epoch'], df['val_loss'], label='Val Loss', linewidth=2, linestyle='--')
-    plt.title(f'{model_name} - Loss Evolution')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
+    plt.plot(df["epoch"], df["train_loss"], label="Train Loss", linewidth=2)
+    plt.plot(df["epoch"], df["val_loss"], label="Val Loss", linewidth=2, linestyle="--")
+    plt.title(f"{model_name} - Loss Evolution")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    imgs['loss'] = _fig_to_base64(plt)
+    imgs["loss"] = _fig_to_base64(plt)
     plt.close()
 
     # B. Accuracy Plot (Multi-task)
-    acc_cols = [c for c in df.columns if c.startswith('val_acc_')]
+    acc_cols = [c for c in df.columns if c.startswith("val_acc_")]
 
     if acc_cols:
         plt.figure(figsize=(10, 6))
         for col in acc_cols:
-            label = col.replace('val_acc_', '').replace('_', ' ').title()
-            plt.plot(df['epoch'], df[col], label=label, linewidth=2)
+            label = col.replace("val_acc_", "").replace("_", " ").title()
+            plt.plot(df["epoch"], df[col], label=label, linewidth=2)
 
-        plt.title(f'{model_name} - Accuracy Metrics (Validation)')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.title(f"{model_name} - Accuracy Metrics (Validation)")
+        plt.xlabel("Epoch")
+        plt.ylabel("Accuracy")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
         plt.grid(True, alpha=0.3)
-        imgs['acc'] = _fig_to_base64(plt)
+        imgs["acc"] = _fig_to_base64(plt)
         plt.close()
 
     # C. Build HTML
@@ -108,11 +110,11 @@ def _create_html_report(history: list[dict[str, Any]], output_dir: Path, model_n
                         <span class="stat-label">Total Epochs</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-value">{df['val_loss'].min():.4f}</span>
+                        <span class="stat-value">{df["val_loss"].min():.4f}</span>
                         <span class="stat-label">Best Val Loss</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-value">{df['val_acc_macro'].max():.2%}</span>
+                        <span class="stat-value">{df["val_acc_macro"].max():.2%}</span>
                         <span class="stat-label">Best Macro Accuracy</span>
                     </div>
                 </div>
@@ -121,9 +123,9 @@ def _create_html_report(history: list[dict[str, Any]], output_dir: Path, model_n
             <div class="grid">
                 <div class="card">
                     <h2>📉 Loss History</h2>
-                    <img src="data:image/png;base64,{imgs.get('loss', '')}" alt="Loss Plot" />
+                    <img src="data:image/png;base64,{imgs.get("loss", "")}" alt="Loss Plot" />
                 </div>
-                {f'<div class="card"><h2>🎯 Accuracy History</h2><img src="data:image/png;base64,{imgs["acc"]}" alt="Acc Plot" /></div>' if 'acc' in imgs else ''}
+                {f'<div class="card"><h2>🎯 Accuracy History</h2><img src="data:image/png;base64,{imgs["acc"]}" alt="Acc Plot" /></div>' if "acc" in imgs else ""}
             </div>
 
             <div class="card">
@@ -135,7 +137,7 @@ def _create_html_report(history: list[dict[str, Any]], output_dir: Path, model_n
                                 <th>Epoch</th>
                                 <th>Train Loss</th>
                                 <th>Val Loss</th>
-                                {''.join(f'<th>{c.replace("val_acc_", "")}</th>' for c in acc_cols)}
+                                {"".join(f"<th>{c.replace('val_acc_', '')}</th>" for c in acc_cols)} 
                             </tr>
                         </thead>
                         <tbody>
@@ -147,26 +149,28 @@ def _create_html_report(history: list[dict[str, Any]], output_dir: Path, model_n
         </div>
     </body>
     </html>
-    """
+    """ # noqa
 
     with open(output_dir / f"{model_name}_report.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
+
 def _fig_to_base64(plt_obj):
     buf = BytesIO()
-    plt_obj.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+    plt_obj.savefig(buf, format="png", bbox_inches="tight", dpi=100)
     buf.seek(0)
-    return base64.b64encode(buf.getvalue()).decode('utf-8')
+    return base64.b64encode(buf.getvalue()).decode("utf-8")
+
 
 def _generate_table_rows(df, acc_cols):
     rows = ""
     for _, row in df.iloc[::-1].iterrows():
-        acc_cells = ''.join(f"<td>{row[c]:.2%}</td>" for c in acc_cols)
+        acc_cells = "".join(f"<td>{row[c]:.2%}</td>" for c in acc_cols)
         rows += f"""
         <tr>
-            <td>{int(row['epoch'])}</td>
-            <td>{row['train_loss']:.4f}</td>
-            <td>{row['val_loss']:.4f}</td>
+            <td>{int(row["epoch"])}</td>
+            <td>{row["train_loss"]:.4f}</td>
+            <td>{row["val_loss"]:.4f}</td>
             {acc_cells}
         </tr>
         """

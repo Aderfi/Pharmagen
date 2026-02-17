@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 from datetime import datetime
+import logging
 
 from src.cfg.manager import DIRS
 
@@ -27,13 +27,13 @@ def setup_logging(name="Pharmagen", level=logging.INFO) -> None:
         filename=log_file,
         filemode="a",
         level=level,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(levelname)s - %(message)s",
     )
 
     console = logging.StreamHandler()
     console.setLevel(level)
-    console.setFormatter(logging.Formatter('%(message)s'))
-    logging.getLogger('').addHandler(console)
+    console.setFormatter(logging.Formatter("%(message)s"))
+    logging.getLogger("").addHandler(console)
 
     # Silence noise
     for lib in ["matplotlib", "optuna", "numba"]:

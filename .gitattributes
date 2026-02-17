@@ -1,54 +1,95 @@
-# =======================================================
-# 1. GIT LFS (Large File Storage) - Archivos Binarios
-# =======================================================
-Drug_Compount_processed.tsv filter=lfs diff=lfs merge=lfs -text
-# Modelos de Deep Learning (PyTorch, TensorFlow, ONNX)
-*.pth       filter=lfs diff=lfs merge=lfs -text
-*.pt        filter=lfs diff=lfs merge=lfs -text
-*.ckpt      filter=lfs diff=lfs merge=lfs -text
-*.h5        filter=lfs diff=lfs merge=lfs -text
-*.onnx      filter=lfs diff=lfs merge=lfs -text
-*.safetensors filter=lfs diff=lfs merge=lfs -text
-# Serialización de Python (Pickle, Joblib)
-*.pkl       filter=lfs diff=lfs merge=lfs -text
-*.joblib    filter=lfs diff=lfs merge=lfs -text
-*.kv        filter=lfs diff=lfs merge=lfs -text
-# Bases de Datos (Optuna)
-*.db        filter=lfs diff=lfs merge=lfs -text
-*.sqlite3   filter=lfs diff=lfs merge=lfs -text
-# Datos Comprimidos y Bioinformáticos
-*.gz        filter=lfs diff=lfs merge=lfs -text
-*.zip       filter=lfs diff=lfs merge=lfs -text
-*.parquet   filter=lfs diff=lfs merge=lfs -text
-*.feather   filter=lfs diff=lfs merge=lfs -text
-*.arrow     filter=lfs diff=lfs merge=lfs -text
-*.vcf       filter=lfs diff=lfs merge=lfs -text
-*.fa        filter=lfs diff=lfs merge=lfs -text
-*.fasta     filter=lfs diff=lfs merge=lfs -text
-# =======================================================
-# 2. NORMALIZACIÓN DE FINALES DE LÍNEA (CRLF vs LF)
-# =======================================================
-# Esto es vital si desarrollas en Windows pero despliegas en Linux.
-# Fuerza a que todo el código use 'LF' (estándar Unix/Python) al subirse a Git.
-# Archivos de texto explícitos
-*.py        text eol=lf
-*.toml      text eol=lf
-*.md        text eol=lf
-*.txt       text eol=lf
-*.json      text eol=lf
-*.yaml      text eol=lf
-*.yml       text eol=lf
-*.sh        text eol=lf
-.gitignore  text eol=lf
-.gitattributes text eol=lf
-# Scripts de Windows (mantener CRLF)
-*.bat       text eol=crlf
-*.ps1       text eol=crlf
-# =======================================================
-# 3. LINGUIST (Estadísticas de GitHub)
-# =======================================================
-# Evita que archivos de datos o generados cuenten como "código" en las estadísticas
-*.json      linguist-generated
-*.lock      linguist-generated
-docs/* linguist-documentation
-Drug_ filter=lfs diff=lfs merge=lfs -text
+# ================================================================
+# .gitattributes — Pharmagen
+# Dual-platform: Debian + Windows | Public repository
+# ================================================================
+
+# ================================================================
+# 1. GIT LFS — Binarios y archivos pesados
+# ================================================================
+# Modelos y pesos
+*.pth           filter=lfs diff=lfs merge=lfs -text
+*.pt            filter=lfs diff=lfs merge=lfs -text
+*.ckpt          filter=lfs diff=lfs merge=lfs -text
+*.h5            filter=lfs diff=lfs merge=lfs -text
+*.onnx          filter=lfs diff=lfs merge=lfs -text
+*.safetensors   filter=lfs diff=lfs merge=lfs -text
+*.pkl           filter=lfs diff=lfs merge=lfs -text
+*.joblib        filter=lfs diff=lfs merge=lfs -text
+*.kv            filter=lfs diff=lfs merge=lfs -text
+
+# Bases de datos
+*.db            filter=lfs diff=lfs merge=lfs -text
+*.sqlite3       filter=lfs diff=lfs merge=lfs -text
+
+# Archivos comprimidos y formatos de datos pesados
+*.gz            filter=lfs diff=lfs merge=lfs -text
+*.zip           filter=lfs diff=lfs merge=lfs -text
+*.parquet       filter=lfs diff=lfs merge=lfs -text
+*.feather       filter=lfs diff=lfs merge=lfs -text
+*.arrow         filter=lfs diff=lfs merge=lfs -text
+
+# Datos genómicos (si alguno llega a trackearse explícitamente)
+*.vcf           filter=lfs diff=lfs merge=lfs -text
+*.fa            filter=lfs diff=lfs merge=lfs -text
+*.fasta         filter=lfs diff=lfs merge=lfs -text
+*.bam           filter=lfs diff=lfs merge=lfs -text
+*.sam           filter=lfs diff=lfs merge=lfs -text
+*.cram          filter=lfs diff=lfs merge=lfs -text
+
+# Datos tabulares grandes (si se decide incluir alguno con git add -f)
+*.tsv           filter=lfs diff=lfs merge=lfs -text
+*.csv           filter=lfs diff=lfs merge=lfs -text
+
+# ================================================================
+# 2. NORMALIZACIÓN DE FINALES DE LÍNEA (Def: LF)
+# ================================================================
+
+# Forzar LF para todo el código y texto del proyecto
+*               text=auto
+
+# Código fuente Python → siempre LF
+*.py            text eol=lf
+*.pyi           text eol=lf
+
+# Configuración y metadatos del proyecto
+*.toml          text eol=lf
+*.cfg           text eol=lf
+*.ini           text eol=lf
+*.json          text eol=lf
+*.yaml          text eol=lf
+*.yml           text eol=lf
+
+# Documentación y texto
+*.md            text eol=lf
+*.txt           text eol=lf
+*.rst           text eol=lf
+
+# Scripts de shell → siempre LF (incluso en Windows)
+*.sh            text eol=lf
+
+# Git meta
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+
+# Scripts nativos de Windows → CRLF
+*.bat           text eol=crlf
+*.ps1           text eol=crlf
+*.cmd           text eol=crlf
+
+# ================================================================
+# 3. LING — Estadísticas de GitHub
+# ================================================================
+# Evita que archivos generados o de datos inflen las estadísticas de código
+
+# Datos y configuración generada
+*.json                  linguist-generated
+*.lock                  linguist-generated
+uv.lock                 linguist-generated
+
+# Documentación
+docs/**                 linguist-documentation
+*.md                    linguist-documentation
+
+setup.sh                linguist-other
+setup.ps1               linguist-other
+run_app.sh              linguist-other

@@ -1,8 +1,8 @@
 # src/interface/cli.py
 import datetime
 import logging
-import sys
 from pathlib import Path
+import sys
 
 from src.cfg.manager import DIRS, METADATA, get_available_models
 from src.interface.io import (
@@ -20,6 +20,7 @@ DATE_STAMP = datetime.datetime.now().strftime("%Y_%m_%d")
 # ==============================================================================
 # HELPERS
 # ==============================================================================
+
 
 def _select_model() -> str:
     """Interactively select a model from configuration."""
@@ -40,9 +41,11 @@ def _select_model() -> str:
                 return models[idx]
         ConsoleIO.print_error("Invalid selection.")
 
+
 # ==============================================================================
 # WORKFLOWS
 # ==============================================================================
+
 
 def _run_advanced_analysis():
     """Advanced analysis workflow (placeholder)."""
@@ -54,18 +57,24 @@ def _run_advanced_analysis():
     print("  • SHAP value visualizations")
     print("  • Performance metrics dashboard")
 
+
 def _run_genomic_processing():
     """NGS Genomic Data Processing Workflow"""
     ConsoleIO.print_header("Pharmagen NGS Processing Module")
     ConsoleIO.print_info("This module will provide:")
     with Spinner("Running NGS Processing Pipeline..."):
         from src.analysis.ngs_pipeline import run_ngs_pipeline
-    r1 = ConsoleIO.input_path("Input R1 Path", must_exist=True, file_extensions=[".fastq", ".fq", ".fastq.gz", ".fq.gz"])
-    r2 = ConsoleIO.input_path("Input R2 Path", must_exist=True, file_extensions=[".fastq", ".fq", ".fastq.gz", ".fq.gz"])
+    r1 = ConsoleIO.input_path(
+        "Input R1 Path", must_exist=True, file_extensions=[".fastq", ".fq", ".fastq.gz", ".fq.gz"]
+    )
+    r2 = ConsoleIO.input_path(
+        "Input R2 Path", must_exist=True, file_extensions=[".fastq", ".fq", ".fastq.gz", ".fq.gz"]
+    )
     sample_name = input("Sample Name: ").strip()
     threads_str = input("Number of Threads [default -> 4]: ").strip()
     threads = int(threads_str) if threads_str.isdigit() else 4
     run_ngs_pipeline(r1=r1, r2=r2, sample_name=sample_name, threads=threads)
+
 
 def _run_training_flow():
     """Interactive Training Workflow."""
@@ -93,6 +102,7 @@ def _run_training_flow():
     elif mode == "2":
         _run_optuna_training(model_name, csv_path)
 
+
 def _run_standard_training(model_name: str, csv_path: Path):
     epochs_str = input("Epochs [default -> 50]: ").strip()
     epochs = int(epochs_str) if epochs_str.isdigit() else 50
@@ -104,13 +114,13 @@ def _run_standard_training(model_name: str, csv_path: Path):
         train_pipeline(model_name=model_name, csv_path=csv_path, epochs=epochs)
         ConsoleIO.print_success("Training Pipeline Completed Successfully.")
     except Exception as e:
-        logger.error(f"Training failed: {e}", exc_info=True)
+        logger.exception("Training failed: %s", e)
         ConsoleIO.print_error(f"Training failed. Check logs. Error: {e}")
+
 
 def _run_optuna_training(model_name: str, csv_path: Path):
 
     from model.engine.optuna_tuner import OptunaOrchestrator, TunerConfig
-
     from src.cfg.manager import MULTI_LABEL_COLS, get_model_config
     from src.data.data_handler import DataConfig
 
@@ -136,13 +146,13 @@ def _run_optuna_training(model_name: str, csv_path: Path):
             target_cols=data_dict["targets"],
             multi_label_cols=list(MULTI_LABEL_COLS),
             stratify_col=data_dict.get("stratify_col"),
-            num_workers=4
+            num_workers=4,
         )
 
         tuner_cfg = TunerConfig(
             study_name=f"{model_name}_interactive",
             n_trials=n_trials,
-            storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}"
+            storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}",
         )
 
         # 3. Launch Orchestrator
@@ -153,8 +163,9 @@ def _run_optuna_training(model_name: str, csv_path: Path):
         ConsoleIO.print_info(f"Best Params: {study.best_params}")
 
     except Exception as e:
-        logger.error(f"Optimization failed: {e}", exc_info=True)
+        logger.exception("Optimization failed: %s", e)
         ConsoleIO.print_error(f"Optimization failed: {e}")
+
 
 def _run_prediction_flow():
     """Interactive Prediction Workflow."""
@@ -192,8 +203,9 @@ def _run_prediction_flow():
         ConsoleIO.print_error(f"Model artifacts not found: {e}")
         ConsoleIO.print_info("Tip: Run Training first.")
     except Exception as e:
-        logger.error(f"Prediction error: {e}", exc_info=True)
+        logger.exception("Prediction error: %s", e)
         ConsoleIO.print_error(f"Unexpected error: {e}")
+
 
 def _interactive_predict_loop(predictor):
     print("\n(Type 'q' to cancel)")
@@ -203,7 +215,7 @@ def _interactive_predict_loop(predictor):
 
     for feature in features:
         val = input(f"Value for '{feature}': ").strip()
-        if val.lower() == 'q':
+        if val.lower() == "q":
             return
         inputs[feature] = val
 
@@ -218,6 +230,7 @@ def _interactive_predict_loop(predictor):
     except Exception as e:
         ConsoleIO.print_error(f"Prediction logic failed: {e}")
 
+
 def _batch_predict_flow(predictor):
     path = ConsoleIO.input_path("Input CSV/TSV Path")
 
@@ -225,19 +238,22 @@ def _batch_predict_flow(predictor):
         results = predictor.predict_file(path)
 
     if results is None:
-        return # Error already handled in predict_file likely
+        return  # Error already handled in predict_file likely
 
     out_name = f"{path.stem}_preds_{DATE_STAMP}.csv"
     out_path = path.parent / out_name
 
     # Save results
     import pandas as pd
+
     pd.DataFrame(results).to_csv(out_path, index=False)
     ConsoleIO.print_success(f"Predictions saved to: {out_path}")
+
 
 # ==============================================================================
 # MAIN MENU LOOP
 # ==============================================================================
+
 
 def main_menu_loop():
     """Main interactive menu loop."""
@@ -284,6 +300,7 @@ def main_menu_loop():
                 sys.exit(0)
         else:
             ConsoleIO.print_error("Invalid option - please select 1-5")
+
 
 if __name__ == "__main__":
     main_menu_loop()
