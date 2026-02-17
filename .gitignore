@@ -99,6 +99,7 @@ reports/gi
 # CONFIGURACIÓN LOCAL DE ESTADO
 # ================================================================
 src/cfg/venv_setup_true
+BACKUPS/*
 
 # ================================================================
 # HERRAMIENTAS EXTERNAS
