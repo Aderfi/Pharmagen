@@ -101,6 +101,7 @@ reports/gi
 src/cfg/venv_setup_true
 BACKUPS/*
 train_data/
+.vscode/
 
 # ================================================================
 # HERRAMIENTAS EXTERNAS
