@@ -197,16 +197,21 @@ class PGenPredictor:
         """
         model_inputs = {}
         try:
+            # Pre-normalize input keys for efficient lookup (O(1) instead of O(n) per column)
+            # Note: If multiple keys differ only by case, the last one wins
+            input_dict_lower = {k.lower(): v for k, v in input_dict.items()}
+            
+            # Detect case collisions for better error messages
+            if len(input_dict_lower) < len(input_dict):
+                logger.warning(
+                    "Input dictionary contains keys that differ only in case. "
+                    "Some values may be overwritten during normalization."
+                )
+            
             for col in self.feature_cols:
-                # Case insensitive lookup
-                val = input_dict.get(col)
-                if val is None:
-                    # Try manual case match
-                    for k, v in input_dict.items():
-                        if k.lower() == col:
-                            val = v
-                            break
-
+                # Direct lookup with pre-normalized keys
+                val = input_dict_lower.get(col)
+                
                 if val is None:
                     raise ValueError(f"Missing input feature: {col}")
 
@@ -232,18 +237,18 @@ class PGenPredictor:
         - Memory safety for large DataFrames
 
         Args:
-            df (pd.DataFrame): Input data.
+            df (pd.DataFrame): Input data. Note: Column names will be normalized
+                to lowercase for processing but the original DataFrame is not modified.
             batch_size (int): Inference batch size.
 
         Returns:
             list[dict]: List of prediction dictionaries.
         """
-        # 1. Normalize columns
-        df_clean = df.copy()
-        df_clean.columns = df_clean.columns.str.lower().str.strip()
+        # 1. Normalize columns (use rename for non-destructive operation)
+        df_normalized = df.rename(columns=lambda x: x.lower().strip())
 
         # 2. Validate Schema
-        missing = [col for col in self.feature_cols if col not in df_clean.columns]
+        missing = [col for col in self.feature_cols if col not in df_normalized.columns]
         if missing:
             logger.error("DataFrame missing required columns: %s", missing)
             return []
@@ -251,10 +256,10 @@ class PGenPredictor:
         # 3. Pre-process to CPU Tensors (Vectorized)
         tensor_dict = {}
         for col in self.feature_cols:
-            tensor_dict[col] = self._prepare_batch_tensor(col, df_clean[col])
+            tensor_dict[col] = self._prepare_batch_tensor(col, df_normalized[col])
 
         # 4. Batch Loop
-        num_samples = len(df_clean)
+        num_samples = len(df)
         all_results = []
 
         # Iteration Strategy

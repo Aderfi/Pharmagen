@@ -39,6 +39,15 @@ RAW_DIR = Path("data/raw/variantAnnotations")
 PROCESSED_DIR = Path("data/processed")
 OUTPUT_FILE = PROCESSED_DIR / "final_training_data.tsv"
 
+# Pre-compiled regex pattern for drug salt removal (performance optimization)
+_SALT_PATTERN = re.compile(
+    r"\b(?:hydro(?:chloride|bromide|chlorid)|"
+    r"(?:di)?(?:sodium|potassium)|calcium|lithium|"
+    r"sul(?:fate|phate)|phosphate|acetate|maleate|tartrate|citrate|"
+    r"fumarate|mesylate|succinate|nitrate|oxide|"
+    r"(?:tri|di|mono)hydrate|hcl)\b"
+)
+
 # --- HELPER FUNCTIONS ---
 
 
@@ -47,35 +56,7 @@ def normalize_drug_names(text: str) -> str:
     if pd.isna(text):
         return "unknown"
     clean = str(text).lower().strip()
-    salts_to_remove = [
-        r"\bhydrochloride\b",
-        r"\bhydrobromide\b",
-        r"\bhydrochlorid\b",
-        r"\bsodium\b",
-        r"\bpotassium\b",
-        r"\bcalcium\b",
-        r"\blithium\b",
-        r"\bsulfate\b",
-        r"\bsulphate\b",
-        r"\bphosphate\b",
-        r"\bacetate\b",
-        r"\bmaleate\b",
-        r"\btartrate\b",
-        r"\bcitrate\b",
-        r"\bfumarate\b",
-        r"\bmesylate\b",
-        r"\bsuccinate\b",
-        r"\bnitrate\b",
-        r"\boxide\b",
-        r"\btrihydrate\b",
-        r"\bdihydrate\b",
-        r"\bmonohydrate\b",
-        r"\bdisodium\b",
-        r"\bdipotassium\b",
-        r"\bhcl\b",
-    ]
-    salt_pattern = "|".join(salts_to_remove)
-    clean = re.sub(salt_pattern, "", clean)
+    clean = _SALT_PATTERN.sub("", clean)
     return clean.strip()
 
 
