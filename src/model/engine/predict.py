@@ -198,7 +198,15 @@ class PGenPredictor:
         model_inputs = {}
         try:
             # Pre-normalize input keys for efficient lookup (O(1) instead of O(n) per column)
+            # Note: If multiple keys differ only by case, the last one wins
             input_dict_lower = {k.lower(): v for k, v in input_dict.items()}
+            
+            # Detect case collisions for better error messages
+            if len(input_dict_lower) < len(input_dict):
+                logger.warning(
+                    "Input dictionary contains keys that differ only in case. "
+                    "Some values may be overwritten during normalization."
+                )
             
             for col in self.feature_cols:
                 # Direct lookup with pre-normalized keys
