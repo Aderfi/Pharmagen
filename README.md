@@ -1,6 +1,6 @@
 # 💊 Pharmagen
 
-![Pharmagen Logo](./cache/dna_20.gif)
+![Pharmagen Logo](./cache/dna.gif)
 
 > **Pharmacogenetic Prediction and Therapeutic Efficacy via Deep Learning.**
 
