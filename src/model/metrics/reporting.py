@@ -163,15 +163,15 @@ def _fig_to_base64(plt_obj):
 
 
 def _generate_table_rows(df, acc_cols):
-    rows = ""
-    for _, row in df.iloc[::-1].iterrows():
+    row_list = []
+    for row in df.iloc[::-1].to_dict('records'):
         acc_cells = "".join(f"<td>{row[c]:.2%}</td>" for c in acc_cols)
-        rows += f"""
+        row_list.append(f"""
         <tr>
             <td>{int(row["epoch"])}</td>
             <td>{row["train_loss"]:.4f}</td>
             <td>{row["val_loss"]:.4f}</td>
             {acc_cells}
         </tr>
-        """
-    return rows
+        """)
+    return "".join(row_list)

@@ -17,23 +17,23 @@ The system integrates a comprehensive pipeline ranging from raw genomic file pro
 
 ## 🚀 Key Features
 
-*   **Hybrid DeepFM Architecture:** Combines the memorization capability of low-order interactions with the generalization power of deep neural networks to model drug-gene relationships.
-*   **Granular Clinical Outcomes:** Predicts specific pharmacological impacts (e.g., *"PK: Poor Metabolizer"*, *"Toxicity: High Risk"*), not just generic associations.
-*   **Multi-Label Inference:** Capable of identifying multiple simultaneous effects (e.g., Low Efficacy AND Toxicity) for a single drug-variant pair.
-*   **Integrated Bioinformatics Pipeline:** Tools for read cleaning (QC), alignment, and variant calling for Next-Generation Sequencing (NGS) data.
-*   **Automated Optimization (AutoML):** Native integration with **Optuna** for efficient model hyperparameter search.
-*   **Interactive Web Interface:** A modern **Streamlit** dashboard for single-patient and batch cohort analysis.
+* **Hybrid DeepFM Architecture:** Combines the memorization capability of low-order interactions with the generalization power of deep neural networks to model drug-gene relationships.
+* **Granular Clinical Outcomes:** Predicts specific pharmacological impacts (e.g., *"PK: Poor Metabolizer"*, *"Toxicity: High Risk"*), not just generic associations.
+* **Multi-Label Inference:** Capable of identifying multiple simultaneous effects (e.g., Low Efficacy AND Toxicity) for a single drug-variant pair.
+* **Integrated Bioinformatics Pipeline:** Tools for read cleaning (QC), alignment, and variant calling for Next-Generation Sequencing (NGS) data.
+* **Automated Optimization (AutoML):** Native integration with **Optuna** for efficient model hyperparameter search.
+* **Interactive Web Interface:** A modern **Streamlit** dashboard for single-patient and batch cohort analysis.
 
 ---
 
 ## 📋 System Requirements
 
-*   **Operating System:** Linux (Recommended/Ubuntu), macOS, Windows (WSL2 recommended).
-*   **Python:** Version **3.10** (Strict).
-*   **Hardware:**
-    *   CPU: Minimum 4 cores.
-    *   RAM: 8GB (16GB+ recommended for training).
-    *   GPU: NVIDIA CUDA-compatible (Optional, but highly recommended for training).
+* **Operating System:** Linux (Recommended/Ubuntu), macOS, Windows (WSL2 recommended).
+* **Python:** Version **3.10** (Strict).
+* **Hardware:**
+  * CPU: Minimum 4 cores.
+    * RAM: 8GB (16GB+ recommended for training).
+    * GPU: NVIDIA CUDA-compatible (Optional, but highly recommended for training).
 
 ---
 
@@ -77,6 +77,7 @@ To activate the environment with `uv`: `uv run python main.py [args]`
 For standard environment: `python main.py [args]`
 
 ### 1. Interactive Mode (Menu)
+
 Ideal for exploring functionalities without memorizing commands.
 
 ```bash
@@ -84,6 +85,7 @@ python main.py --mode menu
 ```
 
 ### 2. Data Preparation (ETL)
+
 Generate the master training dataset from raw PharmGKB annotations.
 
 ```bash
@@ -91,6 +93,7 @@ uv run python src/data/etl_pipeline.py
 ```
 
 ### 3. Model Training
+
 Train the model using the processed data.
 
 ```bash
@@ -102,6 +105,7 @@ python main.py --mode train --model Phenotype_Effect_Outcome --input data/proces
 ```
 
 ### 4. Launch Web Interface
+
 Start the Streamlit dashboard to visualize predictions.
 
 ```bash
@@ -114,11 +118,11 @@ Start the Streamlit dashboard to visualize predictions.
 
 For further details, see [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md).
 
-*   `src/`: Core source code (models, pipeline, CLI).
-*   `config/`: TOML configuration files (paths, hyperparameters).
-*   `data/`: Data storage (raw, processed, dicts).
-*   `reports/`: Training outputs, plots, and Optuna reports.
-*   `tests/`: Unit and integration tests.
+* `src/`: Core source code (models, pipeline, CLI).
+* `config/`: TOML configuration files (paths, hyperparameters).
+* `data/`: Data storage (raw, processed, dicts).
+* `reports/`: Training outputs, plots, and Optuna reports.
+* `tests/`: Unit and integration tests.
 
 ---
 
@@ -126,11 +130,11 @@ For further details, see [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md).
 
 Contributions are welcome. Please open an *issue* to discuss major changes before submitting a *pull request*.
 
-1.  Fork the project.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+1. Fork the project.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
 ---
 
