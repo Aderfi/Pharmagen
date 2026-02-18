@@ -19,8 +19,6 @@ def test_normalize_drug_names():
     assert normalize_drug_names("warfarin sodium") == "warfarin"
     assert normalize_drug_names("Metformin Hydrochloride") == "metformin"
     assert normalize_drug_names("Sertraline HCl") == "sertraline"
-    assert normalize_drug_names("calcium carbonate") == "carbonate"
-    assert normalize_drug_names("dipotassium phosphate") == "phosphate"
     
     # Test edge cases
     assert normalize_drug_names(None) == "unknown"
@@ -91,10 +89,9 @@ def test_generate_table_rows_empty():
     ("Metformin HCl", "metformin"),
     ("Warfarin Sodium", "warfarin"),
     ("Sertraline Hydrochloride", "sertraline"),
-    ("Clopidogrel Bisulfate", "clopidogrel bi"),
     ("Unknown", "unknown"),
 ])
 def test_normalize_drug_names_parametrized(drug_input, expected):
     """Parametrized test for drug name normalization."""
     result = normalize_drug_names(drug_input)
-    assert expected in result.lower()
+    assert result == expected

@@ -229,17 +229,18 @@ class PGenPredictor:
         - Memory safety for large DataFrames
 
         Args:
-            df (pd.DataFrame): Input data.
+            df (pd.DataFrame): Input data. Note: Column names will be normalized
+                to lowercase for processing but the original DataFrame is not modified.
             batch_size (int): Inference batch size.
 
         Returns:
             list[dict]: List of prediction dictionaries.
         """
-        # 1. Normalize columns (in-place for efficiency)
-        df.columns = df.columns.str.lower().str.strip()
+        # 1. Normalize columns (use rename for non-destructive operation)
+        df_normalized = df.rename(columns=lambda x: x.lower().strip())
 
         # 2. Validate Schema
-        missing = [col for col in self.feature_cols if col not in df.columns]
+        missing = [col for col in self.feature_cols if col not in df_normalized.columns]
         if missing:
             logger.error("DataFrame missing required columns: %s", missing)
             return []
@@ -247,7 +248,7 @@ class PGenPredictor:
         # 3. Pre-process to CPU Tensors (Vectorized)
         tensor_dict = {}
         for col in self.feature_cols:
-            tensor_dict[col] = self._prepare_batch_tensor(col, df[col])
+            tensor_dict[col] = self._prepare_batch_tensor(col, df_normalized[col])
 
         # 4. Batch Loop
         num_samples = len(df)
