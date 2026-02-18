@@ -102,6 +102,7 @@ src/cfg/venv_setup_true
 BACKUPS/*
 train_data/
 .vscode/
+*cache/
 
 # ================================================================
 # HERRAMIENTAS EXTERNAS

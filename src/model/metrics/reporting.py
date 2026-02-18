@@ -1,5 +1,5 @@
-# src/utils/reporting.py
-# Pharmagen - Reporting Module
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2025  Adrim Hamed Outmani
 import base64
 from io import BytesIO
 import json
