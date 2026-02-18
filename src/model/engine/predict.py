@@ -197,16 +197,13 @@ class PGenPredictor:
         """
         model_inputs = {}
         try:
+            # Pre-normalize input keys for efficient lookup (O(1) instead of O(n) per column)
+            input_dict_lower = {k.lower(): v for k, v in input_dict.items()}
+            
             for col in self.feature_cols:
-                # Case insensitive lookup
-                val = input_dict.get(col)
-                if val is None:
-                    # Try manual case match
-                    for k, v in input_dict.items():
-                        if k.lower() == col:
-                            val = v
-                            break
-
+                # Direct lookup with pre-normalized keys
+                val = input_dict_lower.get(col)
+                
                 if val is None:
                     raise ValueError(f"Missing input feature: {col}")
 
@@ -238,12 +235,11 @@ class PGenPredictor:
         Returns:
             list[dict]: List of prediction dictionaries.
         """
-        # 1. Normalize columns
-        df_clean = df.copy()
-        df_clean.columns = df_clean.columns.str.lower().str.strip()
+        # 1. Normalize columns (in-place for efficiency)
+        df.columns = df.columns.str.lower().str.strip()
 
         # 2. Validate Schema
-        missing = [col for col in self.feature_cols if col not in df_clean.columns]
+        missing = [col for col in self.feature_cols if col not in df.columns]
         if missing:
             logger.error("DataFrame missing required columns: %s", missing)
             return []
@@ -251,10 +247,10 @@ class PGenPredictor:
         # 3. Pre-process to CPU Tensors (Vectorized)
         tensor_dict = {}
         for col in self.feature_cols:
-            tensor_dict[col] = self._prepare_batch_tensor(col, df_clean[col])
+            tensor_dict[col] = self._prepare_batch_tensor(col, df[col])
 
         # 4. Batch Loop
-        num_samples = len(df_clean)
+        num_samples = len(df)
         all_results = []
 
         # Iteration Strategy

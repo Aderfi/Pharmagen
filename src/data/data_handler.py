@@ -264,8 +264,8 @@ def clean_dataset_content(
         series = df[col].fillna(unknown_token).astype(str).str.strip().str.lower()
 
         if col in multi_label_set:
-            # Normalize delimiters to pipe '|' for multi-label consistency
-            df[col] = series.apply(lambda x: RE_SPLITTERS.sub("|", x))
+            # Normalize delimiters to pipe '|' for multi-label consistency (vectorized)
+            df[col] = series.str.replace(RE_SPLITTERS, "|", regex=True)
         else:
             df[col] = series
 
