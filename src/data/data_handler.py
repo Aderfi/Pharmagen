@@ -172,7 +172,6 @@ class PGenDataset(Dataset):
     """
     Zero-copy PyTorch Dataset.
     """
-
     def __init__(
         self,
         data_payload: dict[str, torch.Tensor],
@@ -256,15 +255,12 @@ def clean_dataset_content(
     df.columns = df.columns.str.lower().str.strip()
 
     # 2. Vectorized String Cleaning
-    # Prepare set for O(1) lookup
     multi_label_set = {c.lower() for c in (multi_label_cols or [])}
 
     for col in df.columns:
-        # Fast conversion to string and lowercasing
         series = df[col].fillna(unknown_token).astype(str).str.strip().str.lower()
 
         if col in multi_label_set:
-            # Normalize delimiters to pipe '|' for multi-label consistency
             df[col] = series.apply(lambda x: RE_SPLITTERS.sub("|", x))
         else:
             df[col] = series

@@ -7,7 +7,7 @@ name = "Pharmagen"
 version = "1.0-rc1"
 description = "Software de predicción farmacogenética y eficacia terapéutica mediante Deep Learning."
 readme = "README.md"
-requires-python = ">=3.10, <3.11"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "Adrim Hamed Outmani", email = "adrimh.outmani@gmail.com" }]
 
@@ -30,12 +30,11 @@ classifiers = [
 dependencies = [
   "torch>=2.10.0",
   "numpy>=1.26.0",
-  "pandas>=2.2.0",
+  "pandas>=3.0.0",
   "scikit-learn>=1.5.0",
   "joblib>=1.4.0",
   "biopython>=1.84",
   "tqdm>=4.66.0",
-  "tomli>=2.0.2",
   "rapidfuzz>=3.9.0",
   "packaging>=24.0",
 ]
@@ -68,7 +67,7 @@ include = ["pharmagen*"]
 # =============================================================================
 [tool.ruff]
 
-target-version = "py310"
+target-version = "py311"
 line-length    = 100
 
 exclude = [
@@ -115,6 +114,7 @@ ignore = [
   "N806",   # variable lowercase — idem
   "RUF003",
   "N812",
+  "F401",
 ]
 
 fixable   = ["ALL"]

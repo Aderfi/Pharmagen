@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Pharmagen - Pharmacogenetic Prediction and Therapeutic Efficacy via Deep Learning
 # Copyright (C) 2025  Adrim Hamed Outmani
 #

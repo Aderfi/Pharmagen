@@ -28,7 +28,7 @@ import re
 import pandas as pd
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from src.interface.ui import ConsoleIO  #noqa I001
+from src.interface.ui import ConsoleIO
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -38,8 +38,6 @@ logger = logging.getLogger(__name__)
 RAW_DIR = Path("data/raw/variantAnnotations")
 PROCESSED_DIR = Path("data/processed")
 OUTPUT_FILE = PROCESSED_DIR / "final_training_data.tsv"
-
-# --- HELPER FUNCTIONS ---
 
 
 def normalize_drug_names(text: str) -> str:
@@ -113,7 +111,6 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     ]
 
     try:
-        # Nota: Population Phenotypes suele estar en var_drug_ann y var_pheno_ann
         df_drug = pd.read_csv(
             RAW_DIR / "var_drug_ann.tsv",
             sep="\t",
@@ -155,7 +152,6 @@ def get_phenotype_category(row: pd.Series) -> str:
     cat = clean_text(row.get("Phenotype Category", ""))
     sig = clean_text(row.get("Significance", ""))
 
-    # Filtro de significancia
     if sig in ["no", "none", "not associated"]:
         return "No_Association"
 
@@ -168,7 +164,6 @@ def get_phenotype_category(row: pd.Series) -> str:
     if "dosage" in cat:
         return "Dosage"
 
-    # Si es significativo pero no cae en categoría clara
     if sig == "yes":
         return "Association_General"
 
@@ -188,7 +183,7 @@ def get_direction(row: pd.Series) -> str:
     if any(x in d for x in ["decreased", "lower", "slower", "reduced"]):
         return "Decreased"
 
-    return "Associated"  # Dirección no especificada pero existe relación
+    return "Associated"
 
 
 def get_phenotype_detail(row: pd.Series) -> str:
@@ -205,7 +200,6 @@ def get_phenotype_detail(row: pd.Series) -> str:
     if category_spec == "unknown" and phenotype_desc == "unknown":
         return clean_text(row.get("Phenotype Category", "unknown"))
 
-    # Construcción del detalle
     # Limpieza básica de ruido en Phenotype
     phenotype_desc = re.sub(r"^(risk|severity|likelihood) of\s+", "", phenotype_desc)
 
@@ -289,9 +283,6 @@ def run_etl():
     dir_bin = mlb_dir.fit_transform(df_grouped["Target_Direction"])
     dir_cols = [f"Dir_{c}" for c in mlb_dir.classes_]
     df_dir = pd.DataFrame(dir_bin, columns=dir_cols)
-
-    # Lista de strings para análisis o embeddings de texto futuros
-    # "raw" para no explotar la memoria.
 
     # Final Join
     df_final = pd.concat([df_grouped[[*group_keys, "Target_Detail"]], df_type, df_dir], axis=1)

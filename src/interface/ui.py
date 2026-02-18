@@ -9,12 +9,7 @@ import shutil
 import sys
 import threading
 import time
-from typing import Any, Literal
-
-if python_version := sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
+from typing import Any, Literal, Self
 
 
 class MessageType(Enum):

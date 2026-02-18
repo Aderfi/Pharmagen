@@ -17,6 +17,7 @@ build/
 .env/
 .env_pgen/
 .env_*/
+.venv*/
 venv/
 env/
 .venv/
