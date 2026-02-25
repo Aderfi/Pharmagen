@@ -17,7 +17,9 @@
 import datetime
 import logging
 from pathlib import Path
+import readline
 import sys
+import textwrap
 
 from src.cfg.manager import DIRS, METADATA, get_available_models
 from src.interface.io import (
@@ -274,47 +276,52 @@ def main_menu_loop():
     """Main interactive menu loop."""
     logger.info("Starting interactive menu")
     print_gnu_notice()
+
     ConsoleIO.print_header("Pharmagen - Main Menu")
     ConsoleIO.print_info(f" Version: {METADATA.get('version', 'Not Available')}", metadata=True)
     ConsoleIO.print_info(f" Authors: {METADATA.get('authors', 'Not Available')}", metadata=True)
     ConsoleIO.print_divider("=")
+
+    MENU_TEXT = textwrap.dedent("""\
+            1. Genomic Processing (ETL)
+            2. Train Models (Deep Learning)
+            3. Predict (Inference)
+            4. Advanced Analysis
+
+            5. Exit
+
+         Type 'show w' for warranty details
+         Type 'show c' for license conditions\
+    """)
+
     while True:
-        print("  1. Genomic Processing (ETL)")
-        print("  2. Train Models (Deep Learning)")
-        print("  3. Predict (Inference)")
-        print("  4. Advanced Analysis")
-        print("  5. Exit")
-        print()
-        print("  Type 'show w' for warranty details")
-        print("  Type 'show c' for license conditions")
+        print(MENU_TEXT)
         ConsoleIO.print_divider("=")
 
         choice = input("Select option (1-5): ").strip()
 
-        # Easter eggs for license info
-        if choice == "show w":
-            print_warranty_details()
-            continue
-        if choice == "show c":
-            print_conditions_details()
-            continue
+        match choice:
+            case "show w":
+                print_warranty_details()
+            case "show c":
+                print_conditions_details()
 
-        # Main menu options
-        if choice == "1":
-            _run_genomic_processing()
-        elif choice == "2":
-            _run_training_flow()
-        elif choice == "3":
-            _run_prediction_flow()
-        elif choice == "4":
-            _run_advanced_analysis()
-        elif choice == "5":
-            if ConsoleIO.confirm("Are you sure you want to exit?", default=False):
-                logger.info("User exit")
-                ConsoleIO.print_info("Goodbye!  👋")
-                sys.exit(0)
-        else:
-            ConsoleIO.print_error("Invalid option - please select 1-5")
+            # Main menu options
+            case "1":
+                _run_genomic_processing()
+            case "2":
+                _run_training_flow()
+            case "3":
+                _run_prediction_flow()
+            case "4":
+                _run_advanced_analysis()
+            case "5":
+                if ConsoleIO.confirm("Are you sure you want to exit?", default=False):
+                    logger.info("User exit")
+                    ConsoleIO.print_info("Goodbye!  👋")
+                    sys.exit(0)
+            case _:
+                ConsoleIO.print_error("Invalid option - please select 1-5")
 
 
 if __name__ == "__main__":

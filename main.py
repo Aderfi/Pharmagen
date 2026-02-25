@@ -18,6 +18,7 @@
 import argparse
 import logging
 from pathlib import Path
+import readline
 import sys
 
 import pandas as pd
