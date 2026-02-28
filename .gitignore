@@ -50,6 +50,7 @@ tree.txt
 *.fa
 *.fasta
 *.fa.gz
+*.fastq.gz
 *.fai
 *.bam
 *.sam
