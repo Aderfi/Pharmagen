@@ -184,7 +184,7 @@ class BioToolExecutor:
         self.threads = str(threads)
 
     def _run_cmd(self, command: str, description: str):
-        with Spinner(f"Ejecutando: {description}", style="dots"):
+        with Spinner(f"Ejecutando: {description}", style="braille"):
             logger.debug("CMD: %s", command)
             try:
                 shell_exec = "/bin/bash" if platform.system() != "Windows" else None

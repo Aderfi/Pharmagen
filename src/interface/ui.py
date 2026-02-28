@@ -7,6 +7,7 @@ import itertools
 from pathlib import Path
 import shutil
 import sys
+import textwrap
 import threading
 import time
 from typing import Any, Literal, Self
@@ -223,14 +224,14 @@ class ConsoleIO:
     def print_info(msg: Any, metadata: bool = False):
         """Print info message with info emoji."""
         if metadata:
-            print(f"{MessageType.META.value}  {msg}")
+            print(f"\t {MessageType.META.value}  {msg}")
         else:
-            print(f"{MessageType.INFO.value} {msg}")
+            print(f"\t {MessageType.INFO.value} {msg}")
 
     @staticmethod
     def print_step(msg: Any):
         """Print info message with 🚀."""
-        print(f"{MessageType.ROCKET.value} {msg}")
+        print(textwrap.fill(str(msg), width=60, initial_indent=("━"), subsequent_indent="\t    "))
 
     @staticmethod
     def print_divider(char: str = "-", width: int = 60):
@@ -240,7 +241,7 @@ class ConsoleIO:
     @staticmethod
     def print_dna(msg: str):
         """Special format for genomic operations. Prints with 🧬."""
-        print(f"{MessageType.DNA.value}  \033[36m{msg}\033[0m")  # Cyan
+        print(f"\t {MessageType.DNA.value}  \033[36m{msg}\033[0m")  # Cyan
 
     # -------------------------------------------------------------------------
     # INPUT METHODS WITH VALIDATION

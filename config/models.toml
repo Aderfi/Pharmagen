@@ -2,115 +2,292 @@
 # Copyright (C) 2025 Adrim Hamed Outmani
 # Licensed under the GNU AGPLv3. See LICENSE file in the project root.
 #
-# src/config/models.toml
+# config/models.toml
+#
+# SINTAXIS DEL ESPACIO DE BÚSQUEDA [optuna]
+# ─────────────────────────────────────────
+# Cada clave mapea a una lista que _suggest_parameter() parsea así:
+#
+#   ["cat",   v1, v2, ...]          → suggest_categorical
+#   ["int",   low, high]            → suggest_int (step=1)
+#   ["int",   low, high, step]      → suggest_int con paso explícito
+#   ["float", low, high]            → suggest_float (lineal)
+#   ["float", low, high, true]      → suggest_float (log-scale)
+#   ["const", valor]                → valor fijo, no explorado por Optuna
+#
+#
+# Mapa de claves verificado contra _build_configs (optuna_tuner.py):
+#
+#   TOML key               → params.get(...)       → destino
+#   ─────────────────────────────────────────────────────────
+#   embedding_dim          → embedding_dim          → ModelConfig
+#   embedding_dropout      → embedding_dropout      → ModelConfig
+#   hidden_dim             → hidden_dim             → ModelConfig
+#   n_layers               → n_layers               → ModelConfig
+#   dropout_rate           → dropout_rate           → ModelConfig
+#   activation             → activation             → ModelConfig
+#   norm_type              → norm_type (mapeado)    → use_batch_norm / use_layer_norm
+#   use_transformer        → use_transformer        → ModelConfig
+#   attn_dim_feedforward   → attn_dim_feedforward   → ModelConfig  ← nombre corregido
+#   attn_heads             → attn_heads             → ModelConfig
+#   num_attn_layers        → num_attn_layers        → ModelConfig  ← nombre corregido
+#   attn_dropout           → attn_dropout           → ModelConfig  ← no estaba en toml original
+#   fm_hidden_dim          → fm_hidden_dim          → ModelConfig
+#   fm_hidden_layers       → fm_hidden_layers       → ModelConfig  ← no estaba en toml original
+#   fm_dropout             → fm_dropout             → ModelConfig  ← no estaba en toml original
+#   learning_rate          → learning_rate          → TrainerConfig
+#   weight_decay           → weight_decay           → TrainerConfig
+#   grad_clip_norm         → grad_clip_norm         → TrainerConfig ← no estaba en toml original
+#   batch_size             → batch_size             → DataLoader
+#   epochs                 → epochs                 → TrainerConfig
+#   patience               → patience               → TrainerConfig
+#   ml_loss_type           → ml_loss_type           → TrainerConfig
+#   mc_loss_type           → mc_loss_type           → TrainerConfig
+#   label_smoothing        → label_smoothing        → TrainerConfig
+#   focal_gamma            → focal_gamma            → TrainerConfig
+#   asl_gamma_neg          → asl_gamma_neg          → TrainerConfig ← no estaba en toml original
+#   asl_gamma_pos          → asl_gamma_pos          → TrainerConfig ← no estaba en toml original
 
-# ==========================================
+
+# =============================================================================
 # MODELO 1: Phenotype_Effect_Outcome
-# ==========================================
+# 6 features · 3 targets (multi-class) · uncertainty loss activable
+# =============================================================================
 [Phenotype_Effect_Outcome]
 
     [Phenotype_Effect_Outcome.data]
     features = [
-        "ATC",          
-        "Drug",             
-        "Gene_Symbol",             
-        "Variant_Normalized",        
-        "Genotype", 
-        "Previous_Condition_Term"      
+        "atc",
+        "drug",
+        "gene_symbol",
+        "variant_normalized",
+        "genotype",
+        "previous_condition_term"
     ]
-    targets = ["Phenotype_outcome", "Effect_direction", "Effect_type"]
+    targets = ["phenotype_outcome", "effect_direction", "effect_type"]
     cols_to_load = [
-        "ATC", "Drug", "Gene_Symbol", "Variant_Normalized", "Genotype", 
-        "Previous_Condition_Term", "Phenotype_outcome", "Effect_direction", "Effect_type"
+        "atc", "drug", "gene_symbol", "variant_normalized", "genotype",
+        "previous_condition_term", "phenotype_outcome", "effect_direction", "effect_type"
     ]
-    stratify_col = "Phenotype_outcome"
+    stratify_col = "phenotype_outcome"
 
     [Phenotype_Effect_Outcome.architecture]
-    # Model Structure
-    model_type = "tabular"
-    embedding_dim = 256
-    n_layers = 2
-    hidden_dim = 2176
-    dropout_rate = 0.68
-    activation = "gelu"
-    use_batch_norm = true
-    use_layer_norm = true
-    
-    # Advanced Components
-    use_transformer = true
+    # Mejor configuración conocida (baseline pre-HPO)
+    # use_batch_norm y use_layer_norm juntos están desaconsejados —
+    # se dejan como estaban pero en el HPO se controlan vía norm_type.
+    model_type         = "tabular"
+    embedding_dim      = 256
+    n_layers           = 2
+    hidden_dim         = 2176
+    dropout_rate       = 0.68
+    activation         = "gelu"
+    use_batch_norm     = true
+    use_layer_norm     = false
+    use_transformer    = true
     attn_dim_feedforward = 3840
-    attn_dropout = 0.48
-    num_attn_layers = 2
-    fm_hidden_dim = 384
-    # fm_hidden_layers = 2 (Commented out in original)
+    attn_dropout       = 0.48
+    attn_heads         = 4
+    num_attn_layers    = 2
+    fm_hidden_dim      = 384
+    fm_hidden_layers   = 1
+    fm_dropout         = 0.1
+    embedding_dropout  = 0.1
 
     [Phenotype_Effect_Outcome.training]
-    # Training Loop Hyperparams
-    learning_rate = 2e-4
-    batch_size = 64
-    optimizer_type = "adamw"
-    
+    learning_rate          = 2e-4
+    weight_decay           = 1e-4
+    batch_size             = 64
+    epochs                 = 80
+    early_stopping_patience = 12
+    optimizer_type         = "adamw"
+    grad_clip_norm         = 1.0
+
     [Phenotype_Effect_Outcome.loss]
-    # Loss Function Configuration
-    focal_gamma = 1.16
-    focal_alpha_weight = 1.34
-    label_smoothing = 0.1
-    use_uncertainty_loss = true
-    manual_task_weights = false
+    loss_multilabel        = "asymmetric"
+    loss_singlelabel       = "adaptive_focal"
+    focal_gamma            = 1.16
+    label_smoothing        = 0.1
+    asl_gamma_neg          = 4.0
+    asl_gamma_pos          = 1.0
+    use_uncertainty_loss   = true
+    manual_task_weights    = false
 
+    # -------------------------------------------------------------------------
+    # [Phenotype_Effect_Outcome.optuna]
+    # Espacio de búsqueda amplio — Ciclo 1
+    #
+    # Decisiones de diseño:
+    #
+    # norm_type como variable única:
+    #   Codifica la exclusión mutua BN/LN. El Orchestrator mapea:
+    #     "bn"   → use_batch_norm=True,  use_layer_norm=False
+    #     "ln"   → use_batch_norm=False, use_layer_norm=True
+    #     "none" → use_batch_norm=False, use_layer_norm=False
+    #   Evita que Optuna descubra la combinación BN+LN simultánea.
+    #
+    # attn_heads fijo en 4:
+    #   Divisor exacto de todos los embedding_dim candidatos (32, 64, 128, 256).
+    #   embedding_dim % attn_heads != 0 lanza RuntimeError en PyTorch — trial
+    #   fallido silencioso que envenena el estudio. Liberar en ciclo 2.
+    #
+    # use_uncertainty_loss fijo en true:
+    #   El weighting automático Kendall&Gal es superior a suma manual para
+    #   3 targets con escalas de pérdida heterogéneas. Evaluar su desactivación
+    #   solo si hay evidencia de que los sigmas no convergen.
+    #
+    # ml_loss_type y mc_loss_type fijos en ciclo 1:
+    #   Las funciones de pérdida interactúan fuertemente con gamma y smoothing.
+    #   Fijarlas aísla el impacto de la arquitectura. Ciclo 2 las abre.
+    #
+    # learning_rate y weight_decay en log-scale (true como cuarto elemento):
+    #   El espacio real de interés es no lineal. Muestreo uniforme
+    #   subrepresentaría los valores pequeños donde suele estar el óptimo.
+    # -------------------------------------------------------------------------
     [Phenotype_Effect_Outcome.optuna]
-    # Search Spaces
-    embedding_dim = [64, 128, 256, 512]
-    hidden_dim = ["int", 256, 2048, 128]
-    n_layers = ["int", 2, 5, 1]
-    activation_function = ["gelu", "relu"]
-    learning_rate = [1e-5, 5e-3]
-    batch_size = [64, 128, 256]
-    optimizer_type = ["adamw"]
-    dropout_rate = [0.2, 0.6]
-    embedding_dropout = [0.1, 0.4]
-    weight_decay = [1e-6, 1e-3]
-    label_smoothing = [0.0, 0.15]
-    num_attention_layers = [1, 2, 3]
-    attention_dim_feedforward = ["int", 256, 1024, 128]
-    attention_dropout = [0.1, 0.5]
-    fm_hidden_dim = ["int", 32, 256, 32]
-    fm_dropout = [0.1, 0.5]
-    focal_gamma = [1.0, 4.0]
-    manual_task_weights = [false]
-    use_uncertainty_loss = [true]
-    use_batch_norm = [true]
-    use_layer_norm = [false]
 
-# ==========================================
-# MODELO 2: Features-Phenotype
-# ==========================================
-[Features-Phenotype]
-    
-    [Features-Phenotype.data]
-    features = ["atc", "Genalle", "Gene", "Allele"]
-    targets = ["Phenotype_outcome"]
-    stratify_col = "Phenotype_outcome"
-    cols_to_load = ["Drug", "Genalle", "Gene", "Allele", "Phenotype_outcome", "atc"]
+    # -- Embeddings --
+    embedding_dim     = ["cat", 64, 128, 256]
+    embedding_dropout = ["float", 0.0, 0.3]
 
-    [Features-Phenotype.architecture]
-    model_type = "tabular"
-    embedding_dim = 192
-    n_layers = 1
-    hidden_dim = 1024
-    dropout_rate = 0.7
+    # -- MLP Deep Path --
+    hidden_dim   = ["int", 256, 2048, 128]    # step=128 para espaciar la búsqueda
+    n_layers     = ["int", 2, 5]
+    dropout_rate = ["float", 0.1, 0.6]
+    # norm_type codifica BN/LN como variable única (ver nota arriba)
+    norm_type    = ["cat", "bn", "ln", "none"]
+    activation   = ["cat", "gelu", "relu", "silu"]
 
-    [Features-Phenotype.training]
-    batch_size = 512
-    learning_rate = 1e-4
+    # -- Transformer --
+    use_transformer      = ["cat", true, false]
+    attn_heads           = ["const", 4]          # fijo ciclo 1
+    num_attn_layers      = ["int", 1, 3]
+    attn_dim_feedforward = ["int", 256, 2048, 256]
+    attn_dropout         = ["float", 0.0, 0.5]
 
-    [Features-Phenotype.loss]
-    # Custom weight section kept here or moved to loss
-    # Keeping clean
-    
-    [Features-Phenotype.weights]
-    phenotype_outcome = 1.0
+    # -- FM Path --
+    fm_hidden_dim    = ["int", 32, 512, 32]
+    fm_hidden_layers = ["int", 0, 2]
+    fm_dropout       = ["float", 0.0, 0.4]
 
-    [Features-Phenotype.optuna]
-    embedding_dim = [128, 256, 512]
-    n_layers = ["int", 1, 4, 1]
+    # -- Optimizer --
+    learning_rate  = ["float", 1e-5, 5e-3, true]   # log-scale
+    weight_decay   = ["float", 1e-6, 1e-2, true]   # log-scale
+    grad_clip_norm = ["float", 0.5, 2.0]
+
+    # -- Training loop --
+    batch_size = ["cat", 64, 128, 256, 512]
+    epochs     = ["const", 80]
+    patience   = ["const", 12]
+
+    # -- Losses (fijas en ciclo 1) --
+    ml_loss_type    = ["const", "asymmetric"]
+    mc_loss_type    = ["const", "adaptive_focal"]
+    label_smoothing = ["float", 0.0, 0.15]
+    focal_gamma     = ["float", 1.0, 3.0]
+    asl_gamma_neg   = ["float", 2.0, 6.0]
+    asl_gamma_pos   = ["float", 0.0, 1.0]
+
+
+# =============================================================================
+# MODELO 2: Pheno-Dir-Effect
+# 5 features · 5 targets · espacio más amplio (más targets = más complejidad)
+# =============================================================================
+[Pheno-Dir-Effect]
+
+    [Pheno-Dir-Effect.data]
+    features = ["drug", "variant_haplotypes", "gene", "allele", "genalle"]
+    targets  = [
+        "phenotype_outcome", "effect_direction",
+        "effect_type", "effect_phenotype", "pop_phenotypes_diseases"
+    ]
+    stratify_col = "effect_type"
+    cols_to_load = [
+        "drug", "variant_haplotypes", "gene", "allele", "genalle",
+        "phenotype_outcome", "effect_direction", "effect_type",
+        "effect_phenotype", "pop_phenotypes_diseases"
+    ]
+
+    [Pheno-Dir-Effect.architecture]
+    model_type           = "tabular"
+    embedding_dim        = 256
+    n_layers             = 2
+    hidden_dim           = 2176
+    dropout_rate         = 0.68
+    activation           = "gelu"
+    use_batch_norm       = true
+    use_layer_norm       = false
+    use_transformer      = true
+    attn_dim_feedforward = 3840
+    attn_dropout         = 0.48
+    attn_heads           = 4
+    num_attn_layers      = 2
+    fm_hidden_dim        = 384
+    fm_hidden_layers     = 1
+    fm_dropout           = 0.1
+    embedding_dropout    = 0.1
+
+    [Pheno-Dir-Effect.training]
+    learning_rate           = 2e-4
+    weight_decay            = 1e-4
+    batch_size              = 64
+    epochs                  = 80
+    early_stopping_patience = 12
+    optimizer_type          = "adamw"
+    grad_clip_norm          = 1.0
+
+    [Pheno-Dir-Effect.loss]
+    loss_multilabel      = "asymmetric"
+    loss_singlelabel     = "adaptive_focal"
+    focal_gamma          = 1.16
+    label_smoothing      = 0.1
+    asl_gamma_neg        = 4.0
+    asl_gamma_pos        = 1.0
+    use_uncertainty_loss = true
+    manual_task_weights  = false
+
+    # -------------------------------------------------------------------------
+    # [Pheno-Dir-Effect.optuna]
+    # Con 5 targets (vs 3 del modelo 1), el espacio de pérdida es más complejo.
+    # -------------------------------------------------------------------------
+    [Pheno-Dir-Effect.optuna]
+
+    # -- Embeddings --
+    embedding_dim     = ["cat", 128, 256, 512, 1024]
+    embedding_dropout = ["float", 0.0, 0.3]
+
+    # -- MLP --
+    hidden_dim   = ["int", 256, 2048, 128]
+    n_layers     = ["int", 2, 5]
+    dropout_rate = ["float", 0.1, 0.65]
+    norm_type    = ["cat", "bn", "ln", "none"]
+    activation   = ["cat", "gelu", "relu", "silu"]
+
+    # -- Transformer --
+    use_transformer      = ["cat", true, false]
+    attn_heads           = ["const", 4]
+    num_attn_layers      = ["int", 1, 3]
+    attn_dim_feedforward = ["int", 256, 2048, 256]
+    attn_dropout         = ["float", 0.0, 0.5]
+
+    # -- FM --
+    fm_hidden_dim    = ["int", 32, 512, 32]
+    fm_hidden_layers = ["int", 0, 3]    # hasta 3 con 5 targets
+    fm_dropout       = ["float", 0.0, 0.4]
+
+    # -- Optimizer --
+    learning_rate  = ["float", 1e-5, 5e-3, true]
+    weight_decay   = ["float", 1e-6, 1e-2, true]
+    grad_clip_norm = ["float", 0.5, 2.0]
+
+    # -- Training --
+    batch_size = ["cat", 64, 128, 256, 512]
+    epochs     = ["const", 80]
+    patience   = ["const", 12]
+
+    # -- Losses --
+    ml_loss_type    = ["const", "asymmetric"]
+    mc_loss_type    = ["const", "adaptive_focal"]
+    label_smoothing = ["float", 0.0, 0.15]
+    focal_gamma     = ["float", 1.0, 3.0]
+    asl_gamma_neg   = ["float", 2.0, 6.0]
+    asl_gamma_pos   = ["float", 0.0, 1.0]

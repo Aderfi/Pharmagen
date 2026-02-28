@@ -105,7 +105,7 @@ class OptunaOrchestrator:
         self.feature_dims: dict[str, int] = {}
         self.target_dims: dict[str, int] = {}
 
-        # Initialize Data immediately to fail fast if paths are wrong
+        # Initialize Data
         self._warmup_data()
 
     def _warmup_data(self):
@@ -118,8 +118,7 @@ class OptunaOrchestrator:
         # 1. Load & Clean
         df = load_and_clean_dataset(self.base_data_cfg)
 
-        # 2. Split (Simple chronological or stratified split logic here)
-        # Using a deterministic split for reproducibility of the study
+        # 2. Deterministic split
         val_mask = df.sample(frac=0.2, random_state=self.tuner_cfg.seed).index
         train_df = df.drop(val_mask)
         val_df = df.loc[val_mask]
@@ -169,6 +168,7 @@ class OptunaOrchestrator:
         ['int', low, high, step]
         ['float', low, high, log]
         ['cat', choice1, choice2...]
+        ['const', value]
         """
         param_type = spec[0]
 
@@ -190,12 +190,17 @@ class OptunaOrchestrator:
 
     def _build_configs(self, trial: optuna.Trial) -> tuple[ModelConfig, TrainerConfig, int]:
         """Constructs strict configuration objects from Trial suggestions."""
-        # 1. Parse all params
-        params = {}
+        params: dict[str, Any] = {}
         for key, spec in self.search_space.items():
             params[key] = self._suggest_parameter(trial, key, spec)
 
-        # 2. Construct Model Config
+        # Mapeo norm_type → flags individuales de ModelConfig
+        # El TOML usa norm_type="bn"/"ln"/"none" para evitar la combinación
+        # BN+LN simultánea que sería semánticamente incorrecta.
+        norm_type = params.get("norm_type", "bn")
+        use_bn = norm_type == "bn"
+        use_ln = norm_type == "ln"
+
         model_config = ModelConfig(
             n_features=self.feature_dims,
             target_dims=self.target_dims,
@@ -205,32 +210,34 @@ class OptunaOrchestrator:
             n_layers=params.get("n_layers", 3),
             dropout_rate=params.get("dropout_rate", 0.2),
             activation=params.get("activation", "gelu"),
-            # Transformer specific
+            use_batch_norm=use_bn,
+            use_layer_norm=use_ln,
             use_transformer=params.get("use_transformer", True),
             attn_dim_feedforward=params.get("attn_dim_feedforward", 512),
             attn_heads=params.get("attn_heads", 4),
             num_attn_layers=params.get("num_attn_layers", 2),
-            # FM specific
             fm_hidden_dim=params.get("fm_hidden_dim", 64),
+            fm_hidden_layers=params.get("fm_hidden_layers", 1),
+            fm_dropout=params.get("fm_dropout", 0.1),
         )
 
-        # 3. Construct Trainer Config
         trainer_config = TrainerConfig(
             n_epochs=params.get("epochs", 50),
             patience=params.get("patience", 10),
             learning_rate=params.get("learning_rate", 1e-3),
             weight_decay=params.get("weight_decay", 1e-4),
+            grad_clip_norm=params.get("grad_clip_norm", 1.0),
             device=self.device,
-            use_amp=True,  # Always use AMP for speed
-            # Loss config
-            ml_loss_type=params.get("ml_loss_type", "bce"),
+            use_amp=True,
+            ml_loss_type=params.get("ml_loss_type", "asymmetric"),
             mc_loss_type=params.get("mc_loss_type", "focal"),
             label_smoothing=params.get("label_smoothing", 0.0),
             focal_gamma=params.get("focal_gamma", 2.0),
+            asl_gamma_neg=params.get("asl_gamma_neg", 4.0),
+            asl_gamma_pos=params.get("asl_gamma_pos", 1.0),
         )
 
         batch_size = params.get("batch_size", 128)
-
         return model_config, trainer_config, batch_size
 
     # ==========================================================================
@@ -239,23 +246,25 @@ class OptunaOrchestrator:
 
     def objective(self, trial: optuna.Trial) -> float:
         """Core Optimization Loop for a single trial."""
-        # Garbage Collection before allocation
         gc.collect()
         torch.cuda.empty_cache()
 
         # 1. Build Configuration
         model_cfg, trainer_cfg, batch_size = self._build_configs(trial)
 
-        # 2. Init DataLoaders (Fast, zero-copy due to Dataset design)
+        # 2. Init DataLoaders
+        assert self.train_dataset is not None, "train_dataset was not initialized"
+        assert self.val_dataset is not None, "val_dataset was not initialized"
+
         train_loader = DataLoader(
-            self.train_dataset,  # type: ignore
+            self.train_dataset,
             batch_size=batch_size,
             shuffle=True,
-            num_workers=0,  # Optuna + SQLite + Multi-process = Deadlock. Use 0.
+            num_workers=0,
             pin_memory=True,
         )
         val_loader = DataLoader(
-            self.val_dataset,  # type: ignore
+            self.val_dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=0,
@@ -265,8 +274,15 @@ class OptunaOrchestrator:
         # 3. Init Model & Optimization
         model = PharmagenDeepFM(model_cfg)
 
+        uncertainty_module = None
+        trainable_params = list(model.parameters())
+        if uncertainty_module is not None:
+            trainable_params += list(uncertainty_module.parameters())
+
         optimizer = torch.optim.AdamW(
-            model.parameters(), lr=trainer_cfg.learning_rate, weight_decay=trainer_cfg.weight_decay
+            trainable_params,
+            lr=trainer_cfg.learning_rate,
+            weight_decay=trainer_cfg.weight_decay,
         )
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -281,6 +297,7 @@ class OptunaOrchestrator:
             config=trainer_cfg,
             target_cols=self.base_data_cfg.target_cols,
             multi_label_cols=set(self.base_data_cfg.multi_label_cols),
+            uncertainty_module=uncertainty_module,
         )
 
         # 5. Execute Training
@@ -288,21 +305,21 @@ class OptunaOrchestrator:
             best_loss = trainer.fit(
                 train_loader=train_loader,
                 val_loader=val_loader,
-                trial=trial,  # Enables pruning inside the trainer loop
+                trial=trial,
             )
             return best_loss
 
         except optuna.TrialPruned:
             raise
         except Exception as e:
-            logger.error("Trial %d failed: %s", trial.number, e)
+            logger.exception("Trial %d failed: %s", trial.number, e)
             return float("inf")
 
     # ==========================================================================
     # RUNNER
     # ==========================================================================
 
-    def run(self):
+    def run(self) -> optuna.Study:
         """Starts the optimization study."""
         (DIRS["reports"] / "optuna_db").mkdir(parents=True, exist_ok=True)
         (DIRS["reports"] / "figures").mkdir(parents=True, exist_ok=True)
@@ -337,21 +354,19 @@ class OptunaOrchestrator:
         self._export_results(study)
         return study
 
-    def _export_results(self, study: optuna.Study):
+    def _export_results(self, study: optuna.Study) -> None:
         best_trial = study.best_trial
         ConsoleIO.print_divider("=", 40)
-        ConsoleIO.print_info("Best Value: %.4f", best_trial.value)
+        ConsoleIO.print_info(f"Best Value: {best_trial.value:.4f}")
         ConsoleIO.print_info("Best Params:")
         for key, value in best_trial.params.items():
-            ConsoleIO.print_info("  %s: %s", key, value)
+            ConsoleIO.print_info(f"  {key}: {value}")
         ConsoleIO.print_divider("=", 40)
 
-        # Save JSON
         report_path = DIRS["reports"] / f"{self.tuner_cfg.study_name}_best.json"
         with open(report_path, "w") as f:
             json.dump(best_trial.params, f, indent=4)
 
-        # Plotting (Safe)
         try:
             from optuna.visualization.matplotlib import (
                 plot_optimization_history,
@@ -359,8 +374,6 @@ class OptunaOrchestrator:
             )
 
             fig_path = DIRS["reports"] / "figures"
-
-            # Use non-interactive backend
             plt.switch_backend("Agg")
 
             plt.figure(figsize=(10, 6))

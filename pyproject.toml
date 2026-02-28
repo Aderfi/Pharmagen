@@ -7,7 +7,7 @@ name = "Pharmagen"
 version = "1.0-rc1"
 description = "Software de predicción farmacogenética y eficacia terapéutica mediante Deep Learning."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11, <3.12"
 license = { file = "LICENSE" }
 authors = [{ name = "Adrim Hamed Outmani", email = "adrimh.outmani@gmail.com" }]
 
@@ -46,7 +46,6 @@ train = [
 ]
 dev = [
   "ruff>=0.5.0",
-  "mypy>=1.10.0",
   "pytest>=8.2.0",
   "pytest-cov>=5.0.0",
 ]
@@ -147,25 +146,17 @@ ban-relative-imports = "parents"
 "**/__init__.py" = ["F401", "F403"]
 "src/pharmagen/cfg/manager.py" = ["S", "F401"]
 
-[tool.pyright]
-typeCheckingMode = "off"
+[tool.ty.environment]
+python-version = "3.11"
 
-[tool.mypy]
-python_version        = "3.10"
-warn_return_any       = true
-warn_unused_configs   = true
-warn_unused_ignores   = true
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = [
-  "Bio.*",
-  "optuna.*",
-  "rapidfuzz.*",
-  "joblib.*",
-  "tqdm.*",
-]
-ignore_missing_imports = true
+[tool.ty.analysis]
+allowed-unresolved-imports = [
+    "Bio.**",
+    "optuna.**",
+    "rapidfuzz.**",
+    "joblib.**",
+    "tqdm.**",
+  ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

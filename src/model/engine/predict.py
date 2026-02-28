@@ -37,7 +37,9 @@ from src.interface.ui import ProgressBar
 from src.model.architecture.deep_fm import ModelConfig, PharmagenDeepFM
 
 logger = logging.getLogger(__name__)
+
 MIN_SIZE_PBAR = 2000  # Minimum samples to show progress bar
+_CHECKPOINT_FILENAME = "model_best.pth"
 
 
 class PGenPredictor:
@@ -79,32 +81,25 @@ class PGenPredictor:
     def _load_config_snapshot(self) -> dict[str, Any]:
         """Loads the JSON config snapshot saved at the end of training."""
         snapshot_path = DIRS["reports"] / f"{self.model_name}_final_config.json"
-
         if snapshot_path.exists():
             logger.debug("Loading config snapshot from %s", snapshot_path)
             with open(snapshot_path) as f:
                 return json.load(f)
-        else:
-            logger.warning("Snapshot not found at %s. Falling back to defaults.", snapshot_path)
-            # Partial fallback logic
-            return {"model_config": {}}
+        logger.warning("Snapshot not found at %s. Falling back to defaults.", snapshot_path)
+        return {"model_config": {}}
 
     def _load_encoders(self) -> dict[str, Any]:
         """Loads the pickled sklearn encoders."""
         path = DIRS["encoders"] / f"encoders_{self.model_name}.pkl"
         if not path.exists():
-            raise FileNotFoundError(f"Encoders not found at {path}. Model must be trained first.")
+            raise FileNotFoundError(f"Encoders not found at {path}. Train the model first.")
         return joblib.load(path)
 
     def _reconstruct_model(self) -> PharmagenDeepFM:
-        """
-        Recreates the PyTorch model structure and loads weights.
-        """
-        # 1. Dimensions Extraction (Source of Truth: Encoders)
+        """Recreates the PyTorch model structure and loads weights."""
         n_features: dict[str, int] = {}
         target_dims: dict[str, int] = {}
 
-        # Fallback to Config for column lists if snapshot missing
         if "data_config" in self.config_snapshot:
             f_cols = self.config_snapshot["data_config"].get("feature_cols", [])
             t_cols = self.config_snapshot["data_config"].get("target_cols", [])
@@ -113,7 +108,6 @@ class PGenPredictor:
             f_cols = raw_cfg.get("data", {}).get("features", [])
             t_cols = raw_cfg.get("data", {}).get("targets", [])
 
-        # Map dimensions
         for col, enc in self.encoders.items():
             if hasattr(enc, "classes_"):
                 dim = len(enc.classes_)
@@ -122,15 +116,9 @@ class PGenPredictor:
                 elif col in t_cols:
                     target_dims[col] = dim
 
-        # 2. Build Config Object
         full_cfg = self.config_snapshot.get("full_config", {})
-        arch_params = full_cfg.get("architecture", {})
+        arch_params = full_cfg.get("architecture", {}) or self.config_snapshot.get("model_config", {})
 
-        # If empty (legacy snapshot), try 'model_config'
-        if not arch_params:
-            arch_params = self.config_snapshot.get("model_config", {})
-
-        # Construct safe config
         config = ModelConfig(
             n_features=n_features,
             target_dims=target_dims,
@@ -148,25 +136,26 @@ class PGenPredictor:
             fm_hidden_layers=arch_params.get("fm_hidden_layers", 1),
         )
 
-        # 3. Instantiate & Load Weights
         model = PharmagenDeepFM(config)
 
         # Determine weights path
-        weights_path = DIRS["models"] / "model_best.pt"  # Default name
+        candidates = [
+            DIRS["models"] / _CHECKPOINT_FILENAME,             # training normal
+            DIRS["models"] / f"pmodel_{self.model_name}.pth",  # mejor fold kfold
+            DIRS["models"] / f"pmodel_{self.model_name}.pt",   # legacy
+        ]
+        weights_path: Path | None = next((p for p in candidates if p.exists()), None)
 
-        if not weights_path.exists():
-            weights_path = DIRS["models"] / f"pmodel_{self.model_name}.pt"
-
-        if not weights_path.exists():
-            raise FileNotFoundError(f"Weights not found at {weights_path}")
+        if weights_path is None:
+            raise FileNotFoundError(
+                f"No se encontraron pesos para '{self.model_name}'. "
+                f"Rutas buscadas: {[str(p) for p in candidates]}"
+            )
 
         logger.debug("Loading weights from %s", weights_path)
-        state = torch.load(weights_path, map_location=self.device)
-
-        if "model_state" in state:
-            model.load_state_dict(state["model_state"])
-        else:
-            model.load_state_dict(state)
+        # FIX Bug 3: weights_only=True previene deserialización arbitraria de pickles
+        state = torch.load(weights_path, map_location=self.device, weights_only=True)
+        model.load_state_dict(state.get("model_state", state))
 
         return model.to(self.device)
 
@@ -176,7 +165,7 @@ class PGenPredictor:
         for col, enc in self.encoders.items():
             if isinstance(enc, LabelEncoder):
                 if self.unknown_token in enc.classes_:
-                    indices[col] = int(enc.transform([self.unknown_token])[0])  # type: ignore
+                    indices[col] = int(enc.transform([self.unknown_token])[0])
                 else:
                     indices[col] = 0
         return indices
@@ -197,25 +186,15 @@ class PGenPredictor:
         """
         model_inputs = {}
         try:
-            # Pre-normalize input keys for efficient lookup (O(1) instead of O(n) per column)
-            # Note: If multiple keys differ only by case, the last one wins
-            input_dict_lower = {k.lower(): v for k, v in input_dict.items()}
+            input_lower = {k.lower(): v for k, v in input_dict.items()}
+            if len(input_lower) < len(input_dict):
+                logger.warning("Input dict has keys differing only in case; last value wins.")
 
-            # Detect case collisions for better error messages
-            if len(input_dict_lower) < len(input_dict):
-                logger.warning(
-                    "Input dictionary contains keys that differ only in case. "
-                    "Some values may be overwritten during normalization."
-                )
-
+            model_inputs = {}
             for col in self.feature_cols:
-                # Direct lookup with pre-normalized keys
-                val = input_dict_lower.get(col)
-
+                val = input_lower.get(col)
                 if val is None:
-                    raise ValueError(f"Missing input feature: {col}")
-
-                # Prepare tensor (1,)
+                    raise ValueError(f"Missing input feature: '{col}'")
                 model_inputs[col] = self._prepare_tensor(col, val)
 
             with torch.inference_mode():
@@ -244,78 +223,48 @@ class PGenPredictor:
         Returns:
             list[dict]: List of prediction dictionaries.
         """
-        # 1. Normalize columns (use rename for non-destructive operation)
-        df_normalized = df.rename(columns=lambda x: x.lower().strip())
+        df_norm = df.rename(columns=lambda x: x.lower().strip())
 
-        # 2. Validate Schema
-        missing = [col for col in self.feature_cols if col not in df_normalized.columns]
+        missing = [c for c in self.feature_cols if c not in df_norm.columns]
         if missing:
             logger.error("DataFrame missing required columns: %s", missing)
             return []
 
-        # 3. Pre-process to CPU Tensors (Vectorized)
-        tensor_dict = {}
-        for col in self.feature_cols:
-            tensor_dict[col] = self._prepare_batch_tensor(col, df_normalized[col])
+        tensor_dict = {
+            col: self._prepare_batch_tensor(col, df_norm[col])
+            for col in self.feature_cols
+        }
 
-        # 4. Batch Loop
         num_samples = len(df)
-        all_results = []
-
-        # Iteration Strategy
-        iterator = range(0, num_samples, batch_size)
+        all_results: list[dict[str, Any]] = []
         use_pbar = num_samples > MIN_SIZE_PBAR
+        pbar = ProgressBar(total=num_samples, desc="Inference", width=30) if use_pbar else None
 
         with torch.inference_mode():
-            if use_pbar:
-                # Custom ProgressBar
-                pbar = ProgressBar(total=num_samples, desc="Inference", width=30)
-                pbar.__enter__()
-
             try:
-                for i in iterator:
+                if pbar:
+                    pbar.__enter__()
+                for i in range(0, num_samples, batch_size):
                     end = min(i + batch_size, num_samples)
-                    current_batch_size = end - i
-
-                    # Create Batch & Move to Device
-                    batch_inputs = {
-                        k: v[i:end].to(self.device, non_blocking=True)
-                        for k, v in tensor_dict.items()
-                    }
-
-                    # Forward
-                    outputs = self.model(batch_inputs)
-
-                    # Decode (CPU side)
-                    decoded_batch = self._decode(outputs)
-                    all_results.extend(decoded_batch)
-
-                    if use_pbar:
-                        pbar.update(current_batch_size)  # type: ignore
+                    batch = {k: v[i:end].to(self.device, non_blocking=True) for k, v in tensor_dict.items()}
+                    all_results.extend(self._decode(self.model(batch)))
+                    if pbar:
+                        pbar.update(end - i)
             finally:
-                if use_pbar:
-                    pbar.__exit__(None, None, None)  # type: ignore
+                if pbar:
+                    pbar.__exit__(None, None, None)
 
         return all_results
 
     def predict_file(self, file_path: str | Path, batch_size: int = 512) -> list[dict[str, Any]]:
-        """
-        Wrapper for batch prediction from a file path.
-        Supports CSV and TSV.
-        """
+        """Batch prediction from a CSV or TSV file path."""
         path = Path(file_path)
         if not path.exists():
             logger.error("File not found: %s", path)
             return []
-
         try:
-            logger.info("Reading %s...", path.name)
-            # Detect separator
-            sep = "\t" if path.suffix == ".tsv" else ","
-            df = pd.read_csv(path, sep=sep)
-
+            df = pd.read_csv(path, sep="\t" if path.suffix == ".tsv" else ",")
             return self.predict_dataframe(df, batch_size)
-
         except Exception as e:
             logger.error("Failed to process file %s: %s", path, e)
             return []
@@ -325,67 +274,48 @@ class PGenPredictor:
     # ==========================================================================
 
     def _prepare_tensor(self, col: str, val: Any) -> torch.Tensor:
-        """Encodes a scalar value to tensor (On Device)."""
+        """Encodes a single value to a (1,) tensor on device."""
         enc = self.encoders[col]
         val_str = str(val)
-
-        if val_str in enc.classes_:
-            idx = int(enc.transform([val_str])[0])
-        else:
-            idx = self.unknown_indices.get(col, 0)
-
+        idx = (
+            int(enc.transform([val_str])[0])
+            if val_str in enc.classes_
+            else self.unknown_indices.get(col, 0)
+        )
         return torch.tensor([idx], dtype=torch.long, device=self.device)
 
     def _prepare_batch_tensor(self, col: str, series: pd.Series) -> torch.Tensor:
-        """Encodes a Series to a Tensor (On CPU)."""
+        """Encodes a full Series to a CPU long tensor."""
         enc = self.encoders[col]
-        # Robust string conversion handling NaNs
         vals = series.fillna(self.unknown_token).astype(str).to_numpy()
-
-        # Identify knowns
         mask = np.isin(vals, enc.classes_)
-
-        # Replace unknowns
         vals[~mask] = self.unknown_token
 
-        # Safety fallback if unknown token itself is missing in encoder
         if self.unknown_token not in enc.classes_:
-            encoded = np.zeros(len(vals), dtype=int)  # All to 0
-            known_vals = vals[mask]
-            if len(known_vals) > 0:
-                encoded[mask] = enc.transform(known_vals)
+            encoded = np.zeros(len(vals), dtype=int)
+            if mask.any():
+                encoded[mask] = enc.transform(vals[mask])
         else:
             encoded = enc.transform(vals)
 
-        # Return CPU tensor
         return torch.from_numpy(encoded).long()
 
     def _decode(self, outputs: dict[str, torch.Tensor]) -> list[dict[str, Any]]:
-        """Decodes raw logits to readable labels."""
-        first = next(iter(outputs.values()))
-        bs = first.size(0)
-        decoded_cols = {}
+        """
+        Decodes raw logits to readable labels.
+        """
+        bs = next(iter(outputs.values())).size(0)
+        decoded_cols: dict[str, list] = {}
 
         for col, logits in outputs.items():
             enc = self.encoders[col]
-            logits.cpu()
+            logits = logits.detach().cpu()  # FIX Bug 1: asignar, no ignorar
 
             if col in MULTI_LABEL_COLS:
-                # Multi-label
-                probs = torch.sigmoid(logits)
-                preds = (probs > (1 / 2)).numpy()
-                labels = enc.inverse_transform(preds)
-                decoded_cols[col] = [list(x) for x in labels]
+                preds = (torch.sigmoid(logits) > 0.5).numpy()
+                decoded_cols[col] = [list(x) for x in enc.inverse_transform(preds)]
             else:
-                # Multi-class
                 preds = torch.argmax(logits, dim=1).numpy()
-                labels = enc.inverse_transform(preds)
-                decoded_cols[col] = labels.tolist()
+                decoded_cols[col] = enc.inverse_transform(preds).tolist()
 
-        # Transpose
-        results = []
-        for i in range(bs):
-            row = {k: decoded_cols[k][i] for k in decoded_cols}
-            results.append(row)
-
-        return results
+        return [{k: decoded_cols[k][i] for k in decoded_cols} for i in range(bs)]
