@@ -7,13 +7,13 @@ import sys
 import pandas as pd
 import streamlit as st
 
-from src.cfg.manager import get_available_models
-from src.model.engine.predict import PGenPredictor
-
-# Add project root to path if running from src/interface
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
+
+from src.cfg.manager import get_available_models
+from src.model.engine.predict import PGenPredictor
+
 
 
 # --- CONFIGURACIÓN DE PÁGINA ---

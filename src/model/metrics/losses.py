@@ -150,8 +150,9 @@ class MultiTaskUncertaintyLoss(nn.Module):
         self.log_sigmas = nn.ParameterDict({t: nn.Parameter(torch.zeros(1)) for t in tasks})
 
     def forward(self, losses: dict[str, torch.Tensor]) -> torch.Tensor:
-        total_loss = torch.tensor(0.0, device=next(iter(losses.values())).device)
+        device = next(iter(losses.values())).device
+        terms: list[torch.Tensor] = []
         for task, loss in losses.items():
             sigma = self.log_sigmas[task]
-            total_loss += loss * torch.exp(-sigma) + sigma
-        return total_loss
+            terms.append(loss * torch.exp(-sigma) + sigma)
+        return sum(terms).to(device) # type: ignore[return-value]

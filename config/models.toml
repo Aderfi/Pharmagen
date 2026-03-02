@@ -75,7 +75,6 @@
     # Mejor configuración conocida (baseline pre-HPO)
     # use_batch_norm y use_layer_norm juntos están desaconsejados —
     # se dejan como estaban pero en el HPO se controlan vía norm_type.
-    model_type         = "tabular"
     embedding_dim      = 256
     n_layers           = 2
     hidden_dim         = 2176
@@ -198,9 +197,10 @@
     features = ["drug", "variant_haplotypes", "gene", "allele", "genalle"]
     targets  = [
         "phenotype_outcome", "effect_direction",
-        "effect_type", "effect_phenotype", "pop_phenotypes_diseases"
+        "effect_type"
     ]
-    stratify_col = "effect_type"
+    multi_label_cols = ["phenotype_outcome"]
+    #stratify_col = "phenotype_outcome"
     cols_to_load = [
         "drug", "variant_haplotypes", "gene", "allele", "genalle",
         "phenotype_outcome", "effect_direction", "effect_type",
@@ -208,7 +208,6 @@
     ]
 
     [Pheno-Dir-Effect.architecture]
-    model_type           = "tabular"
     embedding_dim        = 256
     n_layers             = 2
     hidden_dim           = 2176
@@ -260,7 +259,7 @@
     n_layers     = ["int", 2, 5]
     dropout_rate = ["float", 0.1, 0.65]
     norm_type    = ["cat", "bn", "ln", "none"]
-    activation   = ["cat", "gelu", "relu", "silu"]
+    activation   = ["cat", "gelu"]
 
     # -- Transformer --
     use_transformer      = ["cat", true, false]

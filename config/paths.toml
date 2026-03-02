@@ -26,6 +26,7 @@ root = "src/pgen_model"
 models_saved = "src/pgen_model/models"
 encoders = "src/pgen_model/encoders"
 vocabs = "src/pgen_model/labels_vocabs"
+models= "models"
 
 [reports]
 # Subcarpetas de reports

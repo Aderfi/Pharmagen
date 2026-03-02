@@ -72,12 +72,15 @@ def _parse_configs(
         # Important: Update the raw dict so create_data_loaders sees it too
         raw_cfg["training"]["batch_size"] = batch_size_override
 
+    model_ml_cols = raw_cfg["data"].get("multi_label_cols", [])
+    effective_ml_cols = list(set(model_ml_cols) | MULTI_LABEL_COLS)
+
     # 1. Data Configuration
     data_config = DataConfig(
         dataset_path=csv_path,
         feature_cols=raw_cfg["data"]["features"],
         target_cols=raw_cfg["data"]["targets"],
-        multi_label_cols=list(MULTI_LABEL_COLS),
+        multi_label_cols=effective_ml_cols,
         stratify_col=raw_cfg["data"].get("stratify_col"),
         num_workers=4,
         pin_memory=True,
@@ -135,7 +138,7 @@ def train_pipeline(
     train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, stratify=stratify)
 
     # Process
-    processor = PGenProcessor(full_config["data"], list(MULTI_LABEL_COLS))
+    processor = PGenProcessor(full_config["data"], data_cfg.multi_label_cols)
     processor.fit(train_df)
 
     # 3. Create DataLoaders (Factory)
@@ -249,7 +252,7 @@ def train_kfold_pipeline(
     best_overall_loss = float("inf")
 
     # Pre-fit Processor on FULL dataset for consistent vocab
-    processor = PGenProcessor(full_config["data"], list(MULTI_LABEL_COLS))
+    processor = PGenProcessor(full_config["data"], data_cfg.multi_label_cols)
     processor.fit(df)
 
     # Save global encoders
@@ -311,8 +314,8 @@ def train_kfold_pipeline(
         if final_loss < best_overall_loss:
             best_overall_loss = final_loss
             logger.info("New best fold found (Loss: %.4f). Saving as main model.", final_loss)
-            fold_best_path = DIRS["models"] / "model_best.pt"
-            prod_path = DIRS["models"] / f"pmodel_{model_name}.pt"
+            fold_best_path = DIRS["models"] / "model_best.pth"
+            prod_path = DIRS["models"] / f"pmodel_{model_name}.pth"
             if fold_best_path.exists():
                 state = torch.load(fold_best_path)
                 torch.save(state, prod_path)
