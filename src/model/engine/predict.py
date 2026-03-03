@@ -101,8 +101,8 @@ class PGenPredictor:
         target_dims: dict[str, int] = {}
 
         if "data_config" in self.config_snapshot:
-            f_cols = self.config_snapshot["data_config"].get("feature_cols", [])
-            t_cols = self.config_snapshot["data_config"].get("target_cols", [])
+            f_cols = self.config_snapshot["data_config"].get("features", [])
+            t_cols = self.config_snapshot["data_config"].get("targets", [])
         else:
             raw_cfg = get_model_config(self.model_name)
             f_cols = raw_cfg.get("data", {}).get("features", [])
@@ -128,12 +128,16 @@ class PGenPredictor:
             n_layers=arch_params.get("n_layers", 3),
             dropout_rate=arch_params.get("dropout_rate", 0.2),
             activation=arch_params.get("activation", "gelu"),
+            use_batch_norm=arch_params.get("use_batch_norm", True),
+            use_layer_norm=arch_params.get("use_layer_norm", False),
             use_transformer=arch_params.get("use_transformer", True),
             attn_dim_feedforward=arch_params.get("attn_dim_feedforward", 512),
+            attn_dropout=arch_params.get("attn_dropout", 0.1),
             attn_heads=arch_params.get("attn_heads", 4),
             num_attn_layers=arch_params.get("num_attn_layers", 2),
             fm_hidden_dim=arch_params.get("fm_hidden_dim", 64),
             fm_hidden_layers=arch_params.get("fm_hidden_layers", 1),
+            fm_dropout=arch_params.get("fm_dropout", 0.0),
         )
 
         model = PharmagenDeepFM(config)
@@ -141,8 +145,8 @@ class PGenPredictor:
         # Determine weights path
         candidates = [
             DIRS["models"] / _CHECKPOINT_FILENAME,             # training normal
-            DIRS["models"] / f"pmodel_{self.model_name}.pth",  # mejor fold kfold
-            DIRS["models"] / f"pmodel_{self.model_name}.pt",   # legacy
+            DIRS["models"] / f"best_{self.model_name}.pth",  # mejor fold kfold
+            DIRS["models"] / f"best_{self.model_name}.pt",   # legacy
         ]
         weights_path: Path | None = next((p for p in candidates if p.exists()), None)
 

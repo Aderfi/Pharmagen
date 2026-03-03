@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
-def create_model_instance(config: dict[str, Any], dims: dict[str, Any]) -> torch.nn.Module:
+def create_model_instance(config: dict[str, Any], dims: dict[str, Any]) -> tuple[torch.nn.Module, ModelConfig]:
     """
     Creates a model instance based on the configuration dictionary.
 
@@ -49,12 +49,12 @@ def create_model_instance(config: dict[str, Any], dims: dict[str, Any]) -> torch
         dims (Dict): Dimension info (keys: 'n_features', 'target_dims').
 
     Returns:
-        torch.nn.Module: Instantiated PGenModel ready for training.
+        tuple[torch.nn.Module, ModelConfig]: Instantiated PGenModel and its configuration.
 
     Example:
         >>> cfg = {'architecture': {'hidden_dim': 128}}
         >>> dims = {'n_features': {'drug': 50}, 'target_dims': {'y': 1}}
-        >>> model = create_model_instance(cfg, dims)
+        >>> model, model_cfg = create_model_instance(cfg, dims)
     """
     # 1. Extract Architecture Params
     arch_params = config.get("architecture", {}).copy()
@@ -67,7 +67,7 @@ def create_model_instance(config: dict[str, Any], dims: dict[str, Any]) -> torch
     model_cfg = ModelConfig(**arch_params)
 
     # 4. Instantiate Model
-    return PharmagenDeepFM(model_cfg)
+    return PharmagenDeepFM(model_cfg), model_cfg
 
 
 # =============================================================================

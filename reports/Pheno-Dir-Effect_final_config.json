@@ -1,0 +1,222 @@
+{
+    "full_config": {
+        "architecture": {
+            "embedding_dim": 1024,
+            "n_layers": 2,
+            "hidden_dim": 254,
+            "dropout_rate": 0.1494417669734152,
+            "activation": "gelu",
+            "use_batch_norm": true,
+            "use_layer_norm": true,
+            "use_transformer": false,
+            "attn_dim_feedforward": 768,
+            "attn_dropout": 0.13479029204074044,
+            "num_attn_layers": 1,
+            "attn_heads": 4,
+            "fm_hidden_layers": 1,
+            "fm_hidden_dim": 96,
+            "fm_dropout": 0.04231321150604778,
+            "embedding_dropout": 0.07409090944681658
+        },
+        "training": {
+            "weight_decay": 0.0012005824120539478,
+            "learning_rate": 0.0003007508765610028,
+            "batch_size": 64,
+            "optimizer_type": "adamw",
+            "early_stopping_patience": 15,
+            "scheduler_type": "plateau",
+            "epochs": 100,
+            "grad_clip_norm": 1.0
+        },
+        "loss": {
+            "label_smoothing": 0.00024889903623021405,
+            "use_uncertainty_loss": true,
+            "loss_multilabel": "asymmetric",
+            "loss_singlelabel": "adaptive_focal",
+            "focal_gamma": 1.3506801892414875,
+            "asl_gamma_neg": 5.580136502527892,
+            "asl_gamma_pos": 0.5436749139236287,
+            "manual_task_weights": false
+        },
+        "project": {
+            "multi_label_cols": [
+                "phenotype_outcome"
+            ],
+            "seed": 711
+        },
+        "data": {
+            "features": [
+                "drug",
+                "variant_haplotypes",
+                "gene",
+                "allele",
+                "genalle"
+            ],
+            "targets": [
+                "phenotype_outcome",
+                "effect_direction",
+                "effect_type"
+            ],
+            "multi_label_cols": [
+                "phenotype_outcome"
+            ],
+            "cols_to_load": [
+                "drug",
+                "variant_haplotypes",
+                "gene",
+                "allele",
+                "genalle",
+                "phenotype_outcome",
+                "effect_direction",
+                "effect_type",
+                "effect_phenotype",
+                "pop_phenotypes_diseases"
+            ]
+        },
+        "optuna": {
+            "embedding_dim": [
+                "cat",
+                1024,
+                2048,
+                4096
+            ],
+            "embedding_dropout": [
+                "float",
+                0.12,
+                0.28
+            ],
+            "hidden_dim": [
+                "int",
+                256,
+                640,
+                64
+            ],
+            "n_layers": [
+                "const",
+                2
+            ],
+            "dropout_rate": [
+                "float",
+                0.07,
+                0.14
+            ],
+            "norm_type": [
+                "const",
+                "ln"
+            ],
+            "activation": [
+                "const",
+                "gelu"
+            ],
+            "use_transformer": [
+                "const",
+                false
+            ],
+            "attn_heads": [
+                "const",
+                4
+            ],
+            "num_attn_layers": [
+                "const",
+                1
+            ],
+            "attn_dim_feedforward": [
+                "const",
+                768
+            ],
+            "attn_dropout": [
+                "const",
+                0.13
+            ],
+            "fm_hidden_dim": [
+                "int",
+                64,
+                192,
+                32
+            ],
+            "fm_hidden_layers": [
+                "const",
+                0
+            ],
+            "fm_dropout": [
+                "float",
+                0.14,
+                0.22
+            ],
+            "learning_rate": [
+                "float",
+                0.0004,
+                0.001,
+                true
+            ],
+            "weight_decay": [
+                "float",
+                0.0015,
+                0.005,
+                true
+            ],
+            "grad_clip_norm": [
+                "float",
+                1.0,
+                1.5
+            ],
+            "batch_size": [
+                "const",
+                64
+            ],
+            "epochs": [
+                "const",
+                100
+            ],
+            "patience": [
+                "const",
+                12
+            ],
+            "ml_loss_type": [
+                "const",
+                "asymmetric"
+            ],
+            "mc_loss_type": [
+                "const",
+                "adaptive_focal"
+            ],
+            "label_smoothing": [
+                "float",
+                0.0005,
+                0.005
+            ],
+            "focal_gamma": [
+                "float",
+                1.4,
+                1.9
+            ],
+            "asl_gamma_neg": [
+                "float",
+                5.5,
+                7.0
+            ],
+            "asl_gamma_pos": [
+                "float",
+                0.5,
+                1.0
+            ]
+        }
+    },
+    "trainer_config": {
+        "n_epochs": 100,
+        "patience": 15,
+        "learning_rate": 0.0003007508765610028,
+        "device": "cuda",
+        "use_amp": true,
+        "grad_clip_norm": 1.0,
+        "weight_decay": 0.0012005824120539478,
+        "label_smoothing": 0.00024889903623021405,
+        "ml_loss_type": "asymmetric",
+        "mc_loss_type": "adaptive_focal",
+        "focal_gamma": 2.0,
+        "asl_gamma_neg": 4.0,
+        "asl_gamma_pos": 1.0,
+        "poly_epsilon": 1.0
+    },
+    "final_loss": 1.4573354536578769
+}

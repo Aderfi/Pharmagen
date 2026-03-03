@@ -356,6 +356,11 @@ class OptunaOrchestrator:
 
     def _export_results(self, study: optuna.Study) -> None:
         best_trial = study.best_trial
+        clean_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])
+        best_five: list[optuna.trial.FrozenTrial] = sorted(clean_trials, key=lambda t: t.value)[:5]
+
+
+
         ConsoleIO.print_divider("=", 40)
         ConsoleIO.print_info(f"Best Value: {best_trial.value:.4f}")
         ConsoleIO.print_info("Best Params:")
@@ -364,8 +369,11 @@ class OptunaOrchestrator:
         ConsoleIO.print_divider("=", 40)
 
         report_path = DIRS["reports"] / f"{self.tuner_cfg.study_name}_best.json"
+
+        js_report = {f"Trial {best_five[i].number}": best_five[i].params for i in range(min(5, len(best_five)))}
+
         with open(report_path, "w") as f:
-            json.dump(best_trial.params, f, indent=4)
+            json.dump(js_report, f, indent=4)
 
         try:
             from optuna.visualization.matplotlib import (
@@ -388,3 +396,28 @@ class OptunaOrchestrator:
 
         except ImportError:
             ConsoleIO.print_warning("Matplotlib not installed or failed. Skipping plots.")
+
+def sito_export(study: optuna.Study) -> None:
+        best_trial = study.best_trial
+
+        clean_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])
+        best_five: list[optuna.trial.FrozenTrial] = sorted(clean_trials, key=lambda t: t.value)[:5]
+
+
+        ConsoleIO.print_divider("=", 40)
+        ConsoleIO.print_info(f"Best Value: {best_trial.value:.4f}")
+        ConsoleIO.print_info("Best Params:")
+        for key, value in best_trial.params.items():
+            ConsoleIO.print_info(f"  {key}: {value}")
+        ConsoleIO.print_divider("=", 40)
+
+        js_report = {f"Trial {best_five[i].number}": best_five[i].params for i in range(min(5, len(best_five)))}
+
+        report_path = DIRS["reports"] / f"{study.study_name}_best.json"
+        with open(report_path, "w") as f:
+            json.dump(js_report, f, indent=4)
+
+if __name__ == "__main__":
+    estudio = optuna.study.load_study(storage="sqlite:///reports/optuna_study.db", study_name="Pheno-Dir-Effect_study")
+
+    sito_export(estudio)

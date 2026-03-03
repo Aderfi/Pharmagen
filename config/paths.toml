@@ -23,10 +23,10 @@ ref_genome = "data/ref_genome"
 [models]
 # Directorios relacionados con el modelo Deep Learning
 root = "src/pgen_model"
-models_saved = "src/pgen_model/models"
-encoders = "src/pgen_model/encoders"
-vocabs = "src/pgen_model/labels_vocabs"
-models= "models"
+models_saved = "src/model/deep_data/models"
+encoders = "src/model/deep_data/encoders"
+vocabs = "src/model/deep_data/labels_vocabs"
+models= "src/model/deep_data/models"
 
 [reports]
 # Subcarpetas de reports

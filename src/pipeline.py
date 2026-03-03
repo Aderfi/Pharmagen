@@ -154,7 +154,7 @@ def train_pipeline(
 
     dims_payload = {"n_features": feat_dims, "target_dims": target_dims}
 
-    model = create_model_instance(full_config, dims_payload)
+    model, model_cfg = create_model_instance(full_config, dims_payload)
 
     # 5. Loss & Uncertainty
     unc_module = None
@@ -277,7 +277,7 @@ def train_kfold_pipeline(
         target_dims = {k: v for k, v in all_dims.items() if k in data_cfg.target_cols}
         dims_payload = {"n_features": feat_dims, "target_dims": target_dims}
 
-        model = create_model_instance(full_config, dims_payload)
+        model, model_cfg = create_model_instance(full_config, dims_payload)
 
         # Loss & Opt
         unc_module = None
@@ -305,6 +305,7 @@ def train_kfold_pipeline(
             multi_label_cols=set(data_cfg.multi_label_cols),
             model_name=f"{model_name}_fold{fold_idx}",
             uncertainty_module=unc_module,
+            model_cfg=model_cfg,
         )
 
         final_loss = trainer.fit(train_loader, val_loader)

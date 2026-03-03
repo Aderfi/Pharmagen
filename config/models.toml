@@ -73,8 +73,6 @@
 
     [Phenotype_Effect_Outcome.architecture]
     # Mejor configuración conocida (baseline pre-HPO)
-    # use_batch_norm y use_layer_norm juntos están desaconsejados —
-    # se dejan como estaban pero en el HPO se controlan vía norm_type.
     embedding_dim      = 256
     n_layers           = 2
     hidden_dim         = 2176
@@ -208,39 +206,39 @@
     ]
 
     [Pheno-Dir-Effect.architecture]
-    embedding_dim        = 256
+    embedding_dim        = 1024
     n_layers             = 2
-    hidden_dim           = 2176
-    dropout_rate         = 0.68
+    hidden_dim           = 254
+    dropout_rate         = 0.1494417669734152
     activation           = "gelu"
-    use_batch_norm       = true
-    use_layer_norm       = false
-    use_transformer      = true
-    attn_dim_feedforward = 3840
-    attn_dropout         = 0.48
+    use_batch_norm       = false
+    use_layer_norm       = true
+    use_transformer      = false
+    attn_dim_feedforward = 768
+    attn_dropout         = 0.13479029204074044
     attn_heads           = 4
-    num_attn_layers      = 2
-    fm_hidden_dim        = 384
+    num_attn_layers      = 1
+    fm_hidden_dim        = 96
     fm_hidden_layers     = 1
-    fm_dropout           = 0.1
-    embedding_dropout    = 0.1
+    fm_dropout           = 0.04231321150604778
+    embedding_dropout    = 0.07409090944681658
 
     [Pheno-Dir-Effect.training]
-    learning_rate           = 2e-4
-    weight_decay            = 1e-4
+    learning_rate           = 0.0003007508765610028
+    weight_decay            = 0.0012005824120539478
     batch_size              = 64
-    epochs                  = 80
-    early_stopping_patience = 12
+    epochs                  = 100
+    early_stopping_patience = 15
     optimizer_type          = "adamw"
     grad_clip_norm          = 1.0
 
     [Pheno-Dir-Effect.loss]
     loss_multilabel      = "asymmetric"
     loss_singlelabel     = "adaptive_focal"
-    focal_gamma          = 1.16
-    label_smoothing      = 0.1
-    asl_gamma_neg        = 4.0
-    asl_gamma_pos        = 1.0
+    focal_gamma          = 1.3506801892414875
+    label_smoothing      = 0.00024889903623021405
+    asl_gamma_neg        = 5.580136502527892
+    asl_gamma_pos        = 0.5436749139236287
     use_uncertainty_loss = true
     manual_task_weights  = false
 
@@ -251,42 +249,42 @@
     [Pheno-Dir-Effect.optuna]
 
     # -- Embeddings --
-    embedding_dim     = ["cat", 128, 256, 512, 1024]
-    embedding_dropout = ["float", 0.0, 0.3]
+    embedding_dim        = ["cat", 1024, 2048, 4096]
+    embedding_dropout    = ["float", 0.12, 0.28]
 
     # -- MLP --
-    hidden_dim   = ["int", 256, 2048, 128]
-    n_layers     = ["int", 2, 5]
-    dropout_rate = ["float", 0.1, 0.65]
-    norm_type    = ["cat", "bn", "ln", "none"]
-    activation   = ["cat", "gelu"]
+    hidden_dim   = ["int", 256, 640, 64]
+    n_layers     = ["const", 2]
+    dropout_rate = ["float", 0.07, 0.14]
+    norm_type    = ["const", "ln"]
+    activation   = ["const", "gelu"]
 
     # -- Transformer --
-    use_transformer      = ["cat", true, false]
+    use_transformer      = ["const", false]
     attn_heads           = ["const", 4]
-    num_attn_layers      = ["int", 1, 3]
-    attn_dim_feedforward = ["int", 256, 2048, 256]
-    attn_dropout         = ["float", 0.0, 0.5]
+    num_attn_layers      = ["const", 1]
+    attn_dim_feedforward = ["const", 768]
+    attn_dropout         = ["const", 0.13]
 
     # -- FM --
-    fm_hidden_dim    = ["int", 32, 512, 32]
-    fm_hidden_layers = ["int", 0, 3]    # hasta 3 con 5 targets
-    fm_dropout       = ["float", 0.0, 0.4]
+    fm_hidden_dim    = ["int", 64, 192, 32]
+    fm_hidden_layers = ["const", 0]
+    fm_dropout       = ["float", 0.14, 0.22]
 
     # -- Optimizer --
-    learning_rate  = ["float", 1e-5, 5e-3, true]
-    weight_decay   = ["float", 1e-6, 1e-2, true]
-    grad_clip_norm = ["float", 0.5, 2.0]
+    learning_rate  = ["float", 4e-4, 1e-3, true]
+    weight_decay   = ["float", 1.5e-3, 5e-3, true]
+    grad_clip_norm = ["float", 1.0, 1.5]
 
     # -- Training --
-    batch_size = ["cat", 64, 128, 256, 512]
-    epochs     = ["const", 80]
+    batch_size = ["const", 64]
+    epochs     = ["const", 100]
     patience   = ["const", 12]
 
     # -- Losses --
     ml_loss_type    = ["const", "asymmetric"]
     mc_loss_type    = ["const", "adaptive_focal"]
-    label_smoothing = ["float", 0.0, 0.15]
-    focal_gamma     = ["float", 1.0, 3.0]
-    asl_gamma_neg   = ["float", 2.0, 6.0]
-    asl_gamma_pos   = ["float", 0.0, 1.0]
+    label_smoothing = ["float", 5e-4, 5e-3]
+    focal_gamma     = ["float", 1.4, 1.9]
+    asl_gamma_neg   = ["float", 5.5, 7.0]
+    asl_gamma_pos   = ["float", 0.5, 1.0]

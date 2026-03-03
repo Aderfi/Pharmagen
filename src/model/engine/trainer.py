@@ -34,6 +34,7 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from src.cfg.manager import DIRS
+from src.model.architecture.deep_fm import ModelConfig
 from src.model.metrics.losses import (
     AdaptiveFocalLoss,
     AsymmetricLoss,
@@ -221,6 +222,7 @@ class PGenTrainer:
         multi_label_cols: set[str],
         model_name: str = "PGenModel",
         uncertainty_module: MultiTaskUncertaintyLoss | None = None,
+        model_cfg: ModelConfig | None = None,
     ):
         self.model = model.to(config.device)
         self.optimizer = optimizer
@@ -234,6 +236,7 @@ class PGenTrainer:
         )
 
         self._device_type = "cuda" if "cuda" in config.device else "cpu"
+        self.model_cfg = model_cfg
 
         # State Management
         self.scaler = GradScaler(enabled=config.use_amp)
@@ -338,7 +341,7 @@ class PGenTrainer:
         tracker = MetricTracker(self.target_cols)
 
         with torch.inference_mode():
-            for x_batch, y_batch in loader:  # FIX Bug 1: desempaquetar tupla explícitamente
+            for x_batch, y_batch in loader:
                 with autocast(device_type=self._device_type, enabled=self.cfg.use_amp):
                     loss, corrects, totals = self._compute_forward_pass(x_batch, y_batch)
                 tracker.update(loss.item(), corrects, totals)
@@ -356,6 +359,7 @@ class PGenTrainer:
         for epoch in range(self.start_epoch, self.cfg.n_epochs + 1):
             t_metrics = self.train_epoch(train_loader)
             v_metrics = self.validate(val_loader)
+            self.model.state_dict()  # For memory cleanup
 
             v_loss = v_metrics["loss"]
             self.history.append(
@@ -414,13 +418,16 @@ class PGenTrainer:
             "optimizer_state": self.optimizer.state_dict(),
             "best_loss": self.best_loss,
             "config": asdict(self.cfg),
+            #"model_config": asdict(self.model_cfg) if self.model_cfg else None,
+            "model_config": asdict(self.model_cfg) if self.model_cfg else None,
         }
+
         if self.uncertainty_module:
             state["uncertainty_state"] = self.uncertainty_module.state_dict()
 
-        filename = "model_best.pth" if is_best else f"checkpoint_ep{epoch}.pth"
+        filename = f"best_{self.model_name}.pth" if is_best else f"checkpoint_ep{epoch}.pth"
         save_path = DIRS["models"] / filename
-        torch.save(state, save_path)
+        torch.save(self.model.state_dict(), save_path)
         logger.debug("Checkpoint saved: %s", save_path)
 
     def load_checkpoint(self, path: str | Path):

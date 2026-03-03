@@ -129,6 +129,13 @@ def _parse_arguments() -> argparse.Namespace:
         help="Number of HPO trials to run (default: 20)"
     )
 
+    opt_group.add_argument(
+        "--name", "-n",
+        type=str,
+        help="Optuna study name (default: <model_name>_study)",
+        default=None
+    )
+
     return parser.parse_args()
 
 # ==============================================================================
@@ -181,6 +188,9 @@ def _optuna_pipeline(args: argparse.Namespace, logger: logging.Logger):
         logger.error("Model '%s' has no [optuna] section in models.toml", args.model)
         sys.exit(1)
 
+    if not args.name:
+        args.name = f"{args.model}_study"
+
     # 2. Setup DataConfig
     data_cfg = DataConfig(
         dataset_path=Path(args.input),
@@ -193,7 +203,7 @@ def _optuna_pipeline(args: argparse.Namespace, logger: logging.Logger):
 
     # 3. Setup TunerConfig
     tuner_cfg = TunerConfig(
-        study_name=f"{args.model}_study",
+        study_name=args.name,
         n_trials=args.trials,
         storage_url=f"sqlite:///{DIRS['reports'] / 'optuna_study.db'}"
     )
