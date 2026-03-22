@@ -1,0 +1,63 @@
+{
+    "phenotype_outcome": {
+        "type": "multi-label",
+        "f1_macro": 0.4306,
+        "f1_per_label": {
+            "dosage": 0.424,
+            "efficacy": 0.6029,
+            "metabolism": 0.6073,
+            "other": 0.2095,
+            "pd": 0.0,
+            "pk": 0.6135,
+            "toxicity": 0.5569
+        },
+        "balanced_accuracy_macro": 0.7058,
+        "balanced_accuracy_per_label": {
+            "dosage": 0.8328,
+            "efficacy": 0.6519,
+            "metabolism": 0.7991,
+            "other": 0.7254,
+            "pd": 0.4795,
+            "pk": 0.8037,
+            "toxicity": 0.6484
+        }
+    },
+    "effect_direction": {
+        "type": "multi-class",
+        "f1_macro": 0.5284,
+        "f1_weighted": 0.6434,
+        "f1_per_class": {
+            "decreased": 0.5251,
+            "increased": 0.7267,
+            "indeterminado": 0.3333
+        },
+        "balanced_accuracy": 0.5278
+    },
+    "effect_type": {
+        "type": "multi-class",
+        "f1_macro": 0.3175,
+        "f1_weighted": 0.4549,
+        "f1_per_class": {
+            "clearance": 0.2515,
+            "clinical benefit": 0.3133,
+            "concentrations": 0.462,
+            "discontinuation": 0.0,
+            "disease": 0.08,
+            "dose": 0.5342,
+            "dose-adjusted trough concentrations": 0.2456,
+            "efficacy": 0.4576,
+            "exposure": 0.2826,
+            "likelihood": 0.4469,
+            "metabolism": 0.3813,
+            "other": 0.26,
+            "pk": 0.2487,
+            "resistance": 0.2581,
+            "response": 0.58,
+            "risk": 0.5192,
+            "severity": 0.4571,
+            "side effect": 0.1628,
+            "trough concentration": 0.0909
+        },
+        "balanced_accuracy": 0.3238
+    }
+}

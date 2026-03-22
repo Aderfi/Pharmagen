@@ -1,0 +1,119 @@
+[
+    {
+        "epoch": 1,
+        "train_loss": 1.2058227454219852,
+        "val_loss": 0.9307839700153896,
+        "val_acc_phenotype_outcome": 0.6262181852587757,
+        "val_acc_effect_direction": 0.6403633267101901,
+        "val_acc_effect_type": 0.6400794777178541,
+        "val_acc_macro": 0.63555366322894
+    },
+    {
+        "epoch": 2,
+        "train_loss": 0.7440534158869907,
+        "val_loss": 0.939162722655705,
+        "val_acc_phenotype_outcome": 0.6833664490491059,
+        "val_acc_effect_direction": 0.6582458132273631,
+        "val_acc_effect_type": 0.687766108430315,
+        "val_acc_macro": 0.6764594569022613
+    },
+    {
+        "epoch": 3,
+        "train_loss": 0.5433606661117829,
+        "val_loss": 0.9187891100134168,
+        "val_acc_phenotype_outcome": 0.6875295676033684,
+        "val_acc_effect_direction": 0.6710190178824865,
+        "val_acc_effect_type": 0.6786829406755606,
+        "val_acc_macro": 0.6790771753871384
+    },
+    {
+        "epoch": 4,
+        "train_loss": 0.45236055458988156,
+        "val_loss": 0.9282527502093997,
+        "val_acc_phenotype_outcome": 0.73299271454253,
+        "val_acc_effect_direction": 0.6735736588135112,
+        "val_acc_effect_type": 0.6931592392847006,
+        "val_acc_macro": 0.699908537546914
+    },
+    {
+        "epoch": 5,
+        "train_loss": 0.3822502211944477,
+        "val_loss": 0.9686979587588992,
+        "val_acc_phenotype_outcome": 0.7363989024505629,
+        "val_acc_effect_direction": 0.680386034629577,
+        "val_acc_effect_type": 0.6934430882770366,
+        "val_acc_macro": 0.7034093417857256
+    },
+    {
+        "epoch": 6,
+        "train_loss": NaN,
+        "val_loss": 1.0590271417583739,
+        "val_acc_phenotype_outcome": 0.7311476960923455,
+        "val_acc_effect_direction": 0.6778313936985524,
+        "val_acc_effect_type": 0.6925915413000284,
+        "val_acc_macro": 0.7005235436969754
+    },
+    {
+        "epoch": 7,
+        "train_loss": 0.32511742131130117,
+        "val_loss": 1.0537446268967219,
+        "val_acc_phenotype_outcome": 0.7749550572428802,
+        "val_acc_effect_direction": 0.6843599205222821,
+        "val_acc_effect_type": 0.6917399943230201,
+        "val_acc_macro": 0.717018324029394
+    },
+    {
+        "epoch": 8,
+        "train_loss": NaN,
+        "val_loss": 1.0623459198645182,
+        "val_acc_phenotype_outcome": 0.7711704040117324,
+        "val_acc_effect_direction": 0.6945784842463809,
+        "val_acc_effect_type": 0.6962815782003974,
+        "val_acc_macro": 0.7206768221528369
+    },
+    {
+        "epoch": 9,
+        "train_loss": NaN,
+        "val_loss": 1.0790146269968577,
+        "val_acc_phenotype_outcome": 0.7784085533163024,
+        "val_acc_effect_direction": 0.694862333238717,
+        "val_acc_effect_type": 0.7016747090547829,
+        "val_acc_macro": 0.7249818652032675
+    },
+    {
+        "epoch": 10,
+        "train_loss": 0.26603022620484634,
+        "val_loss": 1.1229589581489563,
+        "val_acc_phenotype_outcome": 0.7755227552275523,
+        "val_acc_effect_direction": 0.6894692023843315,
+        "val_acc_effect_type": 0.7008231620777746,
+        "val_acc_macro": 0.7219383732298862
+    },
+    {
+        "epoch": 11,
+        "train_loss": NaN,
+        "val_loss": 1.1317827446120126,
+        "val_acc_phenotype_outcome": 0.7839436086668559,
+        "val_acc_effect_direction": 0.698552370139086,
+        "val_acc_effect_type": 0.7047970479704797,
+        "val_acc_macro": 0.7290976755921404
+    },
+    {
+        "epoch": 12,
+        "train_loss": NaN,
+        "val_loss": 1.14430604662214,
+        "val_acc_phenotype_outcome": 0.7895732803481881,
+        "val_acc_effect_direction": 0.6860630144762986,
+        "val_acc_effect_type": 0.7036616520011354,
+        "val_acc_macro": 0.7264326489418741
+    },
+    {
+        "epoch": 13,
+        "train_loss": 0.24349146215496836,
+        "val_loss": 1.1336665068353926,
+        "val_acc_phenotype_outcome": 0.7909452171444792,
+        "val_acc_effect_direction": 0.6968492761850695,
+        "val_acc_effect_type": 0.6968492761850695,
+        "val_acc_macro": 0.7282145898382062
+    }
+]

@@ -396,7 +396,7 @@ class OptunaOrchestrator:
 
         except ImportError:
             ConsoleIO.print_warning("Matplotlib not installed or failed. Skipping plots.")
-
+'''
 def sito_export(study: optuna.Study) -> None:
         best_trial = study.best_trial
 
@@ -416,8 +416,182 @@ def sito_export(study: optuna.Study) -> None:
         report_path = DIRS["reports"] / f"{study.study_name}_best.json"
         with open(report_path, "w") as f:
             json.dump(js_report, f, indent=4)
+'''
+def sito_export(
+    study: optuna.Study,
+    data_cfg: DataConfig,
+    device: str = "cuda" if torch.cuda.is_available() else "cpu",
+    seed: int = 42,
+) -> None:
+    """
+    Exports the best trial results: re-trains with best params, runs predict()
+    on the validation set, and generates F1, Balanced Accuracy and Confusion
+    Matrix reports via generate_eval_report().
+
+    Args:
+        study: Loaded Optuna study.
+        data_cfg: DataConfig used during the original HPO run.
+        device: torch device string.
+        seed: Random seed for reproducible val split (must match HPO run).
+    """
+    from src.model.metrics.reporting import generate_eval_report
+
+    best_trial = study.best_trial
+    clean_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.COMPLETE])
+    best_five: list[optuna.trial.FrozenTrial] = sorted(clean_trials, key=lambda t: t.value)[:5]
+
+    # --- Print & save top-5 params ---
+    ConsoleIO.print_divider("=", 40)
+    ConsoleIO.print_info(f"Best Trial: #{best_trial.number} | Value: {best_trial.value:.4f}")
+    ConsoleIO.print_info("Best Params:")
+    for key, value in best_trial.params.items():
+        ConsoleIO.print_info(f"  {key}: {value}")
+    ConsoleIO.print_divider("=", 40)
+
+    js_report: dict[str, Any] = {
+        f"Trial {best_five[i].number}": best_five[i].params
+        for i in range(min(5, len(best_five)))
+    }
+    report_path = DIRS["reports"] / f"{study.study_name}_best.json"
+    with open(report_path, "w") as f:
+        json.dump(js_report, f, indent=4)
+
+    # --- Rebuild data (same split as HPO) ---
+    ConsoleIO.print_info("Rebuilding validation split for evaluation...")
+
+    df = load_and_clean_dataset(data_cfg)
+    val_mask = df.sample(frac=0.2, random_state=seed).index
+    train_df = df.drop(val_mask)
+    val_df = df.loc[val_mask]
+
+    processor = PGenProcessor(
+        config={"features": data_cfg.feature_cols, "targets": data_cfg.target_cols},
+        multi_label_cols=data_cfg.multi_label_cols,
+    )
+    processor.fit(train_df)
+
+    train_dataset = PGenDataset(
+        processor.transform(train_df),
+        data_cfg.feature_cols,
+        data_cfg.target_cols,
+        set(data_cfg.multi_label_cols),
+    )
+    val_dataset = PGenDataset(
+        processor.transform(val_df),
+        data_cfg.feature_cols,
+        data_cfg.target_cols,
+        set(data_cfg.multi_label_cols),
+    )
+
+    all_dims = {col: len(enc.classes_) for col, enc in processor.encoders.items()}
+    feature_dims = {k: v for k, v in all_dims.items() if k in data_cfg.feature_cols}
+    target_dims = {k: v for k, v in all_dims.items() if k in data_cfg.target_cols}
+
+    class_names: dict[str, list[str]] = {
+        col: list(processor.encoders[col].classes_)
+        for col in data_cfg.target_cols
+        if col in processor.encoders and hasattr(processor.encoders[col], "classes_")
+    }
+
+    # --- Reconstruct configs from best trial params ---
+    params = best_trial.params
+    norm_type = params.get("norm_type", "bn")
+
+    model_cfg = ModelConfig(
+        n_features=feature_dims,
+        target_dims=target_dims,
+        embedding_dim=params.get("embedding_dim", 64),
+        embedding_dropout=params.get("embedding_dropout", 0.1),
+        hidden_dim=params.get("hidden_dim", 256),
+        n_layers=params.get("n_layers", 3),
+        dropout_rate=params.get("dropout_rate", 0.2),
+        activation=params.get("activation", "gelu"),
+        use_batch_norm=(norm_type == "bn"),
+        use_layer_norm=(norm_type == "ln"),
+        use_transformer=params.get("use_transformer", True),
+        attn_dim_feedforward=params.get("attn_dim_feedforward", 512),
+        attn_heads=params.get("attn_heads", 4),
+        num_attn_layers=params.get("num_attn_layers", 2),
+        fm_hidden_dim=params.get("fm_hidden_dim", 64),
+        fm_hidden_layers=params.get("fm_hidden_layers", 1),
+        fm_dropout=params.get("fm_dropout", 0.1),
+    )
+
+    trainer_cfg = TrainerConfig(
+        n_epochs=params.get("epochs", 50),
+        patience=params.get("patience", 10),
+        learning_rate=params.get("learning_rate", 1e-3),
+        weight_decay=params.get("weight_decay", 1e-4),
+        grad_clip_norm=params.get("grad_clip_norm", 1.0),
+        device=device,
+        use_amp=True,
+        ml_loss_type=params.get("ml_loss_type", "asymmetric"),
+        mc_loss_type=params.get("mc_loss_type", "focal"),
+        label_smoothing=params.get("label_smoothing", 0.0),
+        focal_gamma=params.get("focal_gamma", 2.0),
+        asl_gamma_neg=params.get("asl_gamma_neg", 4.0),
+        asl_gamma_pos=params.get("asl_gamma_pos", 1.0),
+    )
+
+    batch_size: int = params.get("batch_size", 128)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0, pin_memory=True)
+
+    # --- Re-train with best params ---
+    ConsoleIO.print_info(f"Re-training best trial (#{best_trial.number}) for evaluation...")
+
+    model = PharmagenDeepFM(model_cfg)
+    optimizer = torch.optim.AdamW(
+        model.parameters(), lr=trainer_cfg.learning_rate, weight_decay=trainer_cfg.weight_decay
+    )
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3)
+
+    trainer = PGenTrainer(
+        model=model,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        config=trainer_cfg,
+        target_cols=data_cfg.target_cols,
+        multi_label_cols=set(data_cfg.multi_label_cols),
+        model_name=f"{study.study_name}_best",
+    )
+    trainer.fit(train_loader=train_loader, val_loader=val_loader)
+
+    # --- Predict on validation set ---
+    ConsoleIO.print_info("Running inference on validation set...")
+    all_preds, all_targets = trainer._pred(val_loader)
+
+    # --- Generate eval report ---
+    generate_eval_report(
+        all_preds=all_preds,
+        all_targets=all_targets,
+        multi_label_cols=set(data_cfg.multi_label_cols),
+        output_dir=DIRS["reports"],
+        class_names=class_names,
+        study_name=study.study_name,
+
+    )
+
 
 if __name__ == "__main__":
-    estudio = optuna.study.load_study(storage="sqlite:///reports/optuna_study.db", study_name="Pheno-Dir-Effect_study")
-
-    sito_export(estudio)
+    from pathlib import Path
+    _data_cfg = DataConfig(
+        dataset_path = Path("train_data/final_genalle_categorias.tsv"), #Path("data/processed/final_pharmagen_dataset.tsv"),
+        feature_cols=["drug", "variant_haplotypes", "gene", "allele", "genalle"],
+        target_cols=[
+        "phenotype_outcome", "effect_direction",
+        "effect_type"
+    ],
+        multi_label_cols=["phenotype_outcome"],
+    )
+    # ─────────────────────────────────────────────────────────────────────────
+    estudio = optuna.study.load_study(
+        storage="sqlite:///reports/optuna_study.db",
+        study_name="PDE-PhenCat_FineTune",
+    )
+    sito_export(estudio, data_cfg=_data_cfg)
+#
+#if __name__ == "__main__":
+#    estudio = optuna.study.load_study(storage="sqlite:///reports/optuna_study.db", study_name="Pheno-Dir-Effect_study")
+#    sito_export(estudio)

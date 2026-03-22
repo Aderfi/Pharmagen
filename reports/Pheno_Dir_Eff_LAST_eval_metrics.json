@@ -1,0 +1,47 @@
+{
+    "phenotype_outcome": {
+        "type": "multi-label",
+        "f1_macro": 0.4655,
+        "f1_per_label": {
+            "dosage": 0.5141,
+            "efficacy": 0.641,
+            "metabolism": 0.6457,
+            "other": 0.4048,
+            "pd": 0.0,
+            "toxicity": 0.5875
+        },
+        "balanced_accuracy_macro": 0.7279,
+        "balanced_accuracy_per_label": {
+            "dosage": 0.8469,
+            "efficacy": 0.6954,
+            "metabolism": 0.8113,
+            "other": 0.8065,
+            "pd": 0.4999,
+            "toxicity": 0.7075
+        }
+    },
+    "effect_direction": {
+        "type": "multi-class",
+        "f1_macro": 0.5497,
+        "f1_weighted": 0.6853,
+        "f1_per_class": {
+            "decreased": 0.5658,
+            "increased": 0.7757,
+            "indeterminado": 0.3077
+        },
+        "balanced_accuracy": 0.5208
+    },
+    "effect_type": {
+        "type": "multi-class",
+        "f1_macro": 0.6235,
+        "f1_weighted": 0.6955,
+        "f1_per_class": {
+            "adverse_event": 0.6972,
+            "dosage": 0.6173,
+            "efficacy_response": 0.706,
+            "ladme": 0.7333,
+            "other": 0.3636
+        },
+        "balanced_accuracy": 0.6136
+    }
+}

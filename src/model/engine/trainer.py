@@ -309,6 +309,43 @@ class PGenTrainer:
 
         return total_loss, batch_corrects, batch_totals
 
+    def _pred(self, loader: DataLoader) -> tuple[dict[str, list], dict[str, list]]:
+        """
+        Runs inference over a DataLoader and collects raw predictions and ground-truth labels.
+
+        Returns:
+            all_preds: dict {target_col -> list of predicted class indices (MC) or binary arrays (ML)}
+            all_targets: dict {target_col -> list of ground-truth values}
+        """
+        self.model.eval()
+        all_preds: dict[str, list] = {t: [] for t in self.target_cols}
+        all_targets: dict[str, list] = {t: [] for t in self.target_cols}
+
+        with torch.inference_mode():
+            for x_batch, y_batch in loader:
+                x_batch = self._move_to_device(x_batch)
+                y_batch = self._move_to_device(y_batch)
+                outputs = self.model(x_batch)
+
+                for t_col in self.target_cols:
+                    if t_col not in y_batch:
+                        continue
+                    pred = outputs[t_col]
+                    target = y_batch[t_col]
+
+                    if t_col in self.ml_cols:
+                        # Multi-label: threshold at 0.5
+                        predicted = (torch.sigmoid(pred) > 0.5).cpu().numpy().astype(int)
+                        all_preds[t_col].extend(predicted.tolist())
+                        all_targets[t_col].extend(target.cpu().numpy().astype(int).tolist())
+                    else:
+                        # Multi-class: argmax
+                        predicted = pred.argmax(dim=1).cpu().numpy()
+                        all_preds[t_col].extend(predicted.tolist())
+                        all_targets[t_col].extend(target.cpu().numpy().tolist())
+
+        return all_preds, all_targets
+
     def train_epoch(self, loader: DataLoader) -> dict[str, float]:
         """Runs one full training epoch."""
         self.model.train()
@@ -437,7 +474,7 @@ class PGenTrainer:
             logger.error("Checkpoint not found: %s", path)
             return
 
-        checkpoint = torch.load(path, map_location=self.cfg.device, weights_only=True)
+        checkpoint = torch.load(path, map_location=self.cfg.device, weights_only=False)
         self.model.load_state_dict(checkpoint["model_state"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state"])
         if self.uncertainty_module and "uncertainty_state" in checkpoint:

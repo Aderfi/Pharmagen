@@ -1,119 +1,137 @@
 [
     {
         "epoch": 1,
-        "train_loss": 1.7882334651369036,
-        "val_loss": 1.5332841106823512,
-        "val_acc_phenotype_outcome": 0.707609639600521,
-        "val_acc_effect_direction": 0.6496960486322189,
-        "val_acc_effect_type": 0.4677051671732523,
-        "val_acc_macro": 0.6083369518019973
+        "train_loss": 2.4261762980258825,
+        "val_loss": 1.9405219157536824,
+        "val_acc_phenotype_outcome": 0.5634498480243161,
+        "val_acc_effect_direction": 0.6485562310030395,
+        "val_acc_effect_type": 0.3932370820668693,
+        "val_acc_macro": 0.5350810536980749
     },
     {
         "epoch": 2,
-        "train_loss": 1.1819730361302694,
-        "val_loss": 1.571428059112458,
-        "val_acc_phenotype_outcome": 0.7381676074685193,
-        "val_acc_effect_direction": 0.6656534954407295,
-        "val_acc_effect_type": 0.4688449848024316,
-        "val_acc_macro": 0.6242220292372268
+        "train_loss": 1.6302224159240724,
+        "val_loss": 1.67803555727005,
+        "val_acc_phenotype_outcome": 0.5781589231437255,
+        "val_acc_effect_direction": 0.648936170212766,
+        "val_acc_effect_type": 0.46200607902735563,
+        "val_acc_macro": 0.563033724127949
     },
     {
         "epoch": 3,
-        "train_loss": 0.9040705138986761,
-        "val_loss": 1.6599173829669045,
-        "val_acc_phenotype_outcome": 0.767042987407729,
-        "val_acc_effect_direction": 0.64209726443769,
-        "val_acc_effect_type": 0.4787234042553192,
-        "val_acc_macro": 0.6292878853669127
+        "train_loss": 1.2718565973368559,
+        "val_loss": 1.6370787890184493,
+        "val_acc_phenotype_outcome": 0.694040382110291,
+        "val_acc_effect_direction": 0.6504559270516718,
+        "val_acc_effect_type": 0.4764437689969605,
+        "val_acc_macro": 0.6069800260529744
     },
     {
         "epoch": 4,
-        "train_loss": 0.7572372259515705,
-        "val_loss": 1.7873514464923315,
-        "val_acc_phenotype_outcome": 0.7614524533217543,
-        "val_acc_effect_direction": 0.6629939209726444,
-        "val_acc_effect_type": 0.4677051671732523,
-        "val_acc_macro": 0.630717180489217
+        "train_loss": 1.0200580286257195,
+        "val_loss": 1.6747808002290272,
+        "val_acc_phenotype_outcome": 0.7037016934433348,
+        "val_acc_effect_direction": 0.6641337386018237,
+        "val_acc_effect_type": 0.4726443768996961,
+        "val_acc_macro": 0.6134932696482848
     },
     {
         "epoch": 5,
-        "train_loss": 0.6716438623991879,
-        "val_loss": 1.8916433027812414,
-        "val_acc_phenotype_outcome": 0.7658488927485888,
-        "val_acc_effect_direction": 0.6618541033434651,
-        "val_acc_effect_type": 0.46466565349544076,
-        "val_acc_macro": 0.6307895498624981
+        "train_loss": 0.8637508601853342,
+        "val_loss": 1.727760490917024,
+        "val_acc_phenotype_outcome": 0.7060356057316544,
+        "val_acc_effect_direction": 0.6542553191489362,
+        "val_acc_effect_type": 0.4703647416413374,
+        "val_acc_macro": 0.6102185555073093
     },
     {
         "epoch": 6,
-        "train_loss": 0.5429699229471612,
-        "val_loss": 2.0172460817155384,
-        "val_acc_phenotype_outcome": 0.7806665219279201,
-        "val_acc_effect_direction": 0.6557750759878419,
-        "val_acc_effect_type": 0.4703647416413374,
-        "val_acc_macro": 0.6356021131856998
+        "train_loss": 0.7633827780232285,
+        "val_loss": 1.7780604646319436,
+        "val_acc_phenotype_outcome": 0.721287451150673,
+        "val_acc_effect_direction": 0.6531155015197568,
+        "val_acc_effect_type": 0.4688449848024316,
+        "val_acc_macro": 0.6144159791576206
     },
     {
         "epoch": 7,
-        "train_loss": 0.4934976798115355,
-        "val_loss": 2.086759859607333,
-        "val_acc_phenotype_outcome": 0.790327833260964,
-        "val_acc_effect_direction": 0.6538753799392097,
-        "val_acc_effect_type": 0.46656534954407297,
-        "val_acc_macro": 0.6369228542480823
+        "train_loss": 0.6916998845158201,
+        "val_loss": 1.831163880370912,
+        "val_acc_phenotype_outcome": 0.7191163699522363,
+        "val_acc_effect_direction": 0.6553951367781155,
+        "val_acc_effect_type": 0.4601063829787234,
+        "val_acc_macro": 0.6115392965696916
     },
     {
         "epoch": 8,
-        "train_loss": 0.4714655252117099,
-        "val_loss": 2.184358012108576,
-        "val_acc_phenotype_outcome": 0.7870712114633087,
-        "val_acc_effect_direction": 0.6371580547112462,
-        "val_acc_effect_type": 0.4540273556231003,
-        "val_acc_macro": 0.6260855405992184
+        "train_loss": 0.5935817424095038,
+        "val_loss": 1.8395330281484694,
+        "val_acc_phenotype_outcome": 0.7472318714719931,
+        "val_acc_effect_direction": 0.6519756838905775,
+        "val_acc_effect_type": 0.45972644376899696,
+        "val_acc_macro": 0.6196446663771892
     },
     {
         "epoch": 9,
-        "train_loss": 0.45859633196483957,
-        "val_loss": 2.2102212196304682,
-        "val_acc_phenotype_outcome": 0.7922818063395571,
-        "val_acc_effect_direction": 0.6477963525835866,
-        "val_acc_effect_type": 0.45782674772036475,
-        "val_acc_macro": 0.6326349688811695
+        "train_loss": 0.5561330080032348,
+        "val_loss": 1.8704902416183835,
+        "val_acc_phenotype_outcome": 0.7501628310898828,
+        "val_acc_effect_direction": 0.6534954407294833,
+        "val_acc_effect_type": 0.4661854103343465,
+        "val_acc_macro": 0.6232812273845709
     },
     {
         "epoch": 10,
-        "train_loss": 0.4046488497293357,
-        "val_loss": 2.3190331969942366,
-        "val_acc_phenotype_outcome": 0.8006947459834998,
-        "val_acc_effect_direction": 0.6622340425531915,
-        "val_acc_effect_type": 0.46580547112462006,
-        "val_acc_macro": 0.6429114198871038
+        "train_loss": 0.541170392072562,
+        "val_loss": 1.8946658202580042,
+        "val_acc_phenotype_outcome": 0.7641663048198003,
+        "val_acc_effect_direction": 0.6569148936170213,
+        "val_acc_effect_type": 0.4593465045592705,
+        "val_acc_macro": 0.6268092343320307
     },
     {
         "epoch": 11,
-        "train_loss": 0.3910011308662819,
-        "val_loss": 2.3854262119247798,
-        "val_acc_phenotype_outcome": 0.8090534085974815,
-        "val_acc_effect_direction": 0.6580547112462006,
-        "val_acc_effect_type": 0.47302431610942247,
-        "val_acc_macro": 0.6467108119843682
+        "train_loss": 0.5340044852459069,
+        "val_loss": 1.9274190266927083,
+        "val_acc_phenotype_outcome": 0.7676943117672601,
+        "val_acc_effect_direction": 0.6599544072948328,
+        "val_acc_effect_type": 0.4593465045592705,
+        "val_acc_macro": 0.6289984078737878
     },
     {
         "epoch": 12,
-        "train_loss": 0.38485964807597073,
-        "val_loss": 2.4074180466788158,
-        "val_acc_phenotype_outcome": 0.8120929222752931,
-        "val_acc_effect_direction": 0.6519756838905775,
-        "val_acc_effect_type": 0.45896656534954405,
-        "val_acc_macro": 0.6410117238384715
+        "train_loss": 0.496246790524685,
+        "val_loss": 1.9405794399125236,
+        "val_acc_phenotype_outcome": 0.7621580547112462,
+        "val_acc_effect_direction": 0.6595744680851063,
+        "val_acc_effect_type": 0.45782674772036475,
+        "val_acc_macro": 0.6265197568389057
     },
     {
         "epoch": 13,
-        "train_loss": 0.3809483806292216,
-        "val_loss": 2.449868389538356,
-        "val_acc_phenotype_outcome": 0.8159465914025185,
-        "val_acc_effect_direction": 0.6542553191489362,
-        "val_acc_effect_type": 0.4582066869300912,
-        "val_acc_macro": 0.6428028658271819
+        "train_loss": 0.48712251366990983,
+        "val_loss": 1.9483934129987444,
+        "val_acc_phenotype_outcome": 0.7637863656100738,
+        "val_acc_effect_direction": 0.6546352583586627,
+        "val_acc_effect_type": 0.456306990881459,
+        "val_acc_macro": 0.6249095382833986
+    },
+    {
+        "epoch": 14,
+        "train_loss": 0.4829623939413013,
+        "val_loss": 1.9662436246871948,
+        "val_acc_phenotype_outcome": 0.764383412939644,
+        "val_acc_effect_direction": 0.6622340425531915,
+        "val_acc_effect_type": 0.45478723404255317,
+        "val_acc_macro": 0.6271348965117962
+    },
+    {
+        "epoch": 15,
+        "train_loss": 0.4748639758789178,
+        "val_loss": 1.9793738155137925,
+        "val_acc_phenotype_outcome": 0.7602040816326531,
+        "val_acc_effect_direction": 0.6584346504559271,
+        "val_acc_effect_type": 0.456306990881459,
+        "val_acc_macro": 0.6249819076566797
     }
 ]

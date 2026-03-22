@@ -3,11 +3,11 @@
         "architecture": {
             "embedding_dim": 1024,
             "n_layers": 2,
-            "hidden_dim": 254,
+            "hidden_dim": 256,
             "dropout_rate": 0.1494417669734152,
             "activation": "gelu",
             "use_batch_norm": true,
-            "use_layer_norm": true,
+            "use_layer_norm": false,
             "use_transformer": false,
             "attn_dim_feedforward": 768,
             "attn_dropout": 0.13479029204074044,
@@ -48,7 +48,7 @@
             "features": [
                 "drug",
                 "variant_haplotypes",
-                "gene",
+                "gene_symbol",
                 "allele",
                 "genalle"
             ],
@@ -63,7 +63,7 @@
             "cols_to_load": [
                 "drug",
                 "variant_haplotypes",
-                "gene",
+                "gene_symbol",
                 "allele",
                 "genalle",
                 "phenotype_outcome",
@@ -75,94 +75,109 @@
         },
         "optuna": {
             "embedding_dim": [
-                "cat",
-                1024,
-                2048,
-                4096
+                "int",
+                64,
+                4096,
+                64
             ],
             "embedding_dropout": [
                 "float",
-                0.12,
-                0.28
+                0.0,
+                0.6
             ],
             "hidden_dim": [
                 "int",
-                256,
-                640,
+                64,
+                2048,
                 64
             ],
             "n_layers": [
-                "const",
-                2
+                "int",
+                1,
+                8,
+                1
             ],
             "dropout_rate": [
                 "float",
-                0.07,
-                0.14
+                0.0,
+                0.6
             ],
             "norm_type": [
                 "const",
-                "ln"
+                "bn"
             ],
             "activation": [
                 "const",
                 "gelu"
             ],
             "use_transformer": [
-                "const",
+                "cat",
+                true,
                 false
             ],
             "attn_heads": [
-                "const",
-                4
+                "cat",
+                2,
+                4,
+                8
             ],
             "num_attn_layers": [
-                "const",
+                "int",
+                1,
+                4,
                 1
             ],
             "attn_dim_feedforward": [
-                "const",
-                768
+                "int",
+                128,
+                2048,
+                128
             ],
             "attn_dropout": [
-                "const",
-                0.13
+                "float",
+                0.0,
+                0.4
             ],
             "fm_hidden_dim": [
                 "int",
-                64,
-                192,
+                32,
+                1024,
                 32
             ],
             "fm_hidden_layers": [
-                "const",
-                0
+                "int",
+                0,
+                3,
+                1
             ],
             "fm_dropout": [
                 "float",
-                0.14,
-                0.22
+                0.0,
+                0.4
             ],
             "learning_rate": [
                 "float",
-                0.0004,
-                0.001,
+                1e-05,
+                0.01,
                 true
             ],
             "weight_decay": [
                 "float",
-                0.0015,
-                0.005,
+                1e-05,
+                0.1,
                 true
             ],
             "grad_clip_norm": [
                 "float",
-                1.0,
-                1.5
+                0.5,
+                5.0
             ],
             "batch_size": [
-                "const",
-                64
+                "cat",
+                32,
+                64,
+                128,
+                256
             ],
             "epochs": [
                 "const",
@@ -182,23 +197,23 @@
             ],
             "label_smoothing": [
                 "float",
-                0.0005,
-                0.005
+                0.0001,
+                0.1
             ],
             "focal_gamma": [
                 "float",
-                1.4,
-                1.9
+                0.5,
+                5.0
             ],
             "asl_gamma_neg": [
                 "float",
-                5.5,
-                7.0
+                1.0,
+                10.0
             ],
             "asl_gamma_pos": [
                 "float",
-                0.5,
-                1.0
+                0.0,
+                2.0
             ]
         }
     },
@@ -218,5 +233,5 @@
         "asl_gamma_pos": 1.0,
         "poly_epsilon": 1.0
     },
-    "final_loss": 1.4573354536578769
+    "final_loss": 1.480933095727648
 }

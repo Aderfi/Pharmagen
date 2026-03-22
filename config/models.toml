@@ -192,7 +192,7 @@
 [Pheno-Dir-Effect]
 
     [Pheno-Dir-Effect.data]
-    features = ["drug", "variant_haplotypes", "gene", "allele", "genalle"]
+    features = ["drug", "variant_haplotypes", "gene_symbol", "allele", "genalle"]
     targets  = [
         "phenotype_outcome", "effect_direction",
         "effect_type"
@@ -200,7 +200,7 @@
     multi_label_cols = ["phenotype_outcome"]
     #stratify_col = "phenotype_outcome"
     cols_to_load = [
-        "drug", "variant_haplotypes", "gene", "allele", "genalle",
+        "drug", "variant_haplotypes", "gene_symbol", "allele", "genalle",
         "phenotype_outcome", "effect_direction", "effect_type",
         "effect_phenotype", "pop_phenotypes_diseases"
     ]
@@ -208,11 +208,11 @@
     [Pheno-Dir-Effect.architecture]
     embedding_dim        = 1024
     n_layers             = 2
-    hidden_dim           = 254
+    hidden_dim           = 256
     dropout_rate         = 0.1494417669734152
     activation           = "gelu"
-    use_batch_norm       = false
-    use_layer_norm       = true
+    use_batch_norm       = true
+    use_layer_norm       = false
     use_transformer      = false
     attn_dim_feedforward = 768
     attn_dropout         = 0.13479029204074044
@@ -249,42 +249,42 @@
     [Pheno-Dir-Effect.optuna]
 
     # -- Embeddings --
-    embedding_dim        = ["cat", 1024, 2048, 4096]
-    embedding_dropout    = ["float", 0.12, 0.28]
+    embedding_dim        = ["int", 64, 4096, 64]
+    embedding_dropout    = ["float", 0.0, 0.6]
 
     # -- MLP --
-    hidden_dim   = ["int", 256, 640, 64]
-    n_layers     = ["const", 2]
-    dropout_rate = ["float", 0.07, 0.14]
-    norm_type    = ["const", "ln"]
+    hidden_dim   = ["int", 64, 2048, 64]
+    n_layers     = ["int", 1, 8, 1]
+    dropout_rate = ["float", 0.0, 0.6]
+    norm_type    = ["const", "bn"]
     activation   = ["const", "gelu"]
 
     # -- Transformer --
-    use_transformer      = ["const", false]
-    attn_heads           = ["const", 4]
-    num_attn_layers      = ["const", 1]
-    attn_dim_feedforward = ["const", 768]
-    attn_dropout         = ["const", 0.13]
+    use_transformer      = ["cat", true, false]
+    attn_heads           = ["cat", 2, 4, 8]
+    num_attn_layers      = ["int", 1, 4, 1]
+    attn_dim_feedforward = ["int", 128, 2048, 128]
+    attn_dropout         = ["float", 0.0, 0.4]
 
     # -- FM --
-    fm_hidden_dim    = ["int", 64, 192, 32]
-    fm_hidden_layers = ["const", 0]
-    fm_dropout       = ["float", 0.14, 0.22]
+    fm_hidden_dim    = ["int", 32, 1024, 32]
+    fm_hidden_layers = ["int", 0, 3, 1]
+    fm_dropout       = ["float", 0.0, 0.4]
 
     # -- Optimizer --
-    learning_rate  = ["float", 4e-4, 1e-3, true]
-    weight_decay   = ["float", 1.5e-3, 5e-3, true]
-    grad_clip_norm = ["float", 1.0, 1.5]
+    learning_rate  = ["float", 1e-5, 1e-2, true]
+    weight_decay   = ["float", 1e-5, 1e-1, true]
+    grad_clip_norm = ["float", 0.5, 5.0]
 
     # -- Training --
-    batch_size = ["const", 64]
+    batch_size = ["cat", 32, 64, 128, 256]
     epochs     = ["const", 100]
     patience   = ["const", 12]
 
     # -- Losses --
     ml_loss_type    = ["const", "asymmetric"]
     mc_loss_type    = ["const", "adaptive_focal"]
-    label_smoothing = ["float", 5e-4, 5e-3]
-    focal_gamma     = ["float", 1.4, 1.9]
-    asl_gamma_neg   = ["float", 5.5, 7.0]
-    asl_gamma_pos   = ["float", 0.5, 1.0]
+    label_smoothing = ["float", 1e-4, 1e-1]
+    focal_gamma     = ["float", 0.5, 5.0]
+    asl_gamma_neg   = ["float", 1.0, 10.0]
+    asl_gamma_pos   = ["float", 0.0, 2.0]

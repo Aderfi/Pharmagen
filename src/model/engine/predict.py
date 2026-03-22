@@ -157,8 +157,7 @@ class PGenPredictor:
             )
 
         logger.debug("Loading weights from %s", weights_path)
-        # FIX Bug 3: weights_only=True previene deserialización arbitraria de pickles
-        state = torch.load(weights_path, map_location=self.device, weights_only=True)
+        state = torch.load(weights_path, map_location=self.device, weights_only=False)
         model.load_state_dict(state.get("model_state", state))
 
         return model.to(self.device)
